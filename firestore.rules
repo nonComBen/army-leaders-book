@@ -1,0 +1,139 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{user} {
+    	allow create, read: if request.auth.uid != null;
+      allow update, delete: if request.auth.uid == user || request.auth.uid == resource.data.userId;
+    }
+    match /settings/{setting} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /soldiers/{soldier} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /povs/{pov} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /awards/{award} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /perstat/{perstat} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /perstatByName/{byName} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /apftStats/{apft} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /acftStats/{acft} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /bodyfatStats/{bodyfat} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /weaponStats/{weapon} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /flags/{flag} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /profiles/{profile} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /ratings/{rating} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /medpros/{medpro} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /equipment/{equipment} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /milLic/{license} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /dutyRoster/{roster} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /taskings/{tasking} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /training/{training} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /counselings/{counseling} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /workingAwards/{award} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /workingEvals/{eval} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /phoneNumbers/{phoneNumber} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /notes/{note} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /appointments/{appointment} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /hrActions/{hrAction} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+      allow read, update: if request.auth.uid in resource.data.users;
+    }
+    match /alertSoldiers/{soldier} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+    match /savedEvents/{event} {
+    	allow create: if request.auth.uid != null;
+      allow read, update, delete: if request.auth.uid == resource.data.owner;
+    }
+  }
+}

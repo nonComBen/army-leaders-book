@@ -116,10 +116,7 @@ class AptsPageState extends State<AptsPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadAppointmentsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadAppointmentsPage()));
       // Widget title = const Text('Upload Appointments');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -369,9 +366,7 @@ class AptsPageState extends State<AptsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditAppointmentPage(
-                  userId: widget.userId,
                   apt: Appointment.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -380,12 +375,10 @@ class AptsPageState extends State<AptsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditAppointmentPage(
-                  userId: widget.userId,
                   apt: Appointment(
                     users: [widget.userId],
                     owner: widget.userId,
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

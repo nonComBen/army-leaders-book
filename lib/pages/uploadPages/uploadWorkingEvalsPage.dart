@@ -18,11 +18,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadWorkingEvalsPage extends StatefulWidget {
   const UploadWorkingEvalsPage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadWorkingEvalsPageState createState() => UploadWorkingEvalsPageState();
@@ -118,6 +114,7 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
           name = soldier.lastName;
           firstName = soldier.firstName;
           section = soldier.section;
+          final owner = soldier.owner;
 
           String saveDuties = getCellValue(rows[i], columnHeaders, duties);
           String saveEmphasis = getCellValue(rows[i], columnHeaders, emphasis);
@@ -136,7 +133,7 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
 
           WorkingEval eval = WorkingEval(
             soldierId: saveSoldierId,
-            owner: widget.userId,
+            owner: owner,
             rank: rank,
             name: name,
             firstName: firstName,

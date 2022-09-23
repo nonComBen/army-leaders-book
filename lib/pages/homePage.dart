@@ -179,43 +179,23 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future onSelectNotification(String payload) async {
     if (payload == 'ACFT') {
       await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => AcftPage(
-                    userId: _userObj.userId,
-                  )));
+          context, MaterialPageRoute(builder: (context) => const AcftPage()));
     } else if (payload == 'APFT') {
       await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ApftPage(
-                    userId: _userObj.userId,
-                  )));
+          context, MaterialPageRoute(builder: (context) => const ApftPage()));
     } else if (payload == 'WEAPON') {
-      await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => WeaponsPage(
-                    userId: _userObj.userId,
-                  )));
+      await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const WeaponsPage()));
     } else if (payload == 'PHA' ||
         payload == 'Dental' ||
         payload == 'Vision' ||
         payload == 'Hearing' ||
         payload == 'HIV') {
-      await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MedProsPage(
-                    userId: _userObj.userId,
-                  )));
+      await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const MedProsPage()));
     } else if (payload == 'BF') {
-      await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => BodyfatPage(
-                    userId: _userObj.userId,
-                  )));
+      await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const BodyfatPage()));
     } else {
       return Future.value(null);
     }
@@ -407,7 +387,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  List<Widget> homeCards() {
+  List<Widget> homeCards(String userId) {
     List<Widget> list = [];
     if (setting != null) {
       if (setting.perstat) {
@@ -415,7 +395,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('perstat')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -459,7 +439,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           context,
                           MaterialPageRoute(
                               builder: (context) => PerstatPage(
-                                    userId: _userObj.userId,
+                                    userId: userId,
                                   ))),
                       child: const Text('Go to PERSTAT'),
                     ),
@@ -468,9 +448,8 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => DailyPerstatPage(
-                                      userId: _userObj.userId,
-                                    )))),
+                                builder: (context) =>
+                                    const DailyPerstatPage()))),
                   );
               }
             }));
@@ -480,7 +459,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('appointments')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -541,7 +520,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           context,
                           MaterialPageRoute(
                               builder: (context) => AptsPage(
-                                    userId: _userObj.userId,
+                                    userId: userId,
                                   ))),
                       child: const Text('Go to Appointments'),
                     ),
@@ -554,7 +533,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('apftStats')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -605,9 +584,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ApftPage(
-                                    userId: _userObj.userId,
-                                  ))),
+                              builder: (context) => const ApftPage())),
                       child: const Text('Go to APFT'),
                     ),
                   );
@@ -619,7 +596,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('acftStats')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -672,9 +649,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => AcftPage(
-                                    userId: _userObj.userId,
-                                  ))),
+                              builder: (context) => const AcftPage())),
                       child: const Text('Go to ACFT'),
                     ),
                   );
@@ -686,7 +661,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('profiles')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -737,7 +712,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           context,
                           MaterialPageRoute(
                               builder: (context) => TempProfilesPage(
-                                    userId: _userObj.userId,
+                                    userId: userId,
                                   ))),
                       child: const Text('Go to Temp'),
                     ),
@@ -746,7 +721,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           context,
                           MaterialPageRoute(
                               builder: (context) => PermProfilesPage(
-                                    userId: _userObj.userId,
+                                    userId: userId,
                                   ))),
                       child: const Text('Go to Perm'),
                     ),
@@ -759,7 +734,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('bodyfatStats')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -814,9 +789,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => BodyfatPage(
-                                    userId: _userObj.userId,
-                                  ))),
+                              builder: (context) => const BodyfatPage())),
                       child: const Text('Go to Body Comp'),
                     ),
                   );
@@ -828,7 +801,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('weaponStats')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -883,9 +856,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => WeaponsPage(
-                                    userId: _userObj.userId,
-                                  ))),
+                              builder: (context) => const WeaponsPage())),
                       child: const Text('Go to Weapons'),
                     ),
                   );
@@ -897,7 +868,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('flags')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -941,7 +912,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           context,
                           MaterialPageRoute(
                               builder: (context) => FlagsPage(
-                                    userId: _userObj.userId,
+                                    userId: userId,
                                   ))),
                       child: const Text('Go to Flags'),
                     ),
@@ -954,7 +925,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('medpros')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -1002,9 +973,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => MedProsPage(
-                                    userId: _userObj.userId,
-                                  ))),
+                              builder: (context) => const MedProsPage())),
                       child: const Text('Go to Medpros'),
                     ),
                   );
@@ -1016,7 +985,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             stream: _firestore
                 .collection('training')
                 .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: _userObj.userId)
+                .where('users', arrayContains: userId)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -1068,7 +1037,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           context,
                           MaterialPageRoute(
                               builder: (context) => TrainingPage(
-                                    userId: _userObj.userId,
+                                    userId: userId,
                                   ))),
                       child: const Text('Go to Training'),
                     ),
@@ -1128,9 +1097,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SettingsPage(
-                          userId: user.uid,
-                        ),
+                        builder: (context) => const SettingsPage(),
                       ),
                     ),
                   ),
@@ -1156,83 +1123,78 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
             body: Container(
               padding: const EdgeInsets.all(16.0),
-              child: _userObj == null
-                  ? const Center(
-                      child: CenterProgressIndicator(),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: ListView(
+                      primary: true,
+                      shrinkWrap: true,
                       children: [
-                        Flexible(
-                          flex: 1,
-                          child: ListView(
-                            primary: true,
-                            shrinkWrap: true,
-                            children: [
-                              if (user.isAnonymous) const AnonWarningBanner(),
-                              StreamBuilder<DocumentSnapshot>(
-                                  stream: _firestore
-                                      .collection('settings')
-                                      .doc(_userObj.userId)
-                                      .snapshots(),
-                                  builder: (context, snapshot) {
-                                    switch (snapshot.connectionState) {
-                                      case ConnectionState.waiting:
-                                        return const Card(
-                                            child: CenterProgressIndicator());
-                                      default:
-                                        if (snapshot.hasData) {
-                                          setting = Setting.fromMap(
-                                              snapshot.data.data());
-                                        } else {
-                                          setting = Setting(
-                                            owner: _userObj.userId,
-                                            hearingNotifications: [0, 30],
-                                            weaponsNotifications: [0, 30],
-                                            acftNotifications: [0, 30],
-                                            dentalNotifications: [0, 30],
-                                            visionNotifications: [0, 30],
-                                            bfNotifications: [0, 30],
-                                            hivNotifications: [0, 30],
-                                            phaNotifications: [0, 30],
-                                          );
-                                          if (!user.isAnonymous) {
-                                            _firestore
-                                                .collection('settings')
-                                                .doc(_userObj.userId)
-                                                .set(setting.toMap());
-                                          }
-                                        }
-
-                                        return GridView.count(
-                                          crossAxisCount: width > 700 ? 2 : 1,
-                                          childAspectRatio: width > 700
-                                              ? width / 450
-                                              : width / 225,
-                                          shrinkWrap: true,
-                                          primary: false,
-                                          crossAxisSpacing: 1.0,
-                                          mainAxisSpacing: 1.0,
-                                          children: homeCards(),
-                                        );
+                        if (user.isAnonymous) const AnonWarningBanner(),
+                        StreamBuilder<DocumentSnapshot>(
+                            stream: _firestore
+                                .collection('settings')
+                                .doc(user.uid)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              switch (snapshot.connectionState) {
+                                case ConnectionState.waiting:
+                                  return const Card(
+                                      child: CenterProgressIndicator());
+                                default:
+                                  if (snapshot.hasData) {
+                                    setting =
+                                        Setting.fromMap(snapshot.data.data());
+                                  } else {
+                                    setting = Setting(
+                                      owner: user.uid,
+                                      hearingNotifications: [0, 30],
+                                      weaponsNotifications: [0, 30],
+                                      acftNotifications: [0, 30],
+                                      dentalNotifications: [0, 30],
+                                      visionNotifications: [0, 30],
+                                      bfNotifications: [0, 30],
+                                      hivNotifications: [0, 30],
+                                      phaNotifications: [0, 30],
+                                    );
+                                    if (!user.isAnonymous) {
+                                      _firestore
+                                          .collection('settings')
+                                          .doc(user.uid)
+                                          .set(setting.toMap());
                                     }
-                                  })
-                            ],
-                          ),
-                        ),
-                        if (_adLoaded && !isSubscribed)
-                          Container(
-                            alignment: Alignment.center,
-                            width: myBanner.size.width.toDouble(),
-                            height: myBanner.size.height.toDouble(),
-                            constraints:
-                                const BoxConstraints(minHeight: 0, minWidth: 0),
-                            child: AdWidget(
-                              ad: myBanner,
-                            ),
-                          )
+                                  }
+
+                                  return GridView.count(
+                                    crossAxisCount: width > 700 ? 2 : 1,
+                                    childAspectRatio:
+                                        width > 700 ? width / 450 : width / 225,
+                                    shrinkWrap: true,
+                                    primary: false,
+                                    crossAxisSpacing: 1.0,
+                                    mainAxisSpacing: 1.0,
+                                    children: homeCards(user.uid),
+                                  );
+                              }
+                            })
                       ],
                     ),
+                  ),
+                  if (_adLoaded && !isSubscribed)
+                    Container(
+                      alignment: Alignment.center,
+                      width: myBanner.size.width.toDouble(),
+                      height: myBanner.size.height.toDouble(),
+                      constraints:
+                          const BoxConstraints(minHeight: 0, minWidth: 0),
+                      child: AdWidget(
+                        ad: myBanner,
+                      ),
+                    )
+                ],
+              ),
             ),
           );
         });

@@ -14,13 +14,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditNotePage extends StatefulWidget {
   const EditNotePage({
     Key key,
-    @required this.userId,
     @required this.note,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final Note note;
-  final bool isSubscribed;
 
   @override
   EditNotePageState createState() => EditNotePageState();
@@ -46,11 +42,11 @@ class EditNotePageState extends State<EditNotePage> {
     return false;
   }
 
-  void submit(BuildContext context) async {
+  void submit(BuildContext context, String userId) async {
     if (validateAndSave()) {
       Note saveNote = Note(
         id: widget.note.id,
-        owner: widget.userId,
+        owner: userId,
         title: _titleController.text,
         comments: _commentsController.text,
       );
@@ -167,7 +163,7 @@ class EditNotePageState extends State<EditNotePage> {
                           ),
                           FormattedElevatedButton(
                             onPressed: () {
-                              submit(context);
+                              submit(context, user.uid);
                             },
                             text: widget.note.id == null
                                 ? 'Add Note'

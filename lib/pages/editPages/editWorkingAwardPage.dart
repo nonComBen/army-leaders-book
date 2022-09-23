@@ -14,13 +14,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditWorkingAwardPage extends StatefulWidget {
   const EditWorkingAwardPage({
     Key key,
-    @required this.userId,
     @required this.award,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final WorkingAward award;
-  final bool isSubscribed;
 
   @override
   EditWorkingAwardPageState createState() => EditWorkingAwardPageState();
@@ -52,12 +48,12 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
     return false;
   }
 
-  void submit(BuildContext context) async {
+  void submit(BuildContext context, String userId) async {
     if (validateAndSave()) {
       WorkingAward saveAward = WorkingAward(
         id: widget.award.id,
         soldierId: _soldierId,
-        owner: widget.userId,
+        owner: userId,
         rank: _rank,
         name: _lastName,
         firstName: _firstName,
@@ -98,12 +94,12 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
     }
   }
 
-  void _removeSoldiers(bool checked) async {
+  void _removeSoldiers(bool checked, String userId) async {
     if (lessSoldiers == null) {
       lessSoldiers = List.from(allSoldiers, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('workingAwards')
-          .where('owner', isEqualTo: widget.userId)
+          .where('owner', isEqualTo: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
@@ -226,8 +222,7 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
                                 child: FutureBuilder(
                                     future: firestore
                                         .collection('soldiers')
-                                        .where('owner',
-                                            isEqualTo: widget.userId)
+                                        .where('owner', isEqualTo: user.uid)
                                         .get(),
                                     builder: (BuildContext context,
                                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -296,7 +291,7 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
                                   title: const Text(
                                       'Remove Soldiers already added'),
                                   onChanged: (checked) {
-                                    _removeSoldiers(checked);
+                                    _removeSoldiers(checked, user.uid);
                                   },
                                 ),
                               ),
@@ -401,7 +396,7 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
                           ),
                           FormattedElevatedButton(
                             onPressed: () {
-                              submit(context);
+                              submit(context, user.uid);
                             },
                             text: widget.award.id == null
                                 ? 'Add Award'

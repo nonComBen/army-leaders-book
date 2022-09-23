@@ -115,10 +115,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadHandReceiptPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadHandReceiptPage()));
       // Widget title = const Text('Upload Hand Receipt');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -343,9 +340,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditHandReceiptPage(
-                  userId: widget.userId,
                   item: HandReceiptItem.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -354,13 +349,11 @@ class HandReceiptPageState extends State<HandReceiptPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditHandReceiptPage(
-                  userId: widget.userId,
                   item: HandReceiptItem(
                     owner: widget.userId,
                     users: [widget.userId],
                     subComponents: [],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -379,9 +372,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditHandReceiptPage(
-                  userId: widget.userId,
                   item: hrItem,
-                  isSubscribed: isSubscribed,
                 )));
   }
 

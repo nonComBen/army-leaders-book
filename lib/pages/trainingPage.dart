@@ -112,13 +112,8 @@ class TrainingPageState extends State<TrainingPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadTrainingsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadTrainingsPage()));
       // Widget title = const Text('Upload Training');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -370,9 +365,7 @@ class TrainingPageState extends State<TrainingPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditTrainingPage(
-                  userId: widget.userId,
                   training: Training.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -381,12 +374,10 @@ class TrainingPageState extends State<TrainingPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditTrainingPage(
-                  userId: widget.userId,
                   training: Training(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

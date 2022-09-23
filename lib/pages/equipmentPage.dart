@@ -112,13 +112,8 @@ class EquipmentPageState extends State<EquipmentPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadEquipmentPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadEquipmentPage()));
       // Widget title = const Text('Upload Equipment');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -352,9 +347,7 @@ class EquipmentPageState extends State<EquipmentPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditEquipmentPage(
-                  userId: widget.userId,
                   equipment: Equipment.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -363,12 +356,10 @@ class EquipmentPageState extends State<EquipmentPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditEquipmentPage(
-                  userId: widget.userId,
                   equipment: Equipment(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

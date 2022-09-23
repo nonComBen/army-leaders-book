@@ -111,10 +111,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadWorkingAwardsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadWorkingAwardsPage()));
       // Widget title = const Text('Upload Working Awards');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -257,11 +254,9 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditWorkingAwardPage(
-                  userId: widget.userId,
                   award: WorkingAward.fromSnapshot(
                     _selectedDocuments[0],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -270,11 +265,9 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditWorkingAwardPage(
-                  userId: widget.userId,
                   award: WorkingAward(
                     owner: widget.userId,
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

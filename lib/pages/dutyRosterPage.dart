@@ -114,10 +114,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadDutyRosterPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadDutyRosterPage()));
       // Widget title = const Text('Upload Duty Roster');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -363,9 +360,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditDutyRosterPage(
-                  userId: widget.userId,
                   duty: Duty.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -374,12 +369,10 @@ class DutyRosterPageState extends State<DutyRosterPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditDutyRosterPage(
-                  userId: widget.userId,
                   duty: Duty(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

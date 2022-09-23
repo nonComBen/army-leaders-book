@@ -18,13 +18,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditCounselingPage extends StatefulWidget {
   const EditCounselingPage({
     Key key,
-    @required this.userId,
     @required this.counseling,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final Counseling counseling;
-  final bool isSubscribed;
 
   @override
   EditCounselingPageState createState() => EditCounselingPageState();
@@ -98,12 +94,12 @@ class EditCounselingPageState extends State<EditCounselingPage> {
     return false;
   }
 
-  void submit(BuildContext context) async {
+  void submit(BuildContext context, String userId) async {
     if (validateAndSave()) {
       Counseling saveCounseling = Counseling(
         id: widget.counseling.id,
         soldierId: _soldierId,
-        owner: widget.userId,
+        owner: userId,
         rank: _rank,
         name: _lastName,
         firstName: _firstName,
@@ -146,12 +142,12 @@ class EditCounselingPageState extends State<EditCounselingPage> {
     }
   }
 
-  void _removeSoldiers(bool checked) async {
+  void _removeSoldiers(bool checked, String userId) async {
     if (lessSoldiers == null) {
       lessSoldiers = List.from(allSoldiers, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('counselings')
-          .where('owner', isEqualTo: widget.userId)
+          .where('owner', isEqualTo: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
@@ -276,8 +272,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
                                 child: FutureBuilder(
                                     future: firestore
                                         .collection('soldiers')
-                                        .where('users',
-                                            arrayContains: widget.userId)
+                                        .where('users', arrayContains: user.uid)
                                         .get(),
                                     builder: (BuildContext context,
                                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -346,7 +341,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
                                   title: const Text(
                                       'Remove Soldiers already added'),
                                   onChanged: (checked) {
-                                    _removeSoldiers(checked);
+                                    _removeSoldiers(checked, user.uid);
                                   },
                                 ),
                               ),
@@ -462,7 +457,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
                           ),
                           FormattedElevatedButton(
                             onPressed: () {
-                              submit(context);
+                              submit(context, user.uid);
                             },
                             text: widget.counseling.id == null
                                 ? 'Add Counseling'

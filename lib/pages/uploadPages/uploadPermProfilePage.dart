@@ -18,11 +18,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadPermProfilePage extends StatefulWidget {
   const UploadPermProfilePage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadPermProfilePageState createState() => UploadPermProfilePageState();

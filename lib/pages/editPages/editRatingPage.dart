@@ -18,13 +18,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditRatingPage extends StatefulWidget {
   const EditRatingPage({
     Key key,
-    @required this.userId,
     @required this.rating,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final Rating rating;
-  final bool isSubscribed;
 
   @override
   EditRatingPageState createState() => EditRatingPageState();
@@ -197,12 +193,12 @@ class EditRatingPageState extends State<EditRatingPage> {
     }
   }
 
-  void _removeSoldiers(bool checked) async {
+  void _removeSoldiers(bool checked, String userId) async {
     if (lessSoldiers == null) {
       lessSoldiers = List.from(allSoldiers, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('ratings')
-          .where('users', arrayContains: widget.userId)
+          .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
@@ -335,8 +331,7 @@ class EditRatingPageState extends State<EditRatingPage> {
                                 child: FutureBuilder(
                                     future: firestore
                                         .collection('soldiers')
-                                        .where('users',
-                                            arrayContains: widget.userId)
+                                        .where('users', arrayContains: user.uid)
                                         .get(),
                                     builder: (BuildContext context,
                                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -409,7 +404,7 @@ class EditRatingPageState extends State<EditRatingPage> {
                                   title: const Text(
                                       'Remove Soldiers already added'),
                                   onChanged: (checked) {
-                                    _removeSoldiers(checked);
+                                    _removeSoldiers(checked, user.uid);
                                   },
                                 ),
                               ),

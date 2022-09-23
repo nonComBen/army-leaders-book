@@ -18,11 +18,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadMilLicensePage extends StatefulWidget {
   const UploadMilLicensePage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadMilLicensePageState createState() => UploadMilLicensePageState();

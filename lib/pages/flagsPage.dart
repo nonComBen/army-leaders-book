@@ -113,13 +113,8 @@ class FlagsPageState extends State<FlagsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadFlagsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadFlagsPage()));
       // Widget title = const Text('Upload Flags');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -326,9 +321,7 @@ class FlagsPageState extends State<FlagsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditFlagPage(
-                  userId: widget.userId,
                   flag: Flag.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -337,12 +330,10 @@ class FlagsPageState extends State<FlagsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditFlagPage(
-                  userId: widget.userId,
                   flag: Flag(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

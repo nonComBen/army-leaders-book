@@ -116,10 +116,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadPermProfilePage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadPermProfilePage()));
       // Widget title = const Text('Upload Permanent Profiles');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -333,9 +330,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditPermProfilePage(
-                  userId: widget.userId,
                   profile: PermProfile.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -344,12 +339,10 @@ class PermProfilesPageState extends State<PermProfilesPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditPermProfilePage(
-                  userId: widget.userId,
                   profile: PermProfile(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

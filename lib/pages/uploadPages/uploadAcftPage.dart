@@ -18,11 +18,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadAcftPage extends StatefulWidget {
   const UploadAcftPage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadAcftPageState createState() => UploadAcftPageState();

@@ -7,6 +7,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../methods/upload_methods.dart';
@@ -18,11 +19,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadCounselingsPage extends StatefulWidget {
   const UploadCounselingsPage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadCounselingsPageState createState() => UploadCounselingsPageState();
@@ -106,6 +103,7 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
 
       for (int i = 1; i < rows.length; i++) {
         String rank, name, firstName, section, rankSort;
+        String owner = AuthProvider.of(context).auth.currentUser().uid;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -132,7 +130,7 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
 
           Counseling counseling = Counseling(
             soldierId: saveSoldierId,
-            owner: widget.userId,
+            owner: owner,
             rank: rank,
             name: name,
             firstName: firstName,

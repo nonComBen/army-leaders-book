@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,9 +18,7 @@ import '../providers/notifications_plugin_provider.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     Key key,
-    this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/settings-page';
 
@@ -57,7 +56,9 @@ class SettingsPageState extends State<SettingsPage> {
       weapons,
       flags,
       medpros,
-      training;
+      training,
+      isInitial = true;
+  String userId;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   Setting setting;
   ThemeData _theme = ThemeData(brightness: Brightness.light);
@@ -229,12 +230,12 @@ class SettingsPageState extends State<SettingsPage> {
       visionNotifications: visionNotifications,
       hearingNotifications: hearingNotifications,
       hivNotifications: hivNotifications,
-      owner: widget.userId,
+      owner: userId,
     );
 
     firestore
         .collection('settings')
-        .doc(widget.userId)
+        .doc(userId)
         .set(saveSetting.toMap(), SetOptions(merge: true));
 
     if (!saveSetting.addNotifications) {
@@ -263,6 +264,16 @@ class SettingsPageState extends State<SettingsPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    userId = AuthProvider.of(context).auth.currentUser().uid;
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     addNotification = true;
@@ -276,18 +287,16 @@ class SettingsPageState extends State<SettingsPage> {
     flags = false;
     medpros = false;
     training = false;
-
-    initialize();
   }
 
   void initialize() async {
     QuerySnapshot snapshot = await firestore
         .collection('settings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: userId)
         .get();
     DocumentSnapshot doc;
     if (snapshot.docs.isNotEmpty) {
-      doc = snapshot.docs.firstWhere((doc) => doc.id == widget.userId);
+      doc = snapshot.docs.firstWhere((doc) => doc.id == userId);
     }
     prefs = await SharedPreferences.getInstance();
 
@@ -297,7 +306,7 @@ class SettingsPageState extends State<SettingsPage> {
         updated = false;
       } else {
         setting = Setting(
-          owner: widget.userId,
+          owner: userId,
           hearingNotifications: [0, 30],
           weaponsNotifications: [0, 30],
           acftNotifications: [0, 30],

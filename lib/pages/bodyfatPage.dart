@@ -33,9 +33,7 @@ import '../providers/tracking_provider.dart';
 class BodyfatPage extends StatefulWidget {
   const BodyfatPage({
     Key key,
-    @required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/bodyfat-page';
 
@@ -48,7 +46,9 @@ class BodyfatPageState extends State<BodyfatPage> {
   bool _sortAscending = true,
       _adLoaded = false,
       isSubscribed,
-      notificationsRefreshed = false;
+      notificationsRefreshed = false,
+      isInitial = true;
+  String _userId;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
@@ -64,6 +64,7 @@ class BodyfatPageState extends State<BodyfatPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
 
     notificationsPlugin =
@@ -96,6 +97,10 @@ class BodyfatPageState extends State<BodyfatPage> {
         _adLoaded = true;
       }
     }
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
   }
 
   @override
@@ -116,11 +121,15 @@ class BodyfatPageState extends State<BodyfatPage> {
         presentAlert: true, presentSound: false, presentBadge: false);
     notificationDetails =
         NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+  }
+
+  void initialize() async {
+    prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('bodyfatStats')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -133,14 +142,9 @@ class BodyfatPageState extends State<BodyfatPage> {
         refreshNotifications();
       }
     });
-    initialize();
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
     snapshot = await FirebaseFirestore.instance
         .collection('settings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: _userId)
         .get();
     DocumentSnapshot doc = snapshot.docs[0];
     setState(() {
@@ -231,13 +235,8 @@ class BodyfatPageState extends State<BodyfatPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadBodyFatsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadBodyFatsPage()));
       // Widget title = const Text('Upload Body Comp Stats');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -445,8 +444,7 @@ class BodyfatPageState extends State<BodyfatPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Body Composition$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'Body Composition$s');
   }
 
   void _editRecord() {
@@ -460,9 +458,7 @@ class BodyfatPageState extends State<BodyfatPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditBodyfatPage(
-                  userId: widget.userId,
                   bodyfat: Bodyfat.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -471,12 +467,10 @@ class BodyfatPageState extends State<BodyfatPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditBodyfatPage(
-                  userId: widget.userId,
                   bodyfat: Bodyfat(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: _userId,
+                    users: [_userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

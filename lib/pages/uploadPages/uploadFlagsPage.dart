@@ -18,11 +18,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadFlagsPage extends StatefulWidget {
   const UploadFlagsPage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadFlagsPageState createState() => UploadFlagsPageState();

@@ -113,13 +113,8 @@ class RatingsPageState extends State<RatingsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadRatingsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadRatingsPage()));
       // Widget title = const Text('Upload Rating Scheme');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -330,9 +325,7 @@ class RatingsPageState extends State<RatingsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditRatingPage(
-                  userId: widget.userId,
                   rating: Rating.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -341,12 +334,10 @@ class RatingsPageState extends State<RatingsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditRatingPage(
-                  userId: widget.userId,
                   rating: Rating(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

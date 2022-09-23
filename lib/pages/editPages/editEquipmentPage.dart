@@ -14,13 +14,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditEquipmentPage extends StatefulWidget {
   const EditEquipmentPage({
     Key key,
-    @required this.userId,
     @required this.equipment,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final Equipment equipment;
-  final bool isSubscribed;
 
   @override
   EditEquipmentPageState createState() => EditEquipmentPageState();
@@ -201,12 +197,12 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
     }
   }
 
-  void _removeSoldiers(bool checked) async {
+  void _removeSoldiers(bool checked, String userId) async {
     if (lessSoldiers == null) {
       lessSoldiers = List.from(allSoldiers, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('equipment')
-          .where('users', arrayContains: widget.userId)
+          .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
@@ -352,8 +348,7 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
                                 child: FutureBuilder(
                                     future: firestore
                                         .collection('soldiers')
-                                        .where('users',
-                                            arrayContains: widget.userId)
+                                        .where('users', arrayContains: user.uid)
                                         .get(),
                                     builder: (BuildContext context,
                                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -426,7 +421,7 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
                                   title: const Text(
                                       'Remove Soldiers already added'),
                                   onChanged: (checked) {
-                                    _removeSoldiers(checked);
+                                    _removeSoldiers(checked, user.uid);
                                   },
                                 ),
                               ),

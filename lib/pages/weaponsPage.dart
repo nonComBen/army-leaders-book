@@ -33,9 +33,7 @@ import '../widgets/anon_warning_banner.dart';
 class WeaponsPage extends StatefulWidget {
   const WeaponsPage({
     Key key,
-    @required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/weapons-page';
 
@@ -48,7 +46,9 @@ class WeaponsPageState extends State<WeaponsPage> {
   bool _sortAscending = true,
       _adLoaded = false,
       isSubscribed,
-      notificationsRefreshed = false;
+      notificationsRefreshed = false,
+      isInitial = true;
+  String _userId;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
@@ -63,6 +63,7 @@ class WeaponsPageState extends State<WeaponsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
 
     notificationsPlugin =
@@ -95,6 +96,10 @@ class WeaponsPageState extends State<WeaponsPage> {
         _adLoaded = true;
       }
     }
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
   }
 
   @override
@@ -115,11 +120,15 @@ class WeaponsPageState extends State<WeaponsPage> {
         presentAlert: true, presentSound: false, presentBadge: false);
     notificationDetails =
         NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+  }
+
+  void initialize() async {
+    prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('weaponStats')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -128,14 +137,9 @@ class WeaponsPageState extends State<WeaponsPage> {
         _selectedDocuments.clear();
       });
     });
-    initialize();
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('settings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: _userId)
         .get();
     DocumentSnapshot doc = snapshot.docs[0];
     setState(() {
@@ -154,7 +158,7 @@ class WeaponsPageState extends State<WeaponsPage> {
   void refreshNotifications() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('settings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: _userId)
         .get();
     int monthsDue = 6;
     List<dynamic> daysBefore = [0, 30];
@@ -230,13 +234,8 @@ class WeaponsPageState extends State<WeaponsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadWeaponsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadWeaponsPage()));
       // Widget title = const Text('Upload Weapon Stats');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -435,7 +434,7 @@ class WeaponsPageState extends State<WeaponsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Weapon Stat$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'Weapon Stat$s');
   }
 
   void _editRecord() {
@@ -449,9 +448,7 @@ class WeaponsPageState extends State<WeaponsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditWeaponPage(
-                  userId: widget.userId,
                   weapon: Weapon.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -460,12 +457,10 @@ class WeaponsPageState extends State<WeaponsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditWeaponPage(
-                  userId: widget.userId,
                   weapon: Weapon(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: _userId,
+                    users: [_userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

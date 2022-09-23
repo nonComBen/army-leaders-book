@@ -84,9 +84,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditSoldierPage(
-                  userId: widget.userId,
                   soldier: widget.soldier,
-                  isSubscribed: isSubscribed,
                 )));
   }
 

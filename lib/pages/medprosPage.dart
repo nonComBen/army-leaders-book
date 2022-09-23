@@ -32,9 +32,7 @@ import '../providers/tracking_provider.dart';
 class MedProsPage extends StatefulWidget {
   const MedProsPage({
     Key key,
-    @required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/medpros-page';
 
@@ -47,7 +45,9 @@ class MedProsPageState extends State<MedProsPage> {
   bool _sortAscending = true,
       _adLoaded = false,
       isSubscribed,
-      notificationsRefreshed = false;
+      notificationsRefreshed = false,
+      isInitial = true;
+  String _userId;
   List<DocumentSnapshot> documents, filteredDocs, _selectedDocuments;
   StreamSubscription _subscriptionUsers;
   SharedPreferences prefs;
@@ -61,6 +61,7 @@ class MedProsPageState extends State<MedProsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
 
     notificationsPlugin =
@@ -93,6 +94,10 @@ class MedProsPageState extends State<MedProsPage> {
         _adLoaded = true;
       }
     }
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
   }
 
   @override
@@ -111,11 +116,15 @@ class MedProsPageState extends State<MedProsPage> {
         presentAlert: true, presentSound: false, presentBadge: false);
     notificationDetails =
         NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+  }
+
+  void initialize() async {
+    prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('medpros')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -124,11 +133,6 @@ class MedProsPageState extends State<MedProsPage> {
         _selectedDocuments.clear();
       });
     });
-    initialize();
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
   }
 
   @override
@@ -141,7 +145,7 @@ class MedProsPageState extends State<MedProsPage> {
   void refreshNotifications() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('settings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: _userId)
         .get();
     int phaMonthsDue = 12;
     int dentalMonthsDue = 12;
@@ -250,13 +254,8 @@ class MedProsPageState extends State<MedProsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadMedProsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadMedProsPage()));
       // Widget title = const Text('Upload MedPros');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -490,7 +489,7 @@ class MedProsPageState extends State<MedProsPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    deleteRecord(context, _selectedDocuments, widget.userId, 'MedPros');
+    deleteRecord(context, _selectedDocuments, _userId, 'MedPros');
   }
 
   void _editRecord() {
@@ -504,9 +503,7 @@ class MedProsPageState extends State<MedProsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditMedprosPage(
-                  userId: widget.userId,
                   medpro: Medpro.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -515,13 +512,11 @@ class MedProsPageState extends State<MedProsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditMedprosPage(
-                  userId: widget.userId,
                   medpro: Medpro(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: _userId,
+                    users: [_userId],
                     otherImms: [],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

@@ -255,11 +255,10 @@ class EditUserPageState extends State<EditUserPage> {
         agreeDate: user.agreeDate,
       );
 
-      SetOptions options = SetOptions(merge: true);
       firestore
           .collection('users')
           .doc(widget.userId)
-          .set(saveUser.toMap(), options);
+          .set(saveUser.toMap(), SetOptions(merge: true));
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

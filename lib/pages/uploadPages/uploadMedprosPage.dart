@@ -18,11 +18,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadMedProsPage extends StatefulWidget {
   const UploadMedProsPage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadMedProsPageState createState() => UploadMedProsPageState();

@@ -19,13 +19,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditSoldierPage extends StatefulWidget {
   const EditSoldierPage({
     Key key,
-    @required this.userId,
     @required this.soldier,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final Soldier soldier;
-  final bool isSubscribed;
 
   @override
   EditSoldierPageState createState() => EditSoldierPageState();

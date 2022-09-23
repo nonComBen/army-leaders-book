@@ -33,9 +33,7 @@ import '../widgets/anon_warning_banner.dart';
 class AcftPage extends StatefulWidget {
   const AcftPage({
     Key key,
-    @required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/acft-page';
 
@@ -57,7 +55,9 @@ class AcftPageState extends State<AcftPage> {
   bool _sortAscending = true,
       _adLoaded = false,
       isSubscribed,
-      notificationsRefreshed = false;
+      notificationsRefreshed = false,
+      isInitial = true;
+  String _userId;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
@@ -73,6 +73,7 @@ class AcftPageState extends State<AcftPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
 
     notificationsPlugin =
@@ -105,6 +106,11 @@ class AcftPageState extends State<AcftPage> {
         _adLoaded = true;
       }
     }
+
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
   }
 
   @override
@@ -134,11 +140,14 @@ class AcftPageState extends State<AcftPage> {
         presentAlert: true, presentSound: false, presentBadge: false);
     notificationDetails =
         NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+  }
 
+  void initialize() async {
+    prefs = await SharedPreferences.getInstance();
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('acftStats')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -149,14 +158,9 @@ class AcftPageState extends State<AcftPage> {
 
       _calcAves();
     });
-    initialize();
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
     snapshot = await FirebaseFirestore.instance
         .collection('settings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: _userId)
         .get();
     DocumentSnapshot doc = snapshot.docs[0];
     setState(() {
@@ -250,43 +254,9 @@ class AcftPageState extends State<AcftPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UploadAcftPage(
-            userId: widget.userId,
-            isSubscribed: isSubscribed,
-          ),
+          builder: (context) => const UploadAcftPage(),
         ),
       );
-      // Widget title = const Text('Upload ACFT Stats');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your ACFT Stats, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also needs to be in '
-      //       'yyyy-MM-dd or M/d/yy format and aerobic event will default to Run if the event does not match an option in the dropdown menu (case '
-      //       'sensitive). Use TRUE/FALSE values for Pass column',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (context) => UploadAcftPage(
-      //           userId: widget.userId,
-      //           isSubscribed: isSubscribed,
-      //         ),
-      //       ),
-      //     );
-      //   },
-      //   secondary: () {},
-      // );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -475,7 +445,7 @@ class AcftPageState extends State<AcftPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'ACFT$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'ACFT$s');
   }
 
   void _editRecord() {
@@ -489,9 +459,7 @@ class AcftPageState extends State<AcftPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditAcftPage(
-                  userId: widget.userId,
                   acft: Acft.fromSnapshot(_selectedDocuments[0]),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -500,12 +468,10 @@ class AcftPageState extends State<AcftPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditAcftPage(
-                  userId: widget.userId,
                   acft: Acft(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: _userId,
+                    users: [_userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

@@ -116,10 +116,7 @@ class MilLicPageState extends State<MilLicPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadMilLicensePage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadMilLicensePage()));
       // Widget title = const Text('Upload Military Licenses');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -341,9 +338,7 @@ class MilLicPageState extends State<MilLicPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditMilLicPage(
-                  userId: widget.userId,
                   milLic: MilLic.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -352,13 +347,11 @@ class MilLicPageState extends State<MilLicPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditMilLicPage(
-                  userId: widget.userId,
                   milLic: MilLic(
                     owner: widget.userId,
                     users: [widget.userId],
                     vehicles: [],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

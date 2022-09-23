@@ -18,13 +18,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditTempProfilePage extends StatefulWidget {
   const EditTempProfilePage({
     Key key,
-    @required this.userId,
     @required this.profile,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final TempProfile profile;
-  final bool isSubscribed;
 
   @override
   EditTempProfilePageState createState() => EditTempProfilePageState();
@@ -187,12 +183,12 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
     }
   }
 
-  void _removeSoldiers(bool checked) async {
+  void _removeSoldiers(bool checked, String userId) async {
     if (lessSoldiers == null) {
       lessSoldiers = List.from(allSoldiers, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('profiles')
-          .where('users', arrayContains: widget.userId)
+          .where('users', arrayContains: userId)
           .where('type', isEqualTo: 'Temporary')
           .get();
       if (apfts.docs.isNotEmpty) {
@@ -310,8 +306,7 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
                                 child: FutureBuilder(
                                     future: firestore
                                         .collection('soldiers')
-                                        .where('users',
-                                            arrayContains: widget.userId)
+                                        .where('users', arrayContains: user.uid)
                                         .get(),
                                     builder: (BuildContext context,
                                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -384,7 +379,7 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
                                   title: const Text(
                                       'Remove Soldiers already added'),
                                   onChanged: (checked) {
-                                    _removeSoldiers(checked);
+                                    _removeSoldiers(checked, user.uid);
                                   },
                                 ),
                               ),

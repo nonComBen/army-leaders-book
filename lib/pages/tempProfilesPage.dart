@@ -117,10 +117,7 @@ class TempProfilesPageState extends State<TempProfilesPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadTempProfilesPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadTempProfilesPage()));
       // Widget title = const Text('Upload Temporary Profiles');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -325,9 +322,7 @@ class TempProfilesPageState extends State<TempProfilesPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditTempProfilePage(
-                  userId: widget.userId,
                   profile: TempProfile.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -336,12 +331,10 @@ class TempProfilesPageState extends State<TempProfilesPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditTempProfilePage(
-                  userId: widget.userId,
                   profile: TempProfile(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

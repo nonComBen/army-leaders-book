@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -25,8 +26,7 @@ import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
 
 class DailyPerstatPage extends StatefulWidget {
-  const DailyPerstatPage({Key key, @required this.userId}) : super(key: key);
-  final String userId;
+  const DailyPerstatPage({Key key}) : super(key: key);
 
   static const routeName = '/daily-perstat-page';
 
@@ -41,7 +41,8 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   List<String> sections = [];
   DateFormat dateFormat = DateFormat('yyyy-MM-dd');
   FirebaseFirestore firestore;
-  bool expanded = true;
+  bool isExpanded = true, isInitial = true;
+  String _userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
   final GlobalKey _globalKey = GlobalKey();
@@ -180,10 +181,10 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           IconButton(
-              icon: Icon(expanded ? Icons.expand_less : Icons.expand_more),
+              icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
               onPressed: () {
                 setState(() {
-                  expanded = !expanded;
+                  isExpanded = !isExpanded;
                 });
               }),
         ],
@@ -404,20 +405,20 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
       if (i == 0) {
         statuses.add(statusHeader(filteredDailies[i]['type'] +
             ' (${filteredDailies.where((daily) => daily['type'] == filteredDailies[i]['type']).toList().length})'));
-        if (expanded) {
+        if (isExpanded) {
           statuses.add(soldierCard(filteredDailies[i], i));
         }
       } else if (filteredDailies[i]['type'] != filteredDailies[i - 1]['type']) {
         statuses.add(statusHeader(filteredDailies[i]['type'] +
             ' (${filteredDailies.where((daily) => daily['type'] == filteredDailies[i]['type']).toList().length})'));
-        if (expanded) {
+        if (isExpanded) {
           statuses.add(soldierCard(filteredDailies[i], i));
         }
         if (!types.contains(filteredDailies[i]['type'])) {
           types.insertAll(types.length - 2, [filteredDailies[i]['type']]);
         }
       } else {
-        if (expanded) {
+        if (isExpanded) {
           statuses.add(soldierCard(filteredDailies[i], i));
         }
       }
@@ -441,14 +442,11 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
 
   Future<bool> onWillPop() {
     PerstatByName byName = PerstatByName(
-      owner: widget.userId,
+      owner: _userId,
       date: dateFormat.format(DateTime.now()),
       dailies: dailies,
     );
-    firestore
-        .collection('perstatByName')
-        .doc(widget.userId)
-        .set(byName.toMap());
+    firestore.collection('perstatByName').doc(_userId).set(byName.toMap());
     return Future.value(true);
   }
 
@@ -462,7 +460,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
     QuerySnapshot perstatSnapshot = await firestore
         .collection('perstat')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .get();
     perstats = perstatSnapshot.docs
         .where((doc) => isOverdue(doc['start'], 0) && !isOverdue(doc['end'], 1))
@@ -536,7 +534,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
       QuerySnapshot perstatSnapshot = await firestore
           .collection('perstat')
           .where('users', isNotEqualTo: null)
-          .where('users', arrayContains: widget.userId)
+          .where('users', arrayContains: _userId)
           .get();
       perstats = perstatSnapshot.docs
           .where(
@@ -587,20 +585,28 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     dailies = [];
     filteredDailies = [];
     firestore = FirebaseFirestore.instance;
-    initialize();
   }
 
   initialize() async {
     DocumentSnapshot snapshot;
     PerstatByName byName;
     try {
-      snapshot =
-          await firestore.collection('perstatByName').doc(widget.userId).get();
+      snapshot = await firestore.collection('perstatByName').doc(_userId).get();
       byName = PerstatByName.fromSnapshot(snapshot);
     } catch (e) {
       // ignore: avoid_print

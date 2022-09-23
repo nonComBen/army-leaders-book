@@ -21,13 +21,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditApftPage extends StatefulWidget {
   const EditApftPage({
     Key key,
-    @required this.userId,
     @required this.apft,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final Apft apft;
-  final bool isSubscribed;
 
   @override
   EditApftPageState createState() => EditApftPageState();
@@ -269,12 +265,12 @@ class EditApftPageState extends State<EditApftPage> {
     }
   }
 
-  void _removeSoldiers(bool checked) async {
+  void _removeSoldiers(bool checked, String userId) async {
     if (lessSoldiers == null) {
       lessSoldiers = List.from(allSoldiers, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('apftStats')
-          .where('users', arrayContains: widget.userId)
+          .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
@@ -418,8 +414,7 @@ class EditApftPageState extends State<EditApftPage> {
                                 child: FutureBuilder(
                                     future: firestore
                                         .collection('soldiers')
-                                        .where('users',
-                                            arrayContains: widget.userId)
+                                        .where('users', arrayContains: user.uid)
                                         .get(),
                                     builder: (BuildContext context,
                                         AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -491,7 +486,7 @@ class EditApftPageState extends State<EditApftPage> {
                                   title: const Text(
                                       'Remove Soldiers already added'),
                                   onChanged: (checked) {
-                                    _removeSoldiers(checked);
+                                    _removeSoldiers(checked, user.uid);
                                   },
                                 ),
                               ),

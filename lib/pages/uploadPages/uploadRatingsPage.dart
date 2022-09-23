@@ -18,11 +18,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadRatingsPage extends StatefulWidget {
   const UploadRatingsPage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadRatingsPageStat createState() => UploadRatingsPageStat();

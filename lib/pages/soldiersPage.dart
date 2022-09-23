@@ -235,12 +235,8 @@ class SoldiersPageState extends State<SoldiersPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadSoldierPage(
-                    userId: widget.userId,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadSoldierPage()));
       // Widget title = const Text('Upload Roster');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -430,12 +426,10 @@ class SoldiersPageState extends State<SoldiersPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditSoldierPage(
-                  userId: widget.userId,
                   soldier: Soldier(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

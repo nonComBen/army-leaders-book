@@ -137,13 +137,8 @@ class PerstatPageState extends State<PerstatPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadPerstatPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadPerstatPage()));
       // Widget title = const Text('Upload PERSTATs');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -388,9 +383,7 @@ class PerstatPageState extends State<PerstatPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditPerstatPage(
-                  userId: widget.userId,
                   perstat: Perstat.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -399,12 +392,10 @@ class PerstatPageState extends State<PerstatPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditPerstatPage(
-                  userId: widget.userId,
                   perstat: Perstat(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

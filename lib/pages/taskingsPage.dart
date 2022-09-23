@@ -112,13 +112,8 @@ class TaskingsPageState extends State<TaskingsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadTaskingsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadTaskingsPage()));
       // Widget title = const Text('Upload Taskings');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -362,9 +357,7 @@ class TaskingsPageState extends State<TaskingsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditTaskingPage(
-                  userId: widget.userId,
                   tasking: Tasking.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -373,12 +366,10 @@ class TaskingsPageState extends State<TaskingsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditTaskingPage(
-                  userId: widget.userId,
                   tasking: Tasking(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

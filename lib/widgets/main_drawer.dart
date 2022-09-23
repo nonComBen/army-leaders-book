@@ -176,12 +176,8 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.directions_run),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ApftPage(
-                            userId: user.userId,
-                          )));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const ApftPage()));
             },
           ),
           ListTile(
@@ -189,12 +185,8 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.fitness_center),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => AcftPage(
-                            userId: user.userId,
-                          )));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const AcftPage()));
             },
           ),
           ListTile(
@@ -228,12 +220,8 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.accessibility),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BodyfatPage(
-                            userId: user.userId,
-                          )));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const BodyfatPage()));
             },
           ),
           ListTile(
@@ -241,12 +229,8 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.my_location),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => WeaponsPage(
-                            userId: user.userId,
-                          )));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const WeaponsPage()));
             },
           ),
           ListTile(
@@ -280,12 +264,8 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.local_hospital),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => MedProsPage(
-                            userId: user.userId,
-                          )));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const MedProsPage()));
             },
           ),
           ListTile(
@@ -465,9 +445,7 @@ class MainDrawer extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => AlertRosterPage(
-                            userId: user.userId,
-                          )));
+                      builder: (context) => const AlertRosterPage()));
             },
           ),
           const Divider(),
@@ -544,9 +522,7 @@ class MainDrawer extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => SettingsPage(
-                            userId: user.userId,
-                          )));
+                      builder: (context) => const SettingsPage()));
             },
           ),
           ListTile(

@@ -129,13 +129,8 @@ class PhonePageState extends State<PhonePage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadPhonePage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadPhonePage()));
       // Widget title = const Text('Upload Phone Numbers');
       // Widget content = Container(
       //   padding: const EdgeInsets.all(8.0),
@@ -309,11 +304,9 @@ class PhonePageState extends State<PhonePage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditPhonePage(
-                  userId: widget.userId,
                   phone: Phone.fromSnapshot(
                     _selectedDocuments[0],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -322,11 +315,9 @@ class PhonePageState extends State<PhonePage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditPhonePage(
-                  userId: widget.userId,
                   phone: Phone(
                     owner: widget.userId,
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

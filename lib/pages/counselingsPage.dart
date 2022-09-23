@@ -111,10 +111,7 @@ class CounselingsPageState extends State<CounselingsPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadCounselingsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadCounselingsPage()));
       // Widget title = const Text('Upload Counselings');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -260,9 +257,7 @@ class CounselingsPageState extends State<CounselingsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditCounselingPage(
-                  userId: widget.userId,
                   counseling: Counseling.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -271,11 +266,9 @@ class CounselingsPageState extends State<CounselingsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditCounselingPage(
-                  userId: widget.userId,
                   counseling: Counseling(
                     owner: widget.userId,
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

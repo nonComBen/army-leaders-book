@@ -33,9 +33,7 @@ import '../providers/tracking_provider.dart';
 class ApftPage extends StatefulWidget {
   const ApftPage({
     Key key,
-    @required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/apft-page';
 
@@ -48,7 +46,9 @@ class ApftPageState extends State<ApftPage> {
   bool _sortAscending = true,
       _adLoaded = false,
       isSubscribed,
-      notificationsRefreshed = false;
+      notificationsRefreshed = false,
+      isInitial = true;
+  String _userId;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
@@ -64,6 +64,7 @@ class ApftPageState extends State<ApftPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
     print('Provider Subscribed State: $isSubscribed');
 
@@ -97,6 +98,10 @@ class ApftPageState extends State<ApftPage> {
         _adLoaded = true;
       }
     }
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
   }
 
   @override
@@ -117,11 +122,14 @@ class ApftPageState extends State<ApftPage> {
         presentAlert: true, presentSound: false, presentBadge: false);
     notificationDetails =
         NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+  }
 
+  void initialize() async {
+    prefs = await SharedPreferences.getInstance();
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('apftStats')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -132,14 +140,9 @@ class ApftPageState extends State<ApftPage> {
 
       _calcAves();
     });
-    initialize();
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
     snapshot = await FirebaseFirestore.instance
         .collection('settings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: _userId)
         .get();
     DocumentSnapshot doc = snapshot.docs[0];
     setState(() {
@@ -230,13 +233,8 @@ class ApftPageState extends State<ApftPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadApftPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadApftPage()));
       // Widget title = const Text('Upload APFT Stats');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -445,7 +443,7 @@ class ApftPageState extends State<ApftPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'APFT$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'APFT$s');
   }
 
   void _editRecord() {
@@ -459,9 +457,7 @@ class ApftPageState extends State<ApftPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditApftPage(
-                  userId: widget.userId,
                   apft: Apft.fromSnapshot(_selectedDocuments[0]),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -470,12 +466,10 @@ class ApftPageState extends State<ApftPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditApftPage(
-                  userId: widget.userId,
                   apft: Apft(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: _userId,
+                    users: [_userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

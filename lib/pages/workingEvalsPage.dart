@@ -111,10 +111,7 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => UploadWorkingEvalsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+              builder: (context) => const UploadWorkingEvalsPage()));
       // Widget title = const Text('Upload Working Evals');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -265,11 +262,9 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditWorkingEvalPage(
-                  userId: widget.userId,
                   eval: WorkingEval.fromSnapshot(
                     _selectedDocuments[0],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -278,11 +273,9 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditWorkingEvalPage(
-                  userId: widget.userId,
                   eval: WorkingEval(
                     owner: widget.userId,
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

@@ -120,9 +120,7 @@ class NotesPageState extends State<NotesPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditNotePage(
-                  userId: widget.userId,
                   note: Note.fromSnapshot(_selectedDocuments[0]),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -131,11 +129,9 @@ class NotesPageState extends State<NotesPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditNotePage(
-                  userId: widget.userId,
                   note: Note(
                     owner: widget.userId,
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

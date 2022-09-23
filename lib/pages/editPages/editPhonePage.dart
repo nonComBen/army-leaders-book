@@ -14,13 +14,9 @@ import '../../widgets/formatted_elevated_button.dart';
 class EditPhonePage extends StatefulWidget {
   const EditPhonePage({
     Key key,
-    @required this.userId,
     @required this.phone,
-    @required this.isSubscribed,
   }) : super(key: key);
-  final String userId;
   final Phone phone;
-  final bool isSubscribed;
 
   @override
   EditPhonePageState createState() => EditPhonePageState();
@@ -48,11 +44,11 @@ class EditPhonePageState extends State<EditPhonePage> {
     return false;
   }
 
-  void submit(BuildContext context) async {
+  void submit(BuildContext context, String userId) async {
     if (validateAndSave()) {
       Phone savePhone = Phone(
         id: widget.phone.id,
-        owner: widget.userId,
+        owner: userId,
         title: _titleController.text,
         name: _nameController.text,
         phone: _phoneController.text,
@@ -217,7 +213,7 @@ class EditPhonePageState extends State<EditPhonePage> {
                           ),
                           FormattedElevatedButton(
                             onPressed: () {
-                              submit(context);
+                              submit(context, user.uid);
                             },
                             text: widget.phone.id == null
                                 ? 'Add Phone'

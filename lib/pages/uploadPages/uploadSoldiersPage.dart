@@ -7,6 +7,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -18,9 +19,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadSoldierPage extends StatefulWidget {
   const UploadSoldierPage({
     Key key,
-    this.userId,
   }) : super(key: key);
-  final String userId;
 
   @override
   UploadSoldierPageState createState() => UploadSoldierPageState();
@@ -191,8 +190,8 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
         String saveSoldierId;
         String currentSoldierId =
             getCellValue(rows[1], columnHeaders, soldierId);
-        String owner = widget.userId;
-        List<dynamic> users = [widget.userId];
+        String owner = AuthProvider.of(context).auth.currentUser().uid;
+        List<dynamic> users = [owner];
         if (soldierIds.contains(currentSoldierId)) {
           var soldier =
               soldiers.firstWhere((element) => element.id == currentSoldierId);

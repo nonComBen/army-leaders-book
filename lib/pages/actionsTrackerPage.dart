@@ -113,13 +113,8 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadActionsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadActionsPage()));
       // Widget title = const Text('Upload Actions Tracker');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -323,9 +318,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditActionsTrackerPage(
-                  userId: widget.userId,
                   action: ActionObj.fromSnapshot(_selectedDocuments[0]),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -334,12 +327,10 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditActionsTrackerPage(
-                  userId: widget.userId,
                   action: ActionObj(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

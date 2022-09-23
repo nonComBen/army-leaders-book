@@ -19,11 +19,7 @@ import '../../widgets/formatted_elevated_button.dart';
 class UploadAppointmentsPage extends StatefulWidget {
   const UploadAppointmentsPage({
     Key key,
-    this.userId,
-    this.isSubscribed,
   }) : super(key: key);
-  final String userId;
-  final bool isSubscribed;
 
   @override
   UploadAppointmentsPageState createState() => UploadAppointmentsPageState();

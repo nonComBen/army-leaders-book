@@ -29,8 +29,7 @@ import '../widgets/formatted_text_button.dart';
 import '../widgets/alert_tile.dart';
 
 class AlertRosterPage extends StatefulWidget {
-  const AlertRosterPage({Key key, @required this.userId}) : super(key: key);
-  final String userId;
+  const AlertRosterPage({Key key}) : super(key: key);
 
   static const routeName = '/alert-roster-page';
 
@@ -44,6 +43,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   FirebaseFirestore firestore;
   SharedPreferences prefs;
   bool isSubscribed;
+  String _userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
   final GlobalKey _globalKey = GlobalKey();
@@ -727,11 +727,10 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   }
 
   Future<bool> onWillPop() {
-    AlertSoldiers alertSoldiers =
-        AlertSoldiers(widget.userId, widget.userId, _soldiers);
+    AlertSoldiers alertSoldiers = AlertSoldiers(_userId, _userId, _soldiers);
     firestore
         .collection('alertSoldiers')
-        .doc(widget.userId)
+        .doc(_userId)
         .set(alertSoldiers.toMap());
     return Future.value(true);
   }
@@ -739,7 +738,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
     print('Provider Subscribed State: $isSubscribed');
   }
@@ -759,8 +758,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
     DocumentSnapshot snapshot;
     AlertSoldiers alertSoldiers;
     try {
-      snapshot =
-          await firestore.collection('alertSoldiers').doc(widget.userId).get();
+      snapshot = await firestore.collection('alertSoldiers').doc(_userId).get();
       alertSoldiers = AlertSoldiers.fromSnapshot(snapshot);
     } catch (e) {
       print('Error: $e');

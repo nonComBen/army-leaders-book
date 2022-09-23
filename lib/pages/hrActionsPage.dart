@@ -112,13 +112,8 @@ class HrActionsPageState extends State<HrActionsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UploadHrActionsPage(
-                    userId: widget.userId,
-                    isSubscribed: isSubscribed,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadHrActionsPage()));
       // Widget title = const Text('Upload HR Metrics');
       // Widget content = SingleChildScrollView(
       //   child: Container(
@@ -322,9 +317,7 @@ class HrActionsPageState extends State<HrActionsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditHrActionPage(
-                  userId: widget.userId,
                   hrAction: HrAction.fromSnapshot(_selectedDocuments.first),
-                  isSubscribed: isSubscribed,
                 )));
   }
 
@@ -333,12 +326,10 @@ class HrActionsPageState extends State<HrActionsPage> {
         context,
         MaterialPageRoute(
             builder: (context) => EditHrActionPage(
-                  userId: widget.userId,
                   hrAction: HrAction(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
-                  isSubscribed: isSubscribed,
                 )));
   }
 

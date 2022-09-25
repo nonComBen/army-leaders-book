@@ -3,7 +3,7 @@ import {ProductData, productDataMap} from "./products";
 import * as appleReceiptVerify from "node-apple-receipt-verify";
 import {APP_STORE_SHARED_SECRET} from "./constants";
 import {IapRepository} from "./iap.repository";
-import {firestore} from "firebase-admin/lib/firestore";
+import {firestore} from "firebase-admin";
 import * as functions from "firebase-functions";
 import Timestamp = firestore.Timestamp;
 import {groupBy} from "lodash";

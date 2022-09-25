@@ -118,7 +118,7 @@ class ApftPageState extends State<ApftPage> {
 
     var androidSpecifics =
         const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const IOSNotificationDetails(
+    var iosSpecifics = const DarwinNotificationDetails(
         presentAlert: true, presentSound: false, presentBadge: false);
     notificationDetails =
         NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);

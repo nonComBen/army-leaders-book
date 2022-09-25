@@ -266,14 +266,16 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       notificationsInitialized = true;
       var initializationSettingsAndroid =
           const AndroidInitializationSettings('app_icon');
-      var initializationSettingsIos = IOSInitializationSettings(
+      var initializationSettingsIos = DarwinInitializationSettings(
           onDidReceiveLocalNotification: onDidReceiveNotification);
       var initializationSettings = InitializationSettings(
           android: initializationSettingsAndroid,
           iOS: initializationSettingsIos);
 
       await notificationsPlugin.initialize(initializationSettings,
-          onSelectNotification: onSelectNotification);
+          onDidReceiveBackgroundNotificationResponse: (response) =>
+              onSelectNotification,
+          onDidReceiveNotificationResponse: (response) => onSelectNotification);
     }
   }
 
@@ -1077,12 +1079,6 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   .isSubscribed) {
             Provider.of<SubscriptionState>(context, listen: false).subscribe();
           }
-          // if (!isSubscribed &&
-          //     Provider.of<SubscriptionState>(context, listen: false)
-          //         .isSubscribed) {
-          //   Provider.of<SubscriptionState>(context, listen: false)
-          //       .unSubscribe();
-          // }
           sp = context.read<SubscriptionPurchases>();
           print('IAP State: $isSubscribed');
           return Scaffold(

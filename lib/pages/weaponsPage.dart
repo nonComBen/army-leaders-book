@@ -116,7 +116,7 @@ class WeaponsPageState extends State<WeaponsPage> {
 
     var androidSpecifics =
         const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const IOSNotificationDetails(
+    var iosSpecifics = const DarwinNotificationDetails(
         presentAlert: true, presentSound: false, presentBadge: false);
     notificationDetails =
         NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
@@ -236,35 +236,6 @@ class WeaponsPageState extends State<WeaponsPage> {
     if (isSubscribed) {
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const UploadWeaponsPage()));
-      // Widget title = const Text('Upload Weapon Stats');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Weapon Stats, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
-      //       'Date also needs to be in yyyy-MM-dd or M/d/yy format, qualification type will default to Day if the event does not match an '
-      //       'option in the dropdown menu (case sensitive), and use true/false or yes/no for Pass value.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadWeaponsPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),

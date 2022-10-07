@@ -233,12 +233,14 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     print('Provider State Subscribed: $isSubscribed');
 
     final notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
+        Provider.of<NotificationsPluginProvider>(context, listen: false)
+            .notificationsPlugin;
     if (_adLoaded && isSubscribed) {
       removeAds();
     }
     if (!kIsWeb && !_adLoaded && !isSubscribed) {
-      final trackingProvider = Provider.of<TrackingProvider>(context);
+      final trackingProvider =
+          Provider.of<TrackingProvider>(context, listen: false);
       bool trackingAllowed = trackingProvider.trackingAllowed;
       if (trackingAllowed) {
         trackingAllowed = await trackingProvider.getTrackingFromPermission();
@@ -284,10 +286,6 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.initState();
 
     WidgetsBinding.instance.addObserver(this);
-
-    // if (premiumIds.contains(_userObj.userId)) {
-    //   subscribedAdFree = true;
-    // }
 
     _requireUnlock = false;
   }

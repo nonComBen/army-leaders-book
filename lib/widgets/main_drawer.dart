@@ -44,6 +44,7 @@ import '../pages/workingEvalsPage.dart';
 import '../pages/phonePage.dart';
 import '../pages/notesPage.dart';
 import '../providers/user_provider.dart';
+import 'custom_drawer_header.dart';
 
 class MainDrawer extends StatelessWidget {
   final VoidCallback subscribe;
@@ -56,46 +57,6 @@ class MainDrawer extends StatelessWidget {
     this.signOutWarning,
     this.signOut,
   }) : super(key: key);
-
-  Widget drawerHeader(
-      BuildContext context, String name, String email, String userId) {
-    String initials = '';
-    name = name.trim();
-    if (!name.contains(' ')) {
-      if (name.length > 2) {
-        initials = name.substring(0, 1);
-      } else {
-        initials = name;
-      }
-    } else {
-      int space = name.indexOf(' ') + 1;
-      initials = name.substring(0, 1) + name.substring(space, space + 1);
-    }
-    return UserAccountsDrawerHeader(
-      // decoration: BoxDecoration(
-      //   color: Theme.of(context).colorScheme.primary,
-      // ),
-      accountName: Text(
-        name,
-      ),
-      accountEmail: Text(
-        email,
-      ),
-      currentAccountPicture: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        child: Text(initials),
-      ),
-      onDetailsPressed: () {
-        Navigator.pop(context);
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => EditUserPage(
-                      userId: userId,
-                    )));
-      },
-    );
-  }
 
   void subscriptionMessage(BuildContext context) {
     DateFormat dateFormat = DateFormat('yyyy-MM-dd');
@@ -121,17 +82,12 @@ class MainDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
     final isAnonymous = AuthProvider.of(context).auth.currentUser().isAnonymous;
-    final subscribedAdFree =
+    final isSubscribedAdFree =
         Provider.of<SubscriptionState>(context).isSubscribed;
     return Drawer(
       child: ListView(
         children: <Widget>[
-          drawerHeader(
-            context,
-            user.userName != '' ? user.userName : 'Display Name',
-            user.userEmail,
-            user.userId,
-          ),
+          const CustomDrawerHeader(),
           ListTile(
             title: const Text('Soldiers'),
             leading: const Icon(Icons.people),
@@ -458,11 +414,11 @@ class MainDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            title: const Text('Premium'),
+            title: const Text('Subscribe to Premium'),
             leading: const Icon(Icons.subscriptions),
             onTap: () {
               Navigator.pop(context);
-              if (!subscribedAdFree) {
+              if (!isSubscribedAdFree) {
                 subscriptionMessage(context);
               } else {
                 showSnackbar(context, 'You are already subscribed to Premium.');

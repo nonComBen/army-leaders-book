@@ -50,11 +50,11 @@ class UserObj {
   }
 
   factory UserObj.fromSnapshot(DocumentSnapshot doc) {
-    Timestamp timestamp = Timestamp.fromDate(DateTime.now()),
-        created = Timestamp.fromDate(DateTime.now()),
-        lastLogin = Timestamp.fromDate(DateTime.now());
+    Timestamp agreeTimestamp = Timestamp.fromDate(DateTime.now()),
+        createdTimestamp = Timestamp.fromDate(DateTime.now()),
+        lastLoginTimestamp = Timestamp.fromDate(DateTime.now());
     String rank = '', userName = '', userUnit = '';
-    bool updatedArray = false;
+    bool isUserArrayUpdated = false;
 
     try {
       rank = doc['rank'];
@@ -65,20 +65,21 @@ class UserObj {
     }
 
     try {
-      timestamp = doc['agreeDate'];
+      agreeTimestamp = doc['agreeDate'] ?? Timestamp.fromDate(DateTime.now());
     } on Exception catch (e) {
       print('Error: $e');
     }
 
     try {
-      updatedArray = doc['updatedUsersArray'];
+      isUserArrayUpdated = doc['updatedUsersArray'];
     } catch (e) {
       print('Error: $e');
     }
 
     try {
-      created = doc['created'];
-      lastLogin = doc['lastLogin'];
+      createdTimestamp = doc['created'] ?? Timestamp.fromDate(DateTime.now());
+      lastLoginTimestamp =
+          doc['lastLogin'] ?? Timestamp.fromDate(DateTime.now());
     } catch (e) {
       print('Error: $e');
     }
@@ -92,10 +93,10 @@ class UserObj {
       subToken: doc['subToken'],
       adFree: doc['adFree'],
       tosAgree: doc['tosAgree'],
-      agreeDate: timestamp.toDate(),
-      updatedUserArray: updatedArray,
-      createdDate: created.toDate(),
-      lastLoginDate: lastLogin.toDate(),
+      agreeDate: agreeTimestamp.toDate(),
+      updatedUserArray: isUserArrayUpdated,
+      createdDate: createdTimestamp.toDate(),
+      lastLoginDate: lastLoginTimestamp.toDate(),
     );
   }
 }

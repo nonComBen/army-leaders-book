@@ -24,6 +24,18 @@ class IAPRepo extends ChangeNotifier {
   bool get isLoggedIn => _user != null;
   UserObj get user => _userObj;
 
+  final premiumIds = [
+    "N5EIa03V7rSma0LDlko6YzGXuXF3", //bhultquist84
+    'WtI8grypTbTd0657WmEjgtGophO2', //armynoncomtools
+    'i0dn21YEgsfaoQyegu4Aa4AnQn82', //CW2 Lents
+    'nqjvb229UIe8JobyXd8Cmddq93t1', //SPC Browne
+    'N4qAFiFApucAkM9ouvXjGmgjJoG3', //Andrew Beals
+    '8p1IsNvzBfd8SaEnoDSMV6IzRKj2', //1SG Hardel
+    '0v4SkNMrtpPrs25hEtMU6uwwYUK2', //Vic Harper
+    'ozdVTlpNrraI16I76XjIWePZnX32', //Lascelles May
+    'dZnvpPh22EYNgIgCkhzZiVV2VPc2', //Tyler Siegfried
+  ];
+
   void listenToLogin() {
     _userSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
       _user = user;
@@ -50,7 +62,8 @@ class IAPRepo extends ChangeNotifier {
         .get();
 
     _userObj = UserObj.fromSnapshot(userSnapshot.docs.first);
-    bool isSubscribed = userSnapshot.docs.first['adFree'] ?? false;
+    bool isSubscribed = userSnapshot.docs.first['adFree'] ??
+        false || premiumIds.contains(_user.uid);
 
     for (DocumentSnapshot doc in snapshot.docs) {
       Timestamp expiry = doc['expiryDate'];

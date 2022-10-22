@@ -102,18 +102,6 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   RootProvider _rootProvider;
   UserObj _userObj;
 
-  final premiumIds = [
-    "N5EIa03V7rSma0LDlko6YzGXuXF3", //bhultquist84
-    'WtI8grypTbTd0657WmEjgtGophO2', //armynoncomtools
-    'i0dn21YEgsfaoQyegu4Aa4AnQn82', //CW2 Lents
-    'nqjvb229UIe8JobyXd8Cmddq93t1', //SPC Browne
-    'N4qAFiFApucAkM9ouvXjGmgjJoG3', //Andrew Beals
-    '8p1IsNvzBfd8SaEnoDSMV6IzRKj2', //1SG Hardel
-    '0v4SkNMrtpPrs25hEtMU6uwwYUK2', //Vic Harper
-    'ozdVTlpNrraI16I76XjIWePZnX32', //Lascelles May
-    'dZnvpPh22EYNgIgCkhzZiVV2VPc2', //Tyler Siegfried
-  ];
-
   final _scaffoldState = GlobalKey<ScaffoldState>();
 
   void signOut(BuildContext context) {
@@ -1069,15 +1057,6 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
           )
         ],
         builder: (context, child) {
-          final repo = context.watch<IAPRepo>();
-          isSubscribed =
-              repo.hasActiveSubscription || premiumIds.contains(user.uid);
-
-          if (isSubscribed &&
-              !Provider.of<SubscriptionState>(context, listen: false)
-                  .isSubscribed) {
-            Provider.of<SubscriptionState>(context, listen: false).subscribe();
-          }
           sp = context.read<SubscriptionPurchases>();
           print('IAP State: $isSubscribed');
           return Scaffold(

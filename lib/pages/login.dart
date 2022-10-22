@@ -52,9 +52,8 @@ class LoginPageState extends State<LoginPage> {
 
     if (user.metadata.creationTime
         .isBefore(DateTime.now().subtract(const Duration(minutes: 1)))) {
-      FirebaseFirestore.instance
-          .doc('users/${user.uid}')
-          .update({'lastLogin': DateTime.now()});
+      FirebaseFirestore.instance.doc('users/${user.uid}').update(
+          {'lastLogin': DateTime.now(), 'created': user.metadata.creationTime});
 
       return;
     }

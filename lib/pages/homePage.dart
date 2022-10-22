@@ -176,7 +176,8 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  Future onSelectNotification(String payload) async {
+  @pragma('vm:entry-point')
+  Future onSelectNotification(BuildContext context, String payload) async {
     if (payload == 'ACFT') {
       await Navigator.push(
           context, MaterialPageRoute(builder: (context) => const AcftPage()));

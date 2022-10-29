@@ -30,7 +30,7 @@ export class AppStorePurchaseHandler extends PurchaseHandler {
       secret: APP_STORE_SHARED_SECRET,
       extended: true,
       excludeOldTransactions: true,
-      environment: ["production", "sandbox"],
+      environment: ["production"],
     });
   }
 

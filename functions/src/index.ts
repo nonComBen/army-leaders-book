@@ -37,18 +37,6 @@ export const verifyPurchase = functions.https.onCall(
         data: VerifyPurchaseParams,
         context,
     ): Promise<boolean> => {
-      const premiumIds = [
-        "N5EIa03V7rSma0LDlko6YzGXuXF3", // bhultuist84
-        "WtI8grypTbTd0657WmEjgtGophO2", // armynoncomtools
-        "i0dn21YEgsfaoQyegu4Aa4AnQn82", // CW2 Lents
-        "nqjvb229UIe8JobyXd8Cmddq93t1", // SPC Browne
-        "N4qAFiFApucAkM9ouvXjGmgjJoG3", // Andrew Beals
-        "8p1IsNvzBfd8SaEnoDSMV6IzRKj2", // 1SG Hardel
-        "0v4SkNMrtpPrs25hEtMU6uwwYUK2", // Vic Harper
-        "ozdVTlpNrraI16I76XjIWePZnX32", // Lascelles May
-        "l8PsXklsIXbrFLqNDcqmp26BWi22", // test
-        "dZnvpPh22EYNgIgCkhzZiVV2VPc2", // Tyler Siegfried
-      ];
       // Check authentication
       if (!context.auth) {
         console.warn("verifyPurchase called when not authenticated");
@@ -56,11 +44,6 @@ export const verifyPurchase = functions.https.onCall(
             "unauthenticated",
             "Request was not authenticated.",
         );
-      }
-      // Premium IDs
-      if (premiumIds.includes(context.auth.uid)) {
-        console.warn(`Premium ID: ${context.auth.uid}`);
-        return true;
       }
       // App Check
       // if (context.app == undefined) {

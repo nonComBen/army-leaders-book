@@ -167,8 +167,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @pragma('vm:entry-point')
   Future onSelectNotification(BuildContext context, String payload) async {
     if (payload == 'ACFT') {
-      await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const AcftPage()));
+      await Navigator.of(context).pushNamed(AcftPage.routeName);
     } else if (payload == 'APFT') {
       await Navigator.push(
           context, MaterialPageRoute(builder: (context) => const ApftPage()));
@@ -213,11 +212,13 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
+
     _userObj = Provider.of<UserProvider>(context).user;
     if (isInitial && _userObj != null) {
       isInitial = false;
       init();
     }
+
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
     print('Provider State Subscribed: $isSubscribed');
 
@@ -635,10 +636,8 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       },
                     ),
                     button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const AcftPage())),
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed(AcftPage.routeName),
                       child: const Text('Go to ACFT'),
                     ),
                   );

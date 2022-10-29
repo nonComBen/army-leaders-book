@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/pages/acftPage.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -171,7 +172,8 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
                       PrivacyPolicyPage.routeName: (BuildContext context) =>
                           const PrivacyPolicyPage(),
                       TosPage.routeName: (BuildContext context) =>
-                          const TosPage()
+                          const TosPage(),
+                      AcftPage.routeName: (context) => const AcftPage(),
                     },
                     home: const RootPage(),
                   ),

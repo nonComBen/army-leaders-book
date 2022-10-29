@@ -17,7 +17,9 @@ void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     IAPConnection.instance = TestIAPConnection();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(MyApp(
+      prefs: null,
+    ));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

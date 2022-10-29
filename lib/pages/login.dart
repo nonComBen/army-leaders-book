@@ -59,7 +59,7 @@ class LoginPageState extends State<LoginPage> {
     }
     final userObj = UserObj(
       userId: user.uid,
-      userEmail: user.email,
+      userEmail: user.email ?? 'anonymous@email.com',
       userName: user.displayName ?? '',
       updatedUserArray: true,
       agreeDate: DateTime.now(),

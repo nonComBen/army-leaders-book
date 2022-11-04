@@ -498,7 +498,7 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
                             ],
                           ),
                           secondaryTextFields(width),
-                          if (secondaryExpanded)
+                          if (!secondaryExpanded)
                             ElevatedButton(
                                 style: ButtonStyle(
                                   backgroundColor:

@@ -43,7 +43,6 @@ import '../pages/workingAwardsPage.dart';
 import '../pages/workingEvalsPage.dart';
 import '../pages/phonePage.dart';
 import '../pages/notesPage.dart';
-import '../providers/user_provider.dart';
 import 'custom_drawer_header.dart';
 
 class MainDrawer extends StatelessWidget {
@@ -80,8 +79,7 @@ class MainDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context).user;
-    final isAnonymous = AuthProvider.of(context).auth.currentUser().isAnonymous;
+    final user = AuthProvider.of(context).auth.currentUser();
     final isSubscribedAdFree =
         Provider.of<SubscriptionState>(context).isSubscribed;
     return Drawer(
@@ -97,7 +95,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => SoldiersPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -110,7 +108,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => PerstatPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -123,7 +121,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => AptsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -154,7 +152,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => TempProfilesPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -167,7 +165,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => PermProfilesPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -198,7 +196,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => FlagsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -211,7 +209,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => RatingsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -233,7 +231,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => TrainingPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -246,7 +244,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => EquipmentPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -259,7 +257,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => HandReceiptPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -272,7 +270,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => MilLicPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -285,7 +283,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => DutyRosterPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -298,7 +296,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => TaskingsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -311,7 +309,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => HrActionsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -324,7 +322,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => CounselingsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -337,7 +335,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => WorkingAwardsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -350,7 +348,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => WorkingEvalsPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -363,7 +361,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => ActionsTrackerPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -376,7 +374,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => PhonePage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -389,7 +387,7 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => NotesPage(
-                            userId: user.userId,
+                            userId: user.uid,
                           )));
             },
           ),
@@ -485,13 +483,13 @@ class MainDrawer extends StatelessWidget {
             title: const Text('Edit Profile'),
             leading: const Icon(Icons.person),
             onTap: () {
-              if (!isAnonymous) {
+              if (!user.isAnonymous) {
                 Navigator.pop(context);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => EditUserPage(
-                              userId: user.userId,
+                              userId: user.uid,
                             )));
               } else {
                 Navigator.pop(context);
@@ -506,7 +504,7 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.directions_walk),
             onTap: () {
               Navigator.pop(context);
-              if (isAnonymous) {
+              if (user.isAnonymous) {
                 signOutWarning();
               } else {
                 signOut();

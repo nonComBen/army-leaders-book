@@ -198,9 +198,7 @@ class LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.all(16.0),
           constraints: const BoxConstraints(maxWidth: 900.0),
           child: isLoggingIn
-              ? const Center(
-                  child: CenterProgressIndicator(),
-                )
+              ? const CenterProgressIndicator()
               : Form(
                   key: formKey,
                   autovalidateMode: AutovalidateMode.always,
@@ -456,7 +454,7 @@ class LoginPageState extends State<LoginPage> {
             style: TextStyle(fontSize: 18.0),
             textAlign: TextAlign.center,
           ),
-        )
+        ),
       ];
     } else if (_formType == FormType.forgotPassword) {
       return [

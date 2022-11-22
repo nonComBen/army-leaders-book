@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
+import 'package:leaders_book/pages/privacyPolicyPage.dart';
+import 'package:leaders_book/pages/tosPage.dart';
 import 'package:provider/provider.dart';
 
 import '../methods/home_page_methods.dart';
@@ -449,7 +451,7 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.email),
             onTap: () {
               Navigator.pop(context);
-              launchURL('mailto:armynoncomtools@gmail.com');
+              launchURL('armynoncomtools@gmail.com');
             },
           ),
           ListTile(
@@ -457,7 +459,7 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.info),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/privacy-policy');
+              Navigator.pushNamed(context, PrivacyPolicyPage.routeName);
             },
           ),
           ListTile(
@@ -465,7 +467,7 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.info),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/terms-of-service');
+              Navigator.pushNamed(context, TosPage.routeName);
             },
           ),
           ListTile(

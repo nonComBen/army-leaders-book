@@ -2,10 +2,28 @@
 
 import 'package:url_launcher/url_launcher.dart';
 
+String encodeQueryParameters(Map<String, String> params) {
+  return params.entries
+      .map((MapEntry<String, String> e) =>
+          '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+      .join('&');
+}
+
 void launchURL(String url) async {
-  if (await canLaunchUrl(Uri.parse(url))) {
-    await launchUrl(Uri.parse(url));
+  final uri = Uri(
+    scheme: 'mailto',
+    path: url,
+    query: encodeQueryParameters(<String, String>{
+      'subject': 'Leader\'s Book Issue/Suggestion',
+    }),
+  );
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri);
   } else {
-    throw 'Could not launch $url';
+    try {
+      await launchUrl(uri);
+    } catch (e) {
+      throw 'Unable to launch url: $url due to exception: $e';
+    }
   }
 }

@@ -34,17 +34,15 @@ Future<bool> checkPermission(
   }
   var status = await permission.status;
   print(status.toString());
-  if (status.isDenied) {
+  if (!status.isGranted) {
     var requestStatus = await permission.request();
     if (requestStatus.isGranted) {
       return true;
     } else {
       return false;
     }
-  } else if (status.isGranted || status.isLimited) {
-    return true;
   } else {
-    return false;
+    return true;
   }
 }
 

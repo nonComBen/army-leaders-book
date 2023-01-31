@@ -6,7 +6,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_file_safe/open_file_safe.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +47,6 @@ class SoldiersPageState extends State<SoldiersPage> {
   final List<Soldier> _selectedSoldiers = [];
   List<Soldier> soldiers = [];
   List<Soldier> filteredSoldiers = [];
-  //StreamSubscription _subscription;
   BannerAd myBanner;
   String _filter = 'All';
   SoldiersProvider _soldiersProvider;
@@ -324,7 +323,6 @@ class SoldiersPageState extends State<SoldiersPage> {
   void _downloadPdf() async {
     if (isSubscribed) {
       if (_selectedSoldiers.isEmpty) {
-        //show snack bar requiring at least one item selected
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('You must select at least one record')));
         return;
@@ -535,34 +533,34 @@ class SoldiersPageState extends State<SoldiersPage> {
   }
 
   List<DataCell> getCells(Soldier soldier, double width) {
-    bool owner = soldier.owner == widget.userId;
+    bool isOwner = soldier.owner == widget.userId;
     TextStyle sharedTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
     List<DataCell> cellList = [
       DataCell(Text(soldier.rank,
-          style: !owner ? sharedTextStyle : const TextStyle())),
+          style: !isOwner ? sharedTextStyle : const TextStyle())),
       DataCell(Text('${soldier.lastName}, ${soldier.firstName}',
-          style: !owner ? sharedTextStyle : const TextStyle())),
+          style: !isOwner ? sharedTextStyle : const TextStyle())),
     ];
     if (width > 415) {
       cellList.add(DataCell(Text(soldier.section,
-          style: !owner ? sharedTextStyle : const TextStyle())));
+          style: !isOwner ? sharedTextStyle : const TextStyle())));
     }
     if (width > 525) {
       cellList.add(DataCell(Text(soldier.duty,
-          style: !owner ? sharedTextStyle : const TextStyle())));
+          style: !isOwner ? sharedTextStyle : const TextStyle())));
     }
     if (width > 695) {
       cellList.add(DataCell(Text(soldier.lossDate,
-          style: !owner ? sharedTextStyle : const TextStyle())));
+          style: !isOwner ? sharedTextStyle : const TextStyle())));
     }
     if (width > 820) {
       cellList.add(DataCell(Text(soldier.ets,
-          style: !owner ? sharedTextStyle : const TextStyle())));
+          style: !isOwner ? sharedTextStyle : const TextStyle())));
     }
     if (width > 980) {
       cellList.add(DataCell(Text(soldier.dor,
-          style: !owner ? sharedTextStyle : const TextStyle())));
+          style: !isOwner ? sharedTextStyle : const TextStyle())));
     }
     return cellList;
   }

@@ -45,7 +45,7 @@ class LoginPageState extends State<LoginPage> {
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  void createAccount(User user) async {
+  void createAccount(User user) {
     Provider.of<UserProvider>(context, listen: false).loadUser(user.uid);
     Provider.of<SoldiersProvider>(context, listen: false)
         .loadSoldiers(user.uid);

@@ -21,23 +21,24 @@ class Perstat {
   String calendarId;
   String location;
 
-  Perstat(
-      {this.id,
-      this.soldierId,
-      @required this.owner,
-      @required this.users,
-      this.rank = '',
-      this.name = '',
-      this.firstName = '',
-      this.section = '',
-      this.rankSort = '',
-      this.start = '',
-      this.end = '',
-      this.type = 'Leave',
-      this.comments = '',
-      this.eventId,
-      this.calendarId,
-      this.location = ''});
+  Perstat({
+    this.id,
+    this.soldierId,
+    @required this.owner,
+    @required this.users,
+    this.rank = '',
+    this.name = '',
+    this.firstName = '',
+    this.section = '',
+    this.rankSort = '',
+    this.start = '',
+    this.end = '',
+    this.type = 'Leave',
+    this.comments = '',
+    this.eventId,
+    this.calendarId,
+    this.location = '',
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -55,7 +56,7 @@ class Perstat {
     map['comments'] = comments;
     map['eventId'] = eventId;
     map['calendarId'] = null;
-    map['location'] = null;
+    map['location'] = location;
 
     return map;
   }
@@ -74,21 +75,22 @@ class Perstat {
       print('Error: $e');
     }
     return Perstat(
-        id: doc.id,
-        soldierId: doc['soldierId'],
-        owner: doc['owner'],
-        users: users,
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        start: doc['start'],
-        end: doc['end'],
-        type: doc['type'],
-        comments: doc['comments'],
-        eventId: null,
-        calendarId: null,
-        location: location);
+      id: doc.id,
+      soldierId: doc['soldierId'],
+      owner: doc['owner'],
+      users: users,
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      start: doc['start'],
+      end: doc['end'],
+      type: doc['type'],
+      comments: doc['comments'],
+      eventId: null,
+      calendarId: null,
+      location: location,
+    );
   }
 }

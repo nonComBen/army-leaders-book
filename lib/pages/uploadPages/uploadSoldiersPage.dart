@@ -92,12 +92,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
 
   _readExcel(Sheet sheet) {
     rows = sheet.rows;
-    columnHeaders = [''];
-    for (var cell in rows.first) {
-      if (cell.value != '') {
-        columnHeaders.add(cell.value);
-      }
-    }
+    columnHeaders = getColumnHeaders(rows.first);
     soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
     rank = columnHeaders.contains('Rank') ? 'Rank' : '';
     lastName = columnHeaders.contains('Last Name') ? 'Last Name' : '';
@@ -207,16 +202,20 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
         String saveAssigned = getCellValue(rows[i], columnHeaders, assigned);
         String saveSection = getCellValue(rows[i], columnHeaders, section);
         String saveDodId = getCellValue(rows[i], columnHeaders, dodId);
-        String saveDor = getCellValue(rows[i], columnHeaders, dor);
+        String saveDor = convertDate(getCellValue(rows[i], columnHeaders, dor));
         String saveMos = getCellValue(rows[i], columnHeaders, mos);
         String saveDuty = getCellValue(rows[i], columnHeaders, duty);
         String saveParaLn = getCellValue(rows[i], columnHeaders, paraLn);
         String saveReqMos = getCellValue(rows[i], columnHeaders, reqMos);
-        String saveLoss = getCellValue(rows[i], columnHeaders, loss);
-        String saveEts = getCellValue(rows[i], columnHeaders, ets);
-        String saveBasd = getCellValue(rows[i], columnHeaders, basd);
-        String savePebd = getCellValue(rows[i], columnHeaders, pebd);
-        String saveGain = getCellValue(rows[i], columnHeaders, gain);
+        String saveLoss =
+            convertDate(getCellValue(rows[i], columnHeaders, loss));
+        String saveEts = convertDate(getCellValue(rows[i], columnHeaders, ets));
+        String saveBasd =
+            convertDate(getCellValue(rows[i], columnHeaders, basd));
+        String savePebd =
+            convertDate(getCellValue(rows[i], columnHeaders, pebd));
+        String saveGain =
+            convertDate(getCellValue(rows[i], columnHeaders, gain));
         String saveAddress = getCellValue(rows[i], columnHeaders, address);
         String saveCity = getCellValue(rows[i], columnHeaders, city);
         String saveState = getCellValue(rows[i], columnHeaders, state);

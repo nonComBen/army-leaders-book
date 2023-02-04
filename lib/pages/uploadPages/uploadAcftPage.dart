@@ -73,12 +73,7 @@ class UploadAcftPageState extends State<UploadAcftPage> {
     if (mounted) {
       setState(() {
         rows = sheet.rows;
-        columnHeaders = [''];
-        for (var cell in rows.first) {
-          if (cell.value != '') {
-            columnHeaders.add(cell.value);
-          }
-        }
+        columnHeaders = getColumnHeaders(rows.first);
         soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
         date = columnHeaders.contains('Date') ? 'Date' : '';
         ageGroup = columnHeaders.contains('Age Group') ? 'Age Group' : '';

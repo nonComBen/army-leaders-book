@@ -55,12 +55,7 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       title = columnHeaders.contains('Title') ? 'Title' : '';
       date = columnHeaders.contains('Date') ? 'Date' : '';

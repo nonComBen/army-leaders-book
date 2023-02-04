@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class SubscriptionState extends ChangeNotifier {
   SubscriptionState();
-  bool _isSubscribed = false;
+  bool _isSubscribed = true;
 
   void subscribe() {
     _isSubscribed = true;

@@ -1,7 +1,6 @@
 // ignore_for_file: file_names, avoid_print
 
 import 'package:excel/excel.dart';
-import 'package:intl/intl.dart';
 
 import '../methods/validate.dart';
 
@@ -14,11 +13,10 @@ String convertDate(String date) {
   }
 
   String formattedDate = '';
-  DateFormat dateFormat = DateFormat('yy-MM-dd');
+  // DateFormat dateFormat = DateFormat('yy-MM-dd');
 
   try {
-    DateTime dateTime = DateFormat.yMd().parse(date);
-    formattedDate = '20${dateFormat.format(dateTime)}';
+    formattedDate = date.substring(0, 10);
   } catch (e) {
     print('DateTime Parse Error: $e');
   }
@@ -51,4 +49,14 @@ String getCellValue(List<Data> row, List<String> headers, String header) {
   } else {
     return row[headers.indexOf(header) - 1].value.toString();
   }
+}
+
+List<String> getColumnHeaders(List<Data> row) {
+  List<String> columnHeaders = [''];
+  for (var cell in row) {
+    if (cell.value.toString() != '') {
+      columnHeaders.add(cell.value.toString());
+    }
+  }
+  return columnHeaders;
 }

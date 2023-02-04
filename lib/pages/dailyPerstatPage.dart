@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/auth_provider.dart';
-import 'package:open_file_safe/open_file_safe.dart';
+import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -85,18 +85,20 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
         file.writeAsBytesSync(pngBytes.buffer.asUint8List());
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('PERSTAT By Name Downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open('$path/PERSTAT.png');
-                    },
-                  )
-                : null,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('PERSTAT By Name Downloaded to $location'),
+              duration: const Duration(seconds: 5),
+              action: Platform.isAndroid
+                  ? SnackBarAction(
+                      label: 'Open',
+                      onPressed: () {
+                        OpenFile.open('$path/PERSTAT.png');
+                      },
+                    )
+                  : null,
+            ),
+          );
         }
       }
     } catch (e) {

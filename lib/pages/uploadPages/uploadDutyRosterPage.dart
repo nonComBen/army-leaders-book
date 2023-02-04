@@ -54,12 +54,7 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       start = columnHeaders.contains('Start Date') ? 'Start Date' : '';
       end = columnHeaders.contains('End Date') ? 'End Date' : '';

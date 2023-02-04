@@ -56,12 +56,7 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       date = columnHeaders.contains('Date') ? 'Date' : '';
       exp = columnHeaders.contains('Expiration Date') ? 'Expiration Date' : '';

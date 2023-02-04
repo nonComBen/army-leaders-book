@@ -52,12 +52,7 @@ class UploadPhonePageState extends State<UploadPhonePage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       title = columnHeaders.contains('Title') ? 'Title' : '';
       poc = columnHeaders.contains('POC') ? 'POC' : '';
       phone = columnHeaders.contains('Phone Number') ? 'Phone Number' : '';

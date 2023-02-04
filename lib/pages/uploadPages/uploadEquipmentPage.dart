@@ -70,12 +70,7 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       weapon = columnHeaders.contains('Weapon') ? 'Weapon' : '';
       buttStock = columnHeaders.contains('Butt Stock') ? 'Butt Stock' : '';

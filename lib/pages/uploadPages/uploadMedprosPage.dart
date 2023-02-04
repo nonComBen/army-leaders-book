@@ -74,12 +74,7 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       pha = columnHeaders.contains('PHA Date') ? 'PHA Date' : '';
       dental = columnHeaders.contains('Dental Date') ? 'Dental Date' : '';

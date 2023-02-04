@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:open_file_safe/open_file_safe.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -340,18 +340,20 @@ class ApftPageState extends State<ApftPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Data successfully downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open('$dir/apftStats.xlsx');
-                    },
-                  )
-                : null,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Data successfully downloaded to $location'),
+              duration: const Duration(seconds: 5),
+              action: Platform.isAndroid
+                  ? SnackBarAction(
+                      label: 'Open',
+                      onPressed: () {
+                        OpenFile.open('$dir/apftStats.xlsx');
+                      },
+                    )
+                  : null,
+            ),
+          );
         }
       } catch (e) {
         print('Error: $e');

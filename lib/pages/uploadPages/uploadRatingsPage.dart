@@ -54,12 +54,7 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       rater = columnHeaders.contains('Rater') ? 'Rater' : '';
       sr = columnHeaders.contains('Senior Rater') ? 'Senior Rater' : '';

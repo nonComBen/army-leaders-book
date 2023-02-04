@@ -116,7 +116,7 @@ class SubscriptionPurchases extends ChangeNotifier {
         _updateStatus(element, ProductStatus.purchased);
       }
     } else {
-      subscriptionState.unSubscribe();
+      // subscriptionState.unSubscribe();
       for (final element in subscriptions) {
         _updateStatus(element, ProductStatus.purchasable);
       }

@@ -54,12 +54,7 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
   void _readExcel(Sheet sheet) {
     setState(() {
       rows = sheet.rows;
-      columnHeaders = [''];
-      for (var cell in rows.first) {
-        if (cell.value != '') {
-          columnHeaders.add(cell.value);
-        }
-      }
+      columnHeaders = getColumnHeaders(rows.first);
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       reason = columnHeaders.contains('Award Reason') ? 'Award Reason' : '';
       ach1 = columnHeaders.contains('Achievement 1') ? 'Achievement 1' : '';

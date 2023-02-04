@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:open_file_safe/open_file_safe.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -529,15 +529,18 @@ class AlertRosterPageState extends State<AlertRosterPage> {
       file.writeAsBytesSync(pngBytes.buffer.asUint8List());
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Alert Roster Downloaded to $location'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Alert Roster Downloaded to $location'),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
               label: 'Open',
               onPressed: () {
                 OpenFile.open(file.path);
-              }),
-        ));
+              },
+            ),
+          ),
+        );
       }
     } catch (e) {
       print('Error: $e');

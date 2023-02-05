@@ -147,7 +147,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
   }
 
   void _downloadExcel() async {
-    if (!await checkPermission(context, Permission.storage)) return;
+    if (!await checkPermission(Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',

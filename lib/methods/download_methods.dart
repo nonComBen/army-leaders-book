@@ -3,7 +3,6 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:permission_handler/permission_handler.dart';
@@ -27,8 +26,7 @@ Future<List<String>> getPath() async {
   return [newPath, location];
 }
 
-Future<bool> checkPermission(
-    BuildContext context, Permission permission) async {
+Future<bool> checkPermission(Permission permission) async {
   if (kIsWeb || Platform.isIOS) {
     return true;
   }

@@ -98,6 +98,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Setting setting;
   LocalAuthentication _localAuth;
   SubscriptionPurchases sp;
+  SubscriptionState subState;
   BannerAd myBanner;
   RootProvider _rootProvider;
   UserObj _userObj;
@@ -219,7 +220,8 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       init();
     }
 
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    isSubscribed =
+        Provider.of<SubscriptionState>(context, listen: false).isSubscribed;
     print('Provider State Subscribed: $isSubscribed');
 
     final notificationsPlugin =
@@ -1045,7 +1047,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return MultiProvider(
         providers: [
           ChangeNotifierProvider<IAPRepo>(
-            create: (context) => IAPRepo(user),
+            create: (context) => IAPRepo(context, user),
           ),
           ChangeNotifierProvider<SubscriptionPurchases>(
             create: (context) => SubscriptionPurchases(
@@ -1053,7 +1055,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               context.read<IAPRepo>(),
             ),
             lazy: false,
-          )
+          ),
         ],
         builder: (context, child) {
           sp = context.read<SubscriptionPurchases>();

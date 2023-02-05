@@ -152,7 +152,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(context, Permission.storage);
+    bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
@@ -272,7 +272,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(context, Permission.storage);
+    bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     HandReceiptPdf pdf = HandReceiptPdf(
       documents,

@@ -49,8 +49,9 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   final GlobalKey _globalKey = GlobalKey();
 
   void _textAll() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (Platform.isIOS) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      scaffoldMessenger.showSnackBar(const SnackBar(
           content: Text(
               'Unfortunately, mass texting all subordinates is not available on iOS at this time.')));
       return;
@@ -67,7 +68,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
     if (await canLaunchUrl(Uri.parse(recipients))) {
       await launchUrl(Uri.parse(recipients));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Failed to initiate text message')));
     }
   }
@@ -507,7 +508,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   // }
 
   void _shareRoster() async {
-    bool approved = await checkPermission(context, Permission.storage);
+    bool approved = await checkPermission(Permission.storage);
     if (!approved || !mounted) return;
     try {
       RenderRepaintBoundary boundary =
@@ -583,7 +584,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(context, Permission.storage);
+    bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     AlertRosterPdf pdf = AlertRosterPdf(
       _soldiers,

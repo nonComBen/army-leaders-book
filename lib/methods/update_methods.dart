@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 void updateUsersArray(String uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
-  List<String> users = [];
+  List<dynamic> users = [];
 
   db
       .collection('soldiers')
@@ -16,7 +16,7 @@ void updateUsersArray(String uid) async {
         try {
           users = doc['users'];
         } catch (e) {
-          print('Users does not exist');
+          print('Users does not exist: $e');
         }
         if (!users.contains(uid)) {
           users.add(uid);

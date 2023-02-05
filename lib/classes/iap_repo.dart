@@ -6,26 +6,29 @@ import 'package:flutter/cupertino.dart';
 import 'package:leaders_book/constants.dart';
 import 'package:leaders_book/models/past_purchase.dart';
 import 'package:leaders_book/models/user.dart';
+import 'package:leaders_book/providers/subscription_state.dart';
+import 'package:provider/provider.dart';
 
 class IAPRepo extends ChangeNotifier {
   User _user;
+  final BuildContext context;
+
+  IAPRepo(this.context, this._user) {
+    updatePurchases();
+    listenToLogin();
+  }
+
   UserObj _userObj;
   bool hasActiveSubscription = false;
   List<PastPurchase> purchases = [];
 
   StreamSubscription<User> _userSubscription;
-  StreamSubscription<QuerySnapshot> _purchaseSubscription;
-
-  IAPRepo(this._user) {
-    updatePurchases();
-    listenToLogin();
-  }
 
   bool get isLoggedIn => _user != null;
   UserObj get user => _userObj;
 
   final premiumIds = [
-    "N5EIa03V7rSma0LDlko6YzGXuXF3", //bhultquist84
+    // 'N5EIa03V7rSma0LDlko6YzGXuXF3', //bhultquist84
     'WtI8grypTbTd0657WmEjgtGophO2', //armynoncomtools
     'i0dn21YEgsfaoQyegu4Aa4AnQn82', //CW2 Lents
     'nqjvb229UIe8JobyXd8Cmddq93t1', //SPC Browne
@@ -49,9 +52,8 @@ class IAPRepo extends ChangeNotifier {
       hasActiveSubscription = false;
       return;
     }
-    _purchaseSubscription?.cancel();
-
-    final snapshot = await FirebaseFirestore.instance
+    final subState = Provider.of<SubscriptionState>(context, listen: false);
+    final purchaseSnapshot = await FirebaseFirestore.instance
         .collection('purchases')
         .where('userId', isEqualTo: _user.uid)
         .get();
@@ -62,19 +64,17 @@ class IAPRepo extends ChangeNotifier {
         .get();
 
     _userObj = UserObj.fromSnapshot(userSnapshot.docs.first);
-    bool isSubscribed = userSnapshot.docs.first['adFree'] ??
-        false || premiumIds.contains(_user.uid);
+    bool isSubscribed =
+        userSnapshot.docs.first['adFree'] || premiumIds.contains(_user.uid);
 
-    for (DocumentSnapshot doc in snapshot.docs) {
+    for (DocumentSnapshot doc in purchaseSnapshot.docs) {
       Timestamp expiry = doc['expiryDate'];
       if (expiry.toDate().isBefore(DateTime.now())) {
-        doc.reference.update({'status': 'EXPIRED', 'userId': _user.uid});
-      } else if (doc['userId'] == null) {
-        doc.reference.update({'userId': _user.uid});
+        doc.reference.update({'status': 'EXPIRED'});
       }
     }
 
-    purchases = snapshot.docs.map((document) {
+    purchases = purchaseSnapshot.docs.map((document) {
       var data = document.data();
       return PastPurchase.fromJson(data);
     }).toList();
@@ -86,13 +86,16 @@ class IAPRepo extends ChangeNotifier {
             element.status != Status.expired) ||
         isSubscribed;
 
+    if (hasActiveSubscription) {
+      subState.subscribe();
+    }
+
     notifyListeners();
   }
 
   @override
   void dispose() {
     _userSubscription?.cancel();
-    _purchaseSubscription?.cancel();
     super.dispose();
   }
 }

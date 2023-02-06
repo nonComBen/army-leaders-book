@@ -250,6 +250,9 @@ class PhonePageState extends State<PhonePage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
+    documents.sort(
+      (a, b) => a['title'].toString().compareTo(b['title'].toString()),
+    );
     PhonePdf pdf = PhonePdf(
       documents,
     );

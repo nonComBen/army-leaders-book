@@ -287,6 +287,9 @@ class PerstatPageState extends State<PerstatPage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
+    documents.sort(
+      (a, b) => a['start'].toString().compareTo(b['start'].toString()),
+    );
     PerstatsPdf pdf = PerstatsPdf(
       documents,
     );

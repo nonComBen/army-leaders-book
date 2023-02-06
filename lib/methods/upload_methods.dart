@@ -1,6 +1,8 @@
 // ignore_for_file: file_names, avoid_print
 
 import 'package:excel/excel.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../methods/validate.dart';
 
@@ -13,10 +15,17 @@ String convertDate(String date) {
   }
 
   String formattedDate = '';
-  // DateFormat dateFormat = DateFormat('yy-MM-dd');
+  DateFormat dateFormat = DateFormat('yyyy-MM-dd');
 
   try {
-    formattedDate = date.substring(0, 10);
+    print('Date String: $date');
+    final dateInt = int.tryParse(date) ?? 0;
+    if (dateInt > 0) {
+      final dateTime = DateTime(1899, 12, 30).add(Duration(days: dateInt));
+      formattedDate = dateFormat.format(dateTime);
+    } else {
+      formattedDate = date.substring(0, 10);
+    }
   } catch (e) {
     print('DateTime Parse Error: $e');
   }

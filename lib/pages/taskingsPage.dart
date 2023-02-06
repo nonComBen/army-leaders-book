@@ -261,6 +261,9 @@ class TaskingsPageState extends State<TaskingsPage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
+    documents.sort(
+      (a, b) => a['start'].toString().compareTo(b['start'].toString()),
+    );
     TaskingsPdf pdf = TaskingsPdf(
       documents,
     );

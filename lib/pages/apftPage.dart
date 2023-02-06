@@ -392,6 +392,9 @@ class ApftPageState extends State<ApftPage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
+    documents.sort(
+      (a, b) => a['date'].toString().compareTo(b['date'].toString()),
+    );
     ApftsPdf pdf = ApftsPdf(
       documents,
     );

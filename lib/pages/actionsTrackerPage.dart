@@ -254,6 +254,10 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
+    documents.sort(
+      (a, b) =>
+          a['statusDate'].toString().compareTo(b['statusDate'].toString()),
+    );
     ActionsPdf pdf = ActionsPdf(
       documents,
     );

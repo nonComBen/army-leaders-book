@@ -28,7 +28,7 @@ class IAPRepo extends ChangeNotifier {
   UserObj get user => _userObj;
 
   final premiumIds = [
-    // 'N5EIa03V7rSma0LDlko6YzGXuXF3', //bhultquist84
+    'N5EIa03V7rSma0LDlko6YzGXuXF3', //bhultquist84
     'WtI8grypTbTd0657WmEjgtGophO2', //armynoncomtools
     'i0dn21YEgsfaoQyegu4Aa4AnQn82', //CW2 Lents
     'nqjvb229UIe8JobyXd8Cmddq93t1', //SPC Browne

@@ -412,6 +412,9 @@ class MedProsPageState extends State<MedProsPage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
+    documents.sort(
+      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
+    );
     MedprosPdf pdf = MedprosPdf(
       documents,
     );

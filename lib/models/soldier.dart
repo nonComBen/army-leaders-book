@@ -14,7 +14,7 @@ class Soldier {
   String firstName;
   String mi;
   bool assigned;
-  String supervisorId;
+  String supervisor;
   String section;
   String dodId;
   String dor;
@@ -61,7 +61,7 @@ class Soldier {
     this.firstName = '',
     this.mi = '',
     this.assigned = true,
-    this.supervisorId = '',
+    this.supervisor = '',
     this.section = '',
     this.dodId = '',
     this.dor = '',
@@ -109,7 +109,7 @@ class Soldier {
     map['firstName'] = firstName;
     map['middleInitial'] = mi;
     map['assigned'] = assigned;
-    map['supervisorId'] = supervisorId;
+    map['supervisorId'] = supervisor;
     map['section'] = section;
     map['dodId'] = dodId;
     map['dor'] = dor;
@@ -225,7 +225,7 @@ class Soldier {
       firstName: doc['firstName'],
       mi: doc['middleInitial'],
       assigned: assigned,
-      supervisorId: doc['supervisorId'],
+      supervisor: doc['supervisorId'],
       section: doc['section'],
       dodId: dodId,
       dor: doc['dor'],

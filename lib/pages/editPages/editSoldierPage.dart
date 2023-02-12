@@ -364,7 +364,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
         firstName: _firstNameController.text,
         mi: _miController.text,
         assigned: _assigned,
-        supervisorId: _supervisorController.text,
+        supervisor: _supervisorController.text,
         section: _sectionController.text,
         dodId: _dodIdController.text,
         dor: _dorController.text,
@@ -517,7 +517,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
     _miController = TextEditingController(text: widget.soldier.mi);
     _assigned = widget.soldier.assigned ?? true;
     _supervisorController =
-        TextEditingController(text: widget.soldier.supervisorId);
+        TextEditingController(text: widget.soldier.supervisor);
     _sectionController = TextEditingController(text: widget.soldier.section);
     _dodIdController = TextEditingController(text: widget.soldier.dodId ?? '');
     _mosController = TextEditingController(text: widget.soldier.mos);

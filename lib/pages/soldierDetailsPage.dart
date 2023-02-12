@@ -38,7 +38,6 @@ class SoldierDetailsPage extends StatefulWidget {
 class SoldierDetailsPageState extends State<SoldierDetailsPage> {
   String _soldierName;
   FirebaseFirestore firestore;
-  TextEditingController _supervisorController;
   BannerAd myBanner;
   bool _adLoaded = false, isSubscribed;
 
@@ -295,7 +294,6 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
 
   @override
   void dispose() {
-    _supervisorController.dispose();
     myBanner?.dispose();
     super.dispose();
   }
@@ -338,7 +336,6 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
     firestore = FirebaseFirestore.instance;
     _soldierName =
         '${widget.soldier.rank}${widget.soldier.promotable} ${widget.soldier.lastName}';
-    _supervisorController = TextEditingController();
     if (widget.soldier.milEd.length == 4 &&
         widget.soldier.milEd.substring(0, 3) == 'SSD') {
       widget.soldier.milEd = 'DLC${widget.soldier.milEd.substring(3)}';
@@ -402,14 +399,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
                         createField(
                             widget.soldier.assigned ? 'Assigned' : 'Attached',
                             'Assigned'),
-                        Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                                controller: _supervisorController,
-                                enabled: false,
-                                decoration: const InputDecoration(
-                                  labelText: 'Supervisor',
-                                ))),
+                        createField(widget.soldier.supervisor, 'Supervisor'),
                         createField(widget.soldier.section, 'Section'),
                         createField(widget.soldier.dodId, 'DoD ID'),
                         createField(widget.soldier.dor, 'Date of Rank'),

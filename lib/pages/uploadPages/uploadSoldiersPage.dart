@@ -35,6 +35,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
       mi,
       assigned,
       section,
+      supervisor,
       dodId,
       dor,
       mos,
@@ -100,6 +101,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
     mi = columnHeaders.contains('Middle Initial') ? 'Middle Initial' : '';
     assigned = columnHeaders.contains('Assigned') ? 'Assigned' : '';
     section = columnHeaders.contains('Section') ? 'Section' : '';
+    supervisor = columnHeaders.contains('Supervisor') ? 'Supervisor' : '';
     dodId = columnHeaders.contains('DoD ID') ? 'DoD ID' : '';
     dor = columnHeaders.contains('Date of Rank') ? 'Date of Rank' : '';
     mos = columnHeaders.contains('MOS') ? 'MOS' : '';
@@ -202,6 +204,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
       String saveMi = getCellValue(rows[i], columnHeaders, mi);
       String saveAssigned = getCellValue(rows[i], columnHeaders, assigned);
       String saveSection = getCellValue(rows[i], columnHeaders, section);
+      String saveSupervisor = getCellValue(rows[i], columnHeaders, supervisor);
       String saveDodId = getCellValue(rows[i], columnHeaders, dodId);
       String saveDor = convertDate(getCellValue(rows[i], columnHeaders, dor));
       String saveMos = getCellValue(rows[i], columnHeaders, mos);
@@ -261,6 +264,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
         assigned: saveAssigned.toLowerCase() == 'true' ||
             saveAssigned.toLowerCase() == 'yes',
         section: saveSection,
+        supervisor: saveSupervisor,
         dodId: saveDodId,
         dor: saveDor,
         mos: saveMos,
@@ -533,6 +537,25 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                           onChanged: (value) {
                             setState(() {
                               section = value;
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DropdownButtonFormField<String>(
+                          decoration:
+                              const InputDecoration(labelText: 'Supervisor'),
+                          items: columnHeaders.map((header) {
+                            return DropdownMenuItem<String>(
+                              value: header,
+                              child: Text(header),
+                            );
+                          }).toList(),
+                          value: supervisor,
+                          onChanged: (value) {
+                            setState(() {
+                              supervisor = value;
                             });
                           },
                         ),

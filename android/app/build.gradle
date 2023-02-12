@@ -41,7 +41,7 @@ android {
         applicationId "com.armynoncomtools.leadersbook"
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 177
+        versionCode 178
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true

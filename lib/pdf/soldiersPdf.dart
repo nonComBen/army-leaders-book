@@ -95,7 +95,7 @@ class SoldierPdf {
                               '${soldier.rank}${soldier.promotable} ${soldier.lastName}, ${soldier.firstName} ${soldier.mi}',
                               'Name',
                               3.25),
-                          createField(soldier.supervisorId, 'Supervisor', 3.25)
+                          createField(soldier.supervisor, 'Supervisor', 3.25)
                         ]),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -544,7 +544,7 @@ class SoldierPdf {
                     createField(soldier.dodId ?? '', 'DoD Id', 1.75),
                   ]),
                   Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                    createField(soldier.supervisorId, 'Supervisor', 3.0),
+                    createField(soldier.supervisor, 'Supervisor', 3.0),
                     createField('', 'DOB', 1.75),
                   ]),
                   Row(mainAxisAlignment: MainAxisAlignment.start, children: [

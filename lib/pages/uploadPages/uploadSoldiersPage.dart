@@ -146,171 +146,166 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
   }
 
   void _saveSoldiers(BuildContext context) {
-    if (rows.length > 1) {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
-
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
-
-      List<String> civEds = [
-        '',
-        'GED',
-        '30 Semester Hours',
-        '60 Semester Hours',
-        '90 Semester Hours',
-        'HS Diploma',
-        'Associates',
-        'Bachelors',
-        'Masters',
-        'Doctorate'
-      ];
-
-      List<String> milEds = [
-        '',
-        'None',
-        'DLC1',
-        'BLC',
-        'DLC2',
-        'ALC',
-        'DLC3',
-        'SLC',
-        'DLC4',
-        'MLC',
-        'DLC5',
-        'SMA'
-      ];
-
-      for (int i = 1; i < rows.length; i++) {
-        String saveSoldierId;
-        String currentSoldierId =
-            getCellValue(rows[1], columnHeaders, soldierId);
-        String owner = AuthProvider.of(context).auth.currentUser().uid;
-        List<dynamic> users = [owner];
-        if (soldierIds.contains(currentSoldierId)) {
-          var soldier =
-              soldiers.firstWhere((element) => element.id == currentSoldierId);
-          saveSoldierId = currentSoldierId;
-          owner = soldier.owner;
-          users = soldier.users;
-        }
-
-        String saveRank = getCellValue(rows[i], columnHeaders, rank);
-        String saveLastName = getCellValue(rows[i], columnHeaders, lastName);
-        String saveFirstName = getCellValue(rows[i], columnHeaders, firstName);
-        String saveMi = getCellValue(rows[i], columnHeaders, mi);
-        String saveAssigned = getCellValue(rows[i], columnHeaders, assigned);
-        String saveSection = getCellValue(rows[i], columnHeaders, section);
-        String saveDodId = getCellValue(rows[i], columnHeaders, dodId);
-        String saveDor = convertDate(getCellValue(rows[i], columnHeaders, dor));
-        String saveMos = getCellValue(rows[i], columnHeaders, mos);
-        String saveDuty = getCellValue(rows[i], columnHeaders, duty);
-        String saveParaLn = getCellValue(rows[i], columnHeaders, paraLn);
-        String saveReqMos = getCellValue(rows[i], columnHeaders, reqMos);
-        String saveLoss =
-            convertDate(getCellValue(rows[i], columnHeaders, loss));
-        String saveEts = convertDate(getCellValue(rows[i], columnHeaders, ets));
-        String saveBasd =
-            convertDate(getCellValue(rows[i], columnHeaders, basd));
-        String savePebd =
-            convertDate(getCellValue(rows[i], columnHeaders, pebd));
-        String saveGain =
-            convertDate(getCellValue(rows[i], columnHeaders, gain));
-        String saveAddress = getCellValue(rows[i], columnHeaders, address);
-        String saveCity = getCellValue(rows[i], columnHeaders, city);
-        String saveState = getCellValue(rows[i], columnHeaders, state);
-        String saveZip = getCellValue(rows[i], columnHeaders, zip);
-        String savePhone = getCellValue(rows[i], columnHeaders, phone);
-        String saveWorkPhone = getCellValue(rows[i], columnHeaders, workPhone);
-        String saveEmail = getCellValue(rows[i], columnHeaders, email);
-        String saveWorkEmail = getCellValue(rows[i], columnHeaders, workEmail);
-        String saveNok = getCellValue(rows[i], columnHeaders, nok);
-        String saveNokPhone = getCellValue(rows[i], columnHeaders, nokPhone);
-        String saveMaritalStatus =
-            getCellValue(rows[i], columnHeaders, maritalStatus);
-        String saveComments = getCellValue(rows[i], columnHeaders, comments);
-        String saveCivEd = getCellValue(rows[i], columnHeaders, civEd);
-        if (!civEds.contains(saveCivEd)) {
-          saveCivEd = '';
-        }
-        String saveMilEd = getCellValue(rows[i], columnHeaders, milEd);
-        String saveNbcSuit = getCellValue(rows[i], columnHeaders, nbcSuitSize);
-        String saveNbcMask = getCellValue(rows[i], columnHeaders, nbcMaskSize);
-        String saveNbcBoot = getCellValue(rows[i], columnHeaders, nbcBootSize);
-        String saveNbcGlove =
-            getCellValue(rows[i], columnHeaders, nbcGloveSize);
-        String saveHat = getCellValue(rows[i], columnHeaders, hatSize);
-        String saveBoot = getCellValue(rows[i], columnHeaders, bootSize);
-        String saveAcuTop = getCellValue(rows[i], columnHeaders, acuTopSize);
-        String saveAcuTrouser =
-            getCellValue(rows[i], columnHeaders, acuTrouserSize);
-
-        if (saveMilEd.length == 4 &&
-            saveMilEd.substring(0, 3).toLowerCase() == 'ssd') {
-          saveMilEd = 'DLC${saveMilEd.substring(3)}';
-        }
-        if (!milEds.contains(saveMilEd)) {
-          saveMilEd = '';
-        }
-
-        Soldier soldier = Soldier(
-          id: saveSoldierId,
-          owner: owner,
-          users: users,
-          rank: saveRank,
-          rankSort: getRankSort(saveRank),
-          lastName: saveLastName,
-          firstName: saveFirstName,
-          mi: saveMi,
-          assigned: saveAssigned.toLowerCase() == 'true' ||
-              saveAssigned.toLowerCase() == 'yes',
-          section: saveSection,
-          dodId: saveDodId,
-          dor: saveDor,
-          mos: saveMos,
-          duty: saveDuty,
-          paraLn: saveParaLn,
-          reqMos: saveReqMos,
-          lossDate: saveLoss,
-          ets: saveEts,
-          basd: saveBasd,
-          pebd: savePebd,
-          gainDate: saveGain,
-          civEd: saveCivEd,
-          milEd: saveMilEd,
-          nbcSuitSize: saveNbcSuit,
-          nbcMaskSize: saveNbcMask,
-          nbcBootSize: saveNbcBoot,
-          nbcGloveSize: saveNbcGlove,
-          hatSize: saveHat,
-          bootSize: saveBoot,
-          acuTopSize: saveAcuTop,
-          acuTrouserSize: saveAcuTrouser,
-          address: saveAddress,
-          city: saveCity,
-          state: saveState,
-          zip: saveZip,
-          phone: savePhone,
-          workPhone: saveWorkPhone,
-          email: saveEmail,
-          workEmail: saveWorkEmail,
-          nok: saveNok,
-          nokPhone: saveNokPhone,
-          maritalStatus: saveMaritalStatus,
-          comments: saveComments,
-        );
-
-        if (saveSoldierId != null) {
-          firestore
-              .collection('soldiers')
-              .doc(saveSoldierId)
-              .set(soldier.toMap(), SetOptions(merge: true));
-        } else {
-          firestore.collection('soldiers').add(soldier.toMap());
-        }
-      }
-      Navigator.pop(context);
+    if (rows.length <= 1) {
+      return;
     }
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final soldiers =
+        Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+
+    List<String> soldierIds = soldiers.map((soldier) => soldier.id).toList();
+
+    List<String> civEds = [
+      '',
+      'GED',
+      '30 Semester Hours',
+      '60 Semester Hours',
+      '90 Semester Hours',
+      'HS Diploma',
+      'Associates',
+      'Bachelors',
+      'Masters',
+      'Doctorate'
+    ];
+
+    List<String> milEds = [
+      '',
+      'None',
+      'DLC1',
+      'BLC',
+      'DLC2',
+      'ALC',
+      'DLC3',
+      'SLC',
+      'DLC4',
+      'MLC',
+      'DLC5',
+      'SMA'
+    ];
+
+    for (int i = 1; i < rows.length; i++) {
+      String saveSoldierId;
+      String currentSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
+      String owner = AuthProvider.of(context).auth.currentUser().uid;
+      List<dynamic> users = [owner];
+      if (soldierIds.contains(currentSoldierId)) {
+        var soldier =
+            soldiers.firstWhere((element) => element.id == currentSoldierId);
+        saveSoldierId = currentSoldierId;
+        owner = soldier.owner;
+        users = soldier.users;
+      }
+
+      String saveRank = getCellValue(rows[i], columnHeaders, rank);
+      String saveLastName = getCellValue(rows[i], columnHeaders, lastName);
+      String saveFirstName = getCellValue(rows[i], columnHeaders, firstName);
+      String saveMi = getCellValue(rows[i], columnHeaders, mi);
+      String saveAssigned = getCellValue(rows[i], columnHeaders, assigned);
+      String saveSection = getCellValue(rows[i], columnHeaders, section);
+      String saveDodId = getCellValue(rows[i], columnHeaders, dodId);
+      String saveDor = convertDate(getCellValue(rows[i], columnHeaders, dor));
+      String saveMos = getCellValue(rows[i], columnHeaders, mos);
+      String saveDuty = getCellValue(rows[i], columnHeaders, duty);
+      String saveParaLn = getCellValue(rows[i], columnHeaders, paraLn);
+      String saveReqMos = getCellValue(rows[i], columnHeaders, reqMos);
+      String saveLoss = convertDate(getCellValue(rows[i], columnHeaders, loss));
+      String saveEts = convertDate(getCellValue(rows[i], columnHeaders, ets));
+      String saveBasd = convertDate(getCellValue(rows[i], columnHeaders, basd));
+      String savePebd = convertDate(getCellValue(rows[i], columnHeaders, pebd));
+      String saveGain = convertDate(getCellValue(rows[i], columnHeaders, gain));
+      String saveAddress = getCellValue(rows[i], columnHeaders, address);
+      String saveCity = getCellValue(rows[i], columnHeaders, city);
+      String saveState = getCellValue(rows[i], columnHeaders, state);
+      String saveZip = getCellValue(rows[i], columnHeaders, zip);
+      String savePhone = getCellValue(rows[i], columnHeaders, phone);
+      String saveWorkPhone = getCellValue(rows[i], columnHeaders, workPhone);
+      String saveEmail = getCellValue(rows[i], columnHeaders, email);
+      String saveWorkEmail = getCellValue(rows[i], columnHeaders, workEmail);
+      String saveNok = getCellValue(rows[i], columnHeaders, nok);
+      String saveNokPhone = getCellValue(rows[i], columnHeaders, nokPhone);
+      String saveMaritalStatus =
+          getCellValue(rows[i], columnHeaders, maritalStatus);
+      String saveComments = getCellValue(rows[i], columnHeaders, comments);
+      String saveCivEd = getCellValue(rows[i], columnHeaders, civEd);
+      if (!civEds.contains(saveCivEd)) {
+        saveCivEd = '';
+      }
+      String saveMilEd = getCellValue(rows[i], columnHeaders, milEd);
+      String saveNbcSuit = getCellValue(rows[i], columnHeaders, nbcSuitSize);
+      String saveNbcMask = getCellValue(rows[i], columnHeaders, nbcMaskSize);
+      String saveNbcBoot = getCellValue(rows[i], columnHeaders, nbcBootSize);
+      String saveNbcGlove = getCellValue(rows[i], columnHeaders, nbcGloveSize);
+      String saveHat = getCellValue(rows[i], columnHeaders, hatSize);
+      String saveBoot = getCellValue(rows[i], columnHeaders, bootSize);
+      String saveAcuTop = getCellValue(rows[i], columnHeaders, acuTopSize);
+      String saveAcuTrouser =
+          getCellValue(rows[i], columnHeaders, acuTrouserSize);
+
+      if (saveMilEd.length == 4 &&
+          saveMilEd.substring(0, 3).toLowerCase() == 'ssd') {
+        saveMilEd = 'DLC${saveMilEd.substring(3)}';
+      }
+      if (!milEds.contains(saveMilEd)) {
+        saveMilEd = '';
+      }
+
+      Soldier soldier = Soldier(
+        id: saveSoldierId,
+        owner: owner,
+        users: users,
+        rank: saveRank,
+        rankSort: getRankSort(saveRank),
+        lastName: saveLastName,
+        firstName: saveFirstName,
+        mi: saveMi,
+        assigned: saveAssigned.toLowerCase() == 'true' ||
+            saveAssigned.toLowerCase() == 'yes',
+        section: saveSection,
+        dodId: saveDodId,
+        dor: saveDor,
+        mos: saveMos,
+        duty: saveDuty,
+        paraLn: saveParaLn,
+        reqMos: saveReqMos,
+        lossDate: saveLoss,
+        ets: saveEts,
+        basd: saveBasd,
+        pebd: savePebd,
+        gainDate: saveGain,
+        civEd: saveCivEd,
+        milEd: saveMilEd,
+        nbcSuitSize: saveNbcSuit,
+        nbcMaskSize: saveNbcMask,
+        nbcBootSize: saveNbcBoot,
+        nbcGloveSize: saveNbcGlove,
+        hatSize: saveHat,
+        bootSize: saveBoot,
+        acuTopSize: saveAcuTop,
+        acuTrouserSize: saveAcuTrouser,
+        address: saveAddress,
+        city: saveCity,
+        state: saveState,
+        zip: saveZip,
+        phone: savePhone,
+        workPhone: saveWorkPhone,
+        email: saveEmail,
+        workEmail: saveWorkEmail,
+        nok: saveNok,
+        nokPhone: saveNokPhone,
+        maritalStatus: saveMaritalStatus,
+        comments: saveComments,
+      );
+
+      if (saveSoldierId != null) {
+        firestore
+            .collection('soldiers')
+            .doc(saveSoldierId)
+            .set(soldier.toMap(), SetOptions(merge: true));
+      } else {
+        firestore.collection('soldiers').add(soldier.toMap());
+      }
+    }
+    Navigator.pop(context);
   }
 
   @override

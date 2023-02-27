@@ -186,6 +186,7 @@ class UploadAcftPageState extends State<UploadAcftPage> {
           pass = passDropdown == ''
               ? true
               : rows[i][columnHeaders.indexOf(passDropdown) - 1]
+                      .value
                       .toString()
                       .toUpperCase() ==
                   'TRUE';

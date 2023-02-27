@@ -31,94 +31,99 @@ class HrActionsPdf {
         ));
   }
 
-  List<TableRow> fullTableChildren() {
-    List<TableRow> children = [
-      TableRow(children: [
-        headerField('Name', 3.0),
-        headerField('DD93', 2.0),
-        headerField('SGLV', 2.0),
-        headerField('Records Review', 2.0),
-      ])
-    ];
-    for (DocumentSnapshot document in documents) {
-      children.add(TableRow(children: [
-        tableField(
-            '${document['rank']} ${document['name']}, ${document['firstName']}',
-            3.0),
-        tableField(document['dd93'], 2.0),
-        tableField(document['sglv'], 2.0),
-        tableField(document['prr'], 2.0),
-      ]));
-    }
-    return children;
+  TableRow tableHeader(bool fullPage) {
+    return TableRow(children: [
+      headerField('Name', fullPage ? 3.0 : 2.5),
+      headerField('DD93', fullPage ? 2.0 : 1.5),
+      headerField('SGLV', fullPage ? 2.0 : 1.5),
+      headerField('Records Review', fullPage ? 2.0 : 1.5),
+    ]);
   }
 
-  List<TableRow> halfTableChildren() {
-    List<TableRow> children = [
-      TableRow(children: [
-        headerField('Name', 2.5),
-        headerField('DD93', 1.5),
-        headerField('SGLV', 1.5),
-        headerField('RR', 1.5),
-      ])
-    ];
-    for (DocumentSnapshot document in documents) {
-      children.add(TableRow(children: [
-        tableField(
-            '${document['rank']} ${document['name']}, ${document['firstName']}',
-            2.5),
-        tableField(document['dd93'], 1.5),
-        tableField(document['sglv'], 1.5),
-        tableField(document['prr'], 1.5),
-      ]));
+  List<TableRow> tableChildren(bool fullPage, int startIndex, int endIndex) {
+    List<TableRow> children = [];
+    for (int i = startIndex; i <= endIndex; i++) {
+      children.add(
+        TableRow(
+          children: [
+            tableField(
+                '${documents[i]['rank']} ${documents[i]['name']}, ${documents[i]['firstName']}',
+                fullPage ? 3.0 : 2.5),
+            tableField(documents[i]['dd93'], fullPage ? 2.0 : 1.5),
+            tableField(documents[i]['sglv'], fullPage ? 2.0 : 1.5),
+            tableField(documents[i]['prr'], fullPage ? 2.0 : 1.5),
+          ],
+        ),
+      );
     }
     return children;
   }
 
   Future<String> createFullPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 18).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.landscape,
-        margin: const EdgeInsets.all(72.0),
-        build: (Context context) {
-          return Center(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 18;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 18) {
+        endIndex = (i * 18) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.landscape,
+          margin: const EdgeInsets.all(72.0),
+          build: (Context context) {
+            return Center(
+              heightFactor: 1,
               child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: fullTableChildren()));
-        }));
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.all(),
+                children: [
+                  tableHeader(true),
+                  ...tableChildren(true, startIndex, endIndex)
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'hrActions');
   }
 
   Future<String> createHalfPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 11).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.portrait,
-        margin: const EdgeInsets.all(0.75 * 72.0),
-        build: (Context context) {
-          return Container(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 11;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 11) {
+        endIndex = (i * 11) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.portrait,
+          margin: const EdgeInsets.all(0.75 * 72.0),
+          build: (Context context) {
+            return Container(
               child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: halfTableChildren()));
-        }));
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.all(),
+                children: [
+                  tableHeader(false),
+                  ...tableChildren(false, startIndex, endIndex),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'hrActions');
   }

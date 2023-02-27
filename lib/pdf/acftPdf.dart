@@ -16,43 +16,90 @@ class AcftsPdf {
   Widget tableField(
       String text, double width, bool failed, TextAlign textAlign) {
     return SizedBox(
-        width: width * 72,
-        height: 24.0,
-        child: Container(
-            padding: const EdgeInsets.all(5.0),
-            decoration:
-                failed ? const BoxDecoration(color: PdfColor(1, 0, 0)) : null,
-            child: Text(text, textAlign: textAlign)));
+      width: width * 72,
+      height: 24.0,
+      child: Container(
+        padding: const EdgeInsets.all(5.0),
+        decoration:
+            failed ? const BoxDecoration(color: PdfColor(1, 0, 0)) : null,
+        child: Text(text, textAlign: textAlign),
+      ),
+    );
   }
 
   Widget headerField(String text, double width) {
     return SizedBox(
-        width: width * 72,
-        child: Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: Text(text,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold)),
-        ));
+      width: width * 72,
+      child: Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Text(text,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
+    );
   }
 
-  List<TableRow> fullTableChildren() {
-    int mdl = 0,
-        mdlNumber = 0,
-        spt = 0,
-        sptNumber = 0,
-        pu = 0,
-        puNumber = 0,
-        sdc = 0,
-        sdcNumber = 0,
-        plk = 0,
-        plkNumber = 0,
-        run = 0,
-        runNumber = 0,
-        total = 0,
-        totalNumber = 0;
-    List<TableRow> children = [
-      TableRow(children: [
+  Map<String, int> getAverages() {
+    List<int> mdl = [];
+    List<int> spt = [];
+    List<int> hrp = [];
+    List<int> sdc = [];
+    List<int> plk = [];
+    List<int> run = [];
+    List<int> total = [];
+    for (DocumentSnapshot doc in documents) {
+      int events = 0;
+      if (doc['deadliftScore'] != 0) {
+        mdl.add(doc['deadliftScore']);
+        events++;
+      }
+      if (doc['powerThrowScore'] != 0) {
+        spt.add(doc['powerThrowScore']);
+        events++;
+      }
+      if (doc['puScore'] != 0) {
+        hrp.add(doc['puScore']);
+        events++;
+      }
+      if (doc['dragScore'] != 0) {
+        sdc.add(doc['dragScore']);
+        events++;
+      }
+      if (doc['legTuckScore'] != 0) {
+        plk.add(doc['legTuckScore']);
+        events++;
+      }
+      if (doc['runScore'] != 0) {
+        run.add(doc['runScore']);
+        events++;
+      }
+      if (events == 6) {
+        total.add(
+            mdl.last + spt.last + hrp.last + sdc.last + plk.last + run.last);
+      }
+    }
+    return <String, int>{
+      'mdl': (mdl.reduce((value, element) => value + element) / mdl.length)
+          .floor(),
+      'spt': (spt.reduce((value, element) => value + element) / spt.length)
+          .floor(),
+      'hrp': (hrp.reduce((value, element) => value + element) / hrp.length)
+          .floor(),
+      'sdc': (sdc.reduce((value, element) => value + element) / sdc.length)
+          .floor(),
+      'plk': (plk.reduce((value, element) => value + element) / plk.length)
+          .floor(),
+      'run': (run.reduce((value, element) => value + element) / run.length)
+          .floor(),
+      'total':
+          (total.reduce((value, element) => value + element) / total.length)
+              .floor(),
+    };
+  }
+
+  TableRow fullPageTableHeader() {
+    return TableRow(
+      children: [
         headerField('Name', 2.75),
         headerField('MDL', 0.75),
         headerField('SPT', 0.75),
@@ -61,248 +108,222 @@ class AcftsPdf {
         headerField('PLK', 0.75),
         headerField('2MR', 0.75),
         headerField('Date/Total', 1.75)
-      ])
-    ];
-    for (DocumentSnapshot acft in documents) {
-      if (acft['deadliftScore'] != 0) {
-        mdl = mdl + acft['deadliftScore'];
-        mdlNumber++;
-      }
-      if (acft['powerThrowScore'] != 0) {
-        spt = spt + acft['powerThrowScore'];
-        sptNumber++;
-      }
-      if (acft['puScore'] != 0) {
-        pu = pu + acft['puScore'];
-        puNumber++;
-      }
-      if (acft['dragScore'] != 0) {
-        sdc = sdc + acft['dragScore'];
-        sdcNumber++;
-      }
-      if (acft['legTuckScore'] != 0) {
-        plk = plk + acft['legTuckScore'];
-        plkNumber++;
-      }
-      if (acft['runScore'] != 0) {
-        run = run + acft['runScore'];
-        runNumber++;
-      }
-      if (acft['deadliftScore'] != 0 &&
-          acft['powerThrowScore'] != 0 &&
-          acft['puScore'] != 0 &&
-          acft['dragScore'] != 0 &&
-          acft['legTuckScore'] != 0 &&
-          acft['runScore'] != 0) {
-        total = total +
-            acft['deadliftScore'] +
-            acft['powerThrowScore'] +
-            acft['puScore'] +
-            acft['dragScore'] +
-            acft['legTuckScore'] +
-            acft['runScore'];
-        totalNumber++;
-      }
+      ],
+    );
+  }
+
+  List<TableRow> fullTableChildren(int startIndex, int endIndex) {
+    List<TableRow> children = [];
+    for (int i = startIndex; i <= endIndex; i++) {
       bool failed = false;
-      if (!acft['pass']) {
+      if (!documents[i]['pass']) {
         failed = true;
       }
-      children.add(TableRow(children: [
-        tableField('${acft['rank']} ${acft['name']}, ${acft['firstName']}',
-            2.75, failed, TextAlign.left),
-        tableField(acft['deadliftRaw'], 0.75, failed, TextAlign.left),
-        tableField(acft['powerThrowRaw'], 0.75, failed, TextAlign.left),
-        tableField(acft['puRaw'], 0.75, failed, TextAlign.left),
-        tableField(acft['dragRaw'], 0.75, failed, TextAlign.left),
-        tableField(acft['legTuckRaw'], 0.75, failed, TextAlign.left),
-        tableField(acft['runRaw'], 0.75, failed, TextAlign.left),
-        tableField(acft['date'], 1.75, failed, TextAlign.left),
-      ]));
-      children.add(TableRow(children: [
-        tableField('', 2.75, failed, TextAlign.right),
-        tableField(
-            acft['deadliftScore'].toString(), 0.75, failed, TextAlign.left),
-        tableField(
-            acft['powerThrowScore'].toString(), 0.75, failed, TextAlign.left),
-        tableField(acft['puScore'].toString(), 0.75, failed, TextAlign.left),
-        tableField(acft['dragScore'].toString(), 0.75, failed, TextAlign.left),
-        tableField(
-            acft['legTuckScore'].toString(), 0.75, failed, TextAlign.left),
-        tableField(acft['runScore'].toString(), 0.75, failed, TextAlign.left),
-        tableField(acft['total'].toString(), 1.75, failed, TextAlign.left),
-      ]));
+      children.add(
+        TableRow(
+          children: [
+            tableField(
+                '${documents[i]['rank']} ${documents[i]['name']}, ${documents[i]['firstName']}',
+                2.75,
+                failed,
+                TextAlign.left),
+            tableField(
+                documents[i]['deadliftRaw'], 0.75, failed, TextAlign.left),
+            tableField(
+                documents[i]['powerThrowRaw'], 0.75, failed, TextAlign.left),
+            tableField(documents[i]['puRaw'], 0.75, failed, TextAlign.left),
+            tableField(documents[i]['dragRaw'], 0.75, failed, TextAlign.left),
+            tableField(
+                documents[i]['legTuckRaw'], 0.75, failed, TextAlign.left),
+            tableField(documents[i]['runRaw'], 0.75, failed, TextAlign.left),
+            tableField(documents[i]['date'], 1.75, failed, TextAlign.left),
+          ],
+        ),
+      );
+      children.add(
+        TableRow(
+          children: [
+            tableField('', 2.75, failed, TextAlign.right),
+            tableField(documents[i]['deadliftScore'].toString(), 0.75, failed,
+                TextAlign.left),
+            tableField(documents[i]['powerThrowScore'].toString(), 0.75, failed,
+                TextAlign.left),
+            tableField(documents[i]['puScore'].toString(), 0.75, failed,
+                TextAlign.left),
+            tableField(documents[i]['dragScore'].toString(), 0.75, failed,
+                TextAlign.left),
+            tableField(documents[i]['legTuckScore'].toString(), 0.75, failed,
+                TextAlign.left),
+            tableField(documents[i]['runScore'].toString(), 0.75, failed,
+                TextAlign.left),
+            tableField(
+                documents[i]['total'].toString(), 1.75, failed, TextAlign.left),
+          ],
+        ),
+      );
     }
-    mdl = mdl ~/ mdlNumber;
-    spt = spt ~/ sptNumber;
-    pu = pu ~/ puNumber;
-    sdc = sdc ~/ sdcNumber;
-    plk = plk ~/ plkNumber;
-    run = run ~/ runNumber;
-    total = total ~/ totalNumber;
-
-    children.add(TableRow(children: [
-      headerField('Average', 2.75),
-      headerField(mdl.toString(), 0.75),
-      headerField(spt.toString(), 0.75),
-      headerField(pu.toString(), 0.75),
-      headerField(sdc.toString(), 0.75),
-      headerField(plk.toString(), 0.75),
-      headerField(run.toString(), 0.75),
-      headerField(total.toString(), 1.75),
-    ]));
 
     return children;
   }
 
-  List<TableRow> halfTableChildren() {
-    int mdl = 0,
-        mdlNumber = 0,
-        spt = 0,
-        sptNumber = 0,
-        pu = 0,
-        puNumber = 0,
-        sdc = 0,
-        sdcNumber = 0,
-        plk = 0,
-        plkNumber = 0,
-        run = 0,
-        runNumber = 0,
-        total = 0,
-        totalNumber = 0;
-    List<TableRow> children = [
-      TableRow(children: [
+  TableRow fullPageAveRow() {
+    return TableRow(
+      children: [
+        headerField('Average', 2.75),
+        headerField(getAverages()['mdl'].toString(), 0.75),
+        headerField(getAverages()['spt'].toString(), 0.75),
+        headerField(getAverages()['hrp'].toString(), 0.75),
+        headerField(getAverages()['sdc'].toString(), 0.75),
+        headerField(getAverages()['plk'].toString(), 0.75),
+        headerField(getAverages()['run'].toString(), 0.75),
+        headerField(getAverages()['total'].toString(), 1.75),
+      ],
+    );
+  }
+
+  TableRow halfPageTableHeader() {
+    return TableRow(
+      children: [
         headerField('Name', 2.5),
         headerField('MDL/SDC', 0.875),
         headerField('SPT/LTK', 0.875),
         headerField('HRP/2MR', 0.875),
         headerField('Date/Total', 1.375),
-      ])
-    ];
-    for (DocumentSnapshot acft in documents) {
-      if (acft['deadliftScore'] != 0) {
-        mdl = mdl + acft['deadliftScore'];
-        mdlNumber++;
-      }
-      if (acft['powerThrowScore'] != 0) {
-        spt = spt + acft['powerThrowScore'];
-        sptNumber++;
-      }
-      if (acft['puScore'] != 0) {
-        pu = pu + acft['puScore'];
-        puNumber++;
-      }
-      if (acft['dragScore'] != 0) {
-        sdc = sdc + acft['dragScore'];
-        sdcNumber++;
-      }
-      if (acft['legTuckScore'] != 0) {
-        plk = plk + acft['legTuckScore'];
-        plkNumber++;
-      }
-      if (acft['runScore'] != 0) {
-        run = run + acft['runScore'];
-        runNumber++;
-      }
-      if (acft['deadliftScore'] != 0 &&
-          acft['powerThrowScore'] != 0 &&
-          acft['puScore'] != 0 &&
-          acft['dragScore'] != 0 &&
-          acft['legTuckScore'] != 0 &&
-          acft['runScore'] != 0) {
-        total = total +
-            acft['deadliftScore'] +
-            acft['powerThrowScore'] +
-            acft['puScore'] +
-            acft['dragScore'] +
-            acft['legTuckScore'] +
-            acft['runScore'];
-        totalNumber++;
-      }
+      ],
+    );
+  }
+
+  List<TableRow> halfTableChildren(int startIndex, int endIndex) {
+    List<TableRow> children = [];
+    for (int i = startIndex; i <= endIndex; i++) {
       bool failed = false;
-      if (!acft['pass']) {
+      if (!documents[i]['pass']) {
         failed = true;
       }
-      children.add(TableRow(children: [
-        tableField('${acft['rank']} ${acft['name']}, ${acft['firstName']}', 2.5,
-            failed, TextAlign.left),
-        tableField(
-            acft['deadliftScore'].toString(), 0.875, failed, TextAlign.left),
-        tableField(
-            acft['powerThrowScore'].toString(), 0.875, failed, TextAlign.left),
-        tableField(acft['puScore'].toString(), 0.875, failed, TextAlign.left),
-        tableField(acft['date'].toString(), 1.375, failed, TextAlign.left),
-      ]));
-      children.add(TableRow(children: [
-        tableField('', 2.5, failed, TextAlign.right),
-        tableField(acft['dragScore'].toString(), 0.875, failed, TextAlign.left),
-        tableField(
-            acft['legTuckScore'].toString(), 0.875, failed, TextAlign.left),
-        tableField(acft['runScore'].toString(), 0.875, failed, TextAlign.left),
-        tableField(acft['total'].toString(), 1.375, failed, TextAlign.left),
-      ]));
+      children.add(
+        TableRow(
+          children: [
+            tableField(
+                '${documents[i]['rank']} ${documents[i]['name']}, ${documents[i]['firstName']}',
+                2.5,
+                failed,
+                TextAlign.left),
+            tableField(documents[i]['deadliftScore'].toString(), 0.875, failed,
+                TextAlign.left),
+            tableField(documents[i]['powerThrowScore'].toString(), 0.875,
+                failed, TextAlign.left),
+            tableField(documents[i]['puScore'].toString(), 0.875, failed,
+                TextAlign.left),
+            tableField(
+                documents[i]['date'].toString(), 1.375, failed, TextAlign.left),
+          ],
+        ),
+      );
+      children.add(
+        TableRow(
+          children: [
+            tableField('', 2.5, failed, TextAlign.right),
+            tableField(documents[i]['dragScore'].toString(), 0.875, failed,
+                TextAlign.left),
+            tableField(documents[i]['legTuckScore'].toString(), 0.875, failed,
+                TextAlign.left),
+            tableField(documents[i]['runScore'].toString(), 0.875, failed,
+                TextAlign.left),
+            tableField(documents[i]['total'].toString(), 1.375, failed,
+                TextAlign.left),
+          ],
+        ),
+      );
     }
-    mdl = mdl ~/ mdlNumber;
-    spt = spt ~/ sptNumber;
-    pu = pu ~/ puNumber;
-    sdc = sdc ~/ sdcNumber;
-    plk = plk ~/ plkNumber;
-    run = run ~/ runNumber;
-    total = total ~/ totalNumber;
 
-    children.add(TableRow(children: [
-      headerField('Average', 2.5),
-      headerField('${mdl.toString()}/${spt.toString()}', 0.875),
-      headerField('${pu.toString()}/${sdc.toString()}', 0.875),
-      headerField('${plk.toString()}/${run.toString()}', 0.875),
-      headerField(total.toString(), 1.375),
-    ]));
     return children;
+  }
+
+  TableRow halfPageAveRow() {
+    return TableRow(
+      children: [
+        headerField('Average', 2.5),
+        headerField(
+            '${getAverages()['mdl'].toString()}/${getAverages()['sdc'].toString()}',
+            0.875),
+        headerField(
+            '${getAverages()['spt'].toString()}/${getAverages()['plk'].toString()}',
+            0.875),
+        headerField(
+            '${getAverages()['hrp'].toString()}/${getAverages()['run'].toString()}',
+            0.875),
+        headerField(getAverages()['total'].toString(), 1.375),
+      ],
+    );
   }
 
   Future<String> createFullPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 8).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.landscape,
-        margin: const EdgeInsets.all(72.0),
-        build: (Context context) {
-          return Center(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 8;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 8) {
+        endIndex = (i * 8) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.landscape,
+          margin: const EdgeInsets.all(72.0),
+          build: (Context context) {
+            return Center(
+              heightFactor: 1,
               child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: fullTableChildren()));
-        }));
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.all(),
+                children: [
+                  fullPageTableHeader(),
+                  ...fullTableChildren(startIndex, endIndex),
+                  if (endIndex == documents.length - 1) fullPageAveRow(),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'acftStats');
   }
 
   Future<String> createHalfPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 5).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.portrait,
-        margin: const EdgeInsets.all(0.75 * 72.0),
-        build: (Context context) {
-          return Container(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 5;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 5) {
+        endIndex = (i * 5) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.portrait,
+          margin: const EdgeInsets.all(0.75 * 72.0),
+          build: (Context context) {
+            return Container(
               child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: halfTableChildren()));
-        }));
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.all(),
+                children: [
+                  halfPageTableHeader(),
+                  ...halfTableChildren(startIndex, endIndex),
+                  if (endIndex == documents.length - 1) halfPageAveRow(),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'acftStats');
   }

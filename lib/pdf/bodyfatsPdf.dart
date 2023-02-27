@@ -35,116 +35,125 @@ class BodyfatsPdf {
         ));
   }
 
-  List<TableRow> fullTableChildren() {
-    List<TableRow> children = [
-      TableRow(children: [
-        headerField('Name', 2.75),
+  TableRow tableHeader(bool fullPage) {
+    return TableRow(
+      children: [
+        headerField('Name', fullPage ? 2.75 : 2.5),
         headerField('Date', 1.5),
         headerField('Age', 0.75),
         headerField('Ht', 0.75),
         headerField('Wt', 0.75),
-        headerField('Neck', 0.75),
-        headerField('Waist', 0.75),
-        headerField('Hip', 0.75),
-        headerField('BF%', 0.75)
-      ])
-    ];
-    for (DocumentSnapshot bf in documents) {
-      bool failed = false;
-      if (!bf['passBmi'] && !bf['passBf']) {
-        failed = true;
-      }
-      children.add(TableRow(children: [
-        tableField(
-            '${bf['rank']} ${bf['name']}, ${bf['firstName']}', 2.75, failed),
-        tableField(bf['date'], 1.5, failed),
-        tableField(bf['age'].toString(), 0.75, failed),
-        tableField(bf['height'], 0.75, failed),
-        tableField(bf['weight'], 0.75, failed),
-        tableField(bf['neck'], 0.75, failed),
-        tableField(bf['waist'], 0.75, failed),
-        tableField(bf['hip'], 0.75, failed),
-        tableField(
-            bf['percent'] != '' ? '${bf['percent']}%' : '', 0.75, failed),
-      ]));
-    }
-    return children;
+        if (fullPage) headerField('Neck', 0.75),
+        if (fullPage) headerField('Waist', 0.75),
+        if (fullPage) headerField('Hip', 0.75),
+        headerField('BF%', 0.75),
+      ],
+    );
   }
 
-  List<TableRow> halfTableChildren() {
-    List<TableRow> children = [
-      TableRow(children: [
-        headerField('Name', 2.5),
-        headerField('Date', 1.5),
-        headerField('Age', 0.75),
-        headerField('Ht', 0.75),
-        headerField('Wt', 0.75),
-        headerField('BF%', 0.75)
-      ])
-    ];
-    for (DocumentSnapshot bf in documents) {
+  List<TableRow> tableChildren(bool fullPage, int startIndex, int endIndex) {
+    List<TableRow> children = [];
+    for (int i = startIndex; i <= endIndex; i++) {
       bool failed = false;
-      if (!bf['passBmi'] && !bf['passBf']) {
+      if (!documents[i]['passBmi'] && !documents[i]['passBf']) {
         failed = true;
       }
-      children.add(TableRow(children: [
-        tableField(
-            '${bf['rank']} ${bf['name']}, ${bf['firstName']}', 2.5, failed),
-        tableField(bf['date'], 1.5, failed),
-        tableField(bf['age'].toString(), 0.75, failed),
-        tableField(bf['height'], 0.75, failed),
-        tableField(bf['weight'], 0.75, failed),
-        tableField(
-            bf['percent'] != '' ? '${bf['percent']}%' : '', 0.75, failed),
-      ]));
+      children.add(
+        TableRow(
+          children: [
+            tableField(
+                '${documents[i]['rank']} ${documents[i]['name']}, ${documents[i]['firstName']}',
+                fullPage ? 2.75 : 2.5,
+                failed),
+            tableField(documents[i]['date'], 1.5, failed),
+            tableField(documents[i]['age'].toString(), 0.75, failed),
+            tableField(documents[i]['height'], 0.75, failed),
+            tableField(documents[i]['weight'], 0.75, failed),
+            if (fullPage) tableField(documents[i]['neck'], 0.75, failed),
+            if (fullPage) tableField(documents[i]['waist'], 0.75, failed),
+            if (fullPage) tableField(documents[i]['hip'], 0.75, failed),
+            tableField(
+                documents[i]['percent'] != ''
+                    ? '${documents[i]['percent']}%'
+                    : '',
+                0.75,
+                failed),
+          ],
+        ),
+      );
     }
     return children;
   }
 
   Future<String> createFullPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 18).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.landscape,
-        margin: const EdgeInsets.all(72.0),
-        build: (Context context) {
-          return Center(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 18;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 18) {
+        endIndex = (i * 18) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.landscape,
+          margin: const EdgeInsets.all(72.0),
+          build: (Context context) {
+            return Center(
+              heightFactor: 1,
               child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: fullTableChildren()));
-        }));
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.all(),
+                children: [
+                  tableHeader(true),
+                  ...tableChildren(
+                    true,
+                    startIndex,
+                    endIndex,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'bodyCompStats');
   }
 
   Future<String> createHalfPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 11).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.portrait,
-        margin: const EdgeInsets.all(0.75 * 72.0),
-        build: (Context context) {
-          return Container(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 11;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 11) {
+        endIndex = (i * 11) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.portrait,
+          margin: const EdgeInsets.all(0.75 * 72.0),
+          build: (Context context) {
+            return Container(
               child: Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: halfTableChildren()));
-        }));
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                border: TableBorder.all(),
+                children: [
+                  tableHeader(false),
+                  ...tableChildren(false, startIndex, endIndex),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'bodyCompStats');
   }

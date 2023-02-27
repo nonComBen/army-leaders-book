@@ -15,37 +15,70 @@ class ApftsPdf {
 
   Widget tableField(String text, double width, bool failed) {
     return SizedBox(
-        width: width * 72,
-        height: 24.0,
-        child: Container(
-            padding: const EdgeInsets.all(5.0),
-            decoration:
-                failed ? const BoxDecoration(color: PdfColor(1, 0, 0)) : null,
-            child: Text(text)));
+      width: width * 72,
+      height: 24.0,
+      child: Container(
+        padding: const EdgeInsets.all(5.0),
+        decoration:
+            failed ? const BoxDecoration(color: PdfColor(1, 0, 0)) : null,
+        child: Text(text),
+      ),
+    );
   }
 
   Widget headerField(String text, double width) {
     return SizedBox(
-        width: width * 72,
-        child: Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: Text(text,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold)),
-        ));
+      width: width * 72,
+      child: Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
   }
 
-  List<TableRow> fullTableChildren() {
-    int pu = 0,
-        puNumber = 0,
-        su = 0,
-        suNumber = 0,
-        run = 0,
-        runNumber = 0,
-        total = 0,
-        totalNumber = 0;
-    List<TableRow> children = [
-      TableRow(children: [
+  Map<String, int> getAverages() {
+    List<int> pu = [];
+    List<int> su = [];
+    List<int> run = [];
+    List<int> total = [];
+    for (DocumentSnapshot doc in documents) {
+      int events = 0;
+      if (doc['puScore'] != 0) {
+        pu.add(doc['puScore']);
+        events++;
+      }
+      if (doc['suScore'] != 0) {
+        su.add(doc['suScore']);
+        events++;
+      }
+      if (doc['runScore'] != 0) {
+        run.add(doc['runScore']);
+        events++;
+      }
+      if (events == 3) {
+        total.add(pu.last + su.last + run.last);
+      }
+    }
+    return <String, int>{
+      'pu':
+          (pu.reduce((value, element) => value + element) / pu.length).floor(),
+      'su':
+          (su.reduce((value, element) => value + element) / su.length).floor(),
+      'run': (run.reduce((value, element) => value + element) / run.length)
+          .floor(),
+      'total':
+          (total.reduce((value, element) => value + element) / total.length)
+              .floor(),
+    };
+  }
+
+  TableRow fullPageTableHeader() {
+    return TableRow(
+      children: [
         headerField('Name', 2.75),
         headerField('Date', 1.625),
         headerField('PU Raw', 0.625),
@@ -55,176 +88,173 @@ class ApftsPdf {
         headerField('Run Raw', 0.75),
         headerField('Run Score', 0.75),
         headerField('Total', 0.625)
-      ])
-    ];
-    for (DocumentSnapshot apft in documents) {
-      if (apft['puScore'] != 0) {
-        pu = pu + apft['puScore'];
-        puNumber++;
-      }
-      if (apft['suScore'] != 0) {
-        su = su + apft['suScore'];
-        suNumber++;
-      }
-      if (apft['runScore'] != 0) {
-        run = run + apft['runScore'];
-        runNumber++;
-      }
-      if (apft['puScore'] != 0 &&
-          apft['suScore'] != 0 &&
-          apft['runScore'] != 0) {
-        total = total + apft['puScore'] + apft['suScore'] + apft['runScore'];
-        totalNumber++;
-      }
+      ],
+    );
+  }
+
+  List<TableRow> fullTableChildren(int startIndex, int endIndex) {
+    List<TableRow> children = [];
+    for (int i = startIndex; i <= endIndex; i++) {
       bool failed = false;
-      if (!apft['pass']) {
+      if (!documents[i]['pass']) {
         failed = true;
       }
-      children.add(TableRow(children: [
-        tableField('${apft['rank']} ${apft['name']}, ${apft['firstName']}',
-            2.75, failed),
-        tableField(apft['date'], 1.625, failed),
-        tableField(apft['puRaw'], 0.625, failed),
-        tableField(apft['puScore'].toString(), 0.625, failed),
-        tableField(apft['suRaw'], 0.625, failed),
-        tableField(apft['suScore'].toString(), 0.625, failed),
-        tableField(apft['runRaw'], 0.75, failed),
-        tableField(apft['runScore'].toString(), 0.75, failed),
-        tableField(apft['total'].toString(), 0.625, failed),
-      ]));
+      children.add(
+        TableRow(
+          children: [
+            tableField(
+                '${documents[i]['rank']} ${documents[i]['name']}, ${documents[i]['firstName']}',
+                2.75,
+                failed),
+            tableField(documents[i]['date'], 1.625, failed),
+            tableField(documents[i]['puRaw'], 0.625, failed),
+            tableField(documents[i]['puScore'].toString(), 0.625, failed),
+            tableField(documents[i]['suRaw'], 0.625, failed),
+            tableField(documents[i]['suScore'].toString(), 0.625, failed),
+            tableField(documents[i]['runRaw'], 0.75, failed),
+            tableField(documents[i]['runScore'].toString(), 0.75, failed),
+            tableField(documents[i]['total'].toString(), 0.625, failed),
+          ],
+        ),
+      );
     }
-    pu = pu ~/ puNumber;
-    su = su ~/ suNumber;
-    run = run ~/ runNumber;
-    total = total ~/ totalNumber;
-
-    children.add(TableRow(children: [
-      headerField('Average', 2.75),
-      headerField('', 1.625),
-      headerField('', 0.625),
-      headerField(pu.toString(), 0.625),
-      headerField('', 0.625),
-      headerField(su.toString(), 0.625),
-      headerField('', 0.75),
-      headerField(run.toString(), 0.625),
-      headerField(total.toString(), 0.75),
-    ]));
 
     return children;
   }
 
-  List<TableRow> halfTableChildren() {
-    int pu = 0,
-        puNumber = 0,
-        su = 0,
-        suNumber = 0,
-        run = 0,
-        runNumber = 0,
-        total = 0,
-        totalNumber = 0;
-    List<TableRow> children = [
-      TableRow(children: [
+  TableRow fullPageAveRow() {
+    return TableRow(
+      children: [
+        headerField('Average', 2.75),
+        headerField('', 1.625),
+        headerField('', 0.625),
+        headerField(getAverages()['pu'].toString(), 0.625),
+        headerField('', 0.625),
+        headerField(getAverages()['su'].toString(), 0.625),
+        headerField('', 0.75),
+        headerField(getAverages()['run'].toString(), 0.625),
+        headerField(getAverages()['total'].toString(), 0.75),
+      ],
+    );
+  }
+
+  TableRow halfPageTableHeader() {
+    return TableRow(
+      children: [
         headerField('Name', 2.5),
         headerField('Date', 1.5),
         headerField('PU', 0.625),
         headerField('SU', 0.625),
         headerField('Run', 0.625),
         headerField('Total', 0.625)
-      ])
-    ];
-    for (DocumentSnapshot apft in documents) {
-      if (apft['puScore'] != 0) {
-        pu = pu + apft['puScore'];
-        puNumber++;
-      }
-      if (apft['suScore'] != 0) {
-        su = su + apft['suScore'];
-        suNumber++;
-      }
-      if (apft['runScore'] != 0) {
-        run = run + apft['runScore'];
-        runNumber++;
-      }
-      if (apft['puScore'] != 0 &&
-          apft['suScore'] != 0 &&
-          apft['runScore'] != 0) {
-        total = total + apft['puScore'] + apft['suScore'] + apft['runScore'];
-        totalNumber++;
-      }
+      ],
+    );
+  }
+
+  List<TableRow> halfTableChildren(int startIndex, int endIndex) {
+    List<TableRow> children = [];
+    for (int i = startIndex; i <= endIndex; i++) {
       bool failed = false;
-      if (!apft['pass']) {
+      if (!documents[i]['pass']) {
         failed = true;
       }
-      children.add(TableRow(children: [
-        tableField('${apft['rank']} ${apft['name']}, ${apft['firstName']}', 2.5,
-            failed),
-        tableField(apft['date'], 1.5, failed),
-        tableField(apft['puScore'].toString(), 0.625, failed),
-        tableField(apft['suScore'].toString(), 0.625, failed),
-        tableField(apft['runScore'].toString(), 0.625, failed),
-        tableField(apft['total'].toString(), 0.625, failed),
-      ]));
+      children.add(
+        TableRow(
+          children: [
+            tableField(
+                '${documents[i]['rank']} ${documents[i]['name']}, ${documents[i]['firstName']}',
+                2.5,
+                failed),
+            tableField(documents[i]['date'], 1.5, failed),
+            tableField(documents[i]['puScore'].toString(), 0.625, failed),
+            tableField(documents[i]['suScore'].toString(), 0.625, failed),
+            tableField(documents[i]['runScore'].toString(), 0.625, failed),
+            tableField(documents[i]['total'].toString(), 0.625, failed),
+          ],
+        ),
+      );
     }
-    pu = pu ~/ puNumber;
-    su = su ~/ suNumber;
-    run = run ~/ runNumber;
-    total = total ~/ totalNumber;
-
-    children.add(TableRow(children: [
-      headerField('Average', 2.5),
-      headerField('', 1.5),
-      headerField(pu.toString(), 0.625),
-      headerField(su.toString(), 0.625),
-      headerField(run.toString(), 0.625),
-      headerField(total.toString(), 0.625),
-    ]));
     return children;
+  }
+
+  TableRow halfPageAveRow() {
+    return TableRow(
+      children: [
+        headerField('Average', 2.5),
+        headerField('', 1.5),
+        headerField(getAverages()['pu'].toString(), 0.625),
+        headerField(getAverages()['su'].toString(), 0.625),
+        headerField(getAverages()['run'].toString(), 0.625),
+        headerField(getAverages()['total'].toString(), 0.625),
+      ],
+    );
   }
 
   Future<String> createFullPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 18).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.landscape,
-        margin: const EdgeInsets.all(72.0),
-        build: (Context context) {
-          return Center(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 18;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 18) {
+        endIndex = (i * 18) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.landscape,
+          margin: const EdgeInsets.all(72.0),
+          build: (Context context) {
+            return Center(
+              heightFactor: 1,
               child: Table(
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: fullTableChildren()));
-        }));
+                  border: TableBorder.all(),
+                  children: [
+                    fullPageTableHeader(),
+                    ...fullTableChildren(startIndex, endIndex),
+                    fullPageAveRow(),
+                  ]),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'apftStats');
   }
 
   Future<String> createHalfPage() async {
     final Document pdf = Document();
+    int pages = (documents.length / 11).ceil();
 
-    pdf.addPage(Page(
-        pageFormat: PdfPageFormat.letter,
-        orientation: PageOrientation.portrait,
-        margin: const EdgeInsets.all(0.75 * 72.0),
-        build: (Context context) {
-          return Container(
+    for (int i = 1; i <= pages; i++) {
+      int startIndex = i == 1 ? 0 : (i - 1) * 11;
+      int endIndex = documents.length - 1;
+      if (documents.length > i * 11) {
+        endIndex = (i * 11) - 1;
+      }
+      pdf.addPage(
+        Page(
+          pageFormat: PdfPageFormat.letter,
+          orientation: PageOrientation.portrait,
+          margin: const EdgeInsets.all(0.75 * 72.0),
+          build: (Context context) {
+            return Container(
               child: Table(
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: const TableBorder(
-                      left: BorderSide(),
-                      top: BorderSide(),
-                      right: BorderSide(),
-                      bottom: BorderSide(),
-                      horizontalInside: BorderSide(),
-                      verticalInside: BorderSide()),
-                  children: halfTableChildren()));
-        }));
+                  border: TableBorder.all(),
+                  children: [
+                    halfPageTableHeader(),
+                    ...halfTableChildren(startIndex, endIndex),
+                    halfPageAveRow(),
+                  ]),
+            );
+          },
+        ),
+      );
+    }
 
     return pdfDownload(pdf, 'apftStats');
   }

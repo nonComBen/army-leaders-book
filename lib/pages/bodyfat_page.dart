@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
@@ -19,32 +21,41 @@ import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/rating.dart';
-import '../../pages/editPages/editRatingPage.dart';
-import '../../pages/uploadPages/uploadRatingsPage.dart';
-import '../../pdf/ratingsPdf.dart';
+import '../../models/setting.dart';
+import '../pdf/bodyfats_pdf.dart';
+import '../../widgets/anon_warning_banner.dart';
+import '../../models/bodyfat.dart';
+import 'editPages/edit_bodyfat_page.dart';
+import 'uploadPages/upload_body_fat_page.dart';
+import '../providers/notifications_plugin_provider.dart';
 import '../providers/tracking_provider.dart';
-import '../widgets/anon_warning_banner.dart';
 
-class RatingsPage extends StatefulWidget {
-  const RatingsPage({
+class BodyfatPage extends StatefulWidget {
+  const BodyfatPage({
     Key key,
-    @required this.userId,
   }) : super(key: key);
-  final String userId;
 
-  static const routeName = '/ratings-page';
+  static const routeName = '/bodyfat-page';
 
   @override
-  RatingsPageState createState() => RatingsPageState();
+  BodyfatPageState createState() => BodyfatPageState();
 }
 
-class RatingsPageState extends State<RatingsPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
+class BodyfatPageState extends State<BodyfatPage> {
+  int _sortColumnIndex, overdueDays, amberDays;
+  bool _sortAscending = true,
+      _adLoaded = false,
+      isSubscribed,
+      notificationsRefreshed = false,
+      isInitial = true;
+  String _userId;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
+  SharedPreferences prefs;
+  NotificationDetails notificationDetails;
+  FlutterLocalNotificationsPlugin notificationsPlugin;
+  QuerySnapshot snapshot;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -53,7 +64,15 @@ class RatingsPageState extends State<RatingsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+
+    notificationsPlugin =
+        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
+    if (!kIsWeb && !notificationsRefreshed) {
+      notificationsRefreshed = true;
+      refreshNotifications();
+    }
 
     if (!_adLoaded) {
       bool trackingAllowed =
@@ -78,6 +97,10 @@ class RatingsPageState extends State<RatingsPage> {
         _adLoaded = true;
       }
     }
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
   }
 
   @override
@@ -89,11 +112,24 @@ class RatingsPageState extends State<RatingsPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
+    overdueDays = 180;
+    amberDays = 150;
+
+    var androidSpecifics =
+        const AndroidNotificationDetails('channelId', 'channelName');
+    var iosSpecifics = const DarwinNotificationDetails(
+        presentAlert: true, presentSound: false, presentBadge: false);
+    notificationDetails =
+        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+  }
+
+  void initialize() async {
+    prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('ratings')
+        .collection('bodyfatStats')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -101,6 +137,19 @@ class RatingsPageState extends State<RatingsPage> {
         filteredDocs = updates.docs;
         _selectedDocuments.clear();
       });
+
+      if (!kIsWeb) {
+        refreshNotifications();
+      }
+    });
+    snapshot = await FirebaseFirestore.instance
+        .collection('settings')
+        .where('owner', isEqualTo: _userId)
+        .get();
+    DocumentSnapshot doc = snapshot.docs[0];
+    setState(() {
+      overdueDays = doc['bfMonths'] * 30;
+      amberDays = overdueDays - 30;
     });
   }
 
@@ -111,39 +160,83 @@ class RatingsPageState extends State<RatingsPage> {
     super.dispose();
   }
 
+  void refreshNotifications() async {
+    int monthsDue = 6;
+    List<dynamic> daysBefore = [0, 30];
+    if (snapshot != null && snapshot.docs.isNotEmpty) {
+      Setting setting = Setting.fromMap(snapshot.docs.first.data());
+      if (setting.addNotifications != null && !setting.addNotifications) return;
+      monthsDue = setting.bfMonths ?? 6;
+      daysBefore = setting.bfNotifications ?? [0, 30];
+    }
+
+    //get pending notifications and cancel them
+    List<PendingNotificationRequest> pending =
+        await notificationsPlugin.pendingNotificationRequests();
+    pending = pending.where((pr) => pr.payload == 'BF').toList();
+    for (PendingNotificationRequest request in pending) {
+      notificationsPlugin.cancel(request.id);
+    }
+
+    int startingId = prefs.getInt('runningId') ?? 0;
+    List<List<String>> dates = [];
+
+    //create copy of documents
+    List<DocumentSnapshot> docs = List.from(documents);
+    //sort by date
+    docs.sort((a, b) => a['date'].toString().compareTo(b['date'].toString()));
+    //combine Soldiers with like dates
+    for (int i = 0; i < docs.length; i++) {
+      if (i == 0) {
+        dates.add([
+          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
+          docs[i]['date']
+        ]);
+      } else if (docs[i]['date'] == docs[i - 1]['date']) {
+        dates.last[0] =
+            '${dates.last[0]}, ${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
+      } else {
+        dates.add([
+          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
+          docs[i]['date']
+        ]);
+      }
+    }
+
+    //add notifications
+    for (List<String> date in dates) {
+      if (date[1] != '') {
+        DateTime dueDate = DateTime.tryParse(date[1]);
+        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
+        if (dueDate.isAfter(DateTime.now())) {
+          for (int days in daysBefore) {
+            DateTime scheduledDate = dueDate.add(Duration(days: -days));
+            if (scheduledDate.isAfter(DateTime.now())) {
+              notificationsPlugin.zonedSchedule(
+                startingId,
+                'Ht/Wt(s) due in $days days',
+                date[0],
+                scheduledDate,
+                notificationDetails,
+                androidAllowWhileIdle: true,
+                uiLocalNotificationDateInterpretation:
+                    UILocalNotificationDateInterpretation.absoluteTime,
+                payload: 'BF',
+              );
+              startingId++;
+            }
+          }
+        }
+      }
+    }
+    if (startingId > 10000000) startingId = 0;
+    prefs.setInt('runningId', startingId);
+  }
+
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadRatingsPage()));
-      // Widget title = const Text('Upload Rating Scheme');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Rating Scheme, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
-      //       'Last/Next Eval Date also needs to be in yyyy-MM-dd or M/d/yy format and Next Eval Type  will default to blank if the type '
-      //       'does not match an option in the dropdown menu (case sensitive).',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadRatingsPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+          MaterialPageRoute(builder: (context) => const UploadBodyFatsPage()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -162,12 +255,18 @@ class RatingsPageState extends State<RatingsPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Rater',
-      'Senior Rater',
-      'Reviewer',
-      'Last Eval',
-      'Next Eval',
-      'Next Eval Type'
+      'Date',
+      'Age',
+      'Gender',
+      'Height',
+      'Height to Half Inch',
+      'Weight',
+      'BMI Pass',
+      'Neck',
+      'Waist',
+      'Hip',
+      'BF Percent',
+      'BF Pass'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -177,12 +276,18 @@ class RatingsPageState extends State<RatingsPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['rater']);
-      docs.add(doc['sr']);
-      docs.add(doc['reviewer']);
-      docs.add(doc['last']);
-      docs.add(doc['next']);
-      docs.add(doc['nextType']);
+      docs.add(doc['date']);
+      docs.add(doc['age']);
+      docs.add(doc['gender']);
+      docs.add(doc['height']);
+      docs.add(doc['heightDouble']);
+      docs.add(doc['weight']);
+      docs.add(doc['passBmi'].toString());
+      docs.add(doc['neck']);
+      docs.add(doc['waist']);
+      docs.add(doc['hip']);
+      docs.add(doc['percent']);
+      docs.add(doc['passBf'].toString());
 
       docsList.add(docs);
     }
@@ -196,7 +301,7 @@ class RatingsPageState extends State<RatingsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'ratings.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'bodyCompStats.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -204,7 +309,7 @@ class RatingsPageState extends State<RatingsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/ratings.xlsx')
+        File('$dir/bodyCompStats.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -216,7 +321,7 @@ class RatingsPageState extends State<RatingsPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/ratings.xlsx');
+                        OpenFile.open('$dir/bodyCompStats.xlsx');
                       },
                     )
                   : null,
@@ -262,9 +367,9 @@ class RatingsPageState extends State<RatingsPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
+      (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
-    RatingsPdf pdf = RatingsPdf(
+    BodyfatsPdf pdf = BodyfatsPdf(
       documents,
     );
     String location;
@@ -292,7 +397,7 @@ class RatingsPageState extends State<RatingsPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/ratingScheme.pdf');
+                    OpenFile.open('$location/bodyCompStats.pdf');
                   },
                 )));
     }
@@ -316,7 +421,7 @@ class RatingsPageState extends State<RatingsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Rating Scheme$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'Body Composition$s');
   }
 
   void _editRecord() {
@@ -329,8 +434,8 @@ class RatingsPageState extends State<RatingsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditRatingPage(
-                  rating: Rating.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditBodyfatPage(
+                  bodyfat: Bodyfat.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -338,10 +443,10 @@ class RatingsPageState extends State<RatingsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditRatingPage(
-                  rating: Rating(
-                    owner: widget.userId,
-                    users: [widget.userId],
+            builder: (context) => EditBodyfatPage(
+                  bodyfat: Bodyfat(
+                    owner: _userId,
+                    users: [_userId],
                   ),
                 )));
   }
@@ -358,27 +463,27 @@ class RatingsPageState extends State<RatingsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 435) {
       columnList.add(DataColumn(
-          label: const Text('Rater'),
+          label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 575) {
+    if (width > 530) {
       columnList.add(DataColumn(
-          label: const Text('Sr Rater'),
+          label: const Text('Height'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 685) {
+    if (width > 650) {
       columnList.add(DataColumn(
-          label: const Text('Reviewer'),
+          label: const Text('Weight'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 835) {
+    if (width > 820) {
       columnList.add(DataColumn(
-          label: const Text('Next Due'),
+          label: const Text('BF %'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -399,68 +504,83 @@ class RatingsPageState extends State<RatingsPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool overdue = isOverdue(documentSnapshot['next'], 1);
-    bool amber = isOverdue(documentSnapshot['next'], -30);
+    bool overdue = isOverdue(documentSnapshot['date'], overdueDays);
+    bool amber = isOverdue(documentSnapshot['date'], amberDays);
+    bool fail = !documentSnapshot['passBf'] && !documentSnapshot['passBmi'];
     TextStyle overdueTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.red);
     TextStyle amberTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
+    TextStyle failTextStyle =
+        const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
     List<DataCell> cellList = [
       DataCell(Text(
         documentSnapshot['rank'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
+        style: fail
+            ? failTextStyle
+            : overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
       )),
       DataCell(Text(
         '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
+        style: fail
+            ? failTextStyle
+            : overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
       )),
     ];
-    if (width > 420) {
+    if (width > 435) {
       cellList.add(DataCell(Text(
-        documentSnapshot['rater'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
+        documentSnapshot['date'],
+        style: fail
+            ? failTextStyle
+            : overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
       )));
     }
-    if (width > 575) {
+    if (width > 530) {
       cellList.add(DataCell(Text(
-        documentSnapshot['sr'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
+        documentSnapshot['height'],
+        style: fail
+            ? failTextStyle
+            : overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
       )));
     }
-    if (width > 685) {
+    if (width > 650) {
       cellList.add(DataCell(Text(
-        documentSnapshot['reviewer'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
+        documentSnapshot['weight'],
+        style: fail
+            ? failTextStyle
+            : overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
       )));
     }
-    if (width > 835) {
+    if (width > 820) {
       cellList.add(DataCell(Text(
-        documentSnapshot['next'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
+        documentSnapshot['percent'],
+        style: fail
+            ? failTextStyle
+            : overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
       )));
     }
     return cellList;
@@ -477,16 +597,16 @@ class RatingsPageState extends State<RatingsPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['rater'].compareTo(b['rater']));
+            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['sr'].compareTo(b['sr']));
+            filteredDocs.sort((a, b) => a['height'].compareTo(b['height']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['reviewer'].compareTo(b['reviewer']));
+            filteredDocs.sort((a, b) => a['weoght'].compareTo(b['weight']));
             break;
           case 5:
-            filteredDocs.sort((a, b) => a['next'].compareTo(b['next']));
+            filteredDocs.sort((a, b) => a['percent'].compareTo(b['percent']));
             break;
         }
       } else {
@@ -498,16 +618,16 @@ class RatingsPageState extends State<RatingsPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['rater'].compareTo(a['rater']));
+            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['sr'].compareTo(a['sr']));
+            filteredDocs.sort((a, b) => b['height'].compareTo(a['height']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['reviewer'].compareTo(a['reviewer']));
+            filteredDocs.sort((a, b) => b['weight'].compareTo(a['weight']));
             break;
           case 5:
-            filteredDocs.sort((a, b) => b['next'].compareTo(a['next']));
+            filteredDocs.sort((a, b) => b['percent'].compareTo(a['percent']));
             break;
         }
       }
@@ -607,7 +727,7 @@ class RatingsPageState extends State<RatingsPage> {
       ));
       popupItems.add(const PopupMenuItem(
         value: 'pdf',
-        child: Text('Download as PDF'),
+        child: Text('Download as Pdf'),
       ));
     }
     if (width > 400) {
@@ -662,7 +782,7 @@ class RatingsPageState extends State<RatingsPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Ratings'),
+            title: const Text('Body Comp Stats'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -706,13 +826,19 @@ class RatingsPageState extends State<RatingsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const <Widget>[
                           Text(
-                            'Amber Text: Next Eval Due within 30 days',
+                            'Blue Text: Failed',
+                            style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Amber Text: Due within 30 days',
                             style: TextStyle(
                                 color: Colors.amber,
                                 fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            'Red Text: Next Eval Overdue',
+                            'Red Text: Overdue',
                             style: TextStyle(
                                 color: Colors.red, fontWeight: FontWeight.bold),
                           )

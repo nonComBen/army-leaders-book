@@ -13,32 +13,32 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../auth_provider.dart';
-import '../providers/tracking_provider.dart';
 import '../../providers/subscription_state.dart';
+import '../auth_provider.dart';
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../pages/editPages/editDutyRosterPage.dart';
-import '../../models/duty.dart';
-import '../../pages/uploadPages/uploadDutyRosterPage.dart';
-import '../../pdf/dutyRosterPdf.dart';
+import '../../models/tasking.dart';
+import 'editPages/edit_tasking_page.dart';
+import 'uploadPages/upload_taskings_page.dart';
+import '../pdf/taskings_pdf.dart';
+import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
 
-class DutyRosterPage extends StatefulWidget {
-  const DutyRosterPage({
+class TaskingsPage extends StatefulWidget {
+  const TaskingsPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/duty-roster-page';
+  static const routeName = '/taskings-page';
 
   @override
-  DutyRosterPageState createState() => DutyRosterPageState();
+  TaskingsPageState createState() => TaskingsPageState();
 }
 
-class DutyRosterPageState extends State<DutyRosterPage> {
+class TaskingsPageState extends State<TaskingsPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
@@ -88,8 +88,9 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('dutyRoster')
+        .collection('taskings')
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: widget.userId)
         .snapshots();
@@ -111,19 +112,17 @@ class DutyRosterPageState extends State<DutyRosterPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadDutyRosterPage()));
-      // Widget title = const Text('Upload Duty Roster');
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadTaskingsPage()));
+      // Widget title = const Text('Upload Taskings');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Duty Roster, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Start/End Date '
-      //       'also needs to be in yyyy-MM-dd or M/d/yy format.',
+      //       'To upload your Taskings, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
+      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
+      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
+      //       'Start/End Date also need to be in yyyy-MM-dd or M/d/yy format.',
       //     ),
       //   ),
       // );
@@ -136,7 +135,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadDutyRosterPage(
+      //             builder: (context) => UploadTaskingsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -161,7 +160,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Duty',
+      'Tasking',
       'Start Date',
       'End Date',
       'Location',
@@ -169,23 +168,21 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
-      docs.add(doc['soldierId'] ?? '');
-      docs.add(doc['rank'] ?? '');
-      docs.add(doc['rankSort'] ?? '');
-      docs.add(doc['name'] ?? '');
-      docs.add(doc['firstName'] ?? '');
-      docs.add(doc['section'] ?? '');
-      docs.add(doc['duty'] ?? '');
-      docs.add(doc['start'] ?? '');
-      docs.add(doc['end'] ?? '');
+      docs.add(doc['soldierId']);
+      docs.add(doc['rank']);
+      docs.add(doc['rankSort']);
+      docs.add(doc['name']);
+      docs.add(doc['firstName']);
+      docs.add(doc['section']);
+      docs.add(doc['type']);
+      docs.add(doc['start']);
+      docs.add(doc['end']);
       try {
         docs.add(doc['location']);
       } catch (e) {
-        // ignore: avoid_print
-        print(e);
         docs.add('');
       }
-      docs.add(doc['comments'] ?? '');
+      docs.add(doc['comments']);
 
       docsList.add(docs);
     }
@@ -199,7 +196,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'dutyRoster.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'taskings.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -207,7 +204,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/dutyRoster.xlsx')
+        File('$dir/taskings.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -219,7 +216,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/dutyRoster.xlsx');
+                        OpenFile.open('$dir/taskings.xlsx');
                       },
                     )
                   : null,
@@ -267,7 +264,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     documents.sort(
       (a, b) => a['start'].toString().compareTo(b['start'].toString()),
     );
-    DutyRosterPdf pdf = DutyRosterPdf(
+    TaskingsPdf pdf = TaskingsPdf(
       documents,
     );
     String location;
@@ -295,7 +292,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/dutyRoster.pdf');
+                    OpenFile.open('$location/taskings.pdf');
                   },
                 )));
     }
@@ -308,14 +305,14 @@ class DutyRosterPageState extends State<DutyRosterPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    String s = _selectedDocuments.length > 1 ? 'ies' : 'y';
-    Widget title = Text('Delete Dut$s?');
+    String s = _selectedDocuments.length > 1 ? 's' : '';
+    Widget title = Text('Delete Tasking$s?');
     Widget content = Container(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Text('Are you sure you want to delete the selected Dut$s?'),
+            Text('Are you sure you want to delete the selected Tasking$s?'),
           ],
         ),
       ),
@@ -364,8 +361,8 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditDutyRosterPage(
-                  duty: Duty.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditTaskingPage(
+                  tasking: Tasking.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -373,8 +370,8 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditDutyRosterPage(
-                  duty: Duty(
+            builder: (context) => EditTaskingPage(
+                  tasking: Tasking(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
@@ -399,15 +396,21 @@ class DutyRosterPageState extends State<DutyRosterPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 570) {
       columnList.add(DataColumn(
           label: const Text('End'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 675) {
+    if (width > 685) {
       columnList.add(DataColumn(
-          label: const Text('Duty'),
+          label: const Text('Type'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 825) {
+      columnList.add(DataColumn(
+          label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -451,7 +454,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
             : const TextStyle(),
       )));
     }
-    if (width > 560) {
+    if (width > 570) {
       cellList.add(DataCell(Text(
         documentSnapshot['end'],
         style: overdue
@@ -459,9 +462,17 @@ class DutyRosterPageState extends State<DutyRosterPage> {
             : const TextStyle(),
       )));
     }
-    if (width > 675) {
+    if (width > 685) {
       cellList.add(DataCell(Text(
-        documentSnapshot['duty'],
+        documentSnapshot['type'],
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
+      )));
+    }
+    if (width > 825) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['section'],
         style: overdue
             ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
             : const TextStyle(),
@@ -487,7 +498,10 @@ class DutyRosterPageState extends State<DutyRosterPage> {
             filteredDocs.sort((a, b) => a['end'].compareTo(b['end']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['duty'].compareTo(b['duty']));
+            filteredDocs.sort((a, b) => a['type'].compareTo(b['type']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
             break;
         }
       } else {
@@ -505,7 +519,10 @@ class DutyRosterPageState extends State<DutyRosterPage> {
             filteredDocs.sort((a, b) => b['end'].compareTo(a['end']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['duty'].compareTo(a['duty']));
+            filteredDocs.sort((a, b) => b['type'].compareTo(a['type']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
             break;
         }
       }
@@ -660,7 +677,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Duty Roster'),
+            title: const Text('Taskings'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),

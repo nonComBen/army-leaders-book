@@ -17,7 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../pdf/alertRosterPdf.dart';
+import '../pdf/alert_roster_pdf.dart';
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
 import '../methods/download_methods.dart';

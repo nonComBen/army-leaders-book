@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:leaders_book/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/editPages/editUserPage.dart';
+import '../pages/editPages/edit_user_page.dart';
 
 class CustomDrawerHeader extends StatelessWidget {
   const CustomDrawerHeader({Key key}) : super(key: key);

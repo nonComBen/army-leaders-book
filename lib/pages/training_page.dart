@@ -6,42 +6,44 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../auth_provider.dart';
-import '../providers/tracking_provider.dart';
 import '../../providers/subscription_state.dart';
+import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../models/counseling.dart';
-import '../../pages/editPages/editCounselingPage.dart';
-import '../../pages/uploadPages/uploadCounselingsPage.dart';
+import '../../models/training.dart';
+import 'editPages/edit_training_page.dart';
+import 'uploadPages/upload_trainings_page.dart';
+import '../pdf/training_pdf.dart';
+import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
 
-class CounselingsPage extends StatefulWidget {
-  const CounselingsPage({
+class TrainingPage extends StatefulWidget {
+  const TrainingPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/counseling-page';
+  static const routeName = '/training-page';
 
   @override
-  CounselingsPageState createState() => CounselingsPageState();
+  TrainingPageState createState() => TrainingPageState();
 }
 
-class CounselingsPageState extends State<CounselingsPage> {
+class TrainingPageState extends State<TrainingPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscription;
+  StreamSubscription _subscriptionUsers;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -86,11 +88,13 @@ class CounselingsPageState extends State<CounselingsPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
-    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('counselings')
-        .where('owner', isEqualTo: widget.userId)
+
+    final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
+        .collection('training')
+        .where('users', isNotEqualTo: null)
+        .where('users', arrayContains: widget.userId)
         .snapshots();
-    _subscription = stream.listen((updates) {
+    _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
         documents = updates.docs;
         filteredDocs = updates.docs;
@@ -101,26 +105,24 @@ class CounselingsPageState extends State<CounselingsPage> {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscriptionUsers.cancel();
     myBanner?.dispose();
     super.dispose();
   }
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadCounselingsPage()));
-      // Widget title = const Text('Upload Counselings');
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadTrainingsPage()));
+      // Widget title = const Text('Upload Training');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Counselings, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also needs to be in '
-      //       'yyyy-MM-dd or M/d/yy format.',
+      //       'To upload your Training, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
+      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
+      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
+      //       'All dates also need to be in yyyy-MM-dd or M/d/yy format.',
       //     ),
       //   ),
       // );
@@ -133,7 +135,7 @@ class CounselingsPageState extends State<CounselingsPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadCounselingsPage(
+      //             builder: (context) => UploadTrainingsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -148,7 +150,8 @@ class CounselingsPageState extends State<CounselingsPage> {
   }
 
   void _downloadExcel() async {
-    if (!await checkPermission(Permission.storage)) return;
+    bool approved = await checkPermission(Permission.storage);
+    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -157,13 +160,30 @@ class CounselingsPageState extends State<CounselingsPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Date',
-      'Purpose of Counseling',
-      'Key Points',
-      'Plan of Action',
-      'Individual Remarks',
-      'Leader Responsibilities',
-      'Assessment'
+      'Cyber Awareness',
+      'OPSEC',
+      'AT Level 1',
+      'Law of War',
+      'Personnel Recovery',
+      'Information Security',
+      'CTIP',
+      'GAT',
+      'SERE',
+      'TARP',
+      'Equal Opportunity',
+      'ASAP',
+      'Suicide Prevention',
+      'SHARP',
+      'Additional 1',
+      'Additional 1 Date',
+      'Additional 2',
+      'Additional 2 Date',
+      'Additional 3',
+      'Additional 3 Date',
+      'Additional 4',
+      'Additional 4 Date',
+      'Additional 5',
+      'Additional 5 Date'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -173,13 +193,30 @@ class CounselingsPageState extends State<CounselingsPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['date']);
-      docs.add(doc['purpose']);
-      docs.add(doc['keyPoints']);
-      docs.add(doc['planOfAction']);
-      docs.add(doc['indivRemarks']);
-      docs.add(doc['leaderResp']);
-      docs.add(doc['assessment']);
+      docs.add(doc['cyber']);
+      docs.add(doc['opsec']);
+      docs.add(doc['antiTerror']);
+      docs.add(doc['lawOfWar']);
+      docs.add(doc['persRec']);
+      docs.add(doc['infoSec']);
+      docs.add(doc['ctip']);
+      docs.add(doc['gat']);
+      docs.add(doc['sere']);
+      docs.add(doc['tarp']);
+      docs.add(doc['eo']);
+      docs.add(doc['asap']);
+      docs.add(doc['suicide']);
+      docs.add(doc['sharp']);
+      docs.add(doc['add1']);
+      docs.add(doc['add1Date']);
+      docs.add(doc['add2']);
+      docs.add(doc['add2Date']);
+      docs.add(doc['add3']);
+      docs.add(doc['add3Date']);
+      docs.add(doc['add4']);
+      docs.add(doc['add4Date']);
+      docs.add(doc['add5']);
+      docs.add(doc['add5Date']);
 
       docsList.add(docs);
     }
@@ -193,7 +230,7 @@ class CounselingsPageState extends State<CounselingsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'counselings.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'training.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -201,7 +238,7 @@ class CounselingsPageState extends State<CounselingsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/counselings.xlsx')
+        File('$dir/training.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -213,7 +250,7 @@ class CounselingsPageState extends State<CounselingsPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/counselings.xlsx');
+                        OpenFile.open('$dir/training.xlsx');
                       },
                     )
                   : null,
@@ -222,8 +259,82 @@ class CounselingsPageState extends State<CounselingsPage> {
         }
       } catch (e) {
         // ignore: avoid_print
-        print('Error: $e');
+        print(e);
       }
+    }
+  }
+
+  void _downloadPdf() async {
+    if (isSubscribed) {
+      if (_selectedDocuments.isEmpty) {
+        //show snack bar requiring at least one item selected
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('You must select at least one record')));
+        return;
+      }
+      Widget title = const Text('Download PDF');
+      Widget content = Container(
+        padding: const EdgeInsets.all(8.0),
+        child: const Text('Select full page or half page format.'),
+      );
+      customAlertDialog(
+        context: context,
+        title: title,
+        content: content,
+        primaryText: 'Full Page',
+        primary: () {
+          completePdfDownload(true);
+        },
+        secondaryText: 'Half Page',
+        secondary: () {
+          completePdfDownload(false);
+        },
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            'Downloading PDF files is only available for subscribed users.'),
+      ));
+    }
+  }
+
+  void completePdfDownload(bool fullPage) async {
+    bool approved = await checkPermission(Permission.storage);
+    if (!approved) return;
+    documents.sort(
+      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
+    );
+    TrainingPdf pdf = TrainingPdf(
+      documents,
+    );
+    String location;
+    if (fullPage) {
+      location = await pdf.createFullPage();
+    } else {
+      location = await pdf.createHalfPage();
+    }
+    String message;
+    if (location == '') {
+      message = 'Failed to download pdf';
+    } else {
+      String directory =
+          kIsWeb ? '/Downloads' : '\'On My iPhone(iPad)/Leader\'s Book\'';
+      message = kIsWeb
+          ? 'Pdf successfully downloaded to $directory'
+          : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 5),
+          action: location == ''
+              ? null
+              : SnackBarAction(
+                  label: 'Open',
+                  onPressed: () {
+                    OpenFile.open('$location/training.pdf');
+                  },
+                )));
     }
   }
 
@@ -245,7 +356,7 @@ class CounselingsPageState extends State<CounselingsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Counseling$s');
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Training$s');
   }
 
   void _editRecord() {
@@ -258,8 +369,8 @@ class CounselingsPageState extends State<CounselingsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditCounselingPage(
-                  counseling: Counseling.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditTrainingPage(
+                  training: Training.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -267,9 +378,10 @@ class CounselingsPageState extends State<CounselingsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditCounselingPage(
-                  counseling: Counseling(
+            builder: (context) => EditTrainingPage(
+                  training: Training(
                     owner: widget.userId,
+                    users: [widget.userId],
                   ),
                 )));
   }
@@ -288,13 +400,25 @@ class CounselingsPageState extends State<CounselingsPage> {
     ];
     if (width > 420) {
       columnList.add(DataColumn(
-          label: const Text('Date'),
+          label: const Text('Cyber'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 510) {
+    if (width > 560) {
       columnList.add(DataColumn(
-          label: const Text('Section'),
+          label: const Text('OPSEC'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 685) {
+      columnList.add(DataColumn(
+          label: const Text('AT Lvl 1'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 825) {
+      columnList.add(DataColumn(
+          label: const Text('CTIP'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -321,10 +445,16 @@ class CounselingsPageState extends State<CounselingsPage> {
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
     if (width > 420) {
-      cellList.add(DataCell(Text(documentSnapshot['date'])));
+      cellList.add(DataCell(Text(documentSnapshot['cyber'])));
     }
-    if (width > 510) {
-      cellList.add(DataCell(Text(documentSnapshot['section'])));
+    if (width > 560) {
+      cellList.add(DataCell(Text(documentSnapshot['opsec'])));
+    }
+    if (width > 685) {
+      cellList.add(DataCell(Text(documentSnapshot['antiTerror'])));
+    }
+    if (width > 825) {
+      cellList.add(DataCell(Text(documentSnapshot['ctip'])));
     }
     return cellList;
   }
@@ -340,10 +470,17 @@ class CounselingsPageState extends State<CounselingsPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
+            filteredDocs.sort((a, b) => a['cyber'].compareTo(b['cyber']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
+            filteredDocs.sort((a, b) => a['opsec'].compareTo(b['opsec']));
+            break;
+          case 4:
+            filteredDocs
+                .sort((a, b) => a['antiTerror'].compareTo(b['antiTerror']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => a['ctip'].compareTo(b['ctip']));
             break;
         }
       } else {
@@ -355,10 +492,17 @@ class CounselingsPageState extends State<CounselingsPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
+            filteredDocs.sort((a, b) => b['cyber'].compareTo(a['cyber']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
+            filteredDocs.sort((a, b) => b['opsec'].compareTo(a['opsec']));
+            break;
+          case 4:
+            filteredDocs
+                .sort((a, b) => b['antiTerror'].compareTo(a['antiTerror']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => b['ctip'].compareTo(a['ctip']));
             break;
         }
       }
@@ -419,7 +563,7 @@ class CounselingsPageState extends State<CounselingsPage> {
 
     List<PopupMenuEntry<String>> popupItems = [];
 
-    if (width > 500) {
+    if (width > 600) {
       buttons.add(
         Tooltip(
             message: 'Download as Excel',
@@ -438,6 +582,15 @@ class CounselingsPageState extends State<CounselingsPage> {
                   _uploadExcel(context);
                 })),
       );
+      buttons.add(
+        Tooltip(
+            message: 'Download as PDF',
+            child: IconButton(
+                icon: const Icon(Icons.picture_as_pdf),
+                onPressed: () {
+                  _downloadPdf();
+                })),
+      );
     } else {
       popupItems.add(const PopupMenuItem(
         value: 'download',
@@ -446,6 +599,10 @@ class CounselingsPageState extends State<CounselingsPage> {
       popupItems.add(const PopupMenuItem(
         value: 'upload',
         child: Text('Upload Data'),
+      ));
+      popupItems.add(const PopupMenuItem(
+        value: 'pdf',
+        child: Text('Download as PDF'),
       ));
     }
     if (width > 400) {
@@ -475,6 +632,9 @@ class CounselingsPageState extends State<CounselingsPage> {
           if (result == 'delete') {
             _deleteRecord();
           }
+          if (result == 'pdf') {
+            _downloadPdf();
+          }
         },
         itemBuilder: (BuildContext context) {
           return popupItems;
@@ -497,7 +657,7 @@ class CounselingsPageState extends State<CounselingsPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Counselings'),
+            title: const Text('Training'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),

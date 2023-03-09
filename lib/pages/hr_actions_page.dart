@@ -13,32 +13,32 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
-import '../providers/subscription_state.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../models/hand_receipt_item.dart';
-import '../pages/editPages/editHandReceiptPage.dart';
-import '../pages/uploadPages/uploadHandReceiptPage.dart';
-import '../pdf/handReceiptPdf.dart';
+import '../models/hr_action.dart';
+import 'editPages/edit_hr_action_page.dart';
+import 'uploadPages/upload_hr_actions_page.dart';
+import '../pdf/hr_actions_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class HandReceiptPage extends StatefulWidget {
-  const HandReceiptPage({
+class HrActionsPage extends StatefulWidget {
+  const HrActionsPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/hand-receipt-page';
+  static const routeName = '/hr-actions-page';
 
   @override
-  HandReceiptPageState createState() => HandReceiptPageState();
+  HrActionsPageState createState() => HrActionsPageState();
 }
 
-class HandReceiptPageState extends State<HandReceiptPage> {
+class HrActionsPageState extends State<HrActionsPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
@@ -90,7 +90,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
     filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('handReceipt')
+        .collection('hrActions')
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: widget.userId)
         .snapshots();
@@ -112,19 +112,17 @@ class HandReceiptPageState extends State<HandReceiptPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadHandReceiptPage()));
-      // Widget title = const Text('Upload Hand Receipt');
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadHrActionsPage()));
+      // Widget title = const Text('Upload HR Metrics');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Hand Receipt, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
-      //       'Subcompents need to be represented as a list of lists (i.e. Item Name, NSN #, On Hand #, Required #; Item Name, ...).',
+      //       'To upload your HR Metrics, the file must be in .csv format. Also, there needs to be a Soldier Id column and '
+      //       'the Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data '
+      //       'from Soldiers page. If Excel gives you an error for Soldier Id, change cell format to Text from General and '
+      //       'delete the \'=\'. Dates also need to be in yyyy-MM-dd or M/d/yy format.',
       //     ),
       //   ),
       // );
@@ -137,7 +135,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadHandReceiptPage(
+      //             builder: (context) => UploadHrActionsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -162,14 +160,9 @@ class HandReceiptPageState extends State<HandReceiptPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Item',
-      'Model #',
-      'Serial #',
-      'NSN #',
-      'Location',
-      'Value',
-      'Subcomponents',
-      'Comments',
+      'DD93 Date',
+      'SGLV Date',
+      'Record Review Date'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -179,19 +172,9 @@ class HandReceiptPageState extends State<HandReceiptPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['item']);
-      docs.add(doc['model']);
-      docs.add(doc['serial']);
-      docs.add(doc['nsn']);
-      docs.add(doc['location']);
-      docs.add(doc['value']);
-      String subs = '';
-      for (Map<String, dynamic> map in doc['subComponents']) {
-        subs =
-            '$subs${map['item']}, ${map['nsn']}, ${map['onHand']}, ${map['required']};';
-      }
-      docs.add(subs);
-      docs.add(doc['comments']);
+      docs.add(doc['dd93']);
+      docs.add(doc['sglv']);
+      docs.add(doc['prr']);
 
       docsList.add(docs);
     }
@@ -205,7 +188,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'handReceipt.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'hrMetrics.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -213,22 +196,24 @@ class HandReceiptPageState extends State<HandReceiptPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/handReceipt.xlsx')
+        File('$dir/hrMetrics.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Data successfully downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open('$dir/handReceipt.xlsx');
-                    },
-                  )
-                : null,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Data successfully downloaded to $location'),
+              duration: const Duration(seconds: 5),
+              action: Platform.isAndroid
+                  ? SnackBarAction(
+                      label: 'Open',
+                      onPressed: () {
+                        OpenFile.open('$dir/hrMetrics.xlsx');
+                      },
+                    )
+                  : null,
+            ),
+          );
         }
       } catch (e) {
         // ignore: avoid_print
@@ -239,12 +224,6 @@ class HandReceiptPageState extends State<HandReceiptPage> {
 
   void _downloadPdf() async {
     if (isSubscribed) {
-      if (_selectedDocuments.isEmpty) {
-        //show snack bar requiring at least one item selected
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('You must select at least one record')));
-        return;
-      }
       Widget title = const Text('Download PDF');
       Widget content = Container(
         padding: const EdgeInsets.all(8.0),
@@ -274,7 +253,10 @@ class HandReceiptPageState extends State<HandReceiptPage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
-    HandReceiptPdf pdf = HandReceiptPdf(
+    documents.sort(
+      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
+    );
+    HrActionsPdf pdf = HrActionsPdf(
       documents,
     );
     String location;
@@ -302,7 +284,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/handReceipt.pdf');
+                    OpenFile.open('$location/hrActions.pdf');
                   },
                 )));
     }
@@ -325,8 +307,8 @@ class HandReceiptPageState extends State<HandReceiptPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Hand Receipt Item');
+    String s = _selectedDocuments.length > 1 ? 's' : '';
+    deleteRecord(context, _selectedDocuments, widget.userId, 'HR Metric$s');
   }
 
   void _editRecord() {
@@ -339,8 +321,8 @@ class HandReceiptPageState extends State<HandReceiptPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditHandReceiptPage(
-                  item: HandReceiptItem.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditHrActionPage(
+                  hrAction: HrAction.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -348,76 +330,41 @@ class HandReceiptPageState extends State<HandReceiptPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditHandReceiptPage(
-                  item: HandReceiptItem(
+            builder: (context) => EditHrActionPage(
+                  hrAction: HrAction(
                     owner: widget.userId,
                     users: [widget.userId],
-                    subComponents: [],
                   ),
-                )));
-  }
-
-  void _copyRecord() {
-    if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
-      return;
-    }
-    HandReceiptItem hrItem =
-        HandReceiptItem.fromSnapshot(_selectedDocuments.first);
-
-    hrItem.id = null;
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditHandReceiptPage(
-                  item: hrItem,
                 )));
   }
 
   List<DataColumn> _createColumns(double width) {
     List<DataColumn> columnList = [
       DataColumn(
-        label: const Expanded(
-          flex: 1,
-          child: Text('Section'),
-        ),
+        label: const Text('Rank'),
         onSort: (int columnIndex, bool ascending) =>
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Expanded(
-            flex: 1,
-            child: Text('Item'),
-          ),
+          label: const Text('Name'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 400) {
+    if (width > 420) {
       columnList.add(DataColumn(
-          label: const Expanded(
-            flex: 1,
-            child: Text('Location'),
-          ),
+          label: const Text('DD93'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 595) {
+    if (width > 560) {
       columnList.add(DataColumn(
-          label: const Expanded(
-            flex: 1,
-            child: Text('Serial'),
-          ),
+          label: const Text('SGLV'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 685) {
+    if (width > 700) {
       columnList.add(DataColumn(
-          label: const Expanded(
-            flex: 1,
-            child: Text('Value'),
-          ),
+          label: const Text('RR'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -439,17 +386,18 @@ class HandReceiptPageState extends State<HandReceiptPage> {
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
     List<DataCell> cellList = [
-      DataCell(Text(documentSnapshot['section'])),
-      DataCell(Text(documentSnapshot['item'])),
+      DataCell(Text(documentSnapshot['rank'])),
+      DataCell(Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 400) {
-      cellList.add(DataCell(Text(documentSnapshot['location'])));
+    if (width > 420) {
+      cellList.add(DataCell(Text(documentSnapshot['dd93'])));
     }
-    if (width > 595) {
-      cellList.add(DataCell(Text(documentSnapshot['serial'])));
+    if (width > 560) {
+      cellList.add(DataCell(Text(documentSnapshot['sglv'])));
     }
-    if (width > 685) {
-      cellList.add(DataCell(Text(documentSnapshot['value'])));
+    if (width > 700) {
+      cellList.add(DataCell(Text(documentSnapshot['prr'])));
     }
     return cellList;
   }
@@ -459,37 +407,37 @@ class HandReceiptPageState extends State<HandReceiptPage> {
       if (ascending) {
         switch (columnIndex) {
           case 0:
-            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
+            filteredDocs.sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
             break;
           case 1:
-            filteredDocs.sort((a, b) => a['item'].compareTo(b['item']));
+            filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['location'].compareTo(b['location']));
+            filteredDocs.sort((a, b) => a['dd93'].compareTo(b['dd93']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['serial'].compareTo(b['serial']));
+            filteredDocs.sort((a, b) => a['sglv'].compareTo(b['sglv']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['value'].compareTo(b['value']));
+            filteredDocs.sort((a, b) => a['prr'].compareTo(b['prr']));
             break;
         }
       } else {
         switch (columnIndex) {
           case 0:
-            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
+            filteredDocs.sort((a, b) => b['rankSort'].compareTo(a['rankSort']));
             break;
           case 1:
-            filteredDocs.sort((a, b) => b['item'].compareTo(a['item']));
+            filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['location'].compareTo(a['location']));
+            filteredDocs.sort((a, b) => b['dd93'].compareTo(a['dd93']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['serial'].compareTo(a['serial']));
+            filteredDocs.sort((a, b) => b['sglv'].compareTo(a['sglv']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['value'].compareTo(a['value']));
+            filteredDocs.sort((a, b) => b['prr'].compareTo(a['prr']));
             break;
         }
       }
@@ -562,7 +510,7 @@ class HandReceiptPageState extends State<HandReceiptPage> {
       );
       buttons.add(
         Tooltip(
-            message: 'Upload Excel',
+            message: 'Upload Data',
             child: IconButton(
                 icon: const Icon(Icons.file_upload),
                 onPressed: () {
@@ -644,29 +592,13 @@ class HandReceiptPageState extends State<HandReceiptPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Hand Receipt'),
+            title: const Text('HR Metrics'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
-        //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-                heroTag: 'copy',
-                child: const Icon(Icons.copy),
-                onPressed: () {
-                  _copyRecord();
-                }),
-            const SizedBox(
-              height: 10,
-            ),
-            FloatingActionButton(
-                heroTag: 'add',
-                child: const Icon(Icons.add),
-                onPressed: () {
-                  _newRecord(context);
-                }),
-          ],
-        ),
+        floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              _newRecord(context);
+            }),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

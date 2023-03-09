@@ -1,11 +1,10 @@
-// ignore_for_file: file_names, avoid_print
+// ignore_for_file: file_names
 
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,49 +12,38 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../models/apft.dart';
-import '../../pages/editPages/editApftPage.dart';
-import '../../pdf/apftsPdf.dart';
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
-import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/setting.dart';
-import '../../pages/uploadPages/uploadApftPage.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../providers/notifications_plugin_provider.dart';
+import '../../models/profile.dart';
+import 'editPages/edit_perm_profile_page.dart';
+import 'uploadPages/upload_perm_profile_page.dart';
+import '../pdf/perm_profiles_pdf.dart';
 import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
 
-class ApftPage extends StatefulWidget {
-  const ApftPage({
+class PermProfilesPage extends StatefulWidget {
+  const PermProfilesPage({
     Key key,
+    @required this.userId,
   }) : super(key: key);
+  final String userId;
 
-  static const routeName = '/apft-page';
+  static const routeName = '/permanent-profile-page';
 
   @override
-  ApftPageState createState() => ApftPageState();
+  PermProfilesPageState createState() => PermProfilesPageState();
 }
 
-class ApftPageState extends State<ApftPage> {
-  int _sortColumnIndex, puAve, suAve, runAve, totalAve, overdueDays, amberDays;
-  bool _sortAscending = true,
-      _adLoaded = false,
-      isSubscribed,
-      notificationsRefreshed = false,
-      isInitial = true;
-  String _userId;
+class PermProfilesPageState extends State<PermProfilesPage> {
+  int _sortColumnIndex;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
-  QuerySnapshot snapshot;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -64,16 +52,7 @@ class ApftPageState extends State<ApftPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-    print('Provider Subscribed State: $isSubscribed');
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
 
     if (!_adLoaded) {
       bool trackingAllowed =
@@ -98,10 +77,6 @@ class ApftPageState extends State<ApftPage> {
         _adLoaded = true;
       }
     }
-    if (isInitial) {
-      initialize();
-      isInitial = false;
-    }
   }
 
   @override
@@ -113,23 +88,12 @@ class ApftPageState extends State<ApftPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
-    overdueDays = 180;
-    amberDays = 150;
 
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('apftStats')
+        .collection('profiles')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: _userId)
+        .where('users', arrayContains: widget.userId)
+        .where('type', isEqualTo: 'Permanent')
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -137,17 +101,6 @@ class ApftPageState extends State<ApftPage> {
         filteredDocs = updates.docs;
         _selectedDocuments.clear();
       });
-
-      _calcAves();
-    });
-    snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot.docs[0];
-    setState(() {
-      overdueDays = doc['acftMonths'] * 30;
-      amberDays = overdueDays - 30;
     });
   }
 
@@ -158,93 +111,22 @@ class ApftPageState extends State<ApftPage> {
     super.dispose();
   }
 
-  void refreshNotifications() async {
-    int monthsDue = 6;
-    List<dynamic> daysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      monthsDue = setting.acftMonths ?? 6;
-      daysBefore = setting.acftNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending.where((pr) => pr.payload == 'APFT').toList();
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    int startingId = prefs.getInt('runningId') ?? 0;
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a['date'].toString().compareTo(b['date'].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      if (i == 0) {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      } else if (docs[i]['date'] == docs[i - 1]['date']) {
-        dates.last[0] =
-            '${dates.last[0]}, ${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      } else {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                'APFT(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                androidAllowWhileIdle: true,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                payload: 'APFT',
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
-  }
-
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadApftPage()));
-      // Widget title = const Text('Upload APFT Stats');
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const UploadPermProfilePage()));
+      // Widget title = const Text('Upload Permanent Profiles');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your APFT Stats, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also needs to be in '
-      //       'yyyy-MM-dd or M/d/yy format and aerobic event will default to Run if the event does not match an option in the dropdown menu (case '
-      //       'sensitive).',
+      //       'To upload your Permanent Profiles, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
+      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. '
+      //       'If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also '
+      //       'needs to be in yyyy-MM-dd or M/d/yy format, alternative event will default to blank if the event does not match an option in the '
+      //       'dropdown menu (case sensitive), and use either true/false or yes/no for shaving, push ups, sit ups, and run values.',
       //     ),
       //   ),
       // );
@@ -257,7 +139,7 @@ class ApftPageState extends State<ApftPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadApftPage(
+      //             builder: (context) => UploadPermProfilePage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -283,17 +165,12 @@ class ApftPageState extends State<ApftPage> {
       'First Name',
       'Section',
       'Date',
-      'Age',
-      'Gender',
-      'PU Raw',
-      'PU Score',
-      'SU Raw',
-      'SU Score',
-      'Run Raw',
-      'Run Score',
-      'Total',
+      'Shaving',
+      'PU',
+      'SU',
+      'Run',
       'Alt Event',
-      'Pass'
+      'Comments'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -304,17 +181,12 @@ class ApftPageState extends State<ApftPage> {
       docs.add(doc['firstName']);
       docs.add(doc['section']);
       docs.add(doc['date']);
-      docs.add(doc['age']);
-      docs.add(doc['gender']);
-      docs.add(doc['puRaw']);
-      docs.add(doc['puScore']);
-      docs.add(doc['suRaw']);
-      docs.add(doc['suScore']);
-      docs.add(doc['runRaw']);
-      docs.add(doc['runScore']);
-      docs.add(doc['total']);
+      docs.add(doc['shaving'].toString());
+      docs.add(doc['pu'].toString());
+      docs.add(doc['su'].toString());
+      docs.add(doc['run'].toString());
       docs.add(doc['altEvent']);
-      docs.add(doc['pass'].toString());
+      docs.add(doc['comments']);
 
       docsList.add(docs);
     }
@@ -328,7 +200,7 @@ class ApftPageState extends State<ApftPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'apftStats.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'permProfiles.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -336,7 +208,7 @@ class ApftPageState extends State<ApftPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/apftStats.xlsx')
+        File('$dir/permProfiles.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -348,7 +220,7 @@ class ApftPageState extends State<ApftPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/apftStats.xlsx');
+                        OpenFile.open('$dir/permProfiles.xlsx');
                       },
                     )
                   : null,
@@ -356,6 +228,7 @@ class ApftPageState extends State<ApftPage> {
           );
         }
       } catch (e) {
+        // ignore: avoid_print
         print('Error: $e');
       }
     }
@@ -393,9 +266,9 @@ class ApftPageState extends State<ApftPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['date'].toString().compareTo(b['date'].toString()),
+      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
-    ApftsPdf pdf = ApftsPdf(
+    PermProfilesPdf pdf = PermProfilesPdf(
       documents,
     );
     String location;
@@ -423,7 +296,7 @@ class ApftPageState extends State<ApftPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/apftStats.pdf');
+                    OpenFile.open('$location/permProfiles.pdf');
                   },
                 )));
     }
@@ -436,7 +309,6 @@ class ApftPageState extends State<ApftPage> {
       filteredDocs =
           documents.where((element) => element['section'] == section).toList();
     }
-    _calcAves();
     setState(() {});
   }
 
@@ -448,7 +320,8 @@ class ApftPageState extends State<ApftPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, _userId, 'APFT$s');
+    deleteRecord(
+        context, _selectedDocuments, widget.userId, 'Permanent Profile$s');
   }
 
   void _editRecord() {
@@ -461,8 +334,8 @@ class ApftPageState extends State<ApftPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditApftPage(
-                  apft: Apft.fromSnapshot(_selectedDocuments[0]),
+            builder: (context) => EditPermProfilePage(
+                  profile: PermProfile.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -470,45 +343,12 @@ class ApftPageState extends State<ApftPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditApftPage(
-                  apft: Apft(
-                    owner: _userId,
-                    users: [_userId],
+            builder: (context) => EditPermProfilePage(
+                  profile: PermProfile(
+                    owner: widget.userId,
+                    users: [widget.userId],
                   ),
                 )));
-  }
-
-  void _calcAves() {
-    int pu = 0;
-    int su = 0;
-    int run = 0;
-    int total = 0;
-    puAve = 0;
-    suAve = 0;
-    runAve = 0;
-    totalAve = 0;
-    for (DocumentSnapshot doc in filteredDocs) {
-      if (doc['puScore'] != 0) {
-        puAve += doc['puScore'];
-        pu++;
-      }
-      if (doc['suScore'] != 0) {
-        suAve += doc['suScore'];
-        su++;
-      }
-      if (doc['runScore'] != 0) {
-        runAve += doc['runScore'];
-        run++;
-      }
-      if (doc['puScore'] != 0 && doc['suScore'] != 0 && doc['runScore'] != 0) {
-        totalAve += doc['total'];
-        total++;
-      }
-    }
-    puAve = pu != 0 ? (puAve / pu).floor() : 0;
-    suAve = su != 0 ? (suAve / su).floor() : 0;
-    runAve = run != 0 ? (runAve / run).floor() : 0;
-    totalAve = total != 0 ? (totalAve / total).floor() : 0;
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -523,33 +363,33 @@ class ApftPageState extends State<ApftPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 430) {
+    if (width > 395) {
       columnList.add(DataColumn(
-          label: const Text('Date'),
+          label: const Text('Shaving'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 515) {
-      columnList.add(DataColumn(
-          label: const Text('Total'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 650) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('PU'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 735) {
+    if (width > 650) {
       columnList.add(DataColumn(
           label: const Text('SU'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 820) {
+    if (width > 735) {
       columnList.add(DataColumn(
           label: const Text('Run'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 875) {
+      columnList.add(DataColumn(
+          label: const Text('Alt Event'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -570,96 +410,25 @@ class ApftPageState extends State<ApftPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool overdue = isOverdue(documentSnapshot['date'], overdueDays);
-    bool amber = isOverdue(documentSnapshot['date'], amberDays);
-    bool fail = !documentSnapshot['pass'];
-    TextStyle overdueTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.red);
-    TextStyle amberTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
-    TextStyle failTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
     List<DataCell> cellList = [
+      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-        documentSnapshot['rank'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 430) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+    if (width > 395) {
+      cellList.add(DataCell(Text(documentSnapshot['shaving'].toString())));
     }
-    if (width > 515) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['total'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+    if (width > 500) {
+      cellList.add(DataCell(Text(documentSnapshot['pu'].toString())));
     }
     if (width > 650) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['puScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(DataCell(Text(documentSnapshot['su'].toString())));
     }
     if (width > 735) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['suScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(DataCell(Text(documentSnapshot['run'].toString())));
     }
-    if (width > 820) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['runScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+    if (width > 875) {
+      cellList.add(DataCell(Text(documentSnapshot['altEvent'])));
     }
     return cellList;
   }
@@ -675,19 +444,19 @@ class ApftPageState extends State<ApftPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
+            filteredDocs.sort((a, b) => a['shaving'].compareTo(b['shaving']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['total'].compareTo(b['total']));
+            filteredDocs.sort((a, b) => a['pu'].compareTo(b['pu']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['puScore'].compareTo(b['puScore']));
+            filteredDocs.sort((a, b) => a['su'].compareTo(b['su']));
             break;
           case 5:
-            filteredDocs.sort((a, b) => a['suScore'].compareTo(b['suScore']));
+            filteredDocs.sort((a, b) => a['run'].compareTo(b['run']));
             break;
           case 6:
-            filteredDocs.sort((a, b) => a['runScore'].compareTo(b['runScore']));
+            filteredDocs.sort((a, b) => a['altEvent'].compareTo(b['altEvent']));
             break;
         }
       } else {
@@ -699,19 +468,19 @@ class ApftPageState extends State<ApftPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
+            filteredDocs.sort((a, b) => b['shaving'].compareTo(a['shaving']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['total'].compareTo(a['total']));
+            filteredDocs.sort((a, b) => b['pu'].compareTo(a['pu']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['puScore'].compareTo(a['puScore']));
+            filteredDocs.sort((a, b) => b['su'].compareTo(a['su']));
             break;
           case 5:
-            filteredDocs.sort((a, b) => b['suScore'].compareTo(a['suScore']));
+            filteredDocs.sort((a, b) => b['run'].compareTo(a['run']));
             break;
           case 6:
-            filteredDocs.sort((a, b) => b['runScore'].compareTo(a['runScore']));
+            filteredDocs.sort((a, b) => b['altEvent'].compareTo(a['altEvent']));
             break;
         }
       }
@@ -862,13 +631,12 @@ class ApftPageState extends State<ApftPage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     final user = AuthProvider.of(context).auth.currentUser();
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('APFT Stats'),
-            actions: appBarMenu(context, width)),
+            title: const Text('Permanent Profiles'),
+            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {
@@ -902,79 +670,6 @@ class ApftPageState extends State<ApftPage> {
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
-                    ),
-                  ),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 850.0),
-                    child: Card(
-                      child: Column(
-                        children: <Widget>[
-                          const Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: Text(
-                              'Average',
-                              style: TextStyle(fontSize: 18),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('PU: $puAve'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('SU: $suAve'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('Run: $runAve'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('Total: $totalAve'),
-                              ),
-                            ],
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: Text(
-                              'Zeros are factored out and averages are rounded down.',
-                              style: TextStyle(fontSize: 14),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Blue Text: Failed',
-                            style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Amber Text: Due within 30 days',
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Red Text: Overdue',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
                     ),
                   )
                 ],

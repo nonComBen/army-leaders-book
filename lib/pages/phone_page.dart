@@ -15,35 +15,35 @@ import 'package:provider/provider.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
-import '../methods/date_methods.dart';
+import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/tasking.dart';
-import '../../pages/editPages/editTaskingPage.dart';
-import '../../pages/uploadPages/uploadTaskingsPage.dart';
-import '../../pdf/taskingsPdf.dart';
+import '../models/phone_number.dart';
+import 'editPages/edit_phone_page.dart';
+import 'uploadPages/upload_phone_page.dart';
+import '../pdf/phone_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class TaskingsPage extends StatefulWidget {
-  const TaskingsPage({
+class PhonePage extends StatefulWidget {
+  const PhonePage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/taskings-page';
+  static const routeName = '/phone-page';
 
   @override
-  TaskingsPageState createState() => TaskingsPageState();
+  PhonePageState createState() => PhonePageState();
 }
 
-class TaskingsPageState extends State<TaskingsPage> {
+class PhonePageState extends State<PhonePage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
+  List<DocumentSnapshot> documents;
+  StreamSubscription _subscription;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -87,25 +87,42 @@ class TaskingsPageState extends State<TaskingsPage> {
     _sortColumnIndex = 0;
     _selectedDocuments = [];
     documents = [];
-    filteredDocs = [];
-
-    final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('taskings')
-        .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
+        .collection('phoneNumbers')
+        .where('owner', isEqualTo: widget.userId)
         .snapshots();
-    _subscriptionUsers = streamUsers.listen((updates) {
+    _subscription = stream.listen((updates) {
       setState(() {
         documents = updates.docs;
-        filteredDocs = updates.docs;
         _selectedDocuments.clear();
       });
+      // for (DocumentChange dc in updates.docChanges) {
+      //   if (dc.type == DocumentChangeType.removed) {
+      //     setState(() {
+      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
+      //       _selectedDocuments.removeWhere((doc) => doc.id == dc.doc.id);
+      //     });
+      //   }
+      //   if (dc.type == DocumentChangeType.added) {
+      //     setState(() {
+      //       documents.add(dc.doc);
+      //       _selectedDocuments.clear();
+      //     });
+      //   }
+      //   if (dc.type == DocumentChangeType.modified) {
+      //     setState(() {
+      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
+      //       documents.add(dc.doc);
+      //       _selectedDocuments.clear();
+      //     });
+      //   }
+      // }
     });
   }
 
   @override
   void dispose() {
-    _subscriptionUsers.cancel();
+    _subscription.cancel();
     myBanner?.dispose();
     super.dispose();
   }
@@ -113,17 +130,12 @@ class TaskingsPageState extends State<TaskingsPage> {
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadTaskingsPage()));
-      // Widget title = const Text('Upload Taskings');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Taskings, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
-      //       'Start/End Date also need to be in yyyy-MM-dd or M/d/yy format.',
-      //     ),
+          MaterialPageRoute(builder: (context) => const UploadPhonePage()));
+      // Widget title = const Text('Upload Phone Numbers');
+      // Widget content = Container(
+      //   padding: const EdgeInsets.all(8.0),
+      //   child: const Text(
+      //     'To upload your Phone Numbers, the file must be in .csv format.',
       //   ),
       // );
       // customAlertDialog(
@@ -135,7 +147,7 @@ class TaskingsPageState extends State<TaskingsPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadTaskingsPage(
+      //             builder: (context) => UploadPhonePage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -153,36 +165,13 @@ class TaskingsPageState extends State<TaskingsPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Tasking',
-      'Start Date',
-      'End Date',
-      'Location',
-      'Comments'
-    ]);
+    docsList.add(['Title', 'POC', 'Phone Number', 'Location']);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
-      docs.add(doc['soldierId']);
-      docs.add(doc['rank']);
-      docs.add(doc['rankSort']);
+      docs.add(doc['title']);
       docs.add(doc['name']);
-      docs.add(doc['firstName']);
-      docs.add(doc['section']);
-      docs.add(doc['type']);
-      docs.add(doc['start']);
-      docs.add(doc['end']);
-      try {
-        docs.add(doc['location']);
-      } catch (e) {
-        docs.add('');
-      }
-      docs.add(doc['comments']);
+      docs.add(doc['phone']);
+      docs.add(doc['location']);
 
       docsList.add(docs);
     }
@@ -196,7 +185,7 @@ class TaskingsPageState extends State<TaskingsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'taskings.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'phoneDirectory.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -204,7 +193,7 @@ class TaskingsPageState extends State<TaskingsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/taskings.xlsx')
+        File('$dir/phoneDirectory.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -216,7 +205,7 @@ class TaskingsPageState extends State<TaskingsPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/taskings.xlsx');
+                        OpenFile.open('$dir/phoneDirectory.xlsx');
                       },
                     )
                   : null,
@@ -262,9 +251,9 @@ class TaskingsPageState extends State<TaskingsPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['start'].toString().compareTo(b['start'].toString()),
+      (a, b) => a['title'].toString().compareTo(b['title'].toString()),
     );
-    TaskingsPdf pdf = TaskingsPdf(
+    PhonePdf pdf = PhonePdf(
       documents,
     );
     String location;
@@ -292,13 +281,13 @@ class TaskingsPageState extends State<TaskingsPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/taskings.pdf');
+                    OpenFile.open('$location/phoneNumbers.pdf');
                   },
                 )));
     }
   }
 
-  void _deleteRecord() async {
+  void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
       //show snack bar requiring at least one item selected
       ScaffoldMessenger.of(context).showSnackBar(
@@ -306,49 +295,7 @@ class TaskingsPageState extends State<TaskingsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    Widget title = Text('Delete Tasking$s?');
-    Widget content = Container(
-      padding: const EdgeInsets.all(8.0),
-      child: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Text('Are you sure you want to delete the selected Tasking$s?'),
-          ],
-        ),
-      ),
-    );
-    customAlertDialog(
-      context: context,
-      title: title,
-      content: content,
-      primaryText: 'Yes',
-      primary: () {
-        delete();
-      },
-      secondary: () {},
-    );
-  }
-
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDocs = List.from(documents);
-    } else {
-      filteredDocs =
-          documents.where((element) => element['section'] == section).toList();
-    }
-    setState(() {});
-  }
-
-  void delete() {
-    for (DocumentSnapshot doc in _selectedDocuments) {
-      if (doc['owner'] == widget.userId) {
-        doc.reference.delete();
-      } else {
-        List<dynamic> users = doc['users'];
-        users.remove(widget.userId);
-        doc.reference.update({'users': users});
-      }
-    }
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Phone Number$s');
   }
 
   void _editRecord() {
@@ -361,8 +308,10 @@ class TaskingsPageState extends State<TaskingsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditTaskingPage(
-                  tasking: Tasking.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditPhonePage(
+                  phone: Phone.fromSnapshot(
+                    _selectedDocuments[0],
+                  ),
                 )));
   }
 
@@ -370,10 +319,9 @@ class TaskingsPageState extends State<TaskingsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditTaskingPage(
-                  tasking: Tasking(
+            builder: (context) => EditPhonePage(
+                  phone: Phone(
                     owner: widget.userId,
-                    users: [widget.userId],
                   ),
                 )));
   }
@@ -381,36 +329,24 @@ class TaskingsPageState extends State<TaskingsPage> {
   List<DataColumn> _createColumns(double width) {
     List<DataColumn> columnList = [
       DataColumn(
-        label: const Text('Rank'),
+        label: const Text('Title'),
         onSort: (int columnIndex, bool ascending) =>
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Text('Name'),
+          label: const Text('POC'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 425) {
       columnList.add(DataColumn(
-          label: const Text('Start'),
+          label: const Text('Phone No'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 570) {
+    if (width > 525) {
       columnList.add(DataColumn(
-          label: const Text('End'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 685) {
-      columnList.add(DataColumn(
-          label: const Text('Type'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 825) {
-      columnList.add(DataColumn(
-          label: const Text('Section'),
+          label: const Text('Location'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -431,52 +367,15 @@ class TaskingsPageState extends State<TaskingsPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool overdue = isOverdue(documentSnapshot['end'], 1);
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
+      DataCell(Text(documentSnapshot['title'])),
+      DataCell(Text(documentSnapshot['name'])),
     ];
-    if (width > 420) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['start'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+    if (width > 425) {
+      cellList.add(DataCell(Text(documentSnapshot['phone'])));
     }
-    if (width > 570) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['end'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
-    }
-    if (width > 685) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['type'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
-    }
-    if (width > 825) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['section'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+    if (width > 525) {
+      cellList.add(DataCell(Text(documentSnapshot['location'])));
     }
     return cellList;
   }
@@ -486,43 +385,31 @@ class TaskingsPageState extends State<TaskingsPage> {
       if (ascending) {
         switch (columnIndex) {
           case 0:
-            filteredDocs.sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+            documents.sort((a, b) => a['title'].compareTo(b['title']));
             break;
           case 1:
-            filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
+            documents.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['start'].compareTo(b['start']));
+            documents.sort((a, b) => a['phone'].compareTo(b['phone']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['end'].compareTo(b['end']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => a['type'].compareTo(b['type']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
+            documents.sort((a, b) => a['location'].compareTo(b['location']));
             break;
         }
       } else {
         switch (columnIndex) {
           case 0:
-            filteredDocs.sort((a, b) => b['rankSort'].compareTo(a['rankSort']));
+            documents.sort((a, b) => b['title'].compareTo(a['title']));
             break;
           case 1:
-            filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
+            documents.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['start'].compareTo(a['start']));
+            documents.sort((a, b) => b['phone'].compareTo(a['phone']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['end'].compareTo(a['end']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => b['type'].compareTo(a['type']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
+            documents.sort((a, b) => b['location'].compareTo(a['location']));
             break;
         }
       }
@@ -543,38 +430,7 @@ class TaskingsPageState extends State<TaskingsPage> {
 
   List<Widget> appBarMenu(BuildContext context, double width) {
     List<Widget> buttons = <Widget>[];
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    documents.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < documents.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      } else if (documents[i]['section'] != documents[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      }
-    }
-
     List<Widget> editButton = <Widget>[
-      Tooltip(
-          message: 'Filter Records',
-          child: PopupMenuButton(
-            icon: const Icon(Icons.filter_alt),
-            onSelected: (String result) => _filterRecords(result),
-            itemBuilder: (context) {
-              return sections;
-            },
-          )),
       Tooltip(
           message: 'Edit Record',
           child: IconButton(
@@ -677,7 +533,7 @@ class TaskingsPageState extends State<TaskingsPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Taskings'),
+            title: const Text('Phone Numbers'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -711,22 +567,7 @@ class TaskingsPageState extends State<TaskingsPage> {
                       columns:
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
-                          filteredDocs, MediaQuery.of(context).size.width),
-                    ),
-                  ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Red Text: Past Thru Date',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
+                          documents, MediaQuery.of(context).size.width),
                     ),
                   )
                 ],

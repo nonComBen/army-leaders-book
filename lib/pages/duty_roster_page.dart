@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,49 +12,38 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../providers/tracking_provider.dart';
+import '../../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
-import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/setting.dart';
-import '../../pdf/bodyfatsPdf.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../models/bodyfat.dart';
-import '../../pages/editPages/editBodyfatPage.dart';
-import '../../pages/uploadPages/uploadBodyFatPage.dart';
-import '../providers/notifications_plugin_provider.dart';
-import '../providers/tracking_provider.dart';
+import 'editPages/edit_duty_roster_page.dart';
+import '../../models/duty.dart';
+import 'uploadPages/upload_duty_roster_page.dart';
+import '../pdf/dutyRoster_pdf.dart';
 
-class BodyfatPage extends StatefulWidget {
-  const BodyfatPage({
+class DutyRosterPage extends StatefulWidget {
+  const DutyRosterPage({
     Key key,
+    @required this.userId,
   }) : super(key: key);
+  final String userId;
 
-  static const routeName = '/bodyfat-page';
+  static const routeName = '/duty-roster-page';
 
   @override
-  BodyfatPageState createState() => BodyfatPageState();
+  DutyRosterPageState createState() => DutyRosterPageState();
 }
 
-class BodyfatPageState extends State<BodyfatPage> {
-  int _sortColumnIndex, overdueDays, amberDays;
-  bool _sortAscending = true,
-      _adLoaded = false,
-      isSubscribed,
-      notificationsRefreshed = false,
-      isInitial = true;
-  String _userId;
+class DutyRosterPageState extends State<DutyRosterPage> {
+  int _sortColumnIndex;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
-  QuerySnapshot snapshot;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -64,15 +52,7 @@ class BodyfatPageState extends State<BodyfatPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
 
     if (!_adLoaded) {
       bool trackingAllowed =
@@ -97,10 +77,6 @@ class BodyfatPageState extends State<BodyfatPage> {
         _adLoaded = true;
       }
     }
-    if (isInitial) {
-      initialize();
-      isInitial = false;
-    }
   }
 
   @override
@@ -112,24 +88,10 @@ class BodyfatPageState extends State<BodyfatPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
-    overdueDays = 180;
-    amberDays = 150;
-
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
-
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('bodyfatStats')
+        .collection('dutyRoster')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: _userId)
+        .where('users', arrayContains: widget.userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -137,19 +99,6 @@ class BodyfatPageState extends State<BodyfatPage> {
         filteredDocs = updates.docs;
         _selectedDocuments.clear();
       });
-
-      if (!kIsWeb) {
-        refreshNotifications();
-      }
-    });
-    snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot.docs[0];
-    setState(() {
-      overdueDays = doc['bfMonths'] * 30;
-      amberDays = overdueDays - 30;
     });
   }
 
@@ -160,83 +109,40 @@ class BodyfatPageState extends State<BodyfatPage> {
     super.dispose();
   }
 
-  void refreshNotifications() async {
-    int monthsDue = 6;
-    List<dynamic> daysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      monthsDue = setting.bfMonths ?? 6;
-      daysBefore = setting.bfNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending.where((pr) => pr.payload == 'BF').toList();
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    int startingId = prefs.getInt('runningId') ?? 0;
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a['date'].toString().compareTo(b['date'].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      if (i == 0) {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      } else if (docs[i]['date'] == docs[i - 1]['date']) {
-        dates.last[0] =
-            '${dates.last[0]}, ${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      } else {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                'Ht/Wt(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                androidAllowWhileIdle: true,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                payload: 'BF',
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
-  }
-
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadBodyFatsPage()));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const UploadDutyRosterPage()));
+      // Widget title = const Text('Upload Duty Roster');
+      // Widget content = SingleChildScrollView(
+      //   child: Container(
+      //     padding: const EdgeInsets.all(8.0),
+      //     child: const Text(
+      //       'To upload your Duty Roster, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
+      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
+      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Start/End Date '
+      //       'also needs to be in yyyy-MM-dd or M/d/yy format.',
+      //     ),
+      //   ),
+      // );
+      // customAlertDialog(
+      //   context: context,
+      //   title: title,
+      //   content: content,
+      //   primaryText: 'Continue',
+      //   primary: () {
+      //     Navigator.push(
+      //         context,
+      //         MaterialPageRoute(
+      //             builder: (context) => UploadDutyRosterPage(
+      //                   userId: widget.userId,
+      //                   isSubscribed: isSubscribed,
+      //                 )));
+      //   },
+      //   secondary: () {},
+      // );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -255,39 +161,31 @@ class BodyfatPageState extends State<BodyfatPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Date',
-      'Age',
-      'Gender',
-      'Height',
-      'Height to Half Inch',
-      'Weight',
-      'BMI Pass',
-      'Neck',
-      'Waist',
-      'Hip',
-      'BF Percent',
-      'BF Pass'
+      'Duty',
+      'Start Date',
+      'End Date',
+      'Location',
+      'Comments'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
-      docs.add(doc['soldierId']);
-      docs.add(doc['rank']);
-      docs.add(doc['rankSort']);
-      docs.add(doc['name']);
-      docs.add(doc['firstName']);
-      docs.add(doc['section']);
-      docs.add(doc['date']);
-      docs.add(doc['age']);
-      docs.add(doc['gender']);
-      docs.add(doc['height']);
-      docs.add(doc['heightDouble']);
-      docs.add(doc['weight']);
-      docs.add(doc['passBmi'].toString());
-      docs.add(doc['neck']);
-      docs.add(doc['waist']);
-      docs.add(doc['hip']);
-      docs.add(doc['percent']);
-      docs.add(doc['passBf'].toString());
+      docs.add(doc['soldierId'] ?? '');
+      docs.add(doc['rank'] ?? '');
+      docs.add(doc['rankSort'] ?? '');
+      docs.add(doc['name'] ?? '');
+      docs.add(doc['firstName'] ?? '');
+      docs.add(doc['section'] ?? '');
+      docs.add(doc['duty'] ?? '');
+      docs.add(doc['start'] ?? '');
+      docs.add(doc['end'] ?? '');
+      try {
+        docs.add(doc['location']);
+      } catch (e) {
+        // ignore: avoid_print
+        print(e);
+        docs.add('');
+      }
+      docs.add(doc['comments'] ?? '');
 
       docsList.add(docs);
     }
@@ -301,7 +199,7 @@ class BodyfatPageState extends State<BodyfatPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'bodyCompStats.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'dutyRoster.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -309,7 +207,7 @@ class BodyfatPageState extends State<BodyfatPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/bodyCompStats.xlsx')
+        File('$dir/dutyRoster.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -321,7 +219,7 @@ class BodyfatPageState extends State<BodyfatPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/bodyCompStats.xlsx');
+                        OpenFile.open('$dir/dutyRoster.xlsx');
                       },
                     )
                   : null,
@@ -367,9 +265,9 @@ class BodyfatPageState extends State<BodyfatPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['date'].toString().compareTo(b['date'].toString()),
+      (a, b) => a['start'].toString().compareTo(b['start'].toString()),
     );
-    BodyfatsPdf pdf = BodyfatsPdf(
+    DutyRosterPdf pdf = DutyRosterPdf(
       documents,
     );
     String location;
@@ -397,10 +295,41 @@ class BodyfatPageState extends State<BodyfatPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/bodyCompStats.pdf');
+                    OpenFile.open('$location/dutyRoster.pdf');
                   },
                 )));
     }
+  }
+
+  void _deleteRecord() async {
+    if (_selectedDocuments.isEmpty) {
+      //show snack bar requiring at least one item selected
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must select at least one record')));
+      return;
+    }
+    String s = _selectedDocuments.length > 1 ? 'ies' : 'y';
+    Widget title = Text('Delete Dut$s?');
+    Widget content = Container(
+      padding: const EdgeInsets.all(8.0),
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Text('Are you sure you want to delete the selected Dut$s?'),
+          ],
+        ),
+      ),
+    );
+    customAlertDialog(
+      context: context,
+      title: title,
+      content: content,
+      primaryText: 'Yes',
+      primary: () {
+        delete();
+      },
+      secondary: () {},
+    );
   }
 
   void _filterRecords(String section) {
@@ -413,15 +342,16 @@ class BodyfatPageState extends State<BodyfatPage> {
     setState(() {});
   }
 
-  void _deleteRecord() {
-    if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
-      return;
+  void delete() {
+    for (DocumentSnapshot doc in _selectedDocuments) {
+      if (doc['owner'] == widget.userId) {
+        doc.reference.delete();
+      } else {
+        List<dynamic> users = doc['users'];
+        users.remove(widget.userId);
+        doc.reference.update({'users': users});
+      }
     }
-    String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, _userId, 'Body Composition$s');
   }
 
   void _editRecord() {
@@ -434,8 +364,8 @@ class BodyfatPageState extends State<BodyfatPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditBodyfatPage(
-                  bodyfat: Bodyfat.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditDutyRosterPage(
+                  duty: Duty.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -443,10 +373,10 @@ class BodyfatPageState extends State<BodyfatPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditBodyfatPage(
-                  bodyfat: Bodyfat(
-                    owner: _userId,
-                    users: [_userId],
+            builder: (context) => EditDutyRosterPage(
+                  duty: Duty(
+                    owner: widget.userId,
+                    users: [widget.userId],
                   ),
                 )));
   }
@@ -463,27 +393,21 @@ class BodyfatPageState extends State<BodyfatPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 420) {
       columnList.add(DataColumn(
-          label: const Text('Date'),
+          label: const Text('Start'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 530) {
+    if (width > 560) {
       columnList.add(DataColumn(
-          label: const Text('Height'),
+          label: const Text('End'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 650) {
+    if (width > 675) {
       columnList.add(DataColumn(
-          label: const Text('Weight'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 820) {
-      columnList.add(DataColumn(
-          label: const Text('BF %'),
+          label: const Text('Duty'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -504,83 +428,43 @@ class BodyfatPageState extends State<BodyfatPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool overdue = isOverdue(documentSnapshot['date'], overdueDays);
-    bool amber = isOverdue(documentSnapshot['date'], amberDays);
-    bool fail = !documentSnapshot['passBf'] && !documentSnapshot['passBmi'];
-    TextStyle overdueTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.red);
-    TextStyle amberTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
-    TextStyle failTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
+    bool overdue = isOverdue(documentSnapshot['end'], 1);
     List<DataCell> cellList = [
       DataCell(Text(
         documentSnapshot['rank'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
       )),
       DataCell(Text(
         '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
       )),
     ];
-    if (width > 435) {
+    if (width > 420) {
       cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
+        documentSnapshot['start'],
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
       )));
     }
-    if (width > 530) {
+    if (width > 560) {
       cellList.add(DataCell(Text(
-        documentSnapshot['height'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
+        documentSnapshot['end'],
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
       )));
     }
-    if (width > 650) {
+    if (width > 675) {
       cellList.add(DataCell(Text(
-        documentSnapshot['weight'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
-    }
-    if (width > 820) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['percent'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
+        documentSnapshot['duty'],
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
       )));
     }
     return cellList;
@@ -597,16 +481,13 @@ class BodyfatPageState extends State<BodyfatPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
+            filteredDocs.sort((a, b) => a['start'].compareTo(b['start']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['height'].compareTo(b['height']));
+            filteredDocs.sort((a, b) => a['end'].compareTo(b['end']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['weoght'].compareTo(b['weight']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => a['percent'].compareTo(b['percent']));
+            filteredDocs.sort((a, b) => a['duty'].compareTo(b['duty']));
             break;
         }
       } else {
@@ -618,16 +499,13 @@ class BodyfatPageState extends State<BodyfatPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
+            filteredDocs.sort((a, b) => b['start'].compareTo(a['start']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['height'].compareTo(a['height']));
+            filteredDocs.sort((a, b) => b['end'].compareTo(a['end']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['weight'].compareTo(a['weight']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => b['percent'].compareTo(a['percent']));
+            filteredDocs.sort((a, b) => b['duty'].compareTo(a['duty']));
             break;
         }
       }
@@ -727,7 +605,7 @@ class BodyfatPageState extends State<BodyfatPage> {
       ));
       popupItems.add(const PopupMenuItem(
         value: 'pdf',
-        child: Text('Download as Pdf'),
+        child: Text('Download as PDF'),
       ));
     }
     if (width > 400) {
@@ -782,7 +660,7 @@ class BodyfatPageState extends State<BodyfatPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Body Comp Stats'),
+            title: const Text('Duty Roster'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -826,19 +704,7 @@ class BodyfatPageState extends State<BodyfatPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const <Widget>[
                           Text(
-                            'Blue Text: Failed',
-                            style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Amber Text: Due within 30 days',
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Red Text: Overdue',
+                            'Red Text: Past Thru Date',
                             style: TextStyle(
                                 color: Colors.red, fontWeight: FontWeight.bold),
                           )

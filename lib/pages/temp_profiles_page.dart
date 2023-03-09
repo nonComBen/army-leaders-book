@@ -15,30 +15,31 @@ import 'package:provider/provider.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/profile.dart';
-import '../../pages/editPages/editPermProfilePage.dart';
-import '../../pages/uploadPages/uploadPermProfilePage.dart';
-import '../../pdf/permProfilesPdf.dart';
+import 'editPages/edit_temp_profile_page.dart';
+import 'uploadPages/upload_temp_profile_page.dart';
+import '../pdf/temp_profiles_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class PermProfilesPage extends StatefulWidget {
-  const PermProfilesPage({
+class TempProfilesPage extends StatefulWidget {
+  const TempProfilesPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/permanent-profile-page';
+  static const routeName = '/temporary-profiles-page';
 
   @override
-  PermProfilesPageState createState() => PermProfilesPageState();
+  TempProfilesPageState createState() => TempProfilesPageState();
 }
 
-class PermProfilesPageState extends State<PermProfilesPage> {
+class TempProfilesPageState extends State<TempProfilesPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
@@ -93,7 +94,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
         .collection('profiles')
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: widget.userId)
-        .where('type', isEqualTo: 'Permanent')
+        .where('type', isEqualTo: 'Temporary')
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -116,17 +117,16 @@ class PermProfilesPageState extends State<PermProfilesPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const UploadPermProfilePage()));
-      // Widget title = const Text('Upload Permanent Profiles');
+              builder: (context) => const UploadTempProfilesPage()));
+      // Widget title = const Text('Upload Temporary Profiles');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Permanent Profiles, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. '
-      //       'If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also '
-      //       'needs to be in yyyy-MM-dd or M/d/yy format, alternative event will default to blank if the event does not match an option in the '
-      //       'dropdown menu (case sensitive), and use either true/false or yes/no for shaving, push ups, sit ups, and run values.',
+      //       'To upload your Temporary Profiles, the file must be in .csv format. Also, there needs to be a Soldier Id '
+      //       'column and the Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download '
+      //       'the data from Soldiers page. If Excel gives you an error for Soldier Id, change cell format to Text from '
+      //       'General and delete the \'=\'. Issued/Exp Dates also need to be in yyyy-MM-dd or M/d/yy format.',
       //     ),
       //   ),
       // );
@@ -139,7 +139,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadPermProfilePage(
+      //             builder: (context) => UploadTempProfilesPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -165,11 +165,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
       'First Name',
       'Section',
       'Date',
-      'Shaving',
-      'PU',
-      'SU',
-      'Run',
-      'Alt Event',
+      'Expiration Date',
       'Comments'
     ]);
     for (DocumentSnapshot doc in documents) {
@@ -181,11 +177,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
       docs.add(doc['firstName']);
       docs.add(doc['section']);
       docs.add(doc['date']);
-      docs.add(doc['shaving'].toString());
-      docs.add(doc['pu'].toString());
-      docs.add(doc['su'].toString());
-      docs.add(doc['run'].toString());
-      docs.add(doc['altEvent']);
+      docs.add(doc['exp']);
       docs.add(doc['comments']);
 
       docsList.add(docs);
@@ -200,7 +192,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'permProfiles.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'tempProfiles.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -208,7 +200,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/permProfiles.xlsx')
+        File('$dir/tempProfiles.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -220,7 +212,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/permProfiles.xlsx');
+                        OpenFile.open('$dir/tempProfiles.xlsx');
                       },
                     )
                   : null,
@@ -268,7 +260,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
     documents.sort(
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
-    PermProfilesPdf pdf = PermProfilesPdf(
+    TempProfilesPdf pdf = TempProfilesPdf(
       documents,
     );
     String location;
@@ -296,7 +288,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/permProfiles.pdf');
+                    OpenFile.open('$location/tempProfiles.pdf');
                   },
                 )));
     }
@@ -321,7 +313,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
     deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Permanent Profile$s');
+        context, _selectedDocuments, widget.userId, 'Temporary Profile$s');
   }
 
   void _editRecord() {
@@ -334,8 +326,8 @@ class PermProfilesPageState extends State<PermProfilesPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditPermProfilePage(
-                  profile: PermProfile.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditTempProfilePage(
+                  profile: TempProfile.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -343,8 +335,8 @@ class PermProfilesPageState extends State<PermProfilesPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditPermProfilePage(
-                  profile: PermProfile(
+            builder: (context) => EditTempProfilePage(
+                  profile: TempProfile(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
@@ -363,33 +355,15 @@ class PermProfilesPageState extends State<PermProfilesPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 395) {
+    if (width > 430) {
       columnList.add(DataColumn(
-          label: const Text('Shaving'),
+          label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 500) {
+    if (width > 575) {
       columnList.add(DataColumn(
-          label: const Text('PU'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 650) {
-      columnList.add(DataColumn(
-          label: const Text('SU'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 735) {
-      columnList.add(DataColumn(
-          label: const Text('Run'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 875) {
-      columnList.add(DataColumn(
-          label: const Text('Alt Event'),
+          label: const Text('Exp Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -410,25 +384,30 @@ class PermProfilesPageState extends State<PermProfilesPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
+    bool exp = isOverdue(documentSnapshot['exp'], 1);
+    TextStyle expTextStyle =
+        const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
     List<DataCell> cellList = [
-      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
+        documentSnapshot['rank'],
+        style: exp ? expTextStyle : const TextStyle(),
+      )),
+      DataCell(Text(
+        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+        style: exp ? expTextStyle : const TextStyle(),
+      )),
     ];
-    if (width > 395) {
-      cellList.add(DataCell(Text(documentSnapshot['shaving'].toString())));
+    if (width > 430) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['date'],
+        style: exp ? expTextStyle : const TextStyle(),
+      )));
     }
-    if (width > 500) {
-      cellList.add(DataCell(Text(documentSnapshot['pu'].toString())));
-    }
-    if (width > 650) {
-      cellList.add(DataCell(Text(documentSnapshot['su'].toString())));
-    }
-    if (width > 735) {
-      cellList.add(DataCell(Text(documentSnapshot['run'].toString())));
-    }
-    if (width > 875) {
-      cellList.add(DataCell(Text(documentSnapshot['altEvent'])));
+    if (width > 575) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['exp'],
+        style: exp ? expTextStyle : const TextStyle(),
+      )));
     }
     return cellList;
   }
@@ -444,19 +423,10 @@ class PermProfilesPageState extends State<PermProfilesPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['shaving'].compareTo(b['shaving']));
+            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['pu'].compareTo(b['pu']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => a['su'].compareTo(b['su']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => a['run'].compareTo(b['run']));
-            break;
-          case 6:
-            filteredDocs.sort((a, b) => a['altEvent'].compareTo(b['altEvent']));
+            filteredDocs.sort((a, b) => a['exp'].compareTo(b['exp']));
             break;
         }
       } else {
@@ -468,19 +438,10 @@ class PermProfilesPageState extends State<PermProfilesPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['shaving'].compareTo(a['shaving']));
+            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['pu'].compareTo(a['pu']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => b['su'].compareTo(a['su']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => b['run'].compareTo(a['run']));
-            break;
-          case 6:
-            filteredDocs.sort((a, b) => b['altEvent'].compareTo(a['altEvent']));
+            filteredDocs.sort((a, b) => b['exp'].compareTo(a['exp']));
             break;
         }
       }
@@ -635,7 +596,7 @@ class PermProfilesPageState extends State<PermProfilesPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Permanent Profiles'),
+            title: const Text('Temporary Profiles'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -670,6 +631,22 @@ class PermProfilesPageState extends State<PermProfilesPage> {
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
+                    ),
+                  ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const <Widget>[
+                          Text(
+                            'Amber Text: Profile is Expired',
+                            style: TextStyle(
+                                color: Colors.amber,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 ],

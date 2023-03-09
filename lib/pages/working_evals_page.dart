@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -15,35 +14,34 @@ import 'package:provider/provider.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
-import '../methods/date_methods.dart';
+import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/perstat.dart';
-import '../../pages/editPages/editPerstatPage.dart';
-import '../../pages/uploadPages/uploadPerstatPage.dart';
-import '../../pdf/perstatsPdf.dart';
+import '../models/working_eval.dart';
+import 'editPages/edit_working_eval_page.dart';
+import 'uploadPages/upload_working_evals_page.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class PerstatPage extends StatefulWidget {
-  const PerstatPage({
+class WorkingEvalsPage extends StatefulWidget {
+  const WorkingEvalsPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/perstat-page';
+  static const routeName = '/working-evaluations-page';
 
   @override
-  PerstatPageState createState() => PerstatPageState();
+  WorkingEvalsPageState createState() => WorkingEvalsPageState();
 }
 
-class PerstatPageState extends State<PerstatPage> {
+class WorkingEvalsPageState extends State<WorkingEvalsPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
+  StreamSubscription _subscription;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -88,66 +86,40 @@ class PerstatPageState extends State<PerstatPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
-
-    final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('perstat')
-        .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
+        .collection('workingEvals')
+        .where('owner', isEqualTo: widget.userId)
         .snapshots();
-    _subscriptionUsers = streamUsers.listen((updates) {
+    _subscription = stream.listen((updates) {
       setState(() {
         documents = updates.docs;
         filteredDocs = updates.docs;
         _selectedDocuments.clear();
       });
-      // for (DocumentChange dc in updates.docChanges) {
-      //   if (dc.type == DocumentChangeType.removed) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       filteredDocs.removeWhere((doc) => doc.id == dc.doc.id);
-      //       _selectedDocuments.removeWhere((doc) => doc.id == dc.doc.id);
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.added) {
-      //     setState(() {
-      //       documents.add(dc.doc);
-      //       filteredDocs.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.modified) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       documents.add(dc.doc);
-      //       filteredDocs.removeWhere((doc) => doc.id == dc.doc.id);
-      //       filteredDocs.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      // }
     });
   }
 
   @override
   void dispose() {
-    _subscriptionUsers.cancel();
+    _subscription.cancel();
     myBanner?.dispose();
     super.dispose();
   }
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadPerstatPage()));
-      // Widget title = const Text('Upload PERSTATs');
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const UploadWorkingEvalsPage()));
+      // Widget title = const Text('Upload Working Evals');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your PERSTATs, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier '
-      //       'Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Start/End Date also need '
-      //       'to be in yyyy-MM-dd or M/d/yy format.',
+      //       'To upload your Working Evals, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
+      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page.'
+      //       'If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'.',
       //     ),
       //   ),
       // );
@@ -160,7 +132,7 @@ class PerstatPageState extends State<PerstatPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadPerstatPage(
+      //             builder: (context) => UploadWorkingEvalsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -175,9 +147,7 @@ class PerstatPageState extends State<PerstatPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
-
+    if (!await checkPermission(Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -186,11 +156,16 @@ class PerstatPageState extends State<PerstatPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Type',
-      'Start Date',
-      'End Date',
-      'Location',
-      'Comments'
+      'Duty Description',
+      'Appointed Duties',
+      'Special Emphasis',
+      'Character',
+      'Presence',
+      'Intellect',
+      'Leads',
+      'Develops',
+      'Achieves',
+      'Performance'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -200,15 +175,16 @@ class PerstatPageState extends State<PerstatPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['type']);
-      docs.add(doc['start']);
-      docs.add(doc['end']);
-      try {
-        docs.add(doc['location']);
-      } catch (e) {
-        docs.add('');
-      }
-      docs.add(doc['comments']);
+      docs.add(doc['dutyDescription']);
+      docs.add(doc['appointedDuties']);
+      docs.add(doc['specialEmphasis']);
+      docs.add(doc['character']);
+      docs.add(doc['presence']);
+      docs.add(doc['intellect']);
+      docs.add(doc['leads']);
+      docs.add(doc['develops']);
+      docs.add(doc['achieves']);
+      docs.add(doc['performance']);
 
       docsList.add(docs);
     }
@@ -222,7 +198,7 @@ class PerstatPageState extends State<PerstatPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'perstat.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'workingEvals.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -230,7 +206,7 @@ class PerstatPageState extends State<PerstatPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/perstat.xlsx')
+        File('$dir/workingEvals.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -242,7 +218,7 @@ class PerstatPageState extends State<PerstatPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/perstat.xlsx');
+                        OpenFile.open('$dir/workingEvals.xlsx');
                       },
                     )
                   : null,
@@ -256,105 +232,6 @@ class PerstatPageState extends State<PerstatPage> {
     }
   }
 
-  void _downloadPdf() async {
-    if (isSubscribed) {
-      Widget title = const Text('Download PDF');
-      Widget content = Container(
-        padding: const EdgeInsets.all(8.0),
-        child: const Text('Select full page or half page format.'),
-      );
-      customAlertDialog(
-        context: context,
-        title: title,
-        content: content,
-        primaryText: 'Full Page',
-        primary: () {
-          completePdfDownload(true);
-        },
-        secondaryText: 'Half Page',
-        secondary: () {
-          completePdfDownload(false);
-        },
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
-    }
-  }
-
-  void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
-    documents.sort(
-      (a, b) => a['start'].toString().compareTo(b['start'].toString()),
-    );
-    PerstatsPdf pdf = PerstatsPdf(
-      documents,
-    );
-    String location;
-    if (fullPage) {
-      location = await pdf.createFullPage();
-    } else {
-      location = await pdf.createHalfPage();
-    }
-    String message;
-    if (location == '') {
-      message = 'Failed to download pdf';
-    } else {
-      String directory =
-          kIsWeb ? '/Downloads' : '\'On My iPhone(iPad)/Leader\'s Book\'';
-      message = kIsWeb
-          ? 'Pdf successfully downloaded to $directory'
-          : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/perstat.pdf');
-                  },
-                )));
-    }
-  }
-
-  void _deleteRecord() async {
-    if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
-      return;
-    }
-    String s = _selectedDocuments.length > 1 ? 's' : '';
-    Widget title = Text('Delete PERSTAT$s?');
-    Widget content = Container(
-      padding: const EdgeInsets.all(8.0),
-      child: SingleChildScrollView(
-        child: Column(
-          children: const <Widget>[
-            Text('Are you sure you want to delete the selected Perstat(s)?'),
-          ],
-        ),
-      ),
-    );
-    customAlertDialog(
-      context: context,
-      title: title,
-      content: content,
-      primaryText: 'Yes',
-      primary: () {
-        delete();
-      },
-      secondary: () {},
-    );
-  }
-
   void _filterRecords(String section) {
     if (section == 'All') {
       filteredDocs = List.from(documents);
@@ -365,19 +242,18 @@ class PerstatPageState extends State<PerstatPage> {
     setState(() {});
   }
 
-  void delete() {
-    for (DocumentSnapshot doc in _selectedDocuments) {
-      if (doc['owner'] == widget.userId) {
-        doc.reference.delete();
-      } else {
-        List<dynamic> users = doc['users'];
-        users.remove(widget.userId);
-        doc.reference.update({'users': users});
-      }
+  void _deleteRecord() {
+    if (_selectedDocuments.isEmpty) {
+      //show snack bar requiring at least one item selected
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must select at least one record')));
+      return;
     }
+    String s = _selectedDocuments.length > 1 ? 's' : '';
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Eval$s');
   }
 
-  void _editRecord(BuildContext context) {
+  void _editRecord() {
     if (_selectedDocuments.length != 1) {
       //show snack bar requiring one item selected
       ScaffoldMessenger.of(context).showSnackBar(
@@ -387,8 +263,10 @@ class PerstatPageState extends State<PerstatPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditPerstatPage(
-                  perstat: Perstat.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditWorkingEvalPage(
+                  eval: WorkingEval.fromSnapshot(
+                    _selectedDocuments[0],
+                  ),
                 )));
   }
 
@@ -396,113 +274,55 @@ class PerstatPageState extends State<PerstatPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditPerstatPage(
-                  perstat: Perstat(
+            builder: (context) => EditWorkingEvalPage(
+                  eval: WorkingEval(
                     owner: widget.userId,
-                    users: [widget.userId],
                   ),
                 )));
   }
 
   List<DataColumn> _createColumns(double width) {
-    List<DataColumn> list = [
+    List<DataColumn> columnList = [
       DataColumn(
-          label: const Text('Rank'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)),
+        label: const Text('Rank'),
+        onSort: (int columnIndex, bool ascending) =>
+            onSortColumn(columnIndex, ascending),
+      ),
       DataColumn(
           label: const Text('Name'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 415) {
-      list.add(DataColumn(
-          label: const Text('Start'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 550) {
-      list.add(DataColumn(
-          label: const Text('End'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 685) {
-      list.add(DataColumn(
-          label: const Text('Type'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 800) {
-      list.add(DataColumn(
+    if (width > 380) {
+      columnList.add(DataColumn(
           label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    return list;
+    return columnList;
   }
 
   List<DataRow> _createRows(List<DocumentSnapshot> snapshot, double width) {
     List<DataRow> newList;
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
-        selected: _selectedDocuments.contains(documentSnapshot),
-        onSelectChanged: (bool selected) =>
-            onSelected(selected, documentSnapshot),
-        cells: getCells(documentSnapshot, width),
-      );
+          selected: _selectedDocuments.contains(documentSnapshot),
+          onSelectChanged: (bool selected) =>
+              onSelected(selected, documentSnapshot),
+          cells: getCells(documentSnapshot, width));
     }).toList();
 
     return newList;
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool overdue = isOverdue(documentSnapshot['end'], 1);
     List<DataCell> cellList = [
+      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-        documentSnapshot['rank'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 415) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['start'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
-    }
-    if (width > 550) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['end'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
-    }
-    if (width > 685) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['type'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
-    }
-    if (width > 800) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['section'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+    if (width > 380) {
+      cellList.add(DataCell(Text(documentSnapshot['section'])));
     }
     return cellList;
   }
@@ -518,15 +338,6 @@ class PerstatPageState extends State<PerstatPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['start'].compareTo(b['start']));
-            break;
-          case 3:
-            filteredDocs.sort((a, b) => a['end'].compareTo(b['end']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => a['type'].compareTo(b['type']));
-            break;
-          case 5:
             filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
             break;
         }
@@ -539,15 +350,6 @@ class PerstatPageState extends State<PerstatPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['start'].compareTo(a['start']));
-            break;
-          case 3:
-            filteredDocs.sort((a, b) => b['end'].compareTo(a['end']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => b['type'].compareTo(a['type']));
-            break;
-          case 5:
             filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
             break;
         }
@@ -604,13 +406,12 @@ class PerstatPageState extends State<PerstatPage> {
       Tooltip(
           message: 'Edit Record',
           child: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => _editRecord(context))),
+              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
     ];
 
     List<PopupMenuEntry<String>> popupItems = [];
 
-    if (width > 600) {
+    if (width > 500) {
       buttons.add(
         Tooltip(
             message: 'Download as Excel',
@@ -629,15 +430,6 @@ class PerstatPageState extends State<PerstatPage> {
                   _uploadExcel(context);
                 })),
       );
-      buttons.add(
-        Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
-      );
     } else {
       popupItems.add(const PopupMenuItem(
         value: 'download',
@@ -646,10 +438,6 @@ class PerstatPageState extends State<PerstatPage> {
       popupItems.add(const PopupMenuItem(
         value: 'upload',
         child: Text('Upload Data'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
       ));
     }
     if (width > 400) {
@@ -679,9 +467,6 @@ class PerstatPageState extends State<PerstatPage> {
           if (result == 'delete') {
             _deleteRecord();
           }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
         },
         itemBuilder: (BuildContext context) {
           return popupItems;
@@ -704,7 +489,7 @@ class PerstatPageState extends State<PerstatPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('PERSTAT'),
+            title: const Text('Working Evals'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -739,21 +524,6 @@ class PerstatPageState extends State<PerstatPage> {
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
-                    ),
-                  ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Red Text: Past Thru Date',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
                     ),
                   )
                 ],

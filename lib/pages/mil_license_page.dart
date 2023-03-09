@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,46 +12,39 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/subscription_state.dart';
-import '../providers/notifications_plugin_provider.dart';
-import '../widgets/anon_warning_banner.dart';
 import '../auth_provider.dart';
+import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/setting.dart';
-import '../../models/medpro.dart';
-import '../../pages/editPages/editMedprosPage.dart';
-import '../../pages/uploadPages/uploadMedprosPage.dart';
-import '../../pdf/medprosPdf.dart';
+import '../models/mil_license.dart';
+import 'editPages/edit_mil_license_page.dart';
+import 'uploadPages/upload_mil_license_page.dart';
+import '../pdf/mil_lic_pdf.dart';
+import '../widgets/anon_warning_banner.dart';
 import '../providers/tracking_provider.dart';
 
-class MedProsPage extends StatefulWidget {
-  const MedProsPage({
+class MilLicPage extends StatefulWidget {
+  const MilLicPage({
     Key key,
+    @required this.userId,
   }) : super(key: key);
+  final String userId;
 
-  static const routeName = '/medpros-page';
+  static const routeName = '/military-license-page';
 
   @override
-  MedProsPageState createState() => MedProsPageState();
+  MilLicPageState createState() => MilLicPageState();
 }
 
-class MedProsPageState extends State<MedProsPage> {
-  int _sortColumnIndex, startingId;
-  bool _sortAscending = true,
-      _adLoaded = false,
-      isSubscribed,
-      notificationsRefreshed = false,
-      isInitial = true;
-  String _userId;
-  List<DocumentSnapshot> documents, filteredDocs, _selectedDocuments;
+class MilLicPageState extends State<MilLicPage> {
+  int _sortColumnIndex;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed;
+  List<DocumentSnapshot> _selectedDocuments;
+  List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -61,15 +53,7 @@ class MedProsPageState extends State<MedProsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
 
     if (!_adLoaded) {
       bool trackingAllowed =
@@ -94,10 +78,6 @@ class MedProsPageState extends State<MedProsPage> {
         _adLoaded = true;
       }
     }
-    if (isInitial) {
-      initialize();
-      isInitial = false;
-    }
   }
 
   @override
@@ -110,21 +90,10 @@ class MedProsPageState extends State<MedProsPage> {
     documents = [];
     filteredDocs = [];
 
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
-  }
-
-  void initialize() async {
-    prefs = await SharedPreferences.getInstance();
-
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('medpros')
+        .collection('milLic')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: _userId)
+        .where('users', arrayContains: widget.userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -142,120 +111,41 @@ class MedProsPageState extends State<MedProsPage> {
     super.dispose();
   }
 
-  void refreshNotifications() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    int phaMonthsDue = 12;
-    int dentalMonthsDue = 12;
-    int visionMonthsDue = 12;
-    int hearingMonthsDue = 12;
-    int hivMonthsDue = 24;
-    List<dynamic> phaDaysBefore = [0, 30];
-    List<dynamic> dentalDaysBefore = [0, 30];
-    List<dynamic> visionDaysBefore = [0, 30];
-    List<dynamic> hearingDaysBefore = [0, 30];
-    List<dynamic> hivDaysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      phaMonthsDue = setting.phaMonths ?? 12;
-      dentalMonthsDue = setting.dentalMonths ?? 12;
-      visionMonthsDue = setting.visionMonths ?? 12;
-      hearingMonthsDue = setting.hearingMonths ?? 12;
-      hivMonthsDue = setting.hivMonths ?? 24;
-      phaDaysBefore = setting.phaNotifications ?? [0, 30];
-      dentalDaysBefore = setting.dentalNotifications ?? [0, 30];
-      visionDaysBefore = setting.visionNotifications ?? [0, 30];
-      hearingDaysBefore = setting.hearingNotifications ?? [0, 30];
-      hivDaysBefore = setting.hivNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending
-        .where((pr) =>
-            pr.payload == 'PHA' ||
-            pr.payload == 'Dental' ||
-            pr.payload == 'Vision' ||
-            pr.payload == 'Hearing' ||
-            pr.payload == 'HIV')
-        .toList();
-
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    startingId = prefs.getInt('runningId') ?? 0;
-
-    scheduleNotifications('pha', 'PHA', phaMonthsDue, phaDaysBefore);
-    scheduleNotifications(
-        'dental', 'Dental', dentalMonthsDue, dentalDaysBefore);
-    scheduleNotifications(
-        'vision', 'Vision', visionMonthsDue, visionDaysBefore);
-    scheduleNotifications(
-        'hearing', 'Hearing', hearingMonthsDue, hearingDaysBefore);
-    scheduleNotifications('hiv', 'HIV', hivMonthsDue, hivDaysBefore);
-
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
-  }
-
-  void scheduleNotifications(
-      String key, String payload, int monthsDue, List<dynamic> daysBefore) {
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a[key].toString().compareTo(b[key].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      String soldier =
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      if (i == 0) {
-        dates.add([soldier, docs[i][key]]);
-      } else if (docs[i][key] == docs[i - 1][key]) {
-        dates.last[0] = '${dates.last[0]}, $soldier';
-      } else {
-        dates.add([soldier, docs[i][key]]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                '$payload(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                androidAllowWhileIdle: true,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                payload: payload,
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
-  }
-
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadMedProsPage()));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const UploadMilLicensePage()));
+      // Widget title = const Text('Upload Military Licenses');
+      // Widget content = SingleChildScrollView(
+      //   child: Container(
+      //     padding: const EdgeInsets.all(8.0),
+      //     child: const Text(
+      //       'To upload your Military Licenses, the file must be in .csv format. Also, there needs to be a Soldier Id column and '
+      //       'the Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from '
+      //       'Soldiers page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the '
+      //       '\'=\'. Date/Expiration Date also need to be in yyyy-MM-dd or M/d/yy format and vehicles need to be listed in one cell, separated '
+      //       'by commas with no \'and\'.',
+      //     ),
+      //   ),
+      // );
+      // customAlertDialog(
+      //   context: context,
+      //   title: title,
+      //   content: content,
+      //   primaryText: 'Continue',
+      //   primary: () {
+      //     Navigator.push(
+      //         context,
+      //         MaterialPageRoute(
+      //             builder: (context) => UploadMilLicensePage(
+      //                   userId: widget.userId,
+      //                   isSubscribed: isSubscribed,
+      //                 )));
+      //   },
+      //   secondary: () {},
+      // );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -274,66 +164,37 @@ class MedProsPageState extends State<MedProsPage> {
       'Last Name',
       'First Name',
       'Section',
-      'PHA Date',
-      'Dental Date',
-      'Hearing Date',
-      'Vision Date',
-      'HIV Date',
-      'Flu Date',
-      'Anthrax Date',
-      'Encephalitis Date',
-      'Hepatitis A Date',
-      'Hepatitis B Date',
-      'Meningococcal Date',
-      'MMR Date',
-      'Polio Date',
-      'Small Pox Date',
-      'Tetanus Date',
-      'Tuberculosis Date',
-      'Typhoid Date',
-      'Varicella Date',
-      'Yellow Fever Date',
-      'Other Immunizations'
+      'Date',
+      'Expiration Date',
+      'License #',
+      'Restrictions',
+      'Qualified Vehicles'
     ]);
     for (DocumentSnapshot doc in documents) {
-      List<dynamic> imms = doc['otherImms'];
-      String otherImms = '';
-      if (doc['otherImms'].length > 0) {
-        for (int i = 0; i < imms.length; i++) {
-          otherImms =
-              '$otherImms{title: ${imms[i]['title']}, date: ${imms[i]['date']}';
-          if (i < imms.length - 1) {
-            otherImms = otherImms = ';';
-          }
-        }
-      }
       List<dynamic> docs = [];
       docs.add(doc['soldierId']);
+      String vehiclesString = '';
       docs.add(doc['rank']);
       docs.add(doc['rankSort']);
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['pha']);
-      docs.add(doc['dental']);
-      docs.add(doc['hearing']);
-      docs.add(doc['vision']);
-      docs.add(doc['hiv']);
-      docs.add(doc['flu']);
-      docs.add(doc['anthrax']);
-      docs.add(doc['encephalitis']);
-      docs.add(doc['hepA']);
-      docs.add(doc['hepB']);
-      docs.add(doc['meningococcal']);
-      docs.add(doc['mmr']);
-      docs.add(doc['polio']);
-      docs.add(doc['smallPox']);
-      docs.add(doc['tetanus']);
-      docs.add(doc['tuberculin']);
-      docs.add(doc['typhoid']);
-      docs.add(doc['varicella']);
-      docs.add(doc['yellow']);
-      docs.add(otherImms);
+      docs.add(doc['date']);
+      docs.add(doc['exp']);
+      docs.add(doc['license']);
+      docs.add(doc['restrictions']);
+      if (doc['vehicles'] != null) {
+        List<dynamic> vehicles = doc['vehicles'];
+        for (String vehicle in vehicles) {
+          if (vehicle == vehicles.first) {
+            vehiclesString = vehiclesString + vehicle;
+          } else {
+            vehiclesString = '$vehiclesString, $vehicle';
+          }
+        }
+      }
+
+      docs.add(vehiclesString);
 
       docsList.add(docs);
     }
@@ -347,7 +208,7 @@ class MedProsPageState extends State<MedProsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'medpros.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'milLicenses.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -355,24 +216,22 @@ class MedProsPageState extends State<MedProsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/medpros.xlsx')
+        File('$dir/milLicenses.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () async {
-                        OpenFile.open('$dir/medpros.xlsx');
-                      },
-                    )
-                  : null,
-            ),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Data successfully downloaded to $location'),
+            duration: const Duration(seconds: 5),
+            action: Platform.isAndroid
+                ? SnackBarAction(
+                    label: 'Open',
+                    onPressed: () {
+                      OpenFile.open('$dir/milLicenses.xlsx');
+                    },
+                  )
+                : null,
+          ));
         }
       } catch (e) {
         // ignore: avoid_print
@@ -415,7 +274,7 @@ class MedProsPageState extends State<MedProsPage> {
     documents.sort(
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
-    MedprosPdf pdf = MedprosPdf(
+    MilLicPdf pdf = MilLicPdf(
       documents,
     );
     String location;
@@ -443,7 +302,7 @@ class MedProsPageState extends State<MedProsPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/medpros.pdf');
+                    OpenFile.open('$location/milLicenses.pdf');
                   },
                 )));
     }
@@ -466,7 +325,9 @@ class MedProsPageState extends State<MedProsPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    deleteRecord(context, _selectedDocuments, _userId, 'MedPros');
+    String s = _selectedDocuments.length > 1 ? 's' : '';
+    deleteRecord(
+        context, _selectedDocuments, widget.userId, 'Military License$s');
   }
 
   void _editRecord() {
@@ -479,8 +340,8 @@ class MedProsPageState extends State<MedProsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditMedprosPage(
-                  medpro: Medpro.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditMilLicPage(
+                  milLic: MilLic.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -488,11 +349,11 @@ class MedProsPageState extends State<MedProsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditMedprosPage(
-                  medpro: Medpro(
-                    owner: _userId,
-                    users: [_userId],
-                    otherImms: [],
+            builder: (context) => EditMilLicPage(
+                  milLic: MilLic(
+                    owner: widget.userId,
+                    users: [widget.userId],
+                    vehicles: [],
                   ),
                 )));
   }
@@ -511,31 +372,19 @@ class MedProsPageState extends State<MedProsPage> {
     ];
     if (width > 420) {
       columnList.add(DataColumn(
-          label: const Text('PHA'),
+          label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 565) {
       columnList.add(DataColumn(
-          label: const Text('Dental'),
+          label: const Text('Expires'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 685) {
+    if (width > 670) {
       columnList.add(DataColumn(
-          label: const Text('Hearing'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 820) {
-      columnList.add(DataColumn(
-          label: const Text('Vision'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 960) {
-      columnList.add(DataColumn(
-          label: const Text('HIV'),
+          label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -556,25 +405,59 @@ class MedProsPageState extends State<MedProsPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
+    bool overdue = isOverdue(documentSnapshot['exp'], 1);
+    bool amber = isOverdue(documentSnapshot['exp'], -30);
+    TextStyle overdueTextStyle =
+        const TextStyle(fontWeight: FontWeight.bold, color: Colors.red);
+    TextStyle amberTextStyle =
+        const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
     List<DataCell> cellList = [
-      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
+        documentSnapshot['rank'],
+        style: overdue
+            ? overdueTextStyle
+            : amber
+                ? amberTextStyle
+                : const TextStyle(),
+      )),
+      DataCell(Text(
+        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+        style: overdue
+            ? overdueTextStyle
+            : amber
+                ? amberTextStyle
+                : const TextStyle(),
+      )),
     ];
     if (width > 420) {
-      cellList.add(DataCell(Text(documentSnapshot['pha'])));
+      cellList.add(DataCell(Text(
+        documentSnapshot['date'],
+        style: overdue
+            ? overdueTextStyle
+            : amber
+                ? amberTextStyle
+                : const TextStyle(),
+      )));
     }
-    if (width > 560) {
-      cellList.add(DataCell(Text(documentSnapshot['dental'])));
+    if (width > 565) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['exp'],
+        style: overdue
+            ? overdueTextStyle
+            : amber
+                ? amberTextStyle
+                : const TextStyle(),
+      )));
     }
-    if (width > 685) {
-      cellList.add(DataCell(Text(documentSnapshot['hearing'])));
-    }
-    if (width > 820) {
-      cellList.add(DataCell(Text(documentSnapshot['vision'])));
-    }
-    if (width > 960) {
-      cellList.add(DataCell(Text(documentSnapshot['hiv'])));
+    if (width > 670) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['section'],
+        style: overdue
+            ? overdueTextStyle
+            : amber
+                ? amberTextStyle
+                : const TextStyle(),
+      )));
     }
     return cellList;
   }
@@ -590,19 +473,13 @@ class MedProsPageState extends State<MedProsPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['pha'].compareTo(b['pha']));
+            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['dental'].compareTo(b['dental']));
+            filteredDocs.sort((a, b) => a['exp'].compareTo(b['exp']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['hearin'].compareTo(b['hearing']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => a['vision'].compareTo(b['vision']));
-            break;
-          case 6:
-            filteredDocs.sort((a, b) => a['hiv'].compareTo(b['hiv']));
+            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
             break;
         }
       } else {
@@ -614,19 +491,13 @@ class MedProsPageState extends State<MedProsPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['pha'].compareTo(a['pha']));
+            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['dental'].compareTo(a['dental']));
+            filteredDocs.sort((a, b) => b['exp'].compareTo(a['exp']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['hearing'].compareTo(a['hearing']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => b['vision'].compareTo(a['vision']));
-            break;
-          case 6:
-            filteredDocs.sort((a, b) => b['hiv'].compareTo(a['hiv']));
+            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
             break;
         }
       }
@@ -781,7 +652,7 @@ class MedProsPageState extends State<MedProsPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('MedPros'),
+            title: const Text('Military Licenses'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -816,6 +687,27 @@ class MedProsPageState extends State<MedProsPage> {
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
+                    ),
+                  ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const <Widget>[
+                          Text(
+                            'Amber Text: License Expires within 30 days',
+                            style: TextStyle(
+                                color: Colors.amber,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Red Text: License Expired',
+                            style: TextStyle(
+                                color: Colors.red, fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ],

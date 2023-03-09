@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -18,32 +17,31 @@ import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/training.dart';
-import '../../pages/editPages/editTrainingPage.dart';
-import '../../pages/uploadPages/uploadTrainingsPage.dart';
-import '../../pdf/trainingPdf.dart';
+import '../models/working_award.dart';
+import 'editPages/edit_working_award_page.dart';
+import 'uploadPages/upload_working_awads_page.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class TrainingPage extends StatefulWidget {
-  const TrainingPage({
+class WorkingAwardsPage extends StatefulWidget {
+  const WorkingAwardsPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/training-page';
+  static const routeName = '/working-awards-page';
 
   @override
-  TrainingPageState createState() => TrainingPageState();
+  WorkingAwardsPageState createState() => WorkingAwardsPageState();
 }
 
-class TrainingPageState extends State<TrainingPage> {
+class WorkingAwardsPageState extends State<WorkingAwardsPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
+  StreamSubscription _subscription;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -88,13 +86,11 @@ class TrainingPageState extends State<TrainingPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
-
-    final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('training')
-        .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
+        .collection('workingAwards')
+        .where('owner', isEqualTo: widget.userId)
         .snapshots();
-    _subscriptionUsers = streamUsers.listen((updates) {
+    _subscription = stream.listen((updates) {
       setState(() {
         documents = updates.docs;
         filteredDocs = updates.docs;
@@ -105,24 +101,25 @@ class TrainingPageState extends State<TrainingPage> {
 
   @override
   void dispose() {
-    _subscriptionUsers.cancel();
+    _subscription.cancel();
     myBanner?.dispose();
     super.dispose();
   }
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadTrainingsPage()));
-      // Widget title = const Text('Upload Training');
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const UploadWorkingAwardsPage()));
+      // Widget title = const Text('Upload Working Awards');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Training, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
+      //       'To upload your Working Awards, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
       //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
-      //       'All dates also need to be in yyyy-MM-dd or M/d/yy format.',
+      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'.',
       //     ),
       //   ),
       // );
@@ -135,7 +132,7 @@ class TrainingPageState extends State<TrainingPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadTrainingsPage(
+      //             builder: (context) => UploadWorkingAwardsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -150,8 +147,7 @@ class TrainingPageState extends State<TrainingPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
+    if (!await checkPermission(Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -160,30 +156,12 @@ class TrainingPageState extends State<TrainingPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Cyber Awareness',
-      'OPSEC',
-      'AT Level 1',
-      'Law of War',
-      'Personnel Recovery',
-      'Information Security',
-      'CTIP',
-      'GAT',
-      'SERE',
-      'TARP',
-      'Equal Opportunity',
-      'ASAP',
-      'Suicide Prevention',
-      'SHARP',
-      'Additional 1',
-      'Additional 1 Date',
-      'Additional 2',
-      'Additional 2 Date',
-      'Additional 3',
-      'Additional 3 Date',
-      'Additional 4',
-      'Additional 4 Date',
-      'Additional 5',
-      'Additional 5 Date'
+      'Award Reason',
+      'Achievement 1',
+      'Achievement 2',
+      'Achievement 3',
+      'Achievement 4',
+      'Citation'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -193,30 +171,12 @@ class TrainingPageState extends State<TrainingPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['cyber']);
-      docs.add(doc['opsec']);
-      docs.add(doc['antiTerror']);
-      docs.add(doc['lawOfWar']);
-      docs.add(doc['persRec']);
-      docs.add(doc['infoSec']);
-      docs.add(doc['ctip']);
-      docs.add(doc['gat']);
-      docs.add(doc['sere']);
-      docs.add(doc['tarp']);
-      docs.add(doc['eo']);
-      docs.add(doc['asap']);
-      docs.add(doc['suicide']);
-      docs.add(doc['sharp']);
-      docs.add(doc['add1']);
-      docs.add(doc['add1Date']);
-      docs.add(doc['add2']);
-      docs.add(doc['add2Date']);
-      docs.add(doc['add3']);
-      docs.add(doc['add3Date']);
-      docs.add(doc['add4']);
-      docs.add(doc['add4Date']);
-      docs.add(doc['add5']);
-      docs.add(doc['add5Date']);
+      docs.add(doc['awardReason']);
+      docs.add(doc['ach1']);
+      docs.add(doc['ach2']);
+      docs.add(doc['ach3']);
+      docs.add(doc['ach4']);
+      docs.add(doc['citation']);
 
       docsList.add(docs);
     }
@@ -230,7 +190,7 @@ class TrainingPageState extends State<TrainingPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'training.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'workingAwards.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -238,7 +198,7 @@ class TrainingPageState extends State<TrainingPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/training.xlsx')
+        File('$dir/workingAwards.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -250,7 +210,7 @@ class TrainingPageState extends State<TrainingPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/training.xlsx');
+                        OpenFile.open('$dir/workingAwards.xlsx');
                       },
                     )
                   : null,
@@ -259,82 +219,8 @@ class TrainingPageState extends State<TrainingPage> {
         }
       } catch (e) {
         // ignore: avoid_print
-        print(e);
+        print('Error: $e');
       }
-    }
-  }
-
-  void _downloadPdf() async {
-    if (isSubscribed) {
-      if (_selectedDocuments.isEmpty) {
-        //show snack bar requiring at least one item selected
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('You must select at least one record')));
-        return;
-      }
-      Widget title = const Text('Download PDF');
-      Widget content = Container(
-        padding: const EdgeInsets.all(8.0),
-        child: const Text('Select full page or half page format.'),
-      );
-      customAlertDialog(
-        context: context,
-        title: title,
-        content: content,
-        primaryText: 'Full Page',
-        primary: () {
-          completePdfDownload(true);
-        },
-        secondaryText: 'Half Page',
-        secondary: () {
-          completePdfDownload(false);
-        },
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
-    }
-  }
-
-  void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
-    documents.sort(
-      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
-    );
-    TrainingPdf pdf = TrainingPdf(
-      documents,
-    );
-    String location;
-    if (fullPage) {
-      location = await pdf.createFullPage();
-    } else {
-      location = await pdf.createHalfPage();
-    }
-    String message;
-    if (location == '') {
-      message = 'Failed to download pdf';
-    } else {
-      String directory =
-          kIsWeb ? '/Downloads' : '\'On My iPhone(iPad)/Leader\'s Book\'';
-      message = kIsWeb
-          ? 'Pdf successfully downloaded to $directory'
-          : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/training.pdf');
-                  },
-                )));
     }
   }
 
@@ -356,7 +242,7 @@ class TrainingPageState extends State<TrainingPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Training$s');
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Award$s');
   }
 
   void _editRecord() {
@@ -369,8 +255,10 @@ class TrainingPageState extends State<TrainingPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditTrainingPage(
-                  training: Training.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditWorkingAwardPage(
+                  award: WorkingAward.fromSnapshot(
+                    _selectedDocuments[0],
+                  ),
                 )));
   }
 
@@ -378,10 +266,9 @@ class TrainingPageState extends State<TrainingPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditTrainingPage(
-                  training: Training(
+            builder: (context) => EditWorkingAwardPage(
+                  award: WorkingAward(
                     owner: widget.userId,
-                    users: [widget.userId],
                   ),
                 )));
   }
@@ -398,27 +285,15 @@ class TrainingPageState extends State<TrainingPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 435) {
       columnList.add(DataColumn(
-          label: const Text('Cyber'),
+          label: const Text('Reason'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 550) {
       columnList.add(DataColumn(
-          label: const Text('OPSEC'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 685) {
-      columnList.add(DataColumn(
-          label: const Text('AT Lvl 1'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 825) {
-      columnList.add(DataColumn(
-          label: const Text('CTIP'),
+          label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -444,17 +319,11 @@ class TrainingPageState extends State<TrainingPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 420) {
-      cellList.add(DataCell(Text(documentSnapshot['cyber'])));
+    if (width > 435) {
+      cellList.add(DataCell(Text(documentSnapshot['awardReason'])));
     }
-    if (width > 560) {
-      cellList.add(DataCell(Text(documentSnapshot['opsec'])));
-    }
-    if (width > 685) {
-      cellList.add(DataCell(Text(documentSnapshot['antiTerror'])));
-    }
-    if (width > 825) {
-      cellList.add(DataCell(Text(documentSnapshot['ctip'])));
+    if (width > 550) {
+      cellList.add(DataCell(Text(documentSnapshot['section'])));
     }
     return cellList;
   }
@@ -470,17 +339,12 @@ class TrainingPageState extends State<TrainingPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['cyber'].compareTo(b['cyber']));
+            filteredDocs
+                .sort((a, b) => a['section'].compareTo(b['awardReason']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['opsec'].compareTo(b['opsec']));
-            break;
-          case 4:
             filteredDocs
-                .sort((a, b) => a['antiTerror'].compareTo(b['antiTerror']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => a['ctip'].compareTo(b['ctip']));
+                .sort((a, b) => a['awardReason'].compareTo(b['section']));
             break;
         }
       } else {
@@ -492,17 +356,12 @@ class TrainingPageState extends State<TrainingPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['cyber'].compareTo(a['cyber']));
+            filteredDocs
+                .sort((a, b) => b['section'].compareTo(a['awardReason']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['opsec'].compareTo(a['opsec']));
-            break;
-          case 4:
             filteredDocs
-                .sort((a, b) => b['antiTerror'].compareTo(a['antiTerror']));
-            break;
-          case 5:
-            filteredDocs.sort((a, b) => b['ctip'].compareTo(a['ctip']));
+                .sort((a, b) => b['awardReason'].compareTo(a['section']));
             break;
         }
       }
@@ -544,7 +403,6 @@ class TrainingPageState extends State<TrainingPage> {
         ));
       }
     }
-
     List<Widget> editButton = <Widget>[
       Tooltip(
           message: 'Filter Records',
@@ -582,15 +440,6 @@ class TrainingPageState extends State<TrainingPage> {
                   _uploadExcel(context);
                 })),
       );
-      buttons.add(
-        Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
-      );
     } else {
       popupItems.add(const PopupMenuItem(
         value: 'download',
@@ -599,10 +448,6 @@ class TrainingPageState extends State<TrainingPage> {
       popupItems.add(const PopupMenuItem(
         value: 'upload',
         child: Text('Upload Data'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
       ));
     }
     if (width > 400) {
@@ -632,9 +477,6 @@ class TrainingPageState extends State<TrainingPage> {
           if (result == 'delete') {
             _deleteRecord();
           }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
         },
         itemBuilder: (BuildContext context) {
           return popupItems;
@@ -657,7 +499,7 @@ class TrainingPageState extends State<TrainingPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Training'),
+            title: const Text('Working Award'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),

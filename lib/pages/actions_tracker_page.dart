@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, use_key_in_widget_constructors, avoid_print
 
 import 'dart:async';
 import 'dart:io';
@@ -13,37 +13,37 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../providers/tracking_provider.dart';
+import '../../providers/subscription_state.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../models/hr_action.dart';
-import '../../pages/editPages/editHrActionPage.dart';
-import '../../pages/uploadPages/uploadHrActionsPage.dart';
-import '../../pdf/hrActionsPdf.dart';
-import '../providers/tracking_provider.dart';
-import '../widgets/anon_warning_banner.dart';
+import '../../models/action.dart';
+import 'editPages/edit_actions_tracker_page.dart';
+import 'uploadPages/upload_actions_page.dart';
+import '../pdf/actions_pdf.dart';
+import '../../widgets/anon_warning_banner.dart';
 
-class HrActionsPage extends StatefulWidget {
-  const HrActionsPage({
-    Key key,
+class ActionsTrackerPage extends StatefulWidget {
+  const ActionsTrackerPage({
     @required this.userId,
-  }) : super(key: key);
+  });
   final String userId;
 
-  static const routeName = '/hr-actions-page';
+  static const routeName = '/actions-tracker-page';
 
   @override
-  HrActionsPageState createState() => HrActionsPageState();
+  ActionsTrackerPageState createState() => ActionsTrackerPageState();
 }
 
-class HrActionsPageState extends State<HrActionsPage> {
+class ActionsTrackerPageState extends State<ActionsTrackerPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
+  QuerySnapshot snapshot;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -90,7 +90,7 @@ class HrActionsPageState extends State<HrActionsPage> {
     filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('hrActions')
+        .collection('actions')
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: widget.userId)
         .snapshots();
@@ -105,6 +105,7 @@ class HrActionsPageState extends State<HrActionsPage> {
 
   @override
   void dispose() {
+    //_subscription.cancel();
     _subscriptionUsers.cancel();
     myBanner?.dispose();
     super.dispose();
@@ -113,16 +114,16 @@ class HrActionsPageState extends State<HrActionsPage> {
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadHrActionsPage()));
-      // Widget title = const Text('Upload HR Metrics');
+          MaterialPageRoute(builder: (context) => const UploadActionsPage()));
+      // Widget title = const Text('Upload Actions Tracker');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your HR Metrics, the file must be in .csv format. Also, there needs to be a Soldier Id column and '
-      //       'the Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data '
-      //       'from Soldiers page. If Excel gives you an error for Soldier Id, change cell format to Text from General and '
-      //       'delete the \'=\'. Dates also need to be in yyyy-MM-dd or M/d/yy format.',
+      //       'To upload your Actions Tracker, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
+      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
+      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also needs to be in '
+      //       'yyyy-MM-dd or M/d/yy format.',
       //     ),
       //   ),
       // );
@@ -135,7 +136,7 @@ class HrActionsPageState extends State<HrActionsPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadHrActionsPage(
+      //             builder: (context) => UploadActionsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -160,9 +161,11 @@ class HrActionsPageState extends State<HrActionsPage> {
       'Last Name',
       'First Name',
       'Section',
-      'DD93 Date',
-      'SGLV Date',
-      'Record Review Date'
+      'Action',
+      'Date Submitted',
+      'Current Status',
+      'Status Date',
+      'Remarks',
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -172,9 +175,11 @@ class HrActionsPageState extends State<HrActionsPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['dd93']);
-      docs.add(doc['sglv']);
-      docs.add(doc['prr']);
+      docs.add(doc['action']);
+      docs.add(doc['dateSubmitted']);
+      docs.add(doc['currentStatus']);
+      docs.add(doc['statusDate']);
+      docs.add(doc['remarks']);
 
       docsList.add(docs);
     }
@@ -188,7 +193,7 @@ class HrActionsPageState extends State<HrActionsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'hrMetrics.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'actionsTracker.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -196,7 +201,7 @@ class HrActionsPageState extends State<HrActionsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/hrMetrics.xlsx')
+        File('$dir/actionsTracker.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -208,7 +213,7 @@ class HrActionsPageState extends State<HrActionsPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/hrMetrics.xlsx');
+                        OpenFile.open('$dir/actionsTracker.xlsx');
                       },
                     )
                   : null,
@@ -216,7 +221,6 @@ class HrActionsPageState extends State<HrActionsPage> {
           );
         }
       } catch (e) {
-        // ignore: avoid_print
         print('Error: $e');
       }
     }
@@ -225,10 +229,7 @@ class HrActionsPageState extends State<HrActionsPage> {
   void _downloadPdf() async {
     if (isSubscribed) {
       Widget title = const Text('Download PDF');
-      Widget content = Container(
-        padding: const EdgeInsets.all(8.0),
-        child: const Text('Select full page or half page format.'),
-      );
+      Widget content = const Text('Select full page or half page format.');
       customAlertDialog(
         context: context,
         title: title,
@@ -245,7 +246,7 @@ class HrActionsPageState extends State<HrActionsPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
+            "Downloading PDF files is only available for subscribed users."),
       ));
     }
   }
@@ -254,9 +255,10 @@ class HrActionsPageState extends State<HrActionsPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
+      (a, b) =>
+          a['statusDate'].toString().compareTo(b['statusDate'].toString()),
     );
-    HrActionsPdf pdf = HrActionsPdf(
+    ActionsPdf pdf = ActionsPdf(
       documents,
     );
     String location;
@@ -284,7 +286,7 @@ class HrActionsPageState extends State<HrActionsPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/hrActions.pdf');
+                    OpenFile.open('$location/actionsTracker.pdf');
                   },
                 )));
     }
@@ -308,7 +310,7 @@ class HrActionsPageState extends State<HrActionsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'HR Metric$s');
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Action$s');
   }
 
   void _editRecord() {
@@ -321,8 +323,8 @@ class HrActionsPageState extends State<HrActionsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditHrActionPage(
-                  hrAction: HrAction.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditActionsTrackerPage(
+                  action: ActionObj.fromSnapshot(_selectedDocuments[0]),
                 )));
   }
 
@@ -330,8 +332,8 @@ class HrActionsPageState extends State<HrActionsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditHrActionPage(
-                  hrAction: HrAction(
+            builder: (context) => EditActionsTrackerPage(
+                  action: ActionObj(
                     owner: widget.userId,
                     users: [widget.userId],
                   ),
@@ -350,21 +352,27 @@ class HrActionsPageState extends State<HrActionsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 480) {
       columnList.add(DataColumn(
-          label: const Text('DD93'),
+          label: const Text('Action'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 640) {
       columnList.add(DataColumn(
-          label: const Text('SGLV'),
+          label: const Text('Current Status'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 700) {
+    if (width > 790) {
       columnList.add(DataColumn(
-          label: const Text('RR'),
+          label: const Text('Status Date'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 960) {
+      columnList.add(DataColumn(
+          label: const Text('Date Submitted'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -386,18 +394,38 @@ class HrActionsPageState extends State<HrActionsPage> {
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
     List<DataCell> cellList = [
-      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
+        documentSnapshot['rank'],
+        style: const TextStyle(),
+      )),
+      DataCell(Text(
+        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+        style: const TextStyle(),
+      )),
     ];
-    if (width > 420) {
-      cellList.add(DataCell(Text(documentSnapshot['dd93'])));
+    if (width > 480) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['action'],
+        style: const TextStyle(),
+      )));
     }
-    if (width > 560) {
-      cellList.add(DataCell(Text(documentSnapshot['sglv'])));
+    if (width > 640) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['currentStatus'].toString(),
+        style: const TextStyle(),
+      )));
     }
-    if (width > 700) {
-      cellList.add(DataCell(Text(documentSnapshot['prr'])));
+    if (width > 790) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['statusDate'].toString(),
+        style: const TextStyle(),
+      )));
+    }
+    if (width > 960) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['dateSubmitted'].toString(),
+        style: const TextStyle(),
+      )));
     }
     return cellList;
   }
@@ -413,13 +441,19 @@ class HrActionsPageState extends State<HrActionsPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['dd93'].compareTo(b['dd93']));
+            filteredDocs.sort((a, b) => a['action'].compareTo(b['action']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['sglv'].compareTo(b['sglv']));
+            filteredDocs.sort(
+                (a, b) => a['currentStatus'].compareTo(b['currentStatus']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['prr'].compareTo(b['prr']));
+            filteredDocs
+                .sort((a, b) => a['statusDate'].compareTo(b['statusDate']));
+            break;
+          case 5:
+            filteredDocs.sort(
+                (a, b) => a['dateSubmitted'].compareTo(b['dateSubmitted']));
             break;
         }
       } else {
@@ -431,13 +465,19 @@ class HrActionsPageState extends State<HrActionsPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['dd93'].compareTo(a['dd93']));
+            filteredDocs.sort((a, b) => b['action'].compareTo(a['action']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['sglv'].compareTo(a['sglv']));
+            filteredDocs.sort(
+                (a, b) => b['currentStatus'].compareTo(a['currentStatus']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['prr'].compareTo(a['prr']));
+            filteredDocs
+                .sort((a, b) => b['statusDate'].compareTo(a['statusDate']));
+            break;
+          case 5:
+            filteredDocs.sort(
+                (a, b) => b['dateSubmitted'].compareTo(a['dateSubmitted']));
             break;
         }
       }
@@ -531,10 +571,12 @@ class HrActionsPageState extends State<HrActionsPage> {
         value: 'download',
         child: Text('Download as Excel'),
       ));
-      popupItems.add(const PopupMenuItem(
-        value: 'upload',
-        child: Text('Upload Data'),
-      ));
+      if (!kIsWeb) {
+        popupItems.add(const PopupMenuItem(
+          value: 'upload',
+          child: Text('Upload Data'),
+        ));
+      }
       popupItems.add(const PopupMenuItem(
         value: 'pdf',
         child: Text('Download as PDF'),
@@ -588,12 +630,13 @@ class HrActionsPageState extends State<HrActionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     final user = AuthProvider.of(context).auth.currentUser();
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('HR Metrics'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+            title: const Text('Action Tracker'),
+            actions: appBarMenu(context, width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {
@@ -628,7 +671,7 @@ class HrActionsPageState extends State<HrActionsPage> {
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

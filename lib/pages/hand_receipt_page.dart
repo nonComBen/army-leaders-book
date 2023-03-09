@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors, avoid_print
+// ignore_for_file: file_names
 
 import 'dart:async';
 import 'dart:io';
@@ -14,36 +14,36 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../auth_provider.dart';
-import '../providers/tracking_provider.dart';
-import '../../providers/subscription_state.dart';
+import '../providers/subscription_state.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/action.dart';
-import '../../pages/editPages/editActionsTrackerPage.dart';
-import '../../pages/uploadPages/uploadActionsPage.dart';
-import '../../pdf/actionsPdf.dart';
-import '../../widgets/anon_warning_banner.dart';
+import '../models/hand_receipt_item.dart';
+import 'editPages/edit_hand_receipt_page.dart';
+import 'uploadPages/upload_hand_receipt_page.dart';
+import '../pdf/hand_receipt_pdf.dart';
+import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
 
-class ActionsTrackerPage extends StatefulWidget {
-  const ActionsTrackerPage({
+class HandReceiptPage extends StatefulWidget {
+  const HandReceiptPage({
+    Key key,
     @required this.userId,
-  });
+  }) : super(key: key);
   final String userId;
 
-  static const routeName = '/actions-tracker-page';
+  static const routeName = '/hand-receipt-page';
 
   @override
-  ActionsTrackerPageState createState() => ActionsTrackerPageState();
+  HandReceiptPageState createState() => HandReceiptPageState();
 }
 
-class ActionsTrackerPageState extends State<ActionsTrackerPage> {
+class HandReceiptPageState extends State<HandReceiptPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
   StreamSubscription _subscriptionUsers;
-  QuerySnapshot snapshot;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -90,7 +90,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
     filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('actions')
+        .collection('handReceipt')
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: widget.userId)
         .snapshots();
@@ -105,7 +105,6 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
 
   @override
   void dispose() {
-    //_subscription.cancel();
     _subscriptionUsers.cancel();
     myBanner?.dispose();
     super.dispose();
@@ -113,17 +112,19 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadActionsPage()));
-      // Widget title = const Text('Upload Actions Tracker');
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const UploadHandReceiptPage()));
+      // Widget title = const Text('Upload Hand Receipt');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Actions Tracker, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also needs to be in '
-      //       'yyyy-MM-dd or M/d/yy format.',
+      //       'To upload your Hand Receipt, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
+      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
+      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
+      //       'Subcompents need to be represented as a list of lists (i.e. Item Name, NSN #, On Hand #, Required #; Item Name, ...).',
       //     ),
       //   ),
       // );
@@ -136,7 +137,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadActionsPage(
+      //             builder: (context) => UploadHandReceiptPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -161,11 +162,14 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Action',
-      'Date Submitted',
-      'Current Status',
-      'Status Date',
-      'Remarks',
+      'Item',
+      'Model #',
+      'Serial #',
+      'NSN #',
+      'Location',
+      'Value',
+      'Subcomponents',
+      'Comments',
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -175,11 +179,19 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['action']);
-      docs.add(doc['dateSubmitted']);
-      docs.add(doc['currentStatus']);
-      docs.add(doc['statusDate']);
-      docs.add(doc['remarks']);
+      docs.add(doc['item']);
+      docs.add(doc['model']);
+      docs.add(doc['serial']);
+      docs.add(doc['nsn']);
+      docs.add(doc['location']);
+      docs.add(doc['value']);
+      String subs = '';
+      for (Map<String, dynamic> map in doc['subComponents']) {
+        subs =
+            '$subs${map['item']}, ${map['nsn']}, ${map['onHand']}, ${map['required']};';
+      }
+      docs.add(subs);
+      docs.add(doc['comments']);
 
       docsList.add(docs);
     }
@@ -193,7 +205,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'actionsTracker.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'handReceipt.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -201,26 +213,25 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/actionsTracker.xlsx')
+        File('$dir/handReceipt.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/actionsTracker.xlsx');
-                      },
-                    )
-                  : null,
-            ),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Data successfully downloaded to $location'),
+            duration: const Duration(seconds: 5),
+            action: Platform.isAndroid
+                ? SnackBarAction(
+                    label: 'Open',
+                    onPressed: () {
+                      OpenFile.open('$dir/handReceipt.xlsx');
+                    },
+                  )
+                : null,
+          ));
         }
       } catch (e) {
+        // ignore: avoid_print
         print('Error: $e');
       }
     }
@@ -228,8 +239,17 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
 
   void _downloadPdf() async {
     if (isSubscribed) {
+      if (_selectedDocuments.isEmpty) {
+        //show snack bar requiring at least one item selected
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('You must select at least one record')));
+        return;
+      }
       Widget title = const Text('Download PDF');
-      Widget content = const Text('Select full page or half page format.');
+      Widget content = Container(
+        padding: const EdgeInsets.all(8.0),
+        child: const Text('Select full page or half page format.'),
+      );
       customAlertDialog(
         context: context,
         title: title,
@@ -246,7 +266,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
-            "Downloading PDF files is only available for subscribed users."),
+            'Downloading PDF files is only available for subscribed users.'),
       ));
     }
   }
@@ -254,11 +274,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
   void completePdfDownload(bool fullPage) async {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
-    documents.sort(
-      (a, b) =>
-          a['statusDate'].toString().compareTo(b['statusDate'].toString()),
-    );
-    ActionsPdf pdf = ActionsPdf(
+    HandReceiptPdf pdf = HandReceiptPdf(
       documents,
     );
     String location;
@@ -286,7 +302,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/actionsTracker.pdf');
+                    OpenFile.open('$location/handReceipt.pdf');
                   },
                 )));
     }
@@ -309,8 +325,8 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Action$s');
+    deleteRecord(
+        context, _selectedDocuments, widget.userId, 'Hand Receipt Item');
   }
 
   void _editRecord() {
@@ -323,8 +339,8 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditActionsTrackerPage(
-                  action: ActionObj.fromSnapshot(_selectedDocuments[0]),
+            builder: (context) => EditHandReceiptPage(
+                  item: HandReceiptItem.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -332,47 +348,76 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditActionsTrackerPage(
-                  action: ActionObj(
+            builder: (context) => EditHandReceiptPage(
+                  item: HandReceiptItem(
                     owner: widget.userId,
                     users: [widget.userId],
+                    subComponents: [],
                   ),
+                )));
+  }
+
+  void _copyRecord() {
+    if (_selectedDocuments.length != 1) {
+      //show snack bar requiring one item selected
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must select exactly one record')));
+      return;
+    }
+    HandReceiptItem hrItem =
+        HandReceiptItem.fromSnapshot(_selectedDocuments.first);
+
+    hrItem.id = null;
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => EditHandReceiptPage(
+                  item: hrItem,
                 )));
   }
 
   List<DataColumn> _createColumns(double width) {
     List<DataColumn> columnList = [
       DataColumn(
-        label: const Text('Rank'),
+        label: const Expanded(
+          flex: 1,
+          child: Text('Section'),
+        ),
         onSort: (int columnIndex, bool ascending) =>
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Text('Name'),
+          label: const Expanded(
+            flex: 1,
+            child: Text('Item'),
+          ),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 480) {
+    if (width > 400) {
       columnList.add(DataColumn(
-          label: const Text('Action'),
+          label: const Expanded(
+            flex: 1,
+            child: Text('Location'),
+          ),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 640) {
+    if (width > 595) {
       columnList.add(DataColumn(
-          label: const Text('Current Status'),
+          label: const Expanded(
+            flex: 1,
+            child: Text('Serial'),
+          ),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 790) {
+    if (width > 685) {
       columnList.add(DataColumn(
-          label: const Text('Status Date'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 960) {
-      columnList.add(DataColumn(
-          label: const Text('Date Submitted'),
+          label: const Expanded(
+            flex: 1,
+            child: Text('Value'),
+          ),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -394,38 +439,17 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: const TextStyle(),
-      )),
+      DataCell(Text(documentSnapshot['section'])),
+      DataCell(Text(documentSnapshot['item'])),
     ];
-    if (width > 480) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['action'],
-        style: const TextStyle(),
-      )));
+    if (width > 400) {
+      cellList.add(DataCell(Text(documentSnapshot['location'])));
     }
-    if (width > 640) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['currentStatus'].toString(),
-        style: const TextStyle(),
-      )));
+    if (width > 595) {
+      cellList.add(DataCell(Text(documentSnapshot['serial'])));
     }
-    if (width > 790) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['statusDate'].toString(),
-        style: const TextStyle(),
-      )));
-    }
-    if (width > 960) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['dateSubmitted'].toString(),
-        style: const TextStyle(),
-      )));
+    if (width > 685) {
+      cellList.add(DataCell(Text(documentSnapshot['value'])));
     }
     return cellList;
   }
@@ -435,49 +459,37 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
       if (ascending) {
         switch (columnIndex) {
           case 0:
-            filteredDocs.sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
             break;
           case 1:
-            filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
+            filteredDocs.sort((a, b) => a['item'].compareTo(b['item']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['action'].compareTo(b['action']));
+            filteredDocs.sort((a, b) => a['location'].compareTo(b['location']));
             break;
           case 3:
-            filteredDocs.sort(
-                (a, b) => a['currentStatus'].compareTo(b['currentStatus']));
+            filteredDocs.sort((a, b) => a['serial'].compareTo(b['serial']));
             break;
           case 4:
-            filteredDocs
-                .sort((a, b) => a['statusDate'].compareTo(b['statusDate']));
-            break;
-          case 5:
-            filteredDocs.sort(
-                (a, b) => a['dateSubmitted'].compareTo(b['dateSubmitted']));
+            filteredDocs.sort((a, b) => a['value'].compareTo(b['value']));
             break;
         }
       } else {
         switch (columnIndex) {
           case 0:
-            filteredDocs.sort((a, b) => b['rankSort'].compareTo(a['rankSort']));
+            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
             break;
           case 1:
-            filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
+            filteredDocs.sort((a, b) => b['item'].compareTo(a['item']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['action'].compareTo(a['action']));
+            filteredDocs.sort((a, b) => b['location'].compareTo(a['location']));
             break;
           case 3:
-            filteredDocs.sort(
-                (a, b) => b['currentStatus'].compareTo(a['currentStatus']));
+            filteredDocs.sort((a, b) => b['serial'].compareTo(a['serial']));
             break;
           case 4:
-            filteredDocs
-                .sort((a, b) => b['statusDate'].compareTo(a['statusDate']));
-            break;
-          case 5:
-            filteredDocs.sort(
-                (a, b) => b['dateSubmitted'].compareTo(a['dateSubmitted']));
+            filteredDocs.sort((a, b) => b['value'].compareTo(a['value']));
             break;
         }
       }
@@ -550,7 +562,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
       );
       buttons.add(
         Tooltip(
-            message: 'Upload Data',
+            message: 'Upload Excel',
             child: IconButton(
                 icon: const Icon(Icons.file_upload),
                 onPressed: () {
@@ -571,12 +583,10 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
         value: 'download',
         child: Text('Download as Excel'),
       ));
-      if (!kIsWeb) {
-        popupItems.add(const PopupMenuItem(
-          value: 'upload',
-          child: Text('Upload Data'),
-        ));
-      }
+      popupItems.add(const PopupMenuItem(
+        value: 'upload',
+        child: Text('Upload Data'),
+      ));
       popupItems.add(const PopupMenuItem(
         value: 'pdf',
         child: Text('Download as PDF'),
@@ -630,18 +640,33 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     final user = AuthProvider.of(context).auth.currentUser();
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Action Tracker'),
-            actions: appBarMenu(context, width)),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
+            title: const Text('Hand Receipt'),
+            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+        //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+                heroTag: 'copy',
+                child: const Icon(Icons.copy),
+                onPressed: () {
+                  _copyRecord();
+                }),
+            const SizedBox(
+              height: 10,
+            ),
+            FloatingActionButton(
+                heroTag: 'add',
+                child: const Icon(Icons.add),
+                onPressed: () {
+                  _newRecord(context);
+                }),
+          ],
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -671,7 +696,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),

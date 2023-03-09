@@ -13,37 +13,37 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../providers/tracking_provider.dart';
+import '../../providers/subscription_state.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../models/phone_number.dart';
-import '../../pages/editPages/editPhonePage.dart';
-import '../../pages/uploadPages/uploadPhonePage.dart';
-import '../../pdf/phonePdf.dart';
-import '../providers/tracking_provider.dart';
-import '../widgets/anon_warning_banner.dart';
+import 'editPages/edit_equipment_page.dart';
+import '../../widgets/anon_warning_banner.dart';
+import '../../models/equipment.dart';
+import 'uploadPages/upload_equipment_page.dart';
+import '../pdf/equipment_pdf.dart';
 
-class PhonePage extends StatefulWidget {
-  const PhonePage({
+class EquipmentPage extends StatefulWidget {
+  const EquipmentPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/phone-page';
+  static const routeName = '/equipment-page';
 
   @override
-  PhonePageState createState() => PhonePageState();
+  EquipmentPageState createState() => EquipmentPageState();
 }
 
-class PhonePageState extends State<PhonePage> {
+class EquipmentPageState extends State<EquipmentPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents;
-  StreamSubscription _subscription;
+  List<DocumentSnapshot> documents, filteredDocs;
+  StreamSubscription _subscriptionUsers;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -87,42 +87,25 @@ class PhonePageState extends State<PhonePage> {
     _sortColumnIndex = 0;
     _selectedDocuments = [];
     documents = [];
-    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('phoneNumbers')
-        .where('owner', isEqualTo: widget.userId)
+    filteredDocs = [];
+
+    final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
+        .collection('equipment')
+        .where('users', isNotEqualTo: null)
+        .where('users', arrayContains: widget.userId)
         .snapshots();
-    _subscription = stream.listen((updates) {
+    _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
         documents = updates.docs;
+        filteredDocs = updates.docs;
         _selectedDocuments.clear();
       });
-      // for (DocumentChange dc in updates.docChanges) {
-      //   if (dc.type == DocumentChangeType.removed) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       _selectedDocuments.removeWhere((doc) => doc.id == dc.doc.id);
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.added) {
-      //     setState(() {
-      //       documents.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.modified) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       documents.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      // }
     });
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscriptionUsers.cancel();
     myBanner?.dispose();
     super.dispose();
   }
@@ -130,12 +113,16 @@ class PhonePageState extends State<PhonePage> {
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadPhonePage()));
-      // Widget title = const Text('Upload Phone Numbers');
-      // Widget content = Container(
-      //   padding: const EdgeInsets.all(8.0),
-      //   child: const Text(
-      //     'To upload your Phone Numbers, the file must be in .csv format.',
+          MaterialPageRoute(builder: (context) => const UploadEquipmentPage()));
+      // Widget title = const Text('Upload Equipment');
+      // Widget content = SingleChildScrollView(
+      //   child: Container(
+      //     padding: const EdgeInsets.all(8.0),
+      //     child: const Text(
+      //       'To upload your Equipment, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
+      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
+      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'.',
+      //     ),
       //   ),
       // );
       // customAlertDialog(
@@ -147,7 +134,7 @@ class PhonePageState extends State<PhonePage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadPhonePage(
+      //             builder: (context) => UploadEquipmentPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -165,13 +152,54 @@ class PhonePageState extends State<PhonePage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     List<List<dynamic>> docsList = [];
-    docsList.add(['Title', 'POC', 'Phone Number', 'Location']);
+    docsList.add([
+      'Soldier Id',
+      'Rank',
+      'Rank Sort',
+      'Last Name',
+      'First Name',
+      'Section',
+      'Weapon',
+      'Butt Stock',
+      'Serial #',
+      'Optics',
+      'Optics Serial #',
+      'Secondary Weapon',
+      'Secondary Butt Stock',
+      'Secondary Serial #',
+      'Secondary Optics',
+      'Secondary Optics Serial #',
+      'Mask',
+      'Vehicle Bumper #',
+      'Vehicle Type',
+      'License #',
+      'Miscellaneous',
+      'Miscellaneous Serial #'
+    ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
-      docs.add(doc['title']);
+      docs.add(doc['soldierId']);
+      docs.add(doc['rank']);
+      docs.add(doc['rankSort']);
       docs.add(doc['name']);
-      docs.add(doc['phone']);
-      docs.add(doc['location']);
+      docs.add(doc['firstName']);
+      docs.add(doc['section']);
+      docs.add(doc['weapon']);
+      docs.add(doc['buttStock']);
+      docs.add(doc['serial']);
+      docs.add(doc['optic']);
+      docs.add(doc['opticSerial']);
+      docs.add(doc['weapon2']);
+      docs.add(doc['buttStock2']);
+      docs.add(doc['serial2']);
+      docs.add(doc['optic2']);
+      docs.add(doc['opticSerial2']);
+      docs.add(doc['mask']);
+      docs.add(doc['veh']);
+      docs.add(doc['vehType']);
+      docs.add(doc['license']);
+      docs.add(doc['misc']);
+      docs.add(doc['miscSerial']);
 
       docsList.add(docs);
     }
@@ -185,7 +213,7 @@ class PhonePageState extends State<PhonePage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'phoneDirectory.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'equipment.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -193,7 +221,7 @@ class PhonePageState extends State<PhonePage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/phoneDirectory.xlsx')
+        File('$dir/equipment.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -205,7 +233,7 @@ class PhonePageState extends State<PhonePage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/phoneDirectory.xlsx');
+                        OpenFile.open('$dir/equipment.xlsx');
                       },
                     )
                   : null,
@@ -221,6 +249,12 @@ class PhonePageState extends State<PhonePage> {
 
   void _downloadPdf() async {
     if (isSubscribed) {
+      if (_selectedDocuments.isEmpty) {
+        //show snack bar requiring at least one item selected
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('You must select at least one record')));
+        return;
+      }
       Widget title = const Text('Download PDF');
       Widget content = Container(
         padding: const EdgeInsets.all(8.0),
@@ -230,7 +264,7 @@ class PhonePageState extends State<PhonePage> {
         context: context,
         title: title,
         content: content,
-        primaryText: 'Full Page',
+        primaryText: 'Full  Page',
         primary: () {
           completePdfDownload(true);
         },
@@ -251,9 +285,9 @@ class PhonePageState extends State<PhonePage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['title'].toString().compareTo(b['title'].toString()),
+      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
-    PhonePdf pdf = PhonePdf(
+    EquipmentPdf pdf = EquipmentPdf(
       documents,
     );
     String location;
@@ -281,10 +315,20 @@ class PhonePageState extends State<PhonePage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/phoneNumbers.pdf');
+                    OpenFile.open('$location/equipment.pdf');
                   },
                 )));
     }
+  }
+
+  void _filterRecords(String section) {
+    if (section == 'All') {
+      filteredDocs = List.from(documents);
+    } else {
+      filteredDocs =
+          documents.where((element) => element['section'] == section).toList();
+    }
+    setState(() {});
   }
 
   void _deleteRecord() {
@@ -294,8 +338,7 @@ class PhonePageState extends State<PhonePage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Phone Number$s');
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Equipment');
   }
 
   void _editRecord() {
@@ -308,10 +351,8 @@ class PhonePageState extends State<PhonePage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditPhonePage(
-                  phone: Phone.fromSnapshot(
-                    _selectedDocuments[0],
-                  ),
+            builder: (context) => EditEquipmentPage(
+                  equipment: Equipment.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -319,9 +360,10 @@ class PhonePageState extends State<PhonePage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditPhonePage(
-                  phone: Phone(
+            builder: (context) => EditEquipmentPage(
+                  equipment: Equipment(
                     owner: widget.userId,
+                    users: [widget.userId],
                   ),
                 )));
   }
@@ -329,24 +371,54 @@ class PhonePageState extends State<PhonePage> {
   List<DataColumn> _createColumns(double width) {
     List<DataColumn> columnList = [
       DataColumn(
-        label: const Text('Title'),
+        label: const Expanded(
+          flex: 1,
+          child: Text('Rank'),
+        ),
         onSort: (int columnIndex, bool ascending) =>
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Text('POC'),
+          label: const Expanded(
+            flex: 1,
+            child: Text('Name'),
+          ),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 425) {
+    if (width > 400) {
       columnList.add(DataColumn(
-          label: const Text('Phone No'),
+          label: const Expanded(
+            flex: 1,
+            child: Text('Weapon'),
+          ),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 525) {
+    if (width > 595) {
       columnList.add(DataColumn(
-          label: const Text('Location'),
+          label: const Expanded(
+            flex: 1,
+            child: Text('Butt Stock'),
+          ),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 685) {
+      columnList.add(DataColumn(
+          label: const Expanded(
+            flex: 1,
+            child: Text('Serial'),
+          ),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 825) {
+      columnList.add(DataColumn(
+          label: const Expanded(
+            flex: 1,
+            child: Text('Mask'),
+          ),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -368,14 +440,21 @@ class PhonePageState extends State<PhonePage> {
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
     List<DataCell> cellList = [
-      DataCell(Text(documentSnapshot['title'])),
-      DataCell(Text(documentSnapshot['name'])),
+      DataCell(Text(documentSnapshot['rank'])),
+      DataCell(Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 425) {
-      cellList.add(DataCell(Text(documentSnapshot['phone'])));
+    if (width > 400) {
+      cellList.add(DataCell(Text(documentSnapshot['weapon'])));
     }
-    if (width > 525) {
-      cellList.add(DataCell(Text(documentSnapshot['location'])));
+    if (width > 595) {
+      cellList.add(DataCell(Text(documentSnapshot['buttStock'])));
+    }
+    if (width > 685) {
+      cellList.add(DataCell(Text(documentSnapshot['serial'])));
+    }
+    if (width > 825) {
+      cellList.add(DataCell(Text(documentSnapshot['mask'])));
     }
     return cellList;
   }
@@ -385,31 +464,45 @@ class PhonePageState extends State<PhonePage> {
       if (ascending) {
         switch (columnIndex) {
           case 0:
-            documents.sort((a, b) => a['title'].compareTo(b['title']));
+            filteredDocs.sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
             break;
           case 1:
-            documents.sort((a, b) => a['name'].compareTo(b['name']));
+            filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            documents.sort((a, b) => a['phone'].compareTo(b['phone']));
+            filteredDocs.sort((a, b) => a['weapon'].compareTo(b['weapon']));
             break;
           case 3:
-            documents.sort((a, b) => a['location'].compareTo(b['location']));
+            filteredDocs
+                .sort((a, b) => a['buttStock'].compareTo(b['buttStock']));
+            break;
+          case 4:
+            filteredDocs.sort((a, b) => a['serial'].compareTo(b['serial']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => a['mask'].compareTo(b['mask']));
             break;
         }
       } else {
         switch (columnIndex) {
           case 0:
-            documents.sort((a, b) => b['title'].compareTo(a['title']));
+            filteredDocs.sort((a, b) => b['rankSort'].compareTo(a['rankSort']));
             break;
           case 1:
-            documents.sort((a, b) => b['name'].compareTo(a['name']));
+            filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            documents.sort((a, b) => b['phone'].compareTo(a['phone']));
+            filteredDocs.sort((a, b) => b['weapon'].compareTo(a['weapon']));
             break;
           case 3:
-            documents.sort((a, b) => b['location'].compareTo(a['location']));
+            filteredDocs
+                .sort((a, b) => b['buttStock'].compareTo(a['buttStock']));
+            break;
+          case 4:
+            filteredDocs.sort((a, b) => b['serial'].compareTo(a['serial']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => b['mask'].compareTo(a['mask']));
             break;
         }
       }
@@ -430,7 +523,38 @@ class PhonePageState extends State<PhonePage> {
 
   List<Widget> appBarMenu(BuildContext context, double width) {
     List<Widget> buttons = <Widget>[];
+
+    List<PopupMenuEntry<String>> sections = [
+      const PopupMenuItem(
+        value: 'All',
+        child: Text('All'),
+      )
+    ];
+    documents.sort((a, b) => a['section'].compareTo(b['section']));
+    for (int i = 0; i < documents.length; i++) {
+      if (i == 0) {
+        sections.add(PopupMenuItem(
+          value: documents[i]['section'],
+          child: Text(documents[i]['section']),
+        ));
+      } else if (documents[i]['section'] != documents[i - 1]['section']) {
+        sections.add(PopupMenuItem(
+          value: documents[i]['section'],
+          child: Text(documents[i]['section']),
+        ));
+      }
+    }
+
     List<Widget> editButton = <Widget>[
+      Tooltip(
+          message: 'Filter Records',
+          child: PopupMenuButton(
+            icon: const Icon(Icons.filter_alt),
+            onSelected: (String result) => _filterRecords(result),
+            itemBuilder: (context) {
+              return sections;
+            },
+          )),
       Tooltip(
           message: 'Edit Record',
           child: IconButton(
@@ -451,7 +575,7 @@ class PhonePageState extends State<PhonePage> {
       );
       buttons.add(
         Tooltip(
-            message: 'Upload Data',
+            message: 'Upload Excel',
             child: IconButton(
                 icon: const Icon(Icons.file_upload),
                 onPressed: () {
@@ -533,7 +657,7 @@ class PhonePageState extends State<PhonePage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Phone Numbers'),
+            title: const Text('Equipment'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -567,7 +691,7 @@ class PhonePageState extends State<PhonePage> {
                       columns:
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
-                          documents, MediaQuery.of(context).size.width),
+                          filteredDocs, MediaQuery.of(context).size.width),
                     ),
                   )
                 ],

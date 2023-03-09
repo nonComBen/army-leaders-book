@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, avoid_print
+// ignore_for_file: file_names
 
 import 'dart:async';
 import 'dart:io';
@@ -13,32 +13,32 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/appointment.dart';
-import '../../pages/editPages/editAppointmentPage.dart';
-import '../../pdf/appointmentsPdf.dart';
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../pages/uploadPages/uploadAppointmentPage.dart';
-import '../../widgets/anon_warning_banner.dart';
+import '../../models/perstat.dart';
+import 'editPages/edit_perstat_page.dart';
+import 'uploadPages/upload_perstat_page.dart';
+import '../pdf/perstats_pdf.dart';
 import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
 
-class AptsPage extends StatefulWidget {
-  const AptsPage({
+class PerstatPage extends StatefulWidget {
+  const PerstatPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/appointments-page';
+  static const routeName = '/perstat-page';
 
   @override
-  AptsPageState createState() => AptsPageState();
+  PerstatPageState createState() => PerstatPageState();
 }
 
-class AptsPageState extends State<AptsPage> {
+class PerstatPageState extends State<PerstatPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
@@ -53,9 +53,8 @@ class AptsPageState extends State<AptsPage> {
     super.didChangeDependencies();
 
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-    print('Provider Subscribed State: $isSubscribed');
 
-    if (!_adLoaded && !isSubscribed) {
+    if (!_adLoaded) {
       bool trackingAllowed =
           Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
 
@@ -74,7 +73,7 @@ class AptsPageState extends State<AptsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        myBanner.load();
+        await myBanner.load();
         _adLoaded = true;
       }
     }
@@ -91,7 +90,7 @@ class AptsPageState extends State<AptsPage> {
     filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('appointments')
+        .collection('perstat')
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: widget.userId)
         .snapshots();
@@ -101,6 +100,31 @@ class AptsPageState extends State<AptsPage> {
         filteredDocs = updates.docs;
         _selectedDocuments.clear();
       });
+      // for (DocumentChange dc in updates.docChanges) {
+      //   if (dc.type == DocumentChangeType.removed) {
+      //     setState(() {
+      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
+      //       filteredDocs.removeWhere((doc) => doc.id == dc.doc.id);
+      //       _selectedDocuments.removeWhere((doc) => doc.id == dc.doc.id);
+      //     });
+      //   }
+      //   if (dc.type == DocumentChangeType.added) {
+      //     setState(() {
+      //       documents.add(dc.doc);
+      //       filteredDocs.add(dc.doc);
+      //       _selectedDocuments.clear();
+      //     });
+      //   }
+      //   if (dc.type == DocumentChangeType.modified) {
+      //     setState(() {
+      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
+      //       documents.add(dc.doc);
+      //       filteredDocs.removeWhere((doc) => doc.id == dc.doc.id);
+      //       filteredDocs.add(dc.doc);
+      //       _selectedDocuments.clear();
+      //     });
+      //   }
+      // }
     });
   }
 
@@ -113,20 +137,17 @@ class AptsPageState extends State<AptsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadAppointmentsPage()));
-      // Widget title = const Text('Upload Appointments');
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadPerstatPage()));
+      // Widget title = const Text('Upload PERSTATs');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Appointments, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
-      //       'Date also needs to be in yyyy-MM-dd or M/d/yy format, Start/End Time need to be in hhmm format (don\'t worry if Excel drops '
-      //       'zeros) and status will default to Scheduled if the status does not match an option in the dropdown menu (case sensitive).',
+      //       'To upload your PERSTATs, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier '
+      //       'Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
+      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Start/End Date also need '
+      //       'to be in yyyy-MM-dd or M/d/yy format.',
       //     ),
       //   ),
       // );
@@ -139,7 +160,7 @@ class AptsPageState extends State<AptsPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadAppointmentsPage(
+      //             builder: (context) => UploadPerstatPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -165,12 +186,10 @@ class AptsPageState extends State<AptsPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Title',
-      'Date',
-      'Start Time',
-      'End Time',
+      'Type',
+      'Start Date',
+      'End Date',
       'Location',
-      'Status',
       'Comments'
     ]);
     for (DocumentSnapshot doc in documents) {
@@ -181,8 +200,7 @@ class AptsPageState extends State<AptsPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['aptTitle']);
-      docs.add(doc['date']);
+      docs.add(doc['type']);
       docs.add(doc['start']);
       docs.add(doc['end']);
       try {
@@ -190,7 +208,6 @@ class AptsPageState extends State<AptsPage> {
       } catch (e) {
         docs.add('');
       }
-      docs.add(doc['status']);
       docs.add(doc['comments']);
 
       docsList.add(docs);
@@ -205,7 +222,7 @@ class AptsPageState extends State<AptsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'appointments.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'perstat.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -213,7 +230,7 @@ class AptsPageState extends State<AptsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/appointments.xlsx')
+        File('$dir/perstat.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -225,7 +242,7 @@ class AptsPageState extends State<AptsPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/appointments.xlsx');
+                        OpenFile.open('$dir/perstat.xlsx');
                       },
                     )
                   : null,
@@ -233,6 +250,7 @@ class AptsPageState extends State<AptsPage> {
           );
         }
       } catch (e) {
+        // ignore: avoid_print
         print('Error: $e');
       }
     }
@@ -270,9 +288,9 @@ class AptsPageState extends State<AptsPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['date'].toString().compareTo(b['date'].toString()),
+      (a, b) => a['start'].toString().compareTo(b['start'].toString()),
     );
-    AppointmentsPdf pdf = AppointmentsPdf(
+    PerstatsPdf pdf = PerstatsPdf(
       documents,
     );
     String location;
@@ -300,7 +318,7 @@ class AptsPageState extends State<AptsPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/appointments.pdf');
+                    OpenFile.open('$location/perstat.pdf');
                   },
                 )));
     }
@@ -314,13 +332,13 @@ class AptsPageState extends State<AptsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    Widget title = Text('Delete Appointment$s?');
+    Widget title = Text('Delete PERSTAT$s?');
     Widget content = Container(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
         child: Column(
-          children: <Widget>[
-            Text('Are you sure you want to delete the selected Appointment$s?'),
+          children: const <Widget>[
+            Text('Are you sure you want to delete the selected Perstat(s)?'),
           ],
         ),
       ),
@@ -359,19 +377,18 @@ class AptsPageState extends State<AptsPage> {
     }
   }
 
-  void _editRecord() {
+  void _editRecord(BuildContext context) {
     if (_selectedDocuments.length != 1) {
       //show snack bar requiring one item selected
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('You must select exactly one record')));
       return;
     }
-
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditAppointmentPage(
-                  apt: Appointment.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditPerstatPage(
+                  perstat: Perstat.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -379,62 +396,68 @@ class AptsPageState extends State<AptsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditAppointmentPage(
-                  apt: Appointment(
-                    users: [widget.userId],
+            builder: (context) => EditPerstatPage(
+                  perstat: Perstat(
                     owner: widget.userId,
+                    users: [widget.userId],
                   ),
                 )));
   }
 
   List<DataColumn> _createColumns(double width) {
-    List<DataColumn> columnList = [
+    List<DataColumn> list = [
       DataColumn(
-        label: const Text('Rank'),
-        onSort: (int columnIndex, bool ascending) =>
-            onSortColumn(columnIndex, ascending),
-      ),
+          label: const Text('Rank'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)),
       DataColumn(
           label: const Text('Name'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 410) {
-      columnList.add(DataColumn(
-          label: const Text('Date'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 500) {
-      columnList.add(DataColumn(
+    if (width > 415) {
+      list.add(DataColumn(
           label: const Text('Start'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 650) {
-      columnList.add(DataColumn(
-          label: const Text('Title'),
+    if (width > 550) {
+      list.add(DataColumn(
+          label: const Text('End'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    return columnList;
+    if (width > 685) {
+      list.add(DataColumn(
+          label: const Text('Type'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 800) {
+      list.add(DataColumn(
+          label: const Text('Section'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    return list;
   }
 
   List<DataRow> _createRows(List<DocumentSnapshot> snapshot, double width) {
     List<DataRow> newList;
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
-          selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
-              onSelected(selected, documentSnapshot),
-          cells: getCells(documentSnapshot, width));
+        selected: _selectedDocuments.contains(documentSnapshot),
+        onSelectChanged: (bool selected) =>
+            onSelected(selected, documentSnapshot),
+        cells: getCells(documentSnapshot, width),
+      );
     }).toList();
 
     return newList;
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool overdue = isOverdue(documentSnapshot['date'], 1);
+    bool overdue = isOverdue(documentSnapshot['end'], 1);
     List<DataCell> cellList = [
       DataCell(Text(
         documentSnapshot['rank'],
@@ -449,15 +472,7 @@ class AptsPageState extends State<AptsPage> {
             : const TextStyle(),
       )),
     ];
-    if (width > 410) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
-    }
-    if (width > 500) {
+    if (width > 415) {
       cellList.add(DataCell(Text(
         documentSnapshot['start'],
         style: overdue
@@ -465,9 +480,25 @@ class AptsPageState extends State<AptsPage> {
             : const TextStyle(),
       )));
     }
-    if (width > 650) {
+    if (width > 550) {
       cellList.add(DataCell(Text(
-        documentSnapshot['aptTitle'],
+        documentSnapshot['end'],
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
+      )));
+    }
+    if (width > 685) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['type'],
+        style: overdue
+            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+            : const TextStyle(),
+      )));
+    }
+    if (width > 800) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['section'],
         style: overdue
             ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
             : const TextStyle(),
@@ -487,13 +518,16 @@ class AptsPageState extends State<AptsPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
-            break;
-          case 3:
             filteredDocs.sort((a, b) => a['start'].compareTo(b['start']));
             break;
+          case 3:
+            filteredDocs.sort((a, b) => a['end'].compareTo(b['end']));
+            break;
           case 4:
-            filteredDocs.sort((a, b) => a['aptTitle'].compareTo(b['aptTitle']));
+            filteredDocs.sort((a, b) => a['type'].compareTo(b['type']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
             break;
         }
       } else {
@@ -505,13 +539,16 @@ class AptsPageState extends State<AptsPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
-            break;
-          case 3:
             filteredDocs.sort((a, b) => b['start'].compareTo(a['start']));
             break;
+          case 3:
+            filteredDocs.sort((a, b) => b['end'].compareTo(a['end']));
+            break;
           case 4:
-            filteredDocs.sort((a, b) => b['aptTitle'].compareTo(a['aptTitle']));
+            filteredDocs.sort((a, b) => b['type'].compareTo(a['type']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
             break;
         }
       }
@@ -567,7 +604,8 @@ class AptsPageState extends State<AptsPage> {
       Tooltip(
           message: 'Edit Record',
           child: IconButton(
-              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
+              icon: const Icon(Icons.edit),
+              onPressed: () => _editRecord(context))),
     ];
 
     List<PopupMenuEntry<String>> popupItems = [];
@@ -662,13 +700,12 @@ class AptsPageState extends State<AptsPage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     final user = AuthProvider.of(context).auth.currentUser();
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Appointments'),
-            actions: appBarMenu(context, width)),
+            title: const Text('PERSTAT'),
+            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

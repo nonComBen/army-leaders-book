@@ -13,7 +13,7 @@ import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../../models/note.dart';
-import '../../pages/editPages/editNotePage.dart';
+import 'editPages/edit_note_page.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 

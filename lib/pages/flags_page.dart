@@ -6,42 +6,45 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../providers/tracking_provider.dart';
+import '../../providers/subscription_state.dart';
+import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../models/working_award.dart';
-import '../../pages/editPages/editWorkingAwardPage.dart';
-import '../../pages/uploadPages/uploadWorkingAwadsPage.dart';
-import '../providers/tracking_provider.dart';
-import '../widgets/anon_warning_banner.dart';
+import '../../widgets/anon_warning_banner.dart';
+import '../../models/flag.dart';
+import 'editPages/edit_flag_page.dart';
+import 'uploadPages/upload_flags_page.dart';
+import '../pdf/flags_pdf.dart';
 
-class WorkingAwardsPage extends StatefulWidget {
-  const WorkingAwardsPage({
+class FlagsPage extends StatefulWidget {
+  const FlagsPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/working-awards-page';
+  static const routeName = '/flags-page';
 
   @override
-  WorkingAwardsPageState createState() => WorkingAwardsPageState();
+  FlagsPageState createState() => FlagsPageState();
 }
 
-class WorkingAwardsPageState extends State<WorkingAwardsPage> {
+class FlagsPageState extends State<FlagsPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscription;
+  StreamSubscription _subscriptionUsers;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -86,11 +89,13 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
-    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('workingAwards')
-        .where('owner', isEqualTo: widget.userId)
+
+    final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
+        .collection('flags')
+        .where('users', isNotEqualTo: null)
+        .where('users', arrayContains: widget.userId)
         .snapshots();
-    _subscription = stream.listen((updates) {
+    _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
         documents = updates.docs;
         filteredDocs = updates.docs;
@@ -101,25 +106,25 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscriptionUsers.cancel();
     myBanner?.dispose();
     super.dispose();
   }
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadWorkingAwardsPage()));
-      // Widget title = const Text('Upload Working Awards');
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UploadFlagsPage()));
+      // Widget title = const Text('Upload Flags');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Working Awards, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'.',
+      //       'To upload your Flags, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
+      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
+      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date/Expiration Date '
+      //       'also needs to be in yyyy-MM-dd or M/d/yy format and Type will default to Adverse Action if the type does not match an option in '
+      //       'the dropdown menu (case sensitive).',
       //     ),
       //   ),
       // );
@@ -132,7 +137,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadWorkingAwardsPage(
+      //             builder: (context) => UploadFlagsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -147,7 +152,8 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
   }
 
   void _downloadExcel() async {
-    if (!await checkPermission(Permission.storage)) return;
+    bool approved = await checkPermission(Permission.storage);
+    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -156,12 +162,10 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Award Reason',
-      'Achievement 1',
-      'Achievement 2',
-      'Achievement 3',
-      'Achievement 4',
-      'Citation'
+      'Date',
+      'Expiration Date',
+      'Flag Type',
+      'Comments'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -171,12 +175,10 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['awardReason']);
-      docs.add(doc['ach1']);
-      docs.add(doc['ach2']);
-      docs.add(doc['ach3']);
-      docs.add(doc['ach4']);
-      docs.add(doc['citation']);
+      docs.add(doc['date']);
+      docs.add(doc['exp']);
+      docs.add(doc['type']);
+      docs.add(doc['comments']);
 
       docsList.add(docs);
     }
@@ -190,7 +192,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'workingAwards.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'flags.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -198,7 +200,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/workingAwards.xlsx')
+        File('$dir/flags.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -210,7 +212,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
                   ? SnackBarAction(
                       label: 'Open',
                       onPressed: () {
-                        OpenFile.open('$dir/workingAwards.xlsx');
+                        OpenFile.open('$dir/flags.xlsx');
                       },
                     )
                   : null,
@@ -221,6 +223,74 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
         // ignore: avoid_print
         print('Error: $e');
       }
+    }
+  }
+
+  void _downloadPdf() async {
+    if (isSubscribed) {
+      Widget title = const Text('Download PDF');
+      Widget content = Container(
+        padding: const EdgeInsets.all(8.0),
+        child: const Text('Select full page or half page format.'),
+      );
+      customAlertDialog(
+        context: context,
+        title: title,
+        content: content,
+        primaryText: 'Full Page',
+        primary: () {
+          completePdfDownload(true);
+        },
+        secondaryText: 'Half Page',
+        secondary: () {
+          completePdfDownload(false);
+        },
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            'Downloading PDF files is only available for subscribed users.'),
+      ));
+    }
+  }
+
+  void completePdfDownload(bool fullPage) async {
+    bool approved = await checkPermission(Permission.storage);
+    if (!approved) return;
+    documents.sort(
+      (a, b) => a['date'].toString().compareTo(b['date'].toString()),
+    );
+    FlagsPdf pdf = FlagsPdf(
+      documents,
+    );
+    String location;
+    if (fullPage) {
+      location = await pdf.createFullPage();
+    } else {
+      location = await pdf.createHalfPage();
+    }
+    String message;
+    if (location == '') {
+      message = 'Failed to download pdf';
+    } else {
+      String directory =
+          kIsWeb ? '/Downloads' : '\'On My iPhone(iPad)/Leader\'s Book\'';
+      message = kIsWeb
+          ? 'Pdf successfully downloaded to $directory'
+          : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 5),
+          action: location == ''
+              ? null
+              : SnackBarAction(
+                  label: 'Open',
+                  onPressed: () {
+                    OpenFile.open('$location/flags.pdf');
+                  },
+                )));
     }
   }
 
@@ -242,7 +312,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Award$s');
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Flag$s');
   }
 
   void _editRecord() {
@@ -255,10 +325,8 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditWorkingAwardPage(
-                  award: WorkingAward.fromSnapshot(
-                    _selectedDocuments[0],
-                  ),
+            builder: (context) => EditFlagPage(
+                  flag: Flag.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -266,9 +334,10 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditWorkingAwardPage(
-                  award: WorkingAward(
+            builder: (context) => EditFlagPage(
+                  flag: Flag(
                     owner: widget.userId,
+                    users: [widget.userId],
                   ),
                 )));
   }
@@ -285,13 +354,19 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 415) {
       columnList.add(DataColumn(
-          label: const Text('Reason'),
+          label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 550) {
+    if (width > 600) {
+      columnList.add(DataColumn(
+          label: const Text('Type'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 800) {
       columnList.add(DataColumn(
           label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
@@ -314,16 +389,37 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
+    bool amber = isOverdue(documentSnapshot['date'], 180);
+    TextStyle amberTextStyle =
+        const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
     List<DataCell> cellList = [
-      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
+        documentSnapshot['rank'],
+        style: amber ? amberTextStyle : const TextStyle(),
+      )),
+      DataCell(Text(
+        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+        style: amber ? amberTextStyle : const TextStyle(),
+      )),
     ];
-    if (width > 435) {
-      cellList.add(DataCell(Text(documentSnapshot['awardReason'])));
+    if (width > 415) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['date'],
+        style: amber ? amberTextStyle : const TextStyle(),
+      )));
     }
-    if (width > 550) {
-      cellList.add(DataCell(Text(documentSnapshot['section'])));
+    if (width > 600) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['type'],
+        style: amber ? amberTextStyle : const TextStyle(),
+        overflow: TextOverflow.ellipsis,
+      )));
+    }
+    if (width > 800) {
+      cellList.add(DataCell(Text(
+        documentSnapshot['section'],
+        style: amber ? amberTextStyle : const TextStyle(),
+      )));
     }
     return cellList;
   }
@@ -339,12 +435,13 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs
-                .sort((a, b) => a['section'].compareTo(b['awardReason']));
+            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
             break;
           case 3:
-            filteredDocs
-                .sort((a, b) => a['awardReason'].compareTo(b['section']));
+            filteredDocs.sort((a, b) => a['type'].compareTo(b['type']));
+            break;
+          case 4:
+            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
             break;
         }
       } else {
@@ -356,12 +453,13 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs
-                .sort((a, b) => b['section'].compareTo(a['awardReason']));
+            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
             break;
           case 3:
-            filteredDocs
-                .sort((a, b) => b['awardReason'].compareTo(a['section']));
+            filteredDocs.sort((a, b) => b['type'].compareTo(a['type']));
+            break;
+          case 4:
+            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
             break;
         }
       }
@@ -403,6 +501,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
         ));
       }
     }
+
     List<Widget> editButton = <Widget>[
       Tooltip(
           message: 'Filter Records',
@@ -440,6 +539,15 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
                   _uploadExcel(context);
                 })),
       );
+      buttons.add(
+        Tooltip(
+            message: 'Download as PDF',
+            child: IconButton(
+                icon: const Icon(Icons.picture_as_pdf),
+                onPressed: () {
+                  _downloadPdf();
+                })),
+      );
     } else {
       popupItems.add(const PopupMenuItem(
         value: 'download',
@@ -448,6 +556,10 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       popupItems.add(const PopupMenuItem(
         value: 'upload',
         child: Text('Upload Data'),
+      ));
+      popupItems.add(const PopupMenuItem(
+        value: 'pdf',
+        child: Text('Download as PDF'),
       ));
     }
     if (width > 400) {
@@ -477,6 +589,9 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
           if (result == 'delete') {
             _deleteRecord();
           }
+          if (result == 'pdf') {
+            _downloadPdf();
+          }
         },
         itemBuilder: (BuildContext context) {
           return popupItems;
@@ -499,7 +614,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Working Award'),
+            title: const Text('Flags'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -534,6 +649,23 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
+                    ),
+                  ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        // ignore: prefer_const_literals_to_create_immutables
+                        children: <Widget>[
+                          const Text(
+                            'Amber Text: Flag > 180 days',
+                            style: TextStyle(
+                                color: Colors.amber,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 ],

@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,39 +13,46 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../auth_provider.dart';
-import '../providers/tracking_provider.dart';
 import '../../providers/subscription_state.dart';
-import '../methods/date_methods.dart';
+import '../providers/notifications_plugin_provider.dart';
+import '../widgets/anon_warning_banner.dart';
+import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../models/flag.dart';
-import '../../pages/editPages/editFlagPage.dart';
-import '../../pages/uploadPages/uploadFlagsPage.dart';
-import '../../pdf/flagsPdf.dart';
+import '../../models/setting.dart';
+import '../../models/medpro.dart';
+import 'editPages/edit_medpros_page.dart';
+import 'uploadPages/upload_medpros_page.dart';
+import '../pdf/medpros_pdf.dart';
+import '../providers/tracking_provider.dart';
 
-class FlagsPage extends StatefulWidget {
-  const FlagsPage({
+class MedProsPage extends StatefulWidget {
+  const MedProsPage({
     Key key,
-    @required this.userId,
   }) : super(key: key);
-  final String userId;
 
-  static const routeName = '/flags-page';
+  static const routeName = '/medpros-page';
 
   @override
-  FlagsPageState createState() => FlagsPageState();
+  MedProsPageState createState() => MedProsPageState();
 }
 
-class FlagsPageState extends State<FlagsPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
+class MedProsPageState extends State<MedProsPage> {
+  int _sortColumnIndex, startingId;
+  bool _sortAscending = true,
+      _adLoaded = false,
+      isSubscribed,
+      notificationsRefreshed = false,
+      isInitial = true;
+  String _userId;
+  List<DocumentSnapshot> documents, filteredDocs, _selectedDocuments;
   StreamSubscription _subscriptionUsers;
+  SharedPreferences prefs;
+  NotificationDetails notificationDetails;
+  FlutterLocalNotificationsPlugin notificationsPlugin;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -53,7 +61,15 @@ class FlagsPageState extends State<FlagsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
+    _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+
+    notificationsPlugin =
+        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
+    if (!kIsWeb && !notificationsRefreshed) {
+      notificationsRefreshed = true;
+      refreshNotifications();
+    }
 
     if (!_adLoaded) {
       bool trackingAllowed =
@@ -78,6 +94,10 @@ class FlagsPageState extends State<FlagsPage> {
         _adLoaded = true;
       }
     }
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
   }
 
   @override
@@ -90,10 +110,21 @@ class FlagsPageState extends State<FlagsPage> {
     documents = [];
     filteredDocs = [];
 
+    var androidSpecifics =
+        const AndroidNotificationDetails('channelId', 'channelName');
+    var iosSpecifics = const DarwinNotificationDetails(
+        presentAlert: true, presentSound: false, presentBadge: false);
+    notificationDetails =
+        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+  }
+
+  void initialize() async {
+    prefs = await SharedPreferences.getInstance();
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('flags')
+        .collection('medpros')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: _userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -111,39 +142,120 @@ class FlagsPageState extends State<FlagsPage> {
     super.dispose();
   }
 
+  void refreshNotifications() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('settings')
+        .where('owner', isEqualTo: _userId)
+        .get();
+    int phaMonthsDue = 12;
+    int dentalMonthsDue = 12;
+    int visionMonthsDue = 12;
+    int hearingMonthsDue = 12;
+    int hivMonthsDue = 24;
+    List<dynamic> phaDaysBefore = [0, 30];
+    List<dynamic> dentalDaysBefore = [0, 30];
+    List<dynamic> visionDaysBefore = [0, 30];
+    List<dynamic> hearingDaysBefore = [0, 30];
+    List<dynamic> hivDaysBefore = [0, 30];
+    if (snapshot != null && snapshot.docs.isNotEmpty) {
+      Setting setting = Setting.fromMap(snapshot.docs.first.data());
+      if (setting.addNotifications != null && !setting.addNotifications) return;
+      phaMonthsDue = setting.phaMonths ?? 12;
+      dentalMonthsDue = setting.dentalMonths ?? 12;
+      visionMonthsDue = setting.visionMonths ?? 12;
+      hearingMonthsDue = setting.hearingMonths ?? 12;
+      hivMonthsDue = setting.hivMonths ?? 24;
+      phaDaysBefore = setting.phaNotifications ?? [0, 30];
+      dentalDaysBefore = setting.dentalNotifications ?? [0, 30];
+      visionDaysBefore = setting.visionNotifications ?? [0, 30];
+      hearingDaysBefore = setting.hearingNotifications ?? [0, 30];
+      hivDaysBefore = setting.hivNotifications ?? [0, 30];
+    }
+
+    //get pending notifications and cancel them
+    List<PendingNotificationRequest> pending =
+        await notificationsPlugin.pendingNotificationRequests();
+    pending = pending
+        .where((pr) =>
+            pr.payload == 'PHA' ||
+            pr.payload == 'Dental' ||
+            pr.payload == 'Vision' ||
+            pr.payload == 'Hearing' ||
+            pr.payload == 'HIV')
+        .toList();
+
+    for (PendingNotificationRequest request in pending) {
+      notificationsPlugin.cancel(request.id);
+    }
+
+    startingId = prefs.getInt('runningId') ?? 0;
+
+    scheduleNotifications('pha', 'PHA', phaMonthsDue, phaDaysBefore);
+    scheduleNotifications(
+        'dental', 'Dental', dentalMonthsDue, dentalDaysBefore);
+    scheduleNotifications(
+        'vision', 'Vision', visionMonthsDue, visionDaysBefore);
+    scheduleNotifications(
+        'hearing', 'Hearing', hearingMonthsDue, hearingDaysBefore);
+    scheduleNotifications('hiv', 'HIV', hivMonthsDue, hivDaysBefore);
+
+    if (startingId > 10000000) startingId = 0;
+    prefs.setInt('runningId', startingId);
+  }
+
+  void scheduleNotifications(
+      String key, String payload, int monthsDue, List<dynamic> daysBefore) {
+    List<List<String>> dates = [];
+
+    //create copy of documents
+    List<DocumentSnapshot> docs = List.from(documents);
+    //sort by date
+    docs.sort((a, b) => a[key].toString().compareTo(b[key].toString()));
+    //combine Soldiers with like dates
+    for (int i = 0; i < docs.length; i++) {
+      String soldier =
+          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
+      if (i == 0) {
+        dates.add([soldier, docs[i][key]]);
+      } else if (docs[i][key] == docs[i - 1][key]) {
+        dates.last[0] = '${dates.last[0]}, $soldier';
+      } else {
+        dates.add([soldier, docs[i][key]]);
+      }
+    }
+
+    //add notifications
+    for (List<String> date in dates) {
+      if (date[1] != '') {
+        DateTime dueDate = DateTime.tryParse(date[1]);
+        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
+        if (dueDate.isAfter(DateTime.now())) {
+          for (int days in daysBefore) {
+            DateTime scheduledDate = dueDate.add(Duration(days: -days));
+            if (scheduledDate.isAfter(DateTime.now())) {
+              notificationsPlugin.zonedSchedule(
+                startingId,
+                '$payload(s) due in $days days',
+                date[0],
+                scheduledDate,
+                notificationDetails,
+                androidAllowWhileIdle: true,
+                uiLocalNotificationDateInterpretation:
+                    UILocalNotificationDateInterpretation.absoluteTime,
+                payload: payload,
+              );
+              startingId++;
+            }
+          }
+        }
+      }
+    }
+  }
+
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadFlagsPage()));
-      // Widget title = const Text('Upload Flags');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Flags, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date/Expiration Date '
-      //       'also needs to be in yyyy-MM-dd or M/d/yy format and Type will default to Adverse Action if the type does not match an option in '
-      //       'the dropdown menu (case sensitive).',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadFlagsPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+          MaterialPageRoute(builder: (context) => const UploadMedProsPage()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -162,12 +274,39 @@ class FlagsPageState extends State<FlagsPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Date',
-      'Expiration Date',
-      'Flag Type',
-      'Comments'
+      'PHA Date',
+      'Dental Date',
+      'Hearing Date',
+      'Vision Date',
+      'HIV Date',
+      'Flu Date',
+      'Anthrax Date',
+      'Encephalitis Date',
+      'Hepatitis A Date',
+      'Hepatitis B Date',
+      'Meningococcal Date',
+      'MMR Date',
+      'Polio Date',
+      'Small Pox Date',
+      'Tetanus Date',
+      'Tuberculosis Date',
+      'Typhoid Date',
+      'Varicella Date',
+      'Yellow Fever Date',
+      'Other Immunizations'
     ]);
     for (DocumentSnapshot doc in documents) {
+      List<dynamic> imms = doc['otherImms'];
+      String otherImms = '';
+      if (doc['otherImms'].length > 0) {
+        for (int i = 0; i < imms.length; i++) {
+          otherImms =
+              '$otherImms{title: ${imms[i]['title']}, date: ${imms[i]['date']}';
+          if (i < imms.length - 1) {
+            otherImms = otherImms = ';';
+          }
+        }
+      }
       List<dynamic> docs = [];
       docs.add(doc['soldierId']);
       docs.add(doc['rank']);
@@ -175,10 +314,26 @@ class FlagsPageState extends State<FlagsPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['date']);
-      docs.add(doc['exp']);
-      docs.add(doc['type']);
-      docs.add(doc['comments']);
+      docs.add(doc['pha']);
+      docs.add(doc['dental']);
+      docs.add(doc['hearing']);
+      docs.add(doc['vision']);
+      docs.add(doc['hiv']);
+      docs.add(doc['flu']);
+      docs.add(doc['anthrax']);
+      docs.add(doc['encephalitis']);
+      docs.add(doc['hepA']);
+      docs.add(doc['hepB']);
+      docs.add(doc['meningococcal']);
+      docs.add(doc['mmr']);
+      docs.add(doc['polio']);
+      docs.add(doc['smallPox']);
+      docs.add(doc['tetanus']);
+      docs.add(doc['tuberculin']);
+      docs.add(doc['typhoid']);
+      docs.add(doc['varicella']);
+      docs.add(doc['yellow']);
+      docs.add(otherImms);
 
       docsList.add(docs);
     }
@@ -192,7 +347,7 @@ class FlagsPageState extends State<FlagsPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'flags.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'medpros.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -200,7 +355,7 @@ class FlagsPageState extends State<FlagsPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/flags.xlsx')
+        File('$dir/medpros.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
@@ -211,8 +366,8 @@ class FlagsPageState extends State<FlagsPage> {
               action: Platform.isAndroid
                   ? SnackBarAction(
                       label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/flags.xlsx');
+                      onPressed: () async {
+                        OpenFile.open('$dir/medpros.xlsx');
                       },
                     )
                   : null,
@@ -258,9 +413,9 @@ class FlagsPageState extends State<FlagsPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved) return;
     documents.sort(
-      (a, b) => a['date'].toString().compareTo(b['date'].toString()),
+      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
-    FlagsPdf pdf = FlagsPdf(
+    MedprosPdf pdf = MedprosPdf(
       documents,
     );
     String location;
@@ -288,7 +443,7 @@ class FlagsPageState extends State<FlagsPage> {
               : SnackBarAction(
                   label: 'Open',
                   onPressed: () {
-                    OpenFile.open('$location/flags.pdf');
+                    OpenFile.open('$location/medpros.pdf');
                   },
                 )));
     }
@@ -311,8 +466,7 @@ class FlagsPageState extends State<FlagsPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Flag$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'MedPros');
   }
 
   void _editRecord() {
@@ -325,8 +479,8 @@ class FlagsPageState extends State<FlagsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditFlagPage(
-                  flag: Flag.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditMedprosPage(
+                  medpro: Medpro.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -334,10 +488,11 @@ class FlagsPageState extends State<FlagsPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditFlagPage(
-                  flag: Flag(
-                    owner: widget.userId,
-                    users: [widget.userId],
+            builder: (context) => EditMedprosPage(
+                  medpro: Medpro(
+                    owner: _userId,
+                    users: [_userId],
+                    otherImms: [],
                   ),
                 )));
   }
@@ -354,21 +509,33 @@ class FlagsPageState extends State<FlagsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 415) {
+    if (width > 420) {
       columnList.add(DataColumn(
-          label: const Text('Date'),
+          label: const Text('PHA'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 600) {
+    if (width > 560) {
       columnList.add(DataColumn(
-          label: const Text('Type'),
+          label: const Text('Dental'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 800) {
+    if (width > 685) {
       columnList.add(DataColumn(
-          label: const Text('Section'),
+          label: const Text('Hearing'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 820) {
+      columnList.add(DataColumn(
+          label: const Text('Vision'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
+    if (width > 960) {
+      columnList.add(DataColumn(
+          label: const Text('HIV'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
@@ -389,37 +556,25 @@ class FlagsPageState extends State<FlagsPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool amber = isOverdue(documentSnapshot['date'], 180);
-    TextStyle amberTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
     List<DataCell> cellList = [
+      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-        documentSnapshot['rank'],
-        style: amber ? amberTextStyle : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: amber ? amberTextStyle : const TextStyle(),
-      )),
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 415) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: amber ? amberTextStyle : const TextStyle(),
-      )));
+    if (width > 420) {
+      cellList.add(DataCell(Text(documentSnapshot['pha'])));
     }
-    if (width > 600) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['type'],
-        style: amber ? amberTextStyle : const TextStyle(),
-        overflow: TextOverflow.ellipsis,
-      )));
+    if (width > 560) {
+      cellList.add(DataCell(Text(documentSnapshot['dental'])));
     }
-    if (width > 800) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['section'],
-        style: amber ? amberTextStyle : const TextStyle(),
-      )));
+    if (width > 685) {
+      cellList.add(DataCell(Text(documentSnapshot['hearing'])));
+    }
+    if (width > 820) {
+      cellList.add(DataCell(Text(documentSnapshot['vision'])));
+    }
+    if (width > 960) {
+      cellList.add(DataCell(Text(documentSnapshot['hiv'])));
     }
     return cellList;
   }
@@ -435,13 +590,19 @@ class FlagsPageState extends State<FlagsPage> {
             filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
+            filteredDocs.sort((a, b) => a['pha'].compareTo(b['pha']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['type'].compareTo(b['type']));
+            filteredDocs.sort((a, b) => a['dental'].compareTo(b['dental']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
+            filteredDocs.sort((a, b) => a['hearin'].compareTo(b['hearing']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => a['vision'].compareTo(b['vision']));
+            break;
+          case 6:
+            filteredDocs.sort((a, b) => a['hiv'].compareTo(b['hiv']));
             break;
         }
       } else {
@@ -453,13 +614,19 @@ class FlagsPageState extends State<FlagsPage> {
             filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
             break;
           case 2:
-            filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
+            filteredDocs.sort((a, b) => b['pha'].compareTo(a['pha']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['type'].compareTo(a['type']));
+            filteredDocs.sort((a, b) => b['dental'].compareTo(a['dental']));
             break;
           case 4:
-            filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
+            filteredDocs.sort((a, b) => b['hearing'].compareTo(a['hearing']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => b['vision'].compareTo(a['vision']));
+            break;
+          case 6:
+            filteredDocs.sort((a, b) => b['hiv'].compareTo(a['hiv']));
             break;
         }
       }
@@ -614,7 +781,7 @@ class FlagsPageState extends State<FlagsPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Flags'),
+            title: const Text('MedPros'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -649,23 +816,6 @@ class FlagsPageState extends State<FlagsPage> {
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
-                    ),
-                  ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        // ignore: prefer_const_literals_to_create_immutables
-                        children: <Widget>[
-                          const Text(
-                            'Amber Text: Flag > 180 days',
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
                     ),
                   )
                 ],

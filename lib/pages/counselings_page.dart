@@ -6,45 +6,42 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
-import '../methods/date_methods.dart';
+import '../providers/tracking_provider.dart';
+import '../../providers/subscription_state.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../models/mil_license.dart';
-import '../../pages/editPages/editMilLicensePage.dart';
-import '../../pages/uploadPages/uploadMilLicensePage.dart';
-import '../../pdf/milLicPdf.dart';
-import '../widgets/anon_warning_banner.dart';
-import '../providers/tracking_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
+import '../../models/counseling.dart';
+import 'editPages/edit_counseling_page.dart';
+import 'uploadPages/upload_counselings_page.dart';
 
-class MilLicPage extends StatefulWidget {
-  const MilLicPage({
+class CounselingsPage extends StatefulWidget {
+  const CounselingsPage({
     Key key,
     @required this.userId,
   }) : super(key: key);
   final String userId;
 
-  static const routeName = '/military-license-page';
+  static const routeName = '/counseling-page';
 
   @override
-  MilLicPageState createState() => MilLicPageState();
+  CounselingsPageState createState() => CounselingsPageState();
 }
 
-class MilLicPageState extends State<MilLicPage> {
+class CounselingsPageState extends State<CounselingsPage> {
   int _sortColumnIndex;
   bool _sortAscending = true, _adLoaded = false, isSubscribed;
   List<DocumentSnapshot> _selectedDocuments;
   List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
+  StreamSubscription _subscription;
   BannerAd myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
@@ -89,13 +86,11 @@ class MilLicPageState extends State<MilLicPage> {
     _selectedDocuments = [];
     documents = [];
     filteredDocs = [];
-
-    final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('milLic')
-        .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+    final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
+        .collection('counselings')
+        .where('owner', isEqualTo: widget.userId)
         .snapshots();
-    _subscriptionUsers = streamUsers.listen((updates) {
+    _subscription = stream.listen((updates) {
       setState(() {
         documents = updates.docs;
         filteredDocs = updates.docs;
@@ -106,7 +101,7 @@ class MilLicPageState extends State<MilLicPage> {
 
   @override
   void dispose() {
-    _subscriptionUsers.cancel();
+    _subscription.cancel();
     myBanner?.dispose();
     super.dispose();
   }
@@ -116,17 +111,16 @@ class MilLicPageState extends State<MilLicPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const UploadMilLicensePage()));
-      // Widget title = const Text('Upload Military Licenses');
+              builder: (context) => const UploadCounselingsPage()));
+      // Widget title = const Text('Upload Counselings');
       // Widget content = SingleChildScrollView(
       //   child: Container(
       //     padding: const EdgeInsets.all(8.0),
       //     child: const Text(
-      //       'To upload your Military Licenses, the file must be in .csv format. Also, there needs to be a Soldier Id column and '
-      //       'the Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from '
-      //       'Soldiers page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the '
-      //       '\'=\'. Date/Expiration Date also need to be in yyyy-MM-dd or M/d/yy format and vehicles need to be listed in one cell, separated '
-      //       'by commas with no \'and\'.',
+      //       'To upload your Counselings, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
+      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
+      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also needs to be in '
+      //       'yyyy-MM-dd or M/d/yy format.',
       //     ),
       //   ),
       // );
@@ -139,7 +133,7 @@ class MilLicPageState extends State<MilLicPage> {
       //     Navigator.push(
       //         context,
       //         MaterialPageRoute(
-      //             builder: (context) => UploadMilLicensePage(
+      //             builder: (context) => UploadCounselingsPage(
       //                   userId: widget.userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
@@ -154,8 +148,7 @@ class MilLicPageState extends State<MilLicPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
+    if (!await checkPermission(Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -165,36 +158,28 @@ class MilLicPageState extends State<MilLicPage> {
       'First Name',
       'Section',
       'Date',
-      'Expiration Date',
-      'License #',
-      'Restrictions',
-      'Qualified Vehicles'
+      'Purpose of Counseling',
+      'Key Points',
+      'Plan of Action',
+      'Individual Remarks',
+      'Leader Responsibilities',
+      'Assessment'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
       docs.add(doc['soldierId']);
-      String vehiclesString = '';
       docs.add(doc['rank']);
       docs.add(doc['rankSort']);
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
       docs.add(doc['date']);
-      docs.add(doc['exp']);
-      docs.add(doc['license']);
-      docs.add(doc['restrictions']);
-      if (doc['vehicles'] != null) {
-        List<dynamic> vehicles = doc['vehicles'];
-        for (String vehicle in vehicles) {
-          if (vehicle == vehicles.first) {
-            vehiclesString = vehiclesString + vehicle;
-          } else {
-            vehiclesString = '$vehiclesString, $vehicle';
-          }
-        }
-      }
-
-      docs.add(vehiclesString);
+      docs.add(doc['purpose']);
+      docs.add(doc['keyPoints']);
+      docs.add(doc['planOfAction']);
+      docs.add(doc['indivRemarks']);
+      docs.add(doc['leaderResp']);
+      docs.add(doc['assessment']);
 
       docsList.add(docs);
     }
@@ -208,7 +193,7 @@ class MilLicPageState extends State<MilLicPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'milLicenses.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'counselings.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -216,95 +201,29 @@ class MilLicPageState extends State<MilLicPage> {
       location = strings[1];
       try {
         var bytes = excel.encode();
-        File('$dir/milLicenses.xlsx')
+        File('$dir/counselings.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Data successfully downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open('$dir/milLicenses.xlsx');
-                    },
-                  )
-                : null,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Data successfully downloaded to $location'),
+              duration: const Duration(seconds: 5),
+              action: Platform.isAndroid
+                  ? SnackBarAction(
+                      label: 'Open',
+                      onPressed: () {
+                        OpenFile.open('$dir/counselings.xlsx');
+                      },
+                    )
+                  : null,
+            ),
+          );
         }
       } catch (e) {
         // ignore: avoid_print
         print('Error: $e');
       }
-    }
-  }
-
-  void _downloadPdf() async {
-    if (isSubscribed) {
-      Widget title = const Text('Download PDF');
-      Widget content = Container(
-        padding: const EdgeInsets.all(8.0),
-        child: const Text('Select full page or half page format.'),
-      );
-      customAlertDialog(
-        context: context,
-        title: title,
-        content: content,
-        primaryText: 'Full Page',
-        primary: () {
-          completePdfDownload(true);
-        },
-        secondaryText: 'Half Page',
-        secondary: () {
-          completePdfDownload(false);
-        },
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
-    }
-  }
-
-  void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
-    documents.sort(
-      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
-    );
-    MilLicPdf pdf = MilLicPdf(
-      documents,
-    );
-    String location;
-    if (fullPage) {
-      location = await pdf.createFullPage();
-    } else {
-      location = await pdf.createHalfPage();
-    }
-    String message;
-    if (location == '') {
-      message = 'Failed to download pdf';
-    } else {
-      String directory =
-          kIsWeb ? '/Downloads' : '\'On My iPhone(iPad)/Leader\'s Book\'';
-      message = kIsWeb
-          ? 'Pdf successfully downloaded to $directory'
-          : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/milLicenses.pdf');
-                  },
-                )));
     }
   }
 
@@ -326,8 +245,7 @@ class MilLicPageState extends State<MilLicPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Military License$s');
+    deleteRecord(context, _selectedDocuments, widget.userId, 'Counseling$s');
   }
 
   void _editRecord() {
@@ -340,8 +258,8 @@ class MilLicPageState extends State<MilLicPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditMilLicPage(
-                  milLic: MilLic.fromSnapshot(_selectedDocuments.first),
+            builder: (context) => EditCounselingPage(
+                  counseling: Counseling.fromSnapshot(_selectedDocuments.first),
                 )));
   }
 
@@ -349,11 +267,9 @@ class MilLicPageState extends State<MilLicPage> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditMilLicPage(
-                  milLic: MilLic(
+            builder: (context) => EditCounselingPage(
+                  counseling: Counseling(
                     owner: widget.userId,
-                    users: [widget.userId],
-                    vehicles: [],
                   ),
                 )));
   }
@@ -376,13 +292,7 @@ class MilLicPageState extends State<MilLicPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 565) {
-      columnList.add(DataColumn(
-          label: const Text('Expires'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 670) {
+    if (width > 510) {
       columnList.add(DataColumn(
           label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
@@ -405,59 +315,16 @@ class MilLicPageState extends State<MilLicPage> {
   }
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    bool overdue = isOverdue(documentSnapshot['exp'], 1);
-    bool amber = isOverdue(documentSnapshot['exp'], -30);
-    TextStyle overdueTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.red);
-    TextStyle amberTextStyle =
-        const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
     List<DataCell> cellList = [
+      DataCell(Text(documentSnapshot['rank'])),
       DataCell(Text(
-        documentSnapshot['rank'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )),
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
     if (width > 420) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )));
+      cellList.add(DataCell(Text(documentSnapshot['date'])));
     }
-    if (width > 565) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['exp'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )));
-    }
-    if (width > 670) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['section'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )));
+    if (width > 510) {
+      cellList.add(DataCell(Text(documentSnapshot['section'])));
     }
     return cellList;
   }
@@ -476,9 +343,6 @@ class MilLicPageState extends State<MilLicPage> {
             filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['exp'].compareTo(b['exp']));
-            break;
-          case 4:
             filteredDocs.sort((a, b) => a['section'].compareTo(b['section']));
             break;
         }
@@ -494,9 +358,6 @@ class MilLicPageState extends State<MilLicPage> {
             filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['exp'].compareTo(a['exp']));
-            break;
-          case 4:
             filteredDocs.sort((a, b) => b['section'].compareTo(a['section']));
             break;
         }
@@ -558,7 +419,7 @@ class MilLicPageState extends State<MilLicPage> {
 
     List<PopupMenuEntry<String>> popupItems = [];
 
-    if (width > 600) {
+    if (width > 500) {
       buttons.add(
         Tooltip(
             message: 'Download as Excel',
@@ -577,15 +438,6 @@ class MilLicPageState extends State<MilLicPage> {
                   _uploadExcel(context);
                 })),
       );
-      buttons.add(
-        Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
-      );
     } else {
       popupItems.add(const PopupMenuItem(
         value: 'download',
@@ -594,10 +446,6 @@ class MilLicPageState extends State<MilLicPage> {
       popupItems.add(const PopupMenuItem(
         value: 'upload',
         child: Text('Upload Data'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
       ));
     }
     if (width > 400) {
@@ -627,9 +475,6 @@ class MilLicPageState extends State<MilLicPage> {
           if (result == 'delete') {
             _deleteRecord();
           }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
         },
         itemBuilder: (BuildContext context) {
           return popupItems;
@@ -652,7 +497,7 @@ class MilLicPageState extends State<MilLicPage> {
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
-            title: const Text('Military Licenses'),
+            title: const Text('Counselings'),
             actions: appBarMenu(context, MediaQuery.of(context).size.width)),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
@@ -687,27 +532,6 @@ class MilLicPageState extends State<MilLicPage> {
                           _createColumns(MediaQuery.of(context).size.width),
                       rows: _createRows(
                           filteredDocs, MediaQuery.of(context).size.width),
-                    ),
-                  ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Amber Text: License Expires within 30 days',
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Red Text: License Expired',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
                     ),
                   )
                 ],

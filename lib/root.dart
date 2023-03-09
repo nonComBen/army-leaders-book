@@ -2,12 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import './pages/createAccountPage.dart';
-import './pages/homePage.dart';
+import 'pages/create_account_page.dart';
+import 'pages/home_page.dart';
 import './providers/root_provider.dart';
-import './pages/localAuthLoginPage.dart';
+import 'pages/local_auth_login_page.dart';
 import './pages/login.dart';
-import './pages/linkAnonymousPage.dart';
+import 'pages/link_anonymous_page.dart';
 
 class RootPage extends StatefulWidget {
   const RootPage({Key key}) : super(key: key);

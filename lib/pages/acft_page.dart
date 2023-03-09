@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth_provider.dart';
 import '../models/acft.dart';
-import '../pages/editPages/editAcftPage.dart';
+import 'editPages/edit_acft_page.dart';
 import '../providers/notifications_plugin_provider.dart';
 import '../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
@@ -25,8 +25,8 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../models/setting.dart';
-import '../pages/uploadPages/uploadAcftPage.dart';
-import '../pdf/acftPdf.dart';
+import 'uploadPages/upload_acft_page.dart';
+import '../pdf/acft_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 

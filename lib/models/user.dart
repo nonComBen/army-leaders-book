@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class UserObj {
   String userId;
@@ -61,19 +60,21 @@ class UserObj {
       userName = doc['userName'];
       userUnit = doc['userUnit'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
 
     try {
       agreeTimestamp = doc['agreeDate'] ?? Timestamp.fromDate(DateTime.now());
-    } on Exception catch (e) {
-      print('Error: $e');
+    } catch (e) {
+      FirebaseAnalytics.instance
+          .logEvent(name: 'AgreeTimeStamp Does Not Exist');
     }
 
     try {
       isUserArrayUpdated = doc['updatedUsersArray'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance
+          .logEvent(name: 'IsUsersArrayUpdated Does Not Exist');
     }
 
     try {
@@ -81,7 +82,8 @@ class UserObj {
       lastLoginTimestamp =
           doc['lastLogin'] ?? Timestamp.fromDate(DateTime.now());
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance
+          .logEvent(name: 'CreatedTimeStamp Does Not Exist');
     }
 
     return UserObj(

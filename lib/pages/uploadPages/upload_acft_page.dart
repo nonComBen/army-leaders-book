@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -207,13 +205,13 @@ class UploadAcftPageState extends State<UploadAcftPage> {
               powerThrowRaw: saveSptRaw,
               puRaw: savePuRaw,
               dragRaw: saveSdcRaw,
-              legTuckRaw: savePlkRaw,
+              plankRaw: savePlkRaw,
               runRaw: saveRunRaw,
               deadliftScore: mdlInt,
               powerThrowScore: sptInt,
               puScore: puInt,
               dragScore: sdcInt,
-              legTuckScore: plkInt,
+              plankScore: plkInt,
               runScore: runInt,
               total: total,
               altEvent: saveRunEvent,

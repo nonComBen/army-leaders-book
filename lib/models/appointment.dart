@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 
 class Appointment {
@@ -18,34 +17,27 @@ class Appointment {
   String end;
   String status;
   String comments;
-  String aptReminderNo;
-  String aptReminderUnit;
   String owner;
   String location;
-  String eventId;
-  String calendarId;
 
-  Appointment(
-      {this.id,
-      @required this.users,
-      this.soldierId,
-      this.rank = '',
-      this.name = '',
-      this.firstName = '',
-      this.section = '',
-      this.rankSort = '',
-      this.aptTitle = '',
-      this.date = '',
-      this.start = '',
-      this.end = '',
-      this.status = 'Scheduled',
-      this.comments = '',
-      this.aptReminderNo = '',
-      this.aptReminderUnit = '',
-      @required this.owner,
-      this.location = '',
-      this.eventId,
-      this.calendarId});
+  Appointment({
+    this.id,
+    @required this.users,
+    this.soldierId,
+    this.rank = '',
+    this.name = '',
+    this.firstName = '',
+    this.section = '',
+    this.rankSort = '',
+    this.aptTitle = '',
+    this.date = '',
+    this.start = '',
+    this.end = '',
+    this.status = 'Scheduled',
+    this.comments = '',
+    @required this.owner,
+    this.location = '',
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -63,8 +55,6 @@ class Appointment {
     map['end'] = end;
     map['status'] = status;
     map['comments'] = comments;
-    map['aptReminderNo'] = aptReminderNo;
-    map['aptReminderUnit'] = aptReminderUnit;
     map['eventId'] = null;
     map['calendarId'] = null;
     map['location'] = location;
@@ -79,29 +69,26 @@ class Appointment {
       location = doc['location'];
       users = doc['users'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     //soldierId is null - only use for sharing
     return Appointment(
-        id: doc.id,
-        users: users,
-        soldierId: doc['soldierId'],
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        aptTitle: doc['aptTitle'],
-        date: doc['date'],
-        start: doc['start'],
-        end: doc['end'],
-        status: doc['status'],
-        comments: doc['comments'],
-        aptReminderNo: doc['aptReminderNo'],
-        aptReminderUnit: doc['aptReminderUnit'],
-        owner: doc['owner'],
-        location: location,
-        eventId: null,
-        calendarId: null);
+      id: doc.id,
+      users: users,
+      soldierId: doc['soldierId'],
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      aptTitle: doc['aptTitle'],
+      date: doc['date'],
+      start: doc['start'],
+      end: doc['end'],
+      status: doc['status'],
+      comments: doc['comments'],
+      owner: doc['owner'],
+      location: location,
+    );
   }
 }

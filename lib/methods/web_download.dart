@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'package:universal_html/html.dart';
 
 class WebDownload {

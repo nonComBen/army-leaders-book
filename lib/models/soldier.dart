@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 
 class Soldier {
@@ -172,7 +171,7 @@ class Soldier {
     try {
       users = doc['users'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     try {
       workEmail = doc['workEmail'];
@@ -180,7 +179,7 @@ class Soldier {
       email = doc['email'];
       pebd = doc['pebd'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
     try {
       nbcSuit = doc['nbcSuitSize'];
@@ -192,7 +191,7 @@ class Soldier {
       acuTop = doc['acuTopSize'];
       acuTrouser = doc['acuTrouserSize'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
     try {
       address = doc['address'];
@@ -201,17 +200,18 @@ class Soldier {
       zip = doc['zip'];
       dodId = doc['dodId'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
     try {
       maritalStatus = doc['maritalStatus'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance
+          .logEvent(name: 'Marital Status Does Not Exist');
     }
     try {
       assigned = doc['assigned'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'Assigned Does Not Exist');
     }
 
     return Soldier(

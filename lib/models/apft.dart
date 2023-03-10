@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 
 class Apft {
@@ -26,28 +25,29 @@ class Apft {
   String altEvent;
   bool pass;
 
-  Apft(
-      {this.id,
-      this.soldierId,
-      @required this.owner,
-      @required this.users,
-      this.rank = '',
-      this.name = '',
-      this.firstName = '',
-      this.section = '',
-      this.rankSort = '',
-      this.date = '',
-      this.puRaw = '',
-      this.suRaw = '',
-      this.runRaw = '',
-      this.puScore = 0,
-      this.suScore = 0,
-      this.runScore = 0,
-      this.total = 0,
-      this.altEvent = 'Run',
-      this.pass = true,
-      this.age = 17,
-      this.gender = 'Male'});
+  Apft({
+    this.id,
+    this.soldierId,
+    @required this.owner,
+    @required this.users,
+    this.rank = '',
+    this.name = '',
+    this.firstName = '',
+    this.section = '',
+    this.rankSort = '',
+    this.date = '',
+    this.puRaw = '',
+    this.suRaw = '',
+    this.runRaw = '',
+    this.puScore = 0,
+    this.suScore = 0,
+    this.runScore = 0,
+    this.total = 0,
+    this.altEvent = 'Run',
+    this.pass = true,
+    this.age = 17,
+    this.gender = 'Male',
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -80,29 +80,30 @@ class Apft {
     try {
       users = doc['users'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return Apft(
-        id: doc.id,
-        soldierId: doc['soldierId'],
-        owner: doc['owner'],
-        users: users,
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        date: doc['date'],
-        puRaw: doc['puRaw'],
-        suRaw: doc['suRaw'],
-        runRaw: doc['runRaw'],
-        puScore: doc['puScore'],
-        suScore: doc['suScore'],
-        runScore: doc['runScore'],
-        total: doc['total'],
-        altEvent: doc['altEvent'],
-        pass: doc['pass'],
-        age: doc['age'],
-        gender: doc['gender'] ?? 'Male');
+      id: doc.id,
+      soldierId: doc['soldierId'],
+      owner: doc['owner'],
+      users: users,
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      date: doc['date'],
+      puRaw: doc['puRaw'],
+      suRaw: doc['suRaw'],
+      runRaw: doc['runRaw'],
+      puScore: doc['puScore'],
+      suScore: doc['suScore'],
+      runScore: doc['runScore'],
+      total: doc['total'],
+      altEvent: doc['altEvent'],
+      pass: doc['pass'],
+      age: doc['age'],
+      gender: doc['gender'] ?? 'Male',
+    );
   }
 }

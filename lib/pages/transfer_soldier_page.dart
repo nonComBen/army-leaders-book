@@ -1,5 +1,3 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
@@ -8,9 +6,10 @@ import '../../models/soldier.dart';
 
 class TransferSoldierPage extends StatefulWidget {
   const TransferSoldierPage({
+    Key key,
     @required this.userId,
     @required this.soldiers,
-  });
+  }) : super(key: key);
   final String userId;
   final List<Soldier> soldiers;
 

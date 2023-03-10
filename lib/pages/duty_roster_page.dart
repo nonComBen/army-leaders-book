@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'dart:io';
 
@@ -23,7 +21,7 @@ import '../../widgets/anon_warning_banner.dart';
 import 'editPages/edit_duty_roster_page.dart';
 import '../../models/duty.dart';
 import 'uploadPages/upload_duty_roster_page.dart';
-import '../pdf/dutyRoster_pdf.dart';
+import '../pdf/duty_roster_pdf.dart';
 
 class DutyRosterPage extends StatefulWidget {
   const DutyRosterPage({

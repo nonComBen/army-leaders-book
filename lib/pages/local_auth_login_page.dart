@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
 import 'package:local_auth/local_auth.dart';
@@ -85,7 +83,8 @@ class LocalAuthLoginPageState extends State<LocalAuthLoginPage> {
                             const RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(24.0))))),
-                    onPressed: () => onUnlockApp(context),
+                    onPressed: () =>
+                        throw Exception('test crash'), // onUnlockApp(context),
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(

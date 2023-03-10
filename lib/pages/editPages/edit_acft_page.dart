@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'dart:io';
 
@@ -237,18 +235,17 @@ class EditAcftPageState extends State<EditAcftPage> {
         powerThrowRaw: _powerThrowRawController.text,
         puRaw: _puRawController.text,
         dragRaw: _dragRawController.text,
-        legTuckRaw: _plankRawController.text,
+        plankRaw: _plankRawController.text,
         runRaw: _runRawController.text,
         deadliftScore: _mdlScore,
         powerThrowScore: _sptScore,
         puScore: _hrpScore,
         dragScore: _sdcScore,
-        legTuckScore: _plkScore,
+        plankScore: _plkScore,
         runScore: _runScore,
         total: _total,
         altEvent: _runType,
         physCat: 'Moderate',
-        coreEvent: null,
         pass: pass,
       );
 
@@ -373,7 +370,7 @@ class EditAcftPageState extends State<EditAcftPage> {
     _sptScore = widget.acft.powerThrowScore;
     _hrpScore = widget.acft.puScore;
     _sdcScore = widget.acft.dragScore;
-    _plkScore = widget.acft.legTuckScore;
+    _plkScore = widget.acft.plankScore;
     _runScore = widget.acft.runScore;
 
     _mdlRaw = int.tryParse(widget.acft.deadliftRaw) ?? 0;
@@ -390,12 +387,12 @@ class EditAcftPageState extends State<EditAcftPage> {
       _sdcMins = 0;
       _sdcSecs = 0;
     }
-    if (widget.acft.legTuckRaw.characters.contains(":")) {
-      _plkMins = int.tryParse(widget.acft.legTuckRaw
-              .substring(0, widget.acft.legTuckRaw.indexOf(":"))) ??
+    if (widget.acft.plankRaw.characters.contains(":")) {
+      _plkMins = int.tryParse(widget.acft.plankRaw
+              .substring(0, widget.acft.plankRaw.indexOf(":"))) ??
           0;
-      _plkSecs = int.tryParse(widget.acft.legTuckRaw
-              .substring(widget.acft.legTuckRaw.indexOf(":") + 1)) ??
+      _plkSecs = int.tryParse(widget.acft.plankRaw
+              .substring(widget.acft.plankRaw.indexOf(":") + 1)) ??
           0;
     } else {
       _plkMins = 0;
@@ -426,7 +423,7 @@ class EditAcftPageState extends State<EditAcftPage> {
         TextEditingController(text: widget.acft.powerThrowRaw);
     _puRawController = TextEditingController(text: widget.acft.puRaw);
     _dragRawController = TextEditingController(text: widget.acft.dragRaw);
-    _plankRawController = TextEditingController(text: widget.acft.legTuckRaw);
+    _plankRawController = TextEditingController(text: widget.acft.plankRaw);
     _runRawController = TextEditingController(text: widget.acft.runRaw);
 
     pass = widget.acft.pass;

@@ -1,9 +1,8 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -66,7 +65,6 @@ class ApftPageState extends State<ApftPage> {
 
     _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-    print('Provider Subscribed State: $isSubscribed');
 
     notificationsPlugin =
         Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
@@ -356,7 +354,7 @@ class ApftPageState extends State<ApftPage> {
           );
         }
       } catch (e) {
-        print('Error: $e');
+        FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
       }
     }
   }

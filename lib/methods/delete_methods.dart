@@ -1,5 +1,3 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -47,11 +45,7 @@ void deleteSoldiers(
 Future<void> deleteSoldier(Soldier soldier, String uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
   if (soldier.owner == uid) {
-    db.collection('soldiers').doc(soldier.id).delete().then((v) {
-      print('Soldier ${soldier.id} deleted successfully');
-    }).catchError((e) {
-      print('Error $e thrown while deleting Soldier ${soldier.id}');
-    });
+    db.collection('soldiers').doc(soldier.id).delete();
   } else {
     List<dynamic> users = soldier.users;
     users.remove(uid);

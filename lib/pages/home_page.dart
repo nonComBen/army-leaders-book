@@ -1,9 +1,8 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -113,7 +112,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
       Provider.of<SubscriptionState>(context, listen: false).unSubscribe();
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Sign Out Error');
     }
   }
 
@@ -159,7 +158,6 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
             sp.products.firstWhere((element) => element.id == 'premium_sub');
       }
       await sp.buy(product);
-      print('...Purchse complete');
     } else {
       showSnackbar(context, 'Store is not available');
     }
@@ -222,7 +220,6 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     isSubscribed =
         Provider.of<SubscriptionState>(context, listen: false).isSubscribed;
-    print('Provider State Subscribed: $isSubscribed');
 
     final notificationsPlugin =
         Provider.of<NotificationsPluginProvider>(context, listen: false)
@@ -307,7 +304,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
         updateUsersArray(_userObj.userId);
       }
     } catch (e) {
-      print('Updated Users Array doesn\'t exist');
+      FirebaseAnalytics.instance.logEvent(name: 'Updated Users Array Fail');
     }
 
 // show change log if new version
@@ -1059,7 +1056,6 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ],
         builder: (context, child) {
           sp = context.read<SubscriptionPurchases>();
-          print('IAP State: $isSubscribed');
           return Scaffold(
             key: _scaffoldState,
             appBar: AppBar(

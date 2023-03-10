@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'package:leaders_book/methods/download_methods.dart';
 import 'package:leaders_book/models/soldier.dart';

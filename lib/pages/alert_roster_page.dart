@@ -1,10 +1,9 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -62,8 +61,6 @@ class AlertRosterPageState extends State<AlertRosterPage> {
         recipients = '${recipients + soldier['phone']},';
       }
     }
-
-    print(recipients);
 
     if (await canLaunchUrl(Uri.parse(recipients))) {
       await launchUrl(Uri.parse(recipients));
@@ -544,7 +541,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
         );
       }
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
     }
   }
 
@@ -744,7 +741,6 @@ class AlertRosterPageState extends State<AlertRosterPage> {
     super.didChangeDependencies();
     _userId = AuthProvider.of(context).auth.currentUser().uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-    print('Provider Subscribed State: $isSubscribed');
   }
 
   @override
@@ -765,7 +761,8 @@ class AlertRosterPageState extends State<AlertRosterPage> {
       snapshot = await firestore.collection('alertSoldiers').doc(_userId).get();
       alertSoldiers = AlertSoldiers.fromSnapshot(snapshot);
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance
+          .logEvent(name: 'Alert Soldiers Does Not Exist');
     }
     if (alertSoldiers == null) {
       buildNewSoldiers();
@@ -800,7 +797,6 @@ class AlertRosterPageState extends State<AlertRosterPage> {
       });
     }
     prefs = await SharedPreferences.getInstance();
-    print(prefs.getBool('dontShowHelpAlert'));
     bool dontShow = prefs.getBool('dontShowHelpAlert') ?? false;
     if (!dontShow) {
       _showHelp();

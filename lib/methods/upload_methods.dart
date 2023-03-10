@@ -1,6 +1,5 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'package:excel/excel.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:intl/intl.dart';
 
 import '../methods/validate.dart';
@@ -17,7 +16,6 @@ String convertDate(String date) {
   DateFormat dateFormat = DateFormat('yyyy-MM-dd');
 
   try {
-    print('Date String: $date');
     final dateInt = int.tryParse(date) ?? 0;
     if (dateInt > 0) {
       final dateTime = DateTime(1899, 12, 30).add(Duration(days: dateInt));
@@ -26,7 +24,7 @@ String convertDate(String date) {
       formattedDate = date.substring(0, 10);
     }
   } catch (e) {
-    print('DateTime Parse Error: $e');
+    FirebaseAnalytics.instance.logEvent(name: 'DateTime Parse Error');
   }
 
   return formattedDate;

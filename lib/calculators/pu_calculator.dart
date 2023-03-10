@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 class PuCalculator {
   int getPuScore(bool male, int ageGroupIndex, int puRaw) {
     if (male) {

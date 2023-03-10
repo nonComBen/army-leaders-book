@@ -1,9 +1,8 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
@@ -53,7 +52,6 @@ class AptsPageState extends State<AptsPage> {
     super.didChangeDependencies();
 
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-    print('Provider Subscribed State: $isSubscribed');
 
     if (!_adLoaded && !isSubscribed) {
       bool trackingAllowed =
@@ -233,7 +231,7 @@ class AptsPageState extends State<AptsPage> {
           );
         }
       } catch (e) {
-        print('Error: $e');
+        FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
       }
     }
   }

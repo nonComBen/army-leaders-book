@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 int get2mrScore(int time, int ageGroup, bool male) {
   if (male) {
     if (time < 1322) return 100;

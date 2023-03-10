@@ -1,5 +1,3 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'package:url_launcher/url_launcher.dart';
 
 String encodeQueryParameters(Map<String, String> params) {

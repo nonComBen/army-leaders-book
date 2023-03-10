@@ -1,9 +1,8 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
@@ -27,8 +26,9 @@ import '../../widgets/anon_warning_banner.dart';
 
 class ActionsTrackerPage extends StatefulWidget {
   const ActionsTrackerPage({
+    Key key,
     @required this.userId,
-  });
+  }) : super(key: key);
   final String userId;
 
   static const routeName = '/actions-tracker-page';
@@ -221,7 +221,7 @@ class ActionsTrackerPageState extends State<ActionsTrackerPage> {
           );
         }
       } catch (e) {
-        print('Error: $e');
+        FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
       }
     }
   }

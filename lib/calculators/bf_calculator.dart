@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 class BfCalculator {
   List<int> setBenchmarks(bool male, int ageGroupIndex, int height) {
     int min, max, percentMax;

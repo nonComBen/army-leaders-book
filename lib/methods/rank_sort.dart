@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 int getRankSort(String rank) {
   int rankSort = 50;
   switch (rank.toUpperCase().trim()) {

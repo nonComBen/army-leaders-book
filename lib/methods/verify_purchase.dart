@@ -32,7 +32,7 @@ Future<bool> listenToPurchaseUpdated(
 Future<bool> verifyPurchase(PurchaseDetails purchaseDetails) async {
   FirebaseFunctions functions = FirebaseFunctions.instance;
   final callable = functions.httpsCallable('verifyPurchase');
-  final results = await callable({
+  final HttpsCallableResult<dynamic> results = await callable({
     'source': purchaseDetails.verificationData.source,
     'verificationData': purchaseDetails.verificationData.serverVerificationData,
     'productId': purchaseDetails.productID,

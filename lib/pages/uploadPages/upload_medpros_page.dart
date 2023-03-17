@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/medpro.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadMedProsPage extends StatefulWidget {
   const UploadMedProsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,9 +24,9 @@ class UploadMedProsPage extends StatefulWidget {
 }
 
 class UploadMedProsPageState extends State<UploadMedProsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       pha,
       dental,
       vision,
@@ -51,14 +52,14 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -73,38 +74,38 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      pha = columnHeaders.contains('PHA Date') ? 'PHA Date' : '';
-      dental = columnHeaders.contains('Dental Date') ? 'Dental Date' : '';
-      vision = columnHeaders.contains('Vision Date') ? 'Vision Date' : '';
-      hearing = columnHeaders.contains('Hearing Date') ? 'Hearing Date' : '';
-      hiv = columnHeaders.contains('HIV Date') ? 'HIV Date' : '';
-      flu = columnHeaders.contains('Flu Date') ? 'Flu Date' : '';
-      mmr = columnHeaders.contains('MMR Date') ? 'MMR Date' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      pha = columnHeaders!.contains('PHA Date') ? 'PHA Date' : '';
+      dental = columnHeaders!.contains('Dental Date') ? 'Dental Date' : '';
+      vision = columnHeaders!.contains('Vision Date') ? 'Vision Date' : '';
+      hearing = columnHeaders!.contains('Hearing Date') ? 'Hearing Date' : '';
+      hiv = columnHeaders!.contains('HIV Date') ? 'HIV Date' : '';
+      flu = columnHeaders!.contains('Flu Date') ? 'Flu Date' : '';
+      mmr = columnHeaders!.contains('MMR Date') ? 'MMR Date' : '';
       varicella =
-          columnHeaders.contains('Varicella Date') ? 'Varicella Date' : '';
-      polio = columnHeaders.contains('Polio Date') ? 'Polio Date' : '';
-      tuber = columnHeaders.contains('Tuberculosis Date')
+          columnHeaders!.contains('Varicella Date') ? 'Varicella Date' : '';
+      polio = columnHeaders!.contains('Polio Date') ? 'Polio Date' : '';
+      tuber = columnHeaders!.contains('Tuberculosis Date')
           ? 'Tuberculosis Date'
           : '';
-      tetanus = columnHeaders.contains('Tetanus Date') ? 'Tetanus Date' : '';
+      tetanus = columnHeaders!.contains('Tetanus Date') ? 'Tetanus Date' : '';
       hepA =
-          columnHeaders.contains('Hepatitis A Date') ? 'Hepatitis A Date' : '';
+          columnHeaders!.contains('Hepatitis A Date') ? 'Hepatitis A Date' : '';
       hepB =
-          columnHeaders.contains('Hepatitis B Date') ? 'Hepatitis B Date' : '';
-      enc = columnHeaders.contains('Encephalitis Date')
+          columnHeaders!.contains('Hepatitis B Date') ? 'Hepatitis B Date' : '';
+      enc = columnHeaders!.contains('Encephalitis Date')
           ? 'Encephalitis Date'
           : '';
-      mening = columnHeaders.contains('Meningococcal Date')
+      mening = columnHeaders!.contains('Meningococcal Date')
           ? 'Meningococcal Date'
           : '';
-      typhoid = columnHeaders.contains('Typhoid Date') ? 'Typhoid Date' : '';
-      yellow = columnHeaders.contains('Yellow Fever Date')
+      typhoid = columnHeaders!.contains('Typhoid Date') ? 'Typhoid Date' : '';
+      yellow = columnHeaders!.contains('Yellow Fever Date')
           ? 'Yellow Fever Date'
           : '';
       smallPox =
-          columnHeaders.contains('Small Pox Date') ? 'Small Pox Date' : '';
-      anthrax = columnHeaders.contains('Anthrax Date') ? 'Anthrax Date' : '';
+          columnHeaders!.contains('Small Pox Date') ? 'Small Pox Date' : '';
+      anthrax = columnHeaders!.contains('Anthrax Date') ? 'Anthrax Date' : '';
     });
   }
 
@@ -120,11 +121,11 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -240,7 +241,7 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
     smallPox = '';
     anthrax = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -278,7 +279,7 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -299,10 +300,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -318,10 +319,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'PHA Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: pha,
@@ -337,10 +338,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Dental Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: dental,
@@ -356,10 +357,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Vision Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: vision,
@@ -375,10 +376,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Hearing Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: hearing,
@@ -394,10 +395,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'HIV Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: hiv,
@@ -413,10 +414,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Influenza Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: flu,
@@ -432,10 +433,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'MMR Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: mmr,
@@ -451,10 +452,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Varicella Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: varicella,
@@ -470,10 +471,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Polio Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: polio,
@@ -489,10 +490,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Tuberculin Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: tuber,
@@ -508,10 +509,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Tetanus Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: tetanus,
@@ -527,10 +528,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Hepatitis A Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: hepA,
@@ -546,10 +547,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Hepititis B Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: hepB,
@@ -565,10 +566,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Encephalitis Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: enc,
@@ -584,10 +585,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Meningococcal Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: mening,
@@ -603,10 +604,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Typhoid Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: typhoid,
@@ -622,10 +623,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Yellow Fever Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: yellow,
@@ -641,10 +642,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Small Pox Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: smallPox,
@@ -660,10 +661,10 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Anthrax Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: anthrax,
@@ -677,11 +678,12 @@ class UploadMedProsPageState extends State<UploadMedProsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload MedPros',
                   )
                 ],

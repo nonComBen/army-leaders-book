@@ -10,13 +10,14 @@ import 'package:leaders_book/providers/soldiers_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../methods/rank_sort.dart';
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class UploadSoldierPage extends StatefulWidget {
   const UploadSoldierPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -24,9 +25,9 @@ class UploadSoldierPage extends StatefulWidget {
 }
 
 class UploadSoldierPageState extends State<UploadSoldierPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       rank,
       lastName,
       firstName,
@@ -71,14 +72,14 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -92,56 +93,56 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
   _readExcel(Sheet sheet) {
     rows = sheet.rows;
     columnHeaders = getColumnHeaders(rows.first);
-    soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-    rank = columnHeaders.contains('Rank') ? 'Rank' : '';
-    lastName = columnHeaders.contains('Last Name') ? 'Last Name' : '';
-    firstName = columnHeaders.contains('First Name') ? 'First Name' : '';
-    mi = columnHeaders.contains('Middle Initial') ? 'Middle Initial' : '';
-    assigned = columnHeaders.contains('Assigned') ? 'Assigned' : '';
-    section = columnHeaders.contains('Section') ? 'Section' : '';
-    supervisor = columnHeaders.contains('Supervisor') ? 'Supervisor' : '';
-    dodId = columnHeaders.contains('DoD ID') ? 'DoD ID' : '';
-    dor = columnHeaders.contains('Date of Rank') ? 'Date of Rank' : '';
-    mos = columnHeaders.contains('MOS') ? 'MOS' : '';
-    duty = columnHeaders.contains('Duty Position') ? 'Duty Position' : '';
-    paraLn = columnHeaders.contains('Paragraph/Line No.')
+    soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+    rank = columnHeaders!.contains('Rank') ? 'Rank' : '';
+    lastName = columnHeaders!.contains('Last Name') ? 'Last Name' : '';
+    firstName = columnHeaders!.contains('First Name') ? 'First Name' : '';
+    mi = columnHeaders!.contains('Middle Initial') ? 'Middle Initial' : '';
+    assigned = columnHeaders!.contains('Assigned') ? 'Assigned' : '';
+    section = columnHeaders!.contains('Section') ? 'Section' : '';
+    supervisor = columnHeaders!.contains('Supervisor') ? 'Supervisor' : '';
+    dodId = columnHeaders!.contains('DoD ID') ? 'DoD ID' : '';
+    dor = columnHeaders!.contains('Date of Rank') ? 'Date of Rank' : '';
+    mos = columnHeaders!.contains('MOS') ? 'MOS' : '';
+    duty = columnHeaders!.contains('Duty Position') ? 'Duty Position' : '';
+    paraLn = columnHeaders!.contains('Paragraph/Line No.')
         ? 'Paragraph/Line No.'
         : '';
-    reqMos = columnHeaders.contains('Duty MOS') ? 'Duty MOS' : '';
-    loss = columnHeaders.contains('Loss Date') ? 'Loss Date' : '';
-    ets = columnHeaders.contains('ETS') ? 'ETS' : '';
-    basd = columnHeaders.contains('BASD') ? 'BASD' : '';
-    pebd = columnHeaders.contains('PEBD') ? 'PEBD' : '';
-    gain = columnHeaders.contains('Gain Date') ? 'Gain Date' : '';
-    address = columnHeaders.contains('Address') ? 'Address' : '';
-    city = columnHeaders.contains('City') ? 'City' : '';
-    state = columnHeaders.contains('State') ? 'State' : '';
-    zip = columnHeaders.contains('Zip Code') ? 'Zip Code' : '';
-    phone = columnHeaders.contains('Phone Number') ? 'Phone Number' : '';
-    workPhone = columnHeaders.contains('Work Phone') ? 'Work Phone' : '';
-    email = columnHeaders.contains('Email Address') ? 'Email Address' : '';
-    workEmail = columnHeaders.contains('Work Email') ? 'Work Email' : '';
-    nok = columnHeaders.contains('Next of Kin') ? 'Next of Kin' : '';
+    reqMos = columnHeaders!.contains('Duty MOS') ? 'Duty MOS' : '';
+    loss = columnHeaders!.contains('Loss Date') ? 'Loss Date' : '';
+    ets = columnHeaders!.contains('ETS') ? 'ETS' : '';
+    basd = columnHeaders!.contains('BASD') ? 'BASD' : '';
+    pebd = columnHeaders!.contains('PEBD') ? 'PEBD' : '';
+    gain = columnHeaders!.contains('Gain Date') ? 'Gain Date' : '';
+    address = columnHeaders!.contains('Address') ? 'Address' : '';
+    city = columnHeaders!.contains('City') ? 'City' : '';
+    state = columnHeaders!.contains('State') ? 'State' : '';
+    zip = columnHeaders!.contains('Zip Code') ? 'Zip Code' : '';
+    phone = columnHeaders!.contains('Phone Number') ? 'Phone Number' : '';
+    workPhone = columnHeaders!.contains('Work Phone') ? 'Work Phone' : '';
+    email = columnHeaders!.contains('Email Address') ? 'Email Address' : '';
+    workEmail = columnHeaders!.contains('Work Email') ? 'Work Email' : '';
+    nok = columnHeaders!.contains('Next of Kin') ? 'Next of Kin' : '';
     nokPhone =
-        columnHeaders.contains('Next of Kin Phone') ? 'Next of Kin Phone' : '';
+        columnHeaders!.contains('Next of Kin Phone') ? 'Next of Kin Phone' : '';
     maritalStatus =
-        columnHeaders.contains('Marital Status') ? 'Marital Status' : '';
-    comments = columnHeaders.contains('Comments') ? 'Comments' : '';
-    civEd = columnHeaders.contains('Civ Ed Level') ? 'Civ Ed Level' : '';
-    milEd = columnHeaders.contains('Mil Ed Level') ? 'Mil Ed Level' : '';
+        columnHeaders!.contains('Marital Status') ? 'Marital Status' : '';
+    comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
+    civEd = columnHeaders!.contains('Civ Ed Level') ? 'Civ Ed Level' : '';
+    milEd = columnHeaders!.contains('Mil Ed Level') ? 'Mil Ed Level' : '';
     nbcBootSize =
-        columnHeaders.contains('CBRN Boot Size') ? 'CBRN Boot Size' : '';
+        columnHeaders!.contains('CBRN Boot Size') ? 'CBRN Boot Size' : '';
     nbcGloveSize =
-        columnHeaders.contains('CBRN Glove Size') ? 'CBRN Glove Size' : '';
+        columnHeaders!.contains('CBRN Glove Size') ? 'CBRN Glove Size' : '';
     nbcMaskSize =
-        columnHeaders.contains('CBRN Mask Size') ? 'CBRN Mask Size' : '';
+        columnHeaders!.contains('CBRN Mask Size') ? 'CBRN Mask Size' : '';
     nbcSuitSize =
-        columnHeaders.contains('CBRN Suit Size') ? 'CBRN Suit Size' : '';
-    hatSize = columnHeaders.contains('Hat Size') ? 'Hat Size' : '';
-    bootSize = columnHeaders.contains('Boot Size') ? 'Boot Size' : '';
-    acuTopSize = columnHeaders.contains('OCP Top Size') ? 'OCP Top Size' : '';
+        columnHeaders!.contains('CBRN Suit Size') ? 'CBRN Suit Size' : '';
+    hatSize = columnHeaders!.contains('Hat Size') ? 'Hat Size' : '';
+    bootSize = columnHeaders!.contains('Boot Size') ? 'Boot Size' : '';
+    acuTopSize = columnHeaders!.contains('OCP Top Size') ? 'OCP Top Size' : '';
     acuTrouserSize =
-        columnHeaders.contains('OCP Trouser Size') ? 'OCP Trouser Size' : '';
+        columnHeaders!.contains('OCP Trouser Size') ? 'OCP Trouser Size' : '';
     setState(() {});
   }
 
@@ -153,7 +154,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
     final soldiers =
         Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-    List<String> soldierIds = soldiers.map((soldier) => soldier.id).toList();
+    List<String?> soldierIds = soldiers.map((soldier) => soldier.id).toList();
 
     List<String> civEds = [
       '',
@@ -184,10 +185,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
     ];
 
     for (int i = 1; i < rows.length; i++) {
-      String saveSoldierId;
+      String? saveSoldierId;
       String currentSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
-      String owner = AuthProvider.of(context).auth.currentUser().uid;
-      List<dynamic> users = [owner];
+      String? owner = AuthProvider.of(context)!.auth!.currentUser()!.uid;
+      List<dynamic>? users = [owner];
       if (soldierIds.contains(currentSoldierId)) {
         var soldier =
             soldiers.firstWhere((element) => element.id == currentSoldierId);
@@ -355,7 +356,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
     acuTopSize = '';
     acuTrouserSize = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
   }
 
   @override
@@ -391,7 +392,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -412,10 +413,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Soldier Id'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -430,10 +431,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Rank'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: rank,
@@ -449,10 +450,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Last Name'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: lastName,
@@ -468,10 +469,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'First Name'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: firstName,
@@ -487,10 +488,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Middle Initial'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: mi,
@@ -506,10 +507,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Assigned'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: assigned,
@@ -525,10 +526,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Section'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: section,
@@ -544,10 +545,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Supervisor'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: supervisor,
@@ -563,10 +564,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'DoD ID'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: dodId,
@@ -582,10 +583,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Date of Rank'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: dor,
@@ -600,10 +601,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'MOS'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: mos,
@@ -619,10 +620,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Duty Position'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: duty,
@@ -638,10 +639,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Paragraph/Line No'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: paraLn,
@@ -657,10 +658,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Required MOS'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: reqMos,
@@ -676,10 +677,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Loss Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: loss,
@@ -695,10 +696,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'ETS Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: ets,
@@ -713,10 +714,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'BASD'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: basd,
@@ -731,10 +732,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'PEBD'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: pebd,
@@ -750,10 +751,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Gain Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: gain,
@@ -769,10 +770,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Civilian Education'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: civEd,
@@ -788,10 +789,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Military Education'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: milEd,
@@ -807,10 +808,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'CBRN Suit Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nbcSuitSize,
@@ -826,10 +827,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'CBRN Mask Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nbcMaskSize,
@@ -845,10 +846,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'CBRN Boot Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nbcBootSize,
@@ -864,10 +865,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'CBRN Glove Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nbcGloveSize,
@@ -883,10 +884,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Hat Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: hatSize,
@@ -902,10 +903,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Boot Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: bootSize,
@@ -921,10 +922,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'OCP Top Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: acuTopSize,
@@ -940,10 +941,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'OCP Trouser Size'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: acuTrouserSize,
@@ -959,10 +960,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Address'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: address,
@@ -977,10 +978,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'City'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: city,
@@ -995,10 +996,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'State'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: state,
@@ -1014,10 +1015,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Zip Code'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: zip,
@@ -1033,10 +1034,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Phone Number'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: phone,
@@ -1052,10 +1053,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Work Phone'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: workPhone,
@@ -1071,10 +1072,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Email Address'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: email,
@@ -1090,10 +1091,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Work Email'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: workEmail,
@@ -1109,10 +1110,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Next of Kin'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nok,
@@ -1128,10 +1129,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'NOK Phone'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nokPhone,
@@ -1147,10 +1148,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Marital Status'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: maritalStatus,
@@ -1166,10 +1167,10 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: comments,
@@ -1183,7 +1184,12 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == '' ? null : () => _saveSoldiers(context),
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveSoldiers(context);
+                    },
                     text: 'Upload Roster',
                   )
                 ],

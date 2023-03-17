@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class HrAction {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -17,20 +16,21 @@ class HrAction {
   String prr;
   String frr;
 
-  HrAction(
-      {this.id,
-      this.soldierId,
-      @required this.owner,
-      @required this.users,
-      this.rank = '',
-      this.name = '',
-      this.firstName = '',
-      this.section = '',
-      this.rankSort = '',
-      this.dd93 = '',
-      this.sglv = '',
-      this.prr = '',
-      this.frr = ''});
+  HrAction({
+    this.id,
+    this.soldierId,
+    required this.owner,
+    required this.users,
+    this.rank = '',
+    this.name = '',
+    this.firstName = '',
+    this.section = '',
+    this.rankSort = '',
+    this.dd93 = '',
+    this.sglv = '',
+    this.prr = '',
+    this.frr = '',
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};

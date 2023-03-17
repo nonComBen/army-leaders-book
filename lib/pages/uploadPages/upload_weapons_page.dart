@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/weapon.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadWeaponsPage extends StatefulWidget {
   const UploadWeaponsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,22 +24,22 @@ class UploadWeaponsPage extends StatefulWidget {
 }
 
 class UploadWeaponsPageState extends State<UploadWeaponsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, date, type, weapon, hits, max, badge, pass, path;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, date, type, weapon, hits, max, badge, pass, path;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -53,14 +54,14 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
-      type = columnHeaders.contains('Qual Type') ? 'Qual Type' : '';
-      weapon = columnHeaders.contains('Weapon') ? 'Weapon' : '';
-      hits = columnHeaders.contains('Hits') ? 'Hits' : '';
-      max = columnHeaders.contains('Max') ? 'Max' : '';
-      badge = columnHeaders.contains('Qual Badge') ? 'Qual Badge' : '';
-      pass = columnHeaders.contains('Pass') ? 'Pass' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      type = columnHeaders!.contains('Qual Type') ? 'Qual Type' : '';
+      weapon = columnHeaders!.contains('Weapon') ? 'Weapon' : '';
+      hits = columnHeaders!.contains('Hits') ? 'Hits' : '';
+      max = columnHeaders!.contains('Max') ? 'Max' : '';
+      badge = columnHeaders!.contains('Qual Badge') ? 'Qual Badge' : '';
+      pass = columnHeaders!.contains('Pass') ? 'Pass' : '';
     });
   }
 
@@ -76,7 +77,7 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> events = [];
       events.add('Day');
@@ -84,8 +85,8 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
       events.add('NBC');
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -151,7 +152,7 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
     badge = '';
     pass = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -189,7 +190,7 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -210,10 +211,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -228,10 +229,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -247,10 +248,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Qualification Type'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: type,
@@ -266,10 +267,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Weapon'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: weapon,
@@ -284,10 +285,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Hits'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: hits,
@@ -303,10 +304,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Maximum'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: max,
@@ -321,10 +322,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Badge'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: badge,
@@ -339,10 +340,10 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Pass'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: pass,
@@ -356,11 +357,12 @@ class UploadWeaponsPageState extends State<UploadWeaponsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Weapon Stats',
                   )
                 ],

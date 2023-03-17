@@ -25,8 +25,8 @@ import '../widgets/anon_warning_banner.dart';
 
 class TrainingPage extends StatefulWidget {
   const TrainingPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -37,12 +37,12 @@ class TrainingPage extends StatefulWidget {
 }
 
 class TrainingPageState extends State<TrainingPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -71,7 +71,7 @@ class TrainingPageState extends State<TrainingPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -80,12 +80,6 @@ class TrainingPageState extends State<TrainingPage> {
   @override
   void initState() {
     super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('training')
@@ -110,36 +104,10 @@ class TrainingPageState extends State<TrainingPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadTrainingsPage()));
-      // Widget title = const Text('Upload Training');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Training, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. '
-      //       'All dates also need to be in yyyy-MM-dd or M/d/yy format.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadTrainingsPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadTrainingsPage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -222,7 +190,7 @@ class TrainingPageState extends State<TrainingPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -235,7 +203,7 @@ class TrainingPageState extends State<TrainingPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/training.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -303,7 +271,7 @@ class TrainingPageState extends State<TrainingPage> {
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
     TrainingPdf pdf = TrainingPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -428,7 +396,7 @@ class TrainingPageState extends State<TrainingPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -509,9 +477,9 @@ class TrainingPageState extends State<TrainingPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -651,7 +619,7 @@ class TrainingPageState extends State<TrainingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -668,11 +636,11 @@ class TrainingPageState extends State<TrainingPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

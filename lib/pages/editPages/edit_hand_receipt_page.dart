@@ -9,11 +9,12 @@ import '../../methods/on_back_pressed.dart';
 import '../../models/hand_receipt_item.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditHandReceiptPage extends StatefulWidget {
   const EditHandReceiptPage({
-    Key key,
-    @required this.item,
+    Key? key,
+    required this.item,
   }) : super(key: key);
   final HandReceiptItem item;
 
@@ -23,34 +24,34 @@ class EditHandReceiptPage extends StatefulWidget {
 
 class EditHandReceiptPageState extends State<EditHandReceiptPage> {
   String _title = 'New Hand Receipt Item';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _itemController;
-  TextEditingController _modelController;
-  TextEditingController _serialController;
-  TextEditingController _nsnController;
-  TextEditingController _locationController;
-  TextEditingController _valueController;
-  TextEditingController _commentsController;
+  final TextEditingController _itemController = TextEditingController();
+  final TextEditingController _modelController = TextEditingController();
+  final TextEditingController _serialController = TextEditingController();
+  final TextEditingController _nsnController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _valueController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
 
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users, _subComponents;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users, _subComponents;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
 
-  void _editSubComponent(BuildContext context, int index) {
+  void _editSubComponent(BuildContext context, int? index) {
     TextEditingController subController = TextEditingController();
     TextEditingController nsnController = TextEditingController();
     TextEditingController onHandController = TextEditingController();
     TextEditingController reqController = TextEditingController();
     if (index != null) {
-      subController.text = _subComponents[index]['item'];
-      nsnController.text = _subComponents[index]['nsn'];
-      onHandController.text = _subComponents[index]['onHand'];
-      reqController.text = _subComponents[index]['required'];
+      subController.text = _subComponents![index]['item'];
+      nsnController.text = _subComponents![index]['nsn'];
+      onHandController.text = _subComponents![index]['onHand'];
+      reqController.text = _subComponents![index]['required'];
     }
     Widget title =
         Text(index != null ? 'Edit Subcompenent' : 'Add Subcompenent');
@@ -59,7 +60,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
+          child: PlatformTextField(
             controller: subController,
             keyboardType: TextInputType.text,
             decoration: const InputDecoration(labelText: 'Item'),
@@ -67,7 +68,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
+          child: PlatformTextField(
             controller: nsnController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'NSN #'),
@@ -75,7 +76,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
+          child: PlatformTextField(
             controller: onHandController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'On Hand'),
@@ -83,7 +84,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
+          child: PlatformTextField(
             controller: reqController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'Required'),
@@ -105,9 +106,9 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
             'required': reqController.text
           };
           if (index != null) {
-            _subComponents[index] = map;
+            _subComponents![index] = map;
           } else {
-            _subComponents.add(map);
+            _subComponents!.add(map);
           }
         });
       },
@@ -117,7 +118,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
 
   List<Widget> _subComponentWidgets() {
     List<Widget> vehicles = [];
-    for (int index = 0; index < _subComponents.length; index++) {
+    for (int index = 0; index < _subComponents!.length; index++) {
       vehicles.add(Padding(
           padding: const EdgeInsets.all(4.0),
           child: Card(
@@ -125,17 +126,17 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(_subComponents[index]['item']),
+                  Text(_subComponents![index]['item']),
                   Text(
-                      '${_subComponents[index]['onHand']}/${_subComponents[index]['required']}')
+                      '${_subComponents![index]['onHand']}/${_subComponents![index]['required']}')
                 ],
               ),
-              subtitle: Text('NSN: ${_subComponents[index]['nsn']}'),
+              subtitle: Text('NSN: ${_subComponents![index]['nsn']}'),
               trailing: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () {
                   setState(() {
-                    _subComponents.removeAt(index);
+                    _subComponents!.removeAt(index);
                   });
                 },
               ),
@@ -149,7 +150,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -160,25 +161,25 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       HandReceiptItem saveHRItem = HandReceiptItem(
         id: widget.item.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         item: _itemController.text,
         model: _modelController.text,
         serial: _serialController.text,
         nsn: _nsnController.text,
         location: _locationController.text,
         value: _valueController.text,
-        subComponents: _subComponents,
+        subComponents: _subComponents!,
         comments: _commentsController.text,
       );
 
@@ -209,21 +210,21 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('equipment')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -231,7 +232,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -239,11 +240,6 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -262,11 +258,6 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.item.id != null) {
       _title = '${widget.item.rank} ${widget.item.name}';
     }
@@ -280,13 +271,13 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
     _owner = widget.item.owner;
     _users = widget.item.users;
 
-    _itemController = TextEditingController(text: widget.item.item);
-    _modelController = TextEditingController(text: widget.item.model);
-    _serialController = TextEditingController(text: widget.item.serial);
-    _nsnController = TextEditingController(text: widget.item.nsn);
-    _locationController = TextEditingController(text: widget.item.location);
-    _valueController = TextEditingController(text: widget.item.value);
-    _commentsController = TextEditingController(text: widget.item.comments);
+    _itemController.text = widget.item.item;
+    _modelController.text = widget.item.model;
+    _serialController.text = widget.item.serial;
+    _nsnController.text = widget.item.nsn;
+    _locationController.text = widget.item.location;
+    _valueController.text = widget.item.value;
+    _commentsController.text = widget.item.comments;
 
     _subComponents = widget.item.subComponents;
 
@@ -297,7 +288,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -306,7 +297,9 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -345,15 +338,15 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -361,7 +354,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier Signed'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -369,26 +362,26 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -522,7 +515,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
                               )
                             ],
                           ),
-                          _subComponents.isEmpty
+                          _subComponents!.isEmpty
                               ? const SizedBox()
                               : GridView.count(
                                   primary: false,

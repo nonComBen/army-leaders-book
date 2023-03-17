@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider with ChangeNotifier {
-  ThemeMode _themeMode;
+  ThemeMode? _themeMode;
   final SharedPreferences prefs;
 
   ThemeProvider(this.prefs) {
@@ -26,7 +26,7 @@ class ThemeProvider with ChangeNotifier {
   //   return ThemeProvider(_themeMode);
   // }
 
-  ThemeMode get currentThemeMode {
+  ThemeMode? get currentThemeMode {
     return _themeMode;
   }
 

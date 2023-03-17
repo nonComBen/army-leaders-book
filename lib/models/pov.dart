@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class POV {
-  String id;
+  String? id;
   String owner;
   List<dynamic> users;
   String soldierId;
@@ -18,9 +17,9 @@ class POV {
 
   POV({
     this.id,
-    @required this.owner,
-    @required this.users,
-    @required this.soldierId,
+    required this.owner,
+    required this.users,
+    required this.soldierId,
     this.year = '',
     this.make = '',
     this.model = '',

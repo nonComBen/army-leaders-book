@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TosPage extends StatelessWidget {
-  const TosPage({Key key}) : super(key: key);
+  const TosPage({Key? key}) : super(key: key);
 
   static const routeName = '/terms-of-service-page';
 

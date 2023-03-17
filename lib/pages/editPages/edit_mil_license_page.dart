@@ -10,14 +10,16 @@ import 'package:leaders_book/methods/custom_alert_dialog.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/mil_license.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditMilLicPage extends StatefulWidget {
   const EditMilLicPage({
-    Key key,
-    @required this.milLic,
+    Key? key,
+    required this.milLic,
   }) : super(key: key);
   final MilLic milLic;
 
@@ -27,21 +29,21 @@ class EditMilLicPage extends StatefulWidget {
 
 class EditMilLicPageState extends State<EditMilLicPage> {
   String _title = 'New Military License';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dateController;
-  TextEditingController _expController;
-  TextEditingController _licenseController;
-  TextEditingController _restrictionsController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  List<dynamic> qualVehicles;
-  bool removeSoldiers, updated;
-  bool abrams,
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _expController = TextEditingController();
+  final TextEditingController _licenseController = TextEditingController();
+  final TextEditingController _restrictionsController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<dynamic>? qualVehicles;
+  bool removeSoldiers = false, updated = false;
+  bool? abrams,
       ace,
       apc,
       bradley,
@@ -70,15 +72,14 @@ class EditMilLicPageState extends State<EditMilLicPage> {
       rg33,
       spa,
       stryker;
-  DateTime _dateTime, _expDate;
-  RegExp regExp;
+  DateTime? _dateTime, _expDate;
 
   Future<void> _pickDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dateTime,
+          initialDate: _dateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -116,9 +117,9 @@ class EditMilLicPageState extends State<EditMilLicPage> {
   Future<void> _pickExp(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _expDate,
+          initialDate: _expDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -154,7 +155,7 @@ class EditMilLicPageState extends State<EditMilLicPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -165,24 +166,24 @@ class EditMilLicPageState extends State<EditMilLicPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
-      if (qualVehicles.last == '') qualVehicles.removeLast();
+      if (qualVehicles!.last == '') qualVehicles!.removeLast();
       MilLic saveMilLic = MilLic(
         id: widget.milLic.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         date: _dateController.text,
         exp: _expController.text,
         license: _licenseController.text,
         restrictions: _restrictionsController.text,
-        vehicles: qualVehicles,
+        vehicles: qualVehicles!,
       );
 
       if (widget.milLic.id == null) {
@@ -212,21 +213,21 @@ class EditMilLicPageState extends State<EditMilLicPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('milLic')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -234,7 +235,7 @@ class EditMilLicPageState extends State<EditMilLicPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -246,17 +247,17 @@ class EditMilLicPageState extends State<EditMilLicPage> {
 
   List<Widget> _vehicles() {
     List<Widget> vehicles = [];
-    for (int index = 0; index < qualVehicles.length; index++) {
+    for (int index = 0; index < qualVehicles!.length; index++) {
       vehicles.add(Padding(
           padding: const EdgeInsets.all(4.0),
           child: Card(
             child: ListTile(
-              title: Text(qualVehicles[index]),
+              title: Text(qualVehicles![index]),
               trailing: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () {
                   setState(() {
-                    qualVehicles.removeAt(index);
+                    qualVehicles!.removeAt(index);
                   });
                 },
               ),
@@ -269,13 +270,13 @@ class EditMilLicPageState extends State<EditMilLicPage> {
     return vehicles;
   }
 
-  void _editVehicle(BuildContext context, int index) {
+  void _editVehicle(BuildContext context, int? index) {
     TextEditingController vehicleController = TextEditingController();
-    if (index != null) vehicleController.text = qualVehicles[index];
+    if (index != null) vehicleController.text = qualVehicles![index];
     Widget title = Text(index != null ? 'Edit Vehicle' : 'Add Vehicle');
     Widget content = Padding(
       padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
+      child: PlatformTextField(
         controller: vehicleController,
         keyboardType: TextInputType.text,
         decoration: const InputDecoration(labelText: 'Vehicle'),
@@ -289,9 +290,9 @@ class EditMilLicPageState extends State<EditMilLicPage> {
       primary: () {
         setState(() {
           if (index != null) {
-            qualVehicles[index] = vehicleController.text;
+            qualVehicles![index] = vehicleController.text;
           } else {
-            qualVehicles.add(vehicleController.text);
+            qualVehicles!.add(vehicleController.text);
           }
         });
       },
@@ -304,11 +305,6 @@ class EditMilLicPageState extends State<EditMilLicPage> {
     if (width > 650) return width / 300;
     if (width > 400) return width / 200;
     return width / 100;
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -324,11 +320,6 @@ class EditMilLicPageState extends State<EditMilLicPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.milLic.id != null) {
       _title = '${widget.milLic.rank} ${widget.milLic.name}';
     }
@@ -342,30 +333,25 @@ class EditMilLicPageState extends State<EditMilLicPage> {
     _owner = widget.milLic.owner;
     _users = widget.milLic.users;
 
-    _dateController = TextEditingController(text: widget.milLic.date);
-    _expController = TextEditingController(text: widget.milLic.exp);
-    _licenseController = TextEditingController(text: widget.milLic.license);
-    _restrictionsController =
-        TextEditingController(text: widget.milLic.restrictions);
+    _dateController.text = widget.milLic.date;
+    _expController.text = widget.milLic.exp;
+    _licenseController.text = widget.milLic.license;
+    _restrictionsController.text = widget.milLic.restrictions;
 
-    if (widget.milLic.vehicles == null) {
+    if (widget.milLic.vehicles.isEmpty) {
       qualVehicles = [];
     } else {
       qualVehicles = widget.milLic.vehicles.toList();
     }
 
-    removeSoldiers = false;
-    updated = false;
-
     _dateTime = DateTime.tryParse(widget.milLic.date) ?? DateTime.now();
     _expDate = DateTime.tryParse(widget.milLic.exp) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -374,7 +360,9 @@ class EditMilLicPageState extends State<EditMilLicPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -413,15 +401,15 @@ class EditMilLicPageState extends State<EditMilLicPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -429,7 +417,7 @@ class EditMilLicPageState extends State<EditMilLicPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -437,26 +425,26 @@ class EditMilLicPageState extends State<EditMilLicPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -501,7 +489,7 @@ class EditMilLicPageState extends State<EditMilLicPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -525,7 +513,7 @@ class EditMilLicPageState extends State<EditMilLicPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -569,7 +557,7 @@ class EditMilLicPageState extends State<EditMilLicPage> {
                               )
                             ],
                           ),
-                          qualVehicles.isEmpty
+                          qualVehicles!.isEmpty
                               ? const SizedBox()
                               : GridView.count(
                                   primary: false,

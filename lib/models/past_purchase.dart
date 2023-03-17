@@ -22,13 +22,13 @@ enum Status {
 class PastPurchase {
   final PurchaseType type;
   final Store store;
-  final String orderId;
-  final String productId;
+  final String? orderId;
+  final String? productId;
   final DateTime purchaseDate;
-  final DateTime expiryDate;
+  final DateTime? expiryDate;
   final Status status;
 
-  String get title {
+  String? get title {
     switch (productId) {
       case storeKeyAndroidTwo:
         return 'androidTwo';
@@ -42,16 +42,16 @@ class PastPurchase {
   }
 
   PastPurchase.fromJson(Map<String, dynamic> json)
-      : type = _typeFromString(json['type'] as String),
-        store = _storeFromString(json['iapSource'] as String),
-        orderId = json['orderId'] as String,
-        productId = json['productId'] as String,
+      : type = _typeFromString(json['type'] as String?),
+        store = _storeFromString(json['iapSource'] as String?),
+        orderId = json['orderId'] as String?,
+        productId = json['productId'] as String?,
         purchaseDate = DateTime.now(),
         expiryDate = null,
-        status = _statusFromString(json['status'] as String);
+        status = _statusFromString(json['status'] as String?);
 }
 
-PurchaseType _typeFromString(String type) {
+PurchaseType _typeFromString(String? type) {
   switch (type) {
     case 'NON_SUBSCRIPTION':
       return PurchaseType.nonSubscriptionPurchase;
@@ -62,7 +62,7 @@ PurchaseType _typeFromString(String type) {
   }
 }
 
-Store _storeFromString(String store) {
+Store _storeFromString(String? store) {
   switch (store) {
     case 'google_play':
       return Store.googlePlay;
@@ -73,7 +73,7 @@ Store _storeFromString(String store) {
   }
 }
 
-Status _statusFromString(String status) {
+Status _statusFromString(String? status) {
   switch (status) {
     case 'PENDING':
       return Status.pending;

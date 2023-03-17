@@ -1,5 +1,9 @@
 class BfCalculator {
-  List<int> setBenchmarks(bool male, int ageGroupIndex, int height) {
+  List<int> setBenchmarks({
+    required bool male,
+    required int ageGroupIndex,
+    required int height,
+  }) {
     int min, max, percentMax;
 
     min = heightWeightTable[height - 58][8];
@@ -10,7 +14,11 @@ class BfCalculator {
     return [min, max, percentMax];
   }
 
-  int getBfPercent(bool male, double height, double cirValue) {
+  int getBfPercent({
+    required bool male,
+    required double height,
+    required double cirValue,
+  }) {
     if (male) {
       if (cirValue < 10.5) {
         return 0;
@@ -54,7 +62,7 @@ class BfCalculator {
 
   List<int> percentTable = [20, 22, 24, 26, 30, 32, 34, 36];
 
-  List<double> heights = [
+  List<double?> heights = [
     58,
     58.5,
     59,

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/bodyfat.dart';
 import '../../calculators/bf_calculator.dart';
 import '../../widgets/anon_warning_banner.dart';
@@ -16,8 +17,8 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class EditBodyfatPage extends StatefulWidget {
   const EditBodyfatPage({
-    Key key,
-    @required this.bodyfat,
+    Key? key,
+    required this.bodyfat,
   }) : super(key: key);
   final Bodyfat bodyfat;
 
@@ -27,22 +28,26 @@ class EditBodyfatPage extends StatefulWidget {
 
 class EditBodyfatPageState extends State<EditBodyfatPage> {
   String _title = 'New Body Composition';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dateController;
-  TextEditingController _heightController;
-  TextEditingController _weightController;
-  TextEditingController _neckController;
-  TextEditingController _waistController;
-  TextEditingController _hipController;
-  TextEditingController _percentController;
-  TextEditingController _ageController;
-  TextEditingController _heightDoubleController;
-  bool bmiPass, bfPass, removeSoldiers, updated, underweight;
-  String _soldierId,
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _neckController = TextEditingController();
+  final TextEditingController _waistController = TextEditingController();
+  final TextEditingController _hipController = TextEditingController();
+  final TextEditingController _percentController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _heightDoubleController = TextEditingController();
+  bool bmiPass = true,
+      bfPass = true,
+      removeSoldiers = false,
+      updated = false,
+      underweight = false;
+  String? _soldierId,
       _rank,
       _lastName,
       _firstName,
@@ -50,20 +55,19 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
       _rankSort,
       _gender,
       _owner;
-  List<dynamic> _users;
-  int height;
-  double heightDouble;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  DateTime _dateTime;
-  RegExp regExp;
+  List<dynamic>? _users;
+  late int height;
+  double? heightDouble;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  DateTime? _dateTime;
   BfCalculator bfCalculator = BfCalculator();
 
   Future<void> _pickDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dateTime,
+          initialDate: _dateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -108,8 +112,11 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
   void calcBmi() {
     int height = int.tryParse(_heightController.text) ?? 58;
     int weight = int.tryParse(_weightController.text) ?? 0;
-    List<int> benchmarks =
-        bfCalculator.setBenchmarks(_gender == 'Male', ageGroupIndex(), height);
+    List<int> benchmarks = bfCalculator.setBenchmarks(
+      ageGroupIndex: ageGroupIndex(),
+      height: height,
+      male: _gender == 'Male',
+    );
 
     if (weight < benchmarks[0]) {
       setState(() {
@@ -129,16 +136,26 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
     }
   }
 
+  double roundToPointFive(double number) {
+    return (number * 2).round() / 2;
+  }
+
   calcBf() {
     int maxPercent = bfCalculator.percentTable[
         _gender == 'Male' ? ageGroupIndex() : ageGroupIndex() + 4];
     double neck = double.tryParse(_neckController.text) ?? 0;
     double waist = double.tryParse(_waistController.text) ?? 0;
     double hip = double.tryParse(_hipController.text) ?? 0;
+    neck = roundToPointFive(neck);
+    waist = roundToPointFive(waist);
+    hip = roundToPointFive(hip);
     double cirValue = _gender == 'Male' ? waist - neck : hip + waist - neck;
 
-    int bfPercent =
-        bfCalculator.getBfPercent(_gender == 'Male', heightDouble, cirValue);
+    int bfPercent = bfCalculator.getBfPercent(
+      cirValue: cirValue,
+      height: heightDouble!,
+      male: _gender == 'Male',
+    );
     _percentController.text = bfPercent.toString();
     setState(() {
       bfPass = bfPercent <= maxPercent;
@@ -167,7 +184,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                     onPressed: () {
                       if (!(heightDouble == (height.toDouble() - 0.5))) {
                         setState(() {
-                          heightDouble = heightDouble - 0.5;
+                          heightDouble = heightDouble! - 0.5;
                           _heightDoubleController.text =
                               heightDouble.toString();
                         });
@@ -199,7 +216,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                     onPressed: () {
                       if (!(heightDouble == (height.toDouble() + 0.5))) {
                         setState(() {
-                          heightDouble = heightDouble + 0.5;
+                          heightDouble = heightDouble! + 0.5;
                           _heightDoubleController.text =
                               heightDouble.toString();
                         });
@@ -299,7 +316,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
       value: bfPass,
       onChanged: (value) {
         setState(() {
-          bfPass = value;
+          bfPass = value!;
         });
       },
     ));
@@ -307,7 +324,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -318,20 +335,20 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Bodyfat saveBodyfat = Bodyfat(
         id: widget.bodyfat.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
-        age: int.tryParse(_ageController.text ?? 0),
-        gender: _gender,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
+        age: int.tryParse(_ageController.text.trim()) ?? 0,
+        gender: _gender!,
         date: _dateController.text,
         height: _heightController.text,
         heightDouble: heightDouble.toString(),
@@ -371,21 +388,21 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('bodyfatStats')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -393,7 +410,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -401,11 +418,6 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -425,11 +437,6 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.bodyfat.id != null) {
       _title = '${widget.bodyfat.rank} ${widget.bodyfat.name}';
     }
@@ -440,13 +447,12 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
     _firstName = widget.bodyfat.firstName;
     _section = widget.bodyfat.section;
     _rankSort = widget.bodyfat.rankSort;
-    _gender = widget.bodyfat.gender ?? 'Male';
+    _gender = widget.bodyfat.gender;
     _owner = widget.bodyfat.owner;
     _users = widget.bodyfat.users;
 
     height = int.tryParse(widget.bodyfat.height) ?? 0;
-    if (widget.bodyfat.heightDouble == null ||
-        widget.bodyfat.heightDouble == '') {
+    if (widget.bodyfat.heightDouble == '') {
       heightDouble = height.toDouble();
     } else {
       heightDouble = double.tryParse(widget.bodyfat.heightDouble);
@@ -454,30 +460,24 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
 
     bmiPass = widget.bodyfat.passBmi;
     bfPass = widget.bodyfat.passBf;
-    underweight = false;
 
-    _dateController = TextEditingController(text: widget.bodyfat.date);
-    _heightController = TextEditingController(text: widget.bodyfat.height);
-    _weightController = TextEditingController(text: widget.bodyfat.weight);
-    _neckController = TextEditingController(text: widget.bodyfat.neck);
-    _waistController = TextEditingController(text: widget.bodyfat.waist);
-    _hipController = TextEditingController(text: widget.bodyfat.hip);
-    _percentController = TextEditingController(text: widget.bodyfat.percent);
-    _ageController = TextEditingController(text: widget.bodyfat.age.toString());
-    _heightDoubleController =
-        TextEditingController(text: heightDouble.toString());
-
-    removeSoldiers = false;
-    updated = false;
+    _dateController.text = widget.bodyfat.date;
+    _heightController.text = widget.bodyfat.height;
+    _weightController.text = widget.bodyfat.weight;
+    _neckController.text = widget.bodyfat.neck;
+    _waistController.text = widget.bodyfat.waist;
+    _hipController.text = widget.bodyfat.hip;
+    _percentController.text = widget.bodyfat.percent;
+    _ageController.text = widget.bodyfat.age.toString();
+    _heightDoubleController.text = heightDouble.toString();
 
     _dateTime = DateTime.tryParse(widget.bodyfat.date) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -486,7 +486,9 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -525,15 +527,15 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -541,7 +543,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -549,26 +551,26 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -599,7 +601,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -627,7 +629,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                                       title: const Text('M'),
                                       value: 'Male',
                                       groupValue: _gender,
-                                      onChanged: (gender) {
+                                      onChanged: (dynamic gender) {
                                         _gender = gender;
                                         calcBmi();
                                         calcBf();
@@ -640,7 +642,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                                       title: const Text('F'),
                                       value: 'Female',
                                       groupValue: _gender,
-                                      onChanged: (gender) {
+                                      onChanged: (dynamic gender) {
                                         _gender = gender;
                                         calcBmi();
                                         calcBf();
@@ -711,7 +713,7 @@ class EditBodyfatPageState extends State<EditBodyfatPage> {
                                   value: bmiPass,
                                   onChanged: (value) {
                                     if (mounted) {
-                                      bmiPass = value;
+                                      bmiPass = value!;
                                     }
                                   },
                                 ),

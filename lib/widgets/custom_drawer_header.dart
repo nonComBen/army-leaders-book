@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../pages/editPages/edit_user_page.dart';
 
 class CustomDrawerHeader extends StatelessWidget {
-  const CustomDrawerHeader({Key key}) : super(key: key);
+  const CustomDrawerHeader({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class CustomDrawerHeader extends StatelessWidget {
           );
         } else {
           String initials = '';
-          String name = userProvider.user.userName;
+          String name = userProvider.user!.userName;
           name = name.trim();
           if (!name.contains(' ')) {
             if (name.length > 2) {
@@ -32,7 +32,7 @@ class CustomDrawerHeader extends StatelessWidget {
               name,
             ),
             accountEmail: Text(
-              userProvider.user.userEmail,
+              userProvider.user!.userEmail,
             ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -44,7 +44,7 @@ class CustomDrawerHeader extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => EditUserPage(
-                            userId: userProvider.user.userId,
+                            userId: userProvider.user!.userId,
                           )));
             },
           );

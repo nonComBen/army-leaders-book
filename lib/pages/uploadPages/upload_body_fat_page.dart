@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/bodyfat.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadBodyFatsPage extends StatefulWidget {
   const UploadBodyFatsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,9 +24,9 @@ class UploadBodyFatsPage extends StatefulWidget {
 }
 
 class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       date,
       age,
       height,
@@ -44,14 +45,14 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -66,19 +67,19 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
-      age = columnHeaders.contains('Age') ? 'Age' : '';
-      height = columnHeaders.contains('Height') ? 'Height' : '';
-      weight = columnHeaders.contains('Weight') ? 'Weight' : '';
-      bmiPass = columnHeaders.contains('BMI Pass') ? 'BMI Pass' : '';
-      neck = columnHeaders.contains('Neck') ? 'Neck' : '';
-      waist = columnHeaders.contains('Waist') ? 'Waist' : '';
-      hip = columnHeaders.contains('Hip') ? 'Hip' : '';
-      percent = columnHeaders.contains('BF Percent') ? 'BF Percent' : '';
-      bfPass = columnHeaders.contains('BF Pass') ? 'BF Pass' : '';
-      gender = columnHeaders.contains('Gender') ? 'Gender' : '';
-      heightDouble = columnHeaders.contains('Height to Half Inch')
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      age = columnHeaders!.contains('Age') ? 'Age' : '';
+      height = columnHeaders!.contains('Height') ? 'Height' : '';
+      weight = columnHeaders!.contains('Weight') ? 'Weight' : '';
+      bmiPass = columnHeaders!.contains('BMI Pass') ? 'BMI Pass' : '';
+      neck = columnHeaders!.contains('Neck') ? 'Neck' : '';
+      waist = columnHeaders!.contains('Waist') ? 'Waist' : '';
+      hip = columnHeaders!.contains('Hip') ? 'Hip' : '';
+      percent = columnHeaders!.contains('BF Percent') ? 'BF Percent' : '';
+      bfPass = columnHeaders!.contains('BF Pass') ? 'BF Pass' : '';
+      gender = columnHeaders!.contains('Gender') ? 'Gender' : '';
+      heightDouble = columnHeaders!.contains('Height to Half Inch')
           ? 'Height to Half Inch'
           : '';
     });
@@ -96,11 +97,11 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         bool passBmi, passBf;
         int ageInt;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
@@ -192,7 +193,7 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
     gender = '';
     heightDouble = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -230,7 +231,7 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -251,10 +252,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -269,10 +270,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -288,10 +289,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Gender'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: gender,
@@ -306,10 +307,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Age'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: age,
@@ -325,10 +326,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Height'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: height,
@@ -344,10 +345,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Weight'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: weight,
@@ -363,10 +364,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'BMI Pass'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: bmiPass,
@@ -382,10 +383,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Height to Nearest Half Inch'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: heightDouble,
@@ -400,10 +401,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Neck'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: neck,
@@ -418,10 +419,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Waist'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: waist,
@@ -436,10 +437,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Hip'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: hip,
@@ -455,10 +456,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'BF Percent'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: percent,
@@ -474,10 +475,10 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'BF Pass'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: bfPass,
@@ -491,11 +492,12 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Body Comp Stats',
                   )
                 ],

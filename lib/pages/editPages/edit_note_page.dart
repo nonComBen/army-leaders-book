@@ -11,8 +11,8 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class EditNotePage extends StatefulWidget {
   const EditNotePage({
-    Key key,
-    @required this.note,
+    Key? key,
+    required this.note,
   }) : super(key: key);
   final Note note;
 
@@ -22,17 +22,17 @@ class EditNotePage extends StatefulWidget {
 
 class EditNotePageState extends State<EditNotePage> {
   String _title = 'New Note';
-  bool updated;
-  FirebaseFirestore firestore;
+  bool updated = false;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _titleController;
-  TextEditingController _commentsController;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -76,11 +76,6 @@ class EditNotePageState extends State<EditNotePage> {
     }
   }
 
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
-  }
-
   @override
   void dispose() {
     _titleController.dispose();
@@ -92,25 +87,18 @@ class EditNotePageState extends State<EditNotePage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    updated = false;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.note.id != null) {
       _title = 'Edit Note';
     }
 
-    _titleController = TextEditingController(text: widget.note.title);
-    _commentsController = TextEditingController(text: widget.note.comments);
+    _titleController.text = widget.note.title;
+    _commentsController.text = widget.note.comments;
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -123,7 +111,9 @@ class EditNotePageState extends State<EditNotePage> {
             child: Form(
                 key: _formKey,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
-                onWillPop: _onBackPressed,
+                onWillPop: updated
+                    ? () => onBackPressed(context)
+                    : () => Future(() => true),
                 child: Container(
                     padding: const EdgeInsets.all(16.0),
                     constraints: const BoxConstraints(maxWidth: 900),

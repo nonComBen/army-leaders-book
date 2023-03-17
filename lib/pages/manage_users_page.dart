@@ -12,7 +12,7 @@ import '../widgets/formatted_text_button.dart';
 
 class ManageUsersPage extends StatefulWidget {
   const ManageUsersPage(
-      {Key key, @required this.userId, @required this.soldiers})
+      {Key? key, required this.userId, required this.soldiers})
       : super(key: key);
 
   final String userId;
@@ -25,7 +25,7 @@ class ManageUsersPage extends StatefulWidget {
 }
 
 class _ManageUsersPageState extends State<ManageUsersPage> {
-  List<Soldier> _soldiers;
+  List<Soldier> _soldiers = [];
   final _firestore = FirebaseFirestore.instance;
 
   void _transferOwnership(Soldier soldier) {
@@ -64,7 +64,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                                     ),
                                   ))
                               .toList(),
-                          onChanged: (value) {
+                          onChanged: (dynamic value) {
                             refresh(() {
                               user = value;
                             });
@@ -125,7 +125,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                                         ),
                                       ))
                                   .toList(),
-                              onChanged: (value) {
+                              onChanged: (dynamic value) {
                                 refresh(() {
                                   user = value;
                                 });
@@ -156,7 +156,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
     }
   }
 
-  void confirmDelete(Soldier soldier, String userId) {
+  void confirmDelete(Soldier soldier, String? userId) {
     var title = const Text('Remove Users');
     var content = const Text(
         'Are you sure you want to remove this user\'s access to this Soldier\'s records?');
@@ -172,7 +172,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
     );
   }
 
-  void deleteUser(Soldier soldier, String userId) {
+  void deleteUser(Soldier soldier, String? userId) {
     var users = soldier.users;
     users.removeWhere((element) => element == userId);
     _firestore.collection('soldiers').doc(soldier.id).update({'users': users});
@@ -206,74 +206,76 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
-            primary: true,
-            shrinkWrap: true,
-            itemCount: _soldiers.length,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  Card(
-                    child: ListTile(
-                        trailing: _soldiers[index].users.length > 1
-                            ? IconButton(
-                                icon: const Icon(
-                                    Icons.arrow_circle_right_outlined),
-                                onPressed: () {
-                                  _transferOwnership(_soldiers[index]);
-                                },
-                              )
-                            : null,
-                        title: Text(
-                            '${_soldiers[index].rank} ${_soldiers[index].lastName}, ${_soldiers[index].firstName}')),
-                  ),
-                  ListView.builder(
-                      itemCount: _soldiers[index]
-                          .users
-                          .where((element) => element != widget.userId)
-                          .length,
-                      primary: false,
-                      shrinkWrap: true,
-                      itemBuilder: (context, i) {
-                        var users = _soldiers[index]
-                            .users
-                            .where((element) => element != widget.userId)
-                            .toList();
-                        return StreamBuilder(
-                            stream: _firestore
-                                .collection('users')
-                                .doc(users[i])
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              switch (snapshot.connectionState) {
-                                case ConnectionState.waiting:
-                                  return const Card(
-                                    child: CenterProgressIndicator(),
-                                  );
-                                default:
-                                  return Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        16.0, 8.0, 8.0, 8.0),
-                                    child: Card(
-                                      child: ListTile(
-                                        title: Text(
-                                            '${snapshot.data['rank']} ${snapshot.data['userName']}'),
-                                        subtitle: Text(users[i]),
-                                        trailing: IconButton(
-                                          icon: const Icon(Icons.delete),
-                                          onPressed: () {
-                                            confirmDelete(
-                                                _soldiers[index], users[i]);
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                              }
-                            });
-                      })
-                ],
-              );
-            }),
+          primary: true,
+          shrinkWrap: true,
+          itemCount: _soldiers.length,
+          itemBuilder: (context, index) {
+            return Column(
+              children: [
+                Card(
+                  child: ListTile(
+                      trailing: _soldiers[index].users.length > 1
+                          ? IconButton(
+                              icon:
+                                  const Icon(Icons.arrow_circle_right_outlined),
+                              onPressed: () {
+                                _transferOwnership(_soldiers[index]);
+                              },
+                            )
+                          : null,
+                      title: Text(
+                          '${_soldiers[index].rank} ${_soldiers[index].lastName}, ${_soldiers[index].firstName}')),
+                ),
+                ListView.builder(
+                  itemCount: _soldiers[index]
+                      .users
+                      .where((element) => element != widget.userId)
+                      .length,
+                  primary: false,
+                  shrinkWrap: true,
+                  itemBuilder: (context, i) {
+                    var users = _soldiers[index]
+                        .users
+                        .where((element) => element != widget.userId)
+                        .toList();
+                    return StreamBuilder<DocumentSnapshot>(
+                      stream: _firestore
+                          .collection('users')
+                          .doc(users[i])
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.waiting:
+                            return const Card(
+                              child: CenterProgressIndicator(),
+                            );
+                          default:
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  16.0, 8.0, 8.0, 8.0),
+                              child: Card(
+                                child: ListTile(
+                                  title: Text(
+                                      '${snapshot.data!['rank']} ${snapshot.data!['userName']}'),
+                                  subtitle: Text(users[i]),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () {
+                                      confirmDelete(_soldiers[index], users[i]);
+                                    },
+                                  ),
+                                ),
+                              ),
+                            );
+                        }
+                      },
+                    );
+                  },
+                )
+              ],
+            );
+          },
+        ),
       ),
     );
   }

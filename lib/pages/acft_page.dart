@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,13 +16,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../auth_provider.dart';
 import '../models/acft.dart';
 import 'editPages/edit_acft_page.dart';
-import '../providers/notifications_plugin_provider.dart';
 import '../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../models/setting.dart';
 import 'uploadPages/upload_acft_page.dart';
 import '../pdf/acft_pdf.dart';
 import '../providers/tracking_provider.dart';
@@ -31,7 +28,7 @@ import '../widgets/anon_warning_banner.dart';
 
 class AcftPage extends StatefulWidget {
   const AcftPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/acft-page';
@@ -41,7 +38,7 @@ class AcftPage extends StatefulWidget {
 }
 
 class AcftPageState extends State<AcftPage> {
-  int _sortColumnIndex,
+  int _sortColumnIndex = 0,
       deadliftAve = 0,
       powerThrowAve = 0,
       puAve = 0,
@@ -49,22 +46,20 @@ class AcftPageState extends State<AcftPage> {
       plkAve = 0,
       runAve = 0,
       totalAve = 0,
-      overdueDays,
-      amberDays;
+      overdueDays = 180,
+      amberDays = 150;
   bool _sortAscending = true,
       _adLoaded = false,
-      isSubscribed,
+      isSubscribed = false,
       notificationsRefreshed = false,
       isInitial = true;
-  String _userId;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  QuerySnapshot snapshot;
-  BannerAd myBanner;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
+  String? _userId;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  late SharedPreferences prefs;
+  QuerySnapshot? snapshot;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -72,15 +67,8 @@ class AcftPageState extends State<AcftPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
+    _userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
 
     if (!_adLoaded && !isSubscribed) {
       bool trackingAllowed =
@@ -101,7 +89,7 @@ class AcftPageState extends State<AcftPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -115,30 +103,17 @@ class AcftPageState extends State<AcftPage> {
   @override
   void initState() {
     super.initState();
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
-    overdueDays = 180;
-    amberDays = 150;
 
     myBanner = BannerAd(
-        adUnitId: kIsWeb
-            ? ''
-            : Platform.isAndroid
-                ? 'ca-app-pub-2431077176117105/1369522276'
-                : 'ca-app-pub-2431077176117105/9894231072',
-        size: AdSize.banner,
-        request: const AdRequest(),
-        listener: const BannerAdListener());
-
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+      adUnitId: kIsWeb
+          ? ''
+          : Platform.isAndroid
+              ? 'ca-app-pub-2431077176117105/1369522276'
+              : 'ca-app-pub-2431077176117105/9894231072',
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: const BannerAdListener(),
+    );
   }
 
   void initialize() async {
@@ -161,7 +136,7 @@ class AcftPageState extends State<AcftPage> {
         .collection('settings')
         .where('owner', isEqualTo: _userId)
         .get();
-    DocumentSnapshot doc = snapshot.docs[0];
+    DocumentSnapshot doc = snapshot!.docs[0];
     setState(() {
       overdueDays = doc['acftMonths'] * 30;
       amberDays = overdueDays - 30;
@@ -173,79 +148,6 @@ class AcftPageState extends State<AcftPage> {
     _subscriptionUsers.cancel();
     myBanner?.dispose();
     super.dispose();
-  }
-
-  void refreshNotifications() async {
-    int monthsDue = 6;
-    List<dynamic> daysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      monthsDue = setting.acftMonths ?? 6;
-      daysBefore = setting.acftNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending.where((pr) => pr.payload == 'ACFT').toList();
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    int startingId = prefs.getInt('runningId') ?? 0;
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a['date'].toString().compareTo(b['date'].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      if (i == 0) {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      } else if (docs[i]['date'] == docs[i - 1]['date']) {
-        dates.last[0] =
-            '${dates.last[0]}, ${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      } else {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                'ACFT(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                androidAllowWhileIdle: true,
-                payload: 'ACFT',
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
   }
 
   _uploadExcel(BuildContext context) {
@@ -326,7 +228,7 @@ class AcftPageState extends State<AcftPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String path, location;
@@ -339,7 +241,7 @@ class AcftPageState extends State<AcftPage> {
       path = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$path/acftStats.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -395,7 +297,7 @@ class AcftPageState extends State<AcftPage> {
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
     AcftsPdf pdf = AcftsPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -457,15 +359,18 @@ class AcftPageState extends State<AcftPage> {
     if (_selectedDocuments.length != 1) {
       //show snack bar requiring one item selected
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+        const SnackBar(content: Text('You must select exactly one record')),
+      );
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditAcftPage(
-                  acft: Acft.fromSnapshot(_selectedDocuments[0]),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditAcftPage(
+          acft: Acft.fromSnapshot(_selectedDocuments[0]),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
@@ -474,7 +379,7 @@ class AcftPageState extends State<AcftPage> {
         MaterialPageRoute(
             builder: (context) => EditAcftPage(
                   acft: Acft(
-                    owner: _userId,
+                    owner: _userId!,
                     users: [_userId],
                   ),
                 )));
@@ -497,27 +402,27 @@ class AcftPageState extends State<AcftPage> {
     totalAve = 0;
     for (DocumentSnapshot doc in filteredDocs) {
       if (doc['deadliftScore'] != 0) {
-        deadliftAve += doc['deadliftScore'];
+        deadliftAve += doc['deadliftScore'] as int;
         deadlift++;
       }
       if (doc['powerThrowScore'] != 0) {
-        powerThrowAve += doc['powerThrowScore'];
+        powerThrowAve += doc['powerThrowScore'] as int;
         powerThrow++;
       }
       if (doc['puScore'] != 0) {
-        puAve += doc['puScore'];
+        puAve += doc['puScore'] as int;
         pu++;
       }
       if (doc['dragScore'] != 0) {
-        dragAve += doc['dragScore'];
+        dragAve += doc['dragScore'] as int;
         drag++;
       }
       if (doc['legTuckScore'] != 0) {
-        plkAve += doc['legTuckScore'];
+        plkAve += doc['legTuckScore'] as int;
         plank++;
       }
       if (doc['runScore'] != 0) {
-        runAve += doc['runScore'];
+        runAve += doc['runScore'] as int;
         run++;
       }
       if (doc['deadliftScore'] != 0 &&
@@ -526,7 +431,7 @@ class AcftPageState extends State<AcftPage> {
           doc['dragScore'] != 0 &&
           doc['legTuckScore'] != 0 &&
           doc['runScore'] != 0) {
-        totalAve += doc['total'];
+        totalAve += doc['total'] as int;
         total++;
       }
     }
@@ -607,7 +512,7 @@ class AcftPageState extends State<AcftPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -828,9 +733,9 @@ class AcftPageState extends State<AcftPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -973,7 +878,7 @@ class AcftPageState extends State<AcftPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -990,11 +895,11 @@ class AcftPageState extends State<AcftPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

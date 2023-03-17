@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/working_eval.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadWorkingEvalsPage extends StatefulWidget {
   const UploadWorkingEvalsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,9 +24,9 @@ class UploadWorkingEvalsPage extends StatefulWidget {
 }
 
 class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       duties,
       emphasis,
       appointed,
@@ -42,14 +43,14 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -64,20 +65,20 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
       duties =
-          columnHeaders.contains('Duty Description') ? 'Duty Description' : '';
+          columnHeaders!.contains('Duty Description') ? 'Duty Description' : '';
       emphasis =
-          columnHeaders.contains('Special Emphasis') ? 'Special Emphasis' : '';
+          columnHeaders!.contains('Special Emphasis') ? 'Special Emphasis' : '';
       appointed =
-          columnHeaders.contains('Appointed Duties') ? 'Appointed Duties' : '';
-      character = columnHeaders.contains('Character') ? 'Character' : '';
-      presence = columnHeaders.contains('Presence') ? 'Presence' : '';
-      intellect = columnHeaders.contains('Intellect') ? 'Intellect' : '';
-      leads = columnHeaders.contains('Leads') ? 'Leads' : '';
-      develops = columnHeaders.contains('Develops') ? 'Develops' : '';
-      achieves = columnHeaders.contains('Achieves') ? 'Achieves' : '';
-      performance = columnHeaders.contains('Performance') ? 'Performance' : '';
+          columnHeaders!.contains('Appointed Duties') ? 'Appointed Duties' : '';
+      character = columnHeaders!.contains('Character') ? 'Character' : '';
+      presence = columnHeaders!.contains('Presence') ? 'Presence' : '';
+      intellect = columnHeaders!.contains('Intellect') ? 'Intellect' : '';
+      leads = columnHeaders!.contains('Leads') ? 'Leads' : '';
+      develops = columnHeaders!.contains('Develops') ? 'Develops' : '';
+      achieves = columnHeaders!.contains('Achieves') ? 'Achieves' : '';
+      performance = columnHeaders!.contains('Performance') ? 'Performance' : '';
     });
   }
 
@@ -93,10 +94,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort;
+        String? rank, name, firstName, section, rankSort;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -167,7 +168,7 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
     achieves = '';
     performance = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -205,7 +206,7 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -226,10 +227,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -245,10 +246,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Daily Duties and Scope'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: duties,
@@ -264,10 +265,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Areas of Special Emphasis'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: emphasis,
@@ -283,10 +284,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Appointed Duties'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: appointed,
@@ -302,10 +303,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Character'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: character,
@@ -321,10 +322,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Presence'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: presence,
@@ -340,10 +341,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Intellect'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: intellect,
@@ -358,10 +359,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Leads'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: leads,
@@ -377,10 +378,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Develops'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: develops,
@@ -396,10 +397,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Achieves'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: achieves,
@@ -415,10 +416,10 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Overall Performance'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: performance,
@@ -432,11 +433,12 @@ class UploadWorkingEvalsPageState extends State<UploadWorkingEvalsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Working Evals',
                   )
                 ],

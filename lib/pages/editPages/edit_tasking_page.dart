@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/tasking.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditTaskingPage extends StatefulWidget {
   const EditTaskingPage({
-    Key key,
-    @required this.tasking,
+    Key? key,
+    required this.tasking,
   }) : super(key: key);
   final Tasking tasking;
 
@@ -26,29 +27,28 @@ class EditTaskingPage extends StatefulWidget {
 
 class EditTaskingPageState extends State<EditTaskingPage> {
   String _title = 'New Tasking';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _startController;
-  TextEditingController _endController;
-  TextEditingController _typeController;
-  TextEditingController _commentsController;
-  TextEditingController _locController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated, saveToCalendar, updateCalendar;
-  DateTime _start, _end;
-  RegExp regExp;
+  final TextEditingController _startController = TextEditingController();
+  final TextEditingController _endController = TextEditingController();
+  final TextEditingController _typeController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+  final TextEditingController _locController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _start, _end;
 
   Future<void> _pickStart(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _start,
+          initialDate: _start!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -86,9 +86,9 @@ class EditTaskingPageState extends State<EditTaskingPage> {
   Future<void> _pickEnd(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _end,
+          initialDate: _end!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -124,7 +124,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -135,18 +135,18 @@ class EditTaskingPageState extends State<EditTaskingPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Tasking saveTasking = Tasking(
         id: widget.tasking.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         start: _startController.text,
         end: _endController.text,
         type: _typeController.text,
@@ -171,21 +171,21 @@ class EditTaskingPageState extends State<EditTaskingPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('taskings')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -193,7 +193,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -201,11 +201,6 @@ class EditTaskingPageState extends State<EditTaskingPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -221,11 +216,6 @@ class EditTaskingPageState extends State<EditTaskingPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.tasking.id != null) {
       _title = '${widget.tasking.rank} ${widget.tasking.name}';
     }
@@ -239,24 +229,20 @@ class EditTaskingPageState extends State<EditTaskingPage> {
     _owner = widget.tasking.owner;
     _users = widget.tasking.users;
 
-    _startController = TextEditingController(text: widget.tasking.start);
-    _endController = TextEditingController(text: widget.tasking.end);
-    _typeController = TextEditingController(text: widget.tasking.type);
-    _commentsController = TextEditingController(text: widget.tasking.comments);
-    _locController = TextEditingController(text: widget.tasking.location ?? '');
-
-    removeSoldiers = false;
-    updated = false;
+    _startController.text = widget.tasking.start;
+    _endController.text = widget.tasking.end;
+    _typeController.text = widget.tasking.type;
+    _commentsController.text = widget.tasking.comments;
+    _locController.text = widget.tasking.location;
 
     _start = DateTime.tryParse(widget.tasking.start) ?? DateTime.now();
     _end = DateTime.tryParse(widget.tasking.end) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -265,7 +251,9 @@ class EditTaskingPageState extends State<EditTaskingPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -304,15 +292,15 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -320,7 +308,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -328,26 +316,26 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -402,7 +390,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -413,7 +401,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                                             _pickStart(context);
                                           })),
                                   onChanged: (value) {
-                                    if (regExp.hasMatch(value)) {
+                                    if (isValidDate(value)) {
                                       _start =
                                           DateTime.tryParse(value) ?? _start;
                                     }
@@ -428,7 +416,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -439,7 +427,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                                             _pickEnd(context);
                                           })),
                                   onChanged: (value) {
-                                    if (regExp.hasMatch(value)) {
+                                    if (isValidDate(value)) {
                                       _end = DateTime.tryParse(value) ?? _end;
                                     }
                                     updated = true;
@@ -465,7 +453,7 @@ class EditTaskingPageState extends State<EditTaskingPage> {
                           FormattedElevatedButton(
                             onPressed: () {
                               if (_endController.text != '' &&
-                                  _end.isBefore(_start)) {
+                                  _end!.isBefore(_start!)) {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(const SnackBar(
                                   content:

@@ -2,18 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
 class UserObj {
-  String userId;
+  String? userId;
   String userRank;
   String userEmail;
   String userUnit;
   String userName;
-  String subToken;
+  String? subToken;
   bool adFree;
   bool tosAgree;
-  DateTime agreeDate;
+  DateTime? agreeDate;
   bool updatedUserArray;
-  DateTime createdDate;
-  DateTime lastLoginDate;
+  DateTime? createdDate;
+  DateTime? lastLoginDate;
 
   UserObj({
     this.userId,

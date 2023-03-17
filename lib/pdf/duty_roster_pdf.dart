@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:leaders_book/methods/download_methods.dart';
 import 'package:pdf/pdf.dart';
@@ -6,9 +5,9 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DutyRosterPdf {
-  DutyRosterPdf(
-    this.documents,
-  );
+  DutyRosterPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 

@@ -23,8 +23,8 @@ import '../widgets/anon_warning_banner.dart';
 
 class WorkingAwardsPage extends StatefulWidget {
   const WorkingAwardsPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -35,12 +35,12 @@ class WorkingAwardsPage extends StatefulWidget {
 }
 
 class WorkingAwardsPageState extends State<WorkingAwardsPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscription;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscription;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -69,7 +69,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -79,11 +79,6 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
   void initState() {
     super.initState();
 
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('workingAwards')
         .where('owner', isEqualTo: widget.userId)
@@ -182,7 +177,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -195,7 +190,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/workingAwards.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -303,7 +298,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -368,9 +363,9 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -493,7 +488,7 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -510,11 +505,11 @@ class WorkingAwardsPageState extends State<WorkingAwardsPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

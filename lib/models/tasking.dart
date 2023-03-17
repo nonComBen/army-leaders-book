@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class Tasking {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -17,14 +16,12 @@ class Tasking {
   String type;
   String comments;
   String location;
-  String calendarId;
-  String eventId;
 
   Tasking({
     this.id,
     this.soldierId,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
     this.name = '',
     this.firstName = '',
@@ -35,8 +32,6 @@ class Tasking {
     this.type = '',
     this.comments = '',
     this.location = '',
-    this.calendarId,
-    this.eventId,
   });
 
   Map<String, dynamic> toMap() {
@@ -54,8 +49,6 @@ class Tasking {
     map['type'] = type;
     map['comments'] = comments;
     map['location'] = location;
-    map['calendarId'] = null;
-    map['eventId'] = null;
 
     return map;
   }
@@ -88,8 +81,6 @@ class Tasking {
       type: doc['type'],
       comments: doc['comments'],
       location: location,
-      eventId: null,
-      calendarId: null,
     );
   }
 }

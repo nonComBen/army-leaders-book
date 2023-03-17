@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/mil_license.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadMilLicensePage extends StatefulWidget {
   const UploadMilLicensePage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,24 +24,24 @@ class UploadMilLicensePage extends StatefulWidget {
 }
 
 class UploadMilLicensePageState extends State<UploadMilLicensePage> {
-  FirebaseFirestore firestore;
+  late FirebaseFirestore firestore;
 
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, date, exp, license, restrictions, vehicles, path;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, date, exp, license, restrictions, vehicles, path;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -55,13 +56,13 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
-      exp = columnHeaders.contains('Expiration Date') ? 'Expiration Date' : '';
-      license = columnHeaders.contains('License #') ? 'License #' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      exp = columnHeaders!.contains('Expiration Date') ? 'Expiration Date' : '';
+      license = columnHeaders!.contains('License #') ? 'License #' : '';
       restrictions =
-          columnHeaders.contains('Restrictions') ? 'Restrictions' : '';
-      vehicles = columnHeaders.contains('Qualified Vehicles')
+          columnHeaders!.contains('Restrictions') ? 'Restrictions' : '';
+      vehicles = columnHeaders!.contains('Qualified Vehicles')
           ? 'Qualified Vehicles'
           : '';
     });
@@ -79,11 +80,11 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -149,7 +150,7 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
     restrictions = '';
     vehicles = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -187,7 +188,7 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -208,10 +209,10 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -226,10 +227,10 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -245,10 +246,10 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Expiration Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: exp,
@@ -264,10 +265,10 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'License No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: license,
@@ -283,10 +284,10 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Restrictions'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: restrictions,
@@ -302,10 +303,10 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Qualified Vehicles'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: vehicles,
@@ -319,11 +320,12 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Military Licenses',
                   )
                 ],

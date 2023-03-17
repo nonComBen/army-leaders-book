@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class WorkingAward {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   String rank;
   String name;
@@ -20,13 +19,13 @@ class WorkingAward {
   WorkingAward({
     this.id,
     this.soldierId,
-    @required this.owner,
+    required this.owner,
     this.rank = '',
     this.name = '',
     this.firstName = '',
     this.section = '',
     this.rankSort = '',
-    this.awardReason,
+    this.awardReason = 'Achievement',
     this.ach1 = '',
     this.ach2 = '',
     this.ach3 = '',

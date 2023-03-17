@@ -11,15 +11,15 @@ enum AuthStatus {
 
 class RootProvider with ChangeNotifier {
   final AuthService auth;
-  AuthStatus _currentAuthStatus;
+  AuthStatus? _currentAuthStatus;
   RootProvider({
-    this.auth,
+    required this.auth,
   }) {
     _currentAuthStatus =
         auth.isSignedIn() ? AuthStatus.localAuthSignIn : AuthStatus.notSignedIn;
   }
 
-  AuthStatus get authStatus {
+  AuthStatus? get authStatus {
     return _currentAuthStatus;
   }
 

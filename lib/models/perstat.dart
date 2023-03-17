@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class Perstat {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -16,15 +15,13 @@ class Perstat {
   String end;
   String type;
   String comments;
-  String eventId;
-  String calendarId;
   String location;
 
   Perstat({
     this.id,
     this.soldierId,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
     this.name = '',
     this.firstName = '',
@@ -34,8 +31,6 @@ class Perstat {
     this.end = '',
     this.type = 'Leave',
     this.comments = '',
-    this.eventId,
-    this.calendarId,
     this.location = '',
   });
 
@@ -53,8 +48,6 @@ class Perstat {
     map['end'] = end;
     map['type'] = type;
     map['comments'] = comments;
-    map['eventId'] = eventId;
-    map['calendarId'] = null;
     map['location'] = location;
 
     return map;
@@ -87,8 +80,6 @@ class Perstat {
       end: doc['end'],
       type: doc['type'],
       comments: doc['comments'],
-      eventId: null,
-      calendarId: null,
       location: location,
     );
   }

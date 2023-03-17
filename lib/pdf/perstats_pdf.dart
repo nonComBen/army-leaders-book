@@ -5,9 +5,9 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PerstatsPdf {
-  PerstatsPdf(
-    this.documents,
-  );
+  PerstatsPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 

@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/working_award.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadWorkingAwardsPage extends StatefulWidget {
   const UploadWorkingAwardsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,22 +24,22 @@ class UploadWorkingAwardsPage extends StatefulWidget {
 }
 
 class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, reason, ach1, ach2, ach3, ach4, citation, path;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, reason, ach1, ach2, ach3, ach4, citation, path;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -53,13 +54,13 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      reason = columnHeaders.contains('Award Reason') ? 'Award Reason' : '';
-      ach1 = columnHeaders.contains('Achievement 1') ? 'Achievement 1' : '';
-      ach2 = columnHeaders.contains('Achievement 2') ? 'Achievement 2' : '';
-      ach3 = columnHeaders.contains('Achievement 3') ? 'Achievement 3' : '';
-      ach4 = columnHeaders.contains('Achievement 4') ? 'Achievement 4' : '';
-      citation = columnHeaders.contains('Citation') ? 'Citation' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      reason = columnHeaders!.contains('Award Reason') ? 'Award Reason' : '';
+      ach1 = columnHeaders!.contains('Achievement 1') ? 'Achievement 1' : '';
+      ach2 = columnHeaders!.contains('Achievement 2') ? 'Achievement 2' : '';
+      ach3 = columnHeaders!.contains('Achievement 3') ? 'Achievement 3' : '';
+      ach4 = columnHeaders!.contains('Achievement 4') ? 'Achievement 4' : '';
+      citation = columnHeaders!.contains('Citation') ? 'Citation' : '';
     });
   }
 
@@ -75,7 +76,7 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> reasons = [
         'Achievement',
@@ -88,7 +89,7 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
       ];
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort;
+        String? rank, name, firstName, section, rankSort;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -147,7 +148,7 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
     ach4 = '';
     citation = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -185,7 +186,7 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -206,10 +207,10 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -225,10 +226,10 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Award Reason'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: reason,
@@ -244,10 +245,10 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Achievement #1'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: ach1,
@@ -263,10 +264,10 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Achievement #2'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: ach2,
@@ -282,10 +283,10 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Achievement #3'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: ach3,
@@ -301,10 +302,10 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Achievement #4'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: ach4,
@@ -320,10 +321,10 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Citation'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: citation,
@@ -337,11 +338,12 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Working Awards',
                   )
                 ],

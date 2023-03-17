@@ -11,8 +11,8 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class EditPhonePage extends StatefulWidget {
   const EditPhonePage({
-    Key key,
-    @required this.phone,
+    Key? key,
+    required this.phone,
   }) : super(key: key);
   final Phone phone;
 
@@ -22,19 +22,19 @@ class EditPhonePage extends StatefulWidget {
 
 class EditPhonePageState extends State<EditPhonePage> {
   String _title = 'New Phone';
-  bool updated;
-  FirebaseFirestore firestore;
+  bool updated = false;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _titleController;
-  TextEditingController _phoneController;
-  TextEditingController _nameController;
-  TextEditingController _locationController;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -80,11 +80,6 @@ class EditPhonePageState extends State<EditPhonePage> {
     }
   }
 
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
-  }
-
   @override
   void dispose() {
     _titleController.dispose();
@@ -98,27 +93,20 @@ class EditPhonePageState extends State<EditPhonePage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    updated = false;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.phone.id != null) {
       _title = 'Edit Phone';
     }
 
-    _titleController = TextEditingController(text: widget.phone.title);
-    _nameController = TextEditingController(text: widget.phone.name);
-    _phoneController = TextEditingController(text: widget.phone.phone);
-    _locationController = TextEditingController(text: widget.phone.location);
+    _titleController.text = widget.phone.title;
+    _nameController.text = widget.phone.name;
+    _phoneController.text = widget.phone.phone;
+    _locationController.text = widget.phone.location;
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -127,7 +115,9 @@ class EditPhonePageState extends State<EditPhonePage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),

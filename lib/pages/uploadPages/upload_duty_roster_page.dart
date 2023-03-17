@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/duty.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadDutyRosterPage extends StatefulWidget {
   const UploadDutyRosterPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,22 +24,22 @@ class UploadDutyRosterPage extends StatefulWidget {
 }
 
 class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, start, end, title, comments, path, location;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, start, end, title, comments, path, location;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -53,12 +54,12 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      start = columnHeaders.contains('Start Date') ? 'Start Date' : '';
-      end = columnHeaders.contains('End Date') ? 'End Date' : '';
-      title = columnHeaders.contains('Duty') ? 'Duty' : '';
-      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
-      location = columnHeaders.contains('Location') ? 'Location' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      start = columnHeaders!.contains('Start Date') ? 'Start Date' : '';
+      end = columnHeaders!.contains('End Date') ? 'End Date' : '';
+      title = columnHeaders!.contains('Duty') ? 'Duty' : '';
+      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
+      location = columnHeaders!.contains('Location') ? 'Location' : '';
     });
   }
 
@@ -74,11 +75,11 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -134,7 +135,7 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
     comments = '';
     location = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -172,7 +173,7 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -193,10 +194,10 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -212,10 +213,10 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Duty Title'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: title,
@@ -231,10 +232,10 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Location'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: location,
@@ -250,10 +251,10 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Start Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: start,
@@ -269,10 +270,10 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'End Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: end,
@@ -288,10 +289,10 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: comments,
@@ -305,11 +306,12 @@ class UploadDutyRosterPageState extends State<UploadDutyRosterPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Duty Roster',
                   )
                 ],

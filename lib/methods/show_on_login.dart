@@ -8,11 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Widget headerText(String text) {
   return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Text(
-        text,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-      ));
+    padding: const EdgeInsets.all(4.0),
+    child: Text(
+      text,
+      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+    ),
+  );
 }
 
 Widget normalText(String text) {
@@ -25,7 +26,7 @@ Widget normalText(String text) {
   );
 }
 
-Future<void> showTos(BuildContext context, String userId) async {
+Future<void> showTos(BuildContext context, String? userId) async {
   Widget title = const Text('Terms and Conditions');
   Widget content = SingleChildScrollView(
     child: Column(
@@ -263,13 +264,14 @@ void showChangeLog(BuildContext context) async {
   );
 }
 
-showNiprWarning(BuildContext context, SharedPreferences prefs) async {
+showNiprWarning(BuildContext context, SharedPreferences? prefs) async {
   bool dontShow = false;
   await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return StatefulBuilder(builder: (ctx, refresh) {
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (ctx, refresh) {
           return AlertDialog(
             title: const Text('Government Computer Warning'),
             content: Column(
@@ -283,7 +285,7 @@ showNiprWarning(BuildContext context, SharedPreferences prefs) async {
                     value: dontShow,
                     onChanged: (value) {
                       refresh(() {
-                        dontShow = value;
+                        dontShow = value!;
                       });
                     }),
               ],
@@ -292,12 +294,14 @@ showNiprWarning(BuildContext context, SharedPreferences prefs) async {
               FormattedTextButton(
                 label: 'OK',
                 onPressed: () {
-                  prefs.setBool('niprWarning', dontShow);
+                  prefs!.setBool('niprWarning', dontShow);
                   Navigator.of(ctx).pop();
                 },
               )
             ],
           );
-        });
-      });
+        },
+      );
+    },
+  );
 }

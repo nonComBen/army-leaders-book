@@ -1,8 +1,9 @@
 import 'package:intl/intl.dart';
 
+import 'validate.dart';
+
 bool isOverdue(String date, int days) {
-  RegExp regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
-  if (!regExp.hasMatch(date)) {
+  if (!isValidDate(date)) {
     return false;
   }
   var dateTime = DateTime.parse('$date 00:00:00');

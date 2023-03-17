@@ -1,4 +1,8 @@
-int getHrpScore(int pushups, int ageGroup, bool male) {
+int getHrpScore({
+  required int pushups,
+  required int ageGroup,
+  required bool male,
+}) {
   if (male) {
     if (pushups > 60) return 100;
     if (pushups < 5) return 0;

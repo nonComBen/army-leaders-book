@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/duty.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditDutyRosterPage extends StatefulWidget {
   const EditDutyRosterPage({
-    Key key,
-    @required this.duty,
+    Key? key,
+    required this.duty,
   }) : super(key: key);
   final Duty duty;
 
@@ -26,29 +27,28 @@ class EditDutyRosterPage extends StatefulWidget {
 
 class EditDutyRosterPageState extends State<EditDutyRosterPage> {
   String _title = 'New Duty';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _startController;
-  TextEditingController _endController;
-  TextEditingController _dutyController;
-  TextEditingController _commentsController;
-  TextEditingController _locController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated, saveToCalendar, updateCalendar;
-  DateTime _start, _end;
-  RegExp regExp;
+  final TextEditingController _startController = TextEditingController();
+  final TextEditingController _endController = TextEditingController();
+  final TextEditingController _dutyController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+  final TextEditingController _locController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _start, _end;
 
   Future<void> _pickStart(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _start,
+          initialDate: _start!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -86,9 +86,9 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
   Future<void> _pickEnd(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _end,
+          initialDate: _end!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -124,7 +124,7 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -135,18 +135,18 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Duty saveDuty = Duty(
         id: widget.duty.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         duty: _dutyController.text,
         start: _startController.text,
         end: _endController.text,
@@ -171,21 +171,21 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('dutyRoster')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -193,7 +193,7 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -201,11 +201,6 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -221,11 +216,6 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.duty.id != null) {
       _title = '${widget.duty.rank} ${widget.duty.name}';
     }
@@ -239,255 +229,241 @@ class EditDutyRosterPageState extends State<EditDutyRosterPage> {
     _owner = widget.duty.owner;
     _users = widget.duty.users;
 
-    _startController = TextEditingController(text: widget.duty.start);
-    _endController = TextEditingController(text: widget.duty.end);
-    _dutyController = TextEditingController(text: widget.duty.duty);
-    _commentsController = TextEditingController(text: widget.duty.comments);
-    _locController = TextEditingController(text: widget.duty.location ?? '');
-
-    removeSoldiers = false;
-    updated = false;
+    _startController.text = widget.duty.start;
+    _endController.text = widget.duty.end;
+    _dutyController.text = widget.duty.duty;
+    _commentsController.text = widget.duty.comments;
+    _locController.text = widget.duty.location;
 
     _start = DateTime.tryParse(widget.duty.start) ?? DateTime.now();
     _end = DateTime.tryParse(widget.duty.end) ?? DateTime.now();
-
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('users', arrayContains: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers[index]
-                                                      ['firstName'];
-                                                  _section = soldiers[index]
-                                                      ['section'];
-                                                  _rankSort = soldiers[index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  _owner =
-                                                      soldiers[index]['owner'];
-                                                  _users =
-                                                      soldiers[index]['users'];
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
-                                          );
-                                      }
-                                    }),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    8.0, 16.0, 8.0, 8.0),
-                                child: CheckboxListTile(
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: removeSoldiers,
-                                  title: const Text(
-                                      'Remove Soldiers already added'),
-                                  onChanged: (checked) {
-                                    _removeSoldiers(checked, user.uid);
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _dutyController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Duty Title',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _locController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Location',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _startController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Start Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickStart(context);
-                                          })),
-                                  onChanged: (value) {
-                                    if (regExp.hasMatch(value)) {
-                                      _start =
-                                          DateTime.tryParse(value) ?? _start;
-                                    }
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _endController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'End Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickEnd(context);
-                                          })),
-                                  onChanged: (value) {
-                                    if (regExp.hasMatch(value)) {
-                                      _end = DateTime.tryParse(value) ?? _end;
-                                    }
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 2,
-                              controller: _commentsController,
-                              enabled: true,
-                              decoration:
-                                  const InputDecoration(labelText: 'Comments'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          FormattedElevatedButton(
-                            onPressed: () {
-                              if (_endController.text != '' &&
-                                  _end.isBefore(_start)) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(const SnackBar(
-                                  content:
-                                      Text('End Date must be after Start Date'),
-                                ));
-                              } else {
-                                submit(context);
-                              }
+      key: _scaffoldState,
+      appBar: AppBar(
+        title: Text(_title),
+      ),
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width > 932 ? (width - 916) / 2 : 16),
+          child: Card(
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    if (user.isAnonymous) const AnonWarningBanner(),
+                    GridView.count(
+                      primary: false,
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 230
+                          : width > 700
+                              ? width / 230
+                              : width / 115,
+                      shrinkWrap: true,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FutureBuilder(
+                              future: firestore
+                                  .collection('soldiers')
+                                  .where('users', arrayContains: user.uid)
+                                  .get(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.waiting:
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  default:
+                                    allSoldiers = snapshot.data!.docs;
+                                    soldiers = removeSoldiers
+                                        ? lessSoldiers
+                                        : allSoldiers;
+                                    soldiers!.sort((a, b) => a['lastName']
+                                        .toString()
+                                        .compareTo(b['lastName'].toString()));
+                                    soldiers!.sort((a, b) => a['rankSort']
+                                        .toString()
+                                        .compareTo(b['rankSort'].toString()));
+                                    return DropdownButtonFormField<String>(
+                                      decoration: const InputDecoration(
+                                          labelText: 'Soldier'),
+                                      items: soldiers!.map((doc) {
+                                        return DropdownMenuItem<String>(
+                                          value: doc.id,
+                                          child: Text(
+                                              '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        int index = soldiers!.indexWhere(
+                                            (doc) => doc.id == value);
+                                        if (mounted) {
+                                          setState(() {
+                                            _soldierId = value;
+                                            _rank = soldiers![index]['rank'];
+                                            _lastName =
+                                                soldiers![index]['lastName'];
+                                            _firstName =
+                                                soldiers![index]['firstName'];
+                                            _section =
+                                                soldiers![index]['section'];
+                                            _rankSort = soldiers![index]
+                                                    ['rankSort']
+                                                .toString();
+                                            _owner = soldiers![index]['owner'];
+                                            _users = soldiers![index]['users'];
+                                            updated = true;
+                                          });
+                                        }
+                                      },
+                                      value: _soldierId,
+                                    );
+                                }
+                              }),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                          child: CheckboxListTile(
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: removeSoldiers,
+                            title: const Text('Remove Soldiers already added'),
+                            onChanged: (checked) {
+                              _removeSoldiers(checked, user.uid);
                             },
-                            text: widget.duty.id == null
-                                ? 'Add Duty'
-                                : 'Update Duty',
                           ),
-                        ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _dutyController,
+                            keyboardType: TextInputType.text,
+                            enabled: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Duty Title',
+                            ),
+                            onChanged: (value) {
+                              updated = true;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _locController,
+                            keyboardType: TextInputType.text,
+                            enabled: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Location',
+                            ),
+                            onChanged: (value) {
+                              updated = true;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _startController,
+                            keyboardType: TextInputType.datetime,
+                            enabled: true,
+                            validator: (value) =>
+                                isValidDate(value!) || value.isEmpty
+                                    ? null
+                                    : 'Date must be in yyyy-MM-dd format',
+                            decoration: InputDecoration(
+                                labelText: 'Start Date',
+                                suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickStart(context);
+                                    })),
+                            onChanged: (value) {
+                              if (isValidDate(value)) {
+                                _start = DateTime.tryParse(value) ?? _start;
+                              }
+                              updated = true;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _endController,
+                            keyboardType: TextInputType.datetime,
+                            enabled: true,
+                            validator: (value) =>
+                                isValidDate(value!) || value.isEmpty
+                                    ? null
+                                    : 'Date must be in yyyy-MM-dd format',
+                            decoration: InputDecoration(
+                                labelText: 'End Date',
+                                suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickEnd(context);
+                                    })),
+                            onChanged: (value) {
+                              if (isValidDate(value)) {
+                                _end = DateTime.tryParse(value) ?? _end;
+                              }
+                              updated = true;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 2,
+                        controller: _commentsController,
+                        enabled: true,
+                        decoration:
+                            const InputDecoration(labelText: 'Comments'),
+                        onChanged: (value) {
+                          updated = true;
+                        },
                       ),
-                    )),
+                    ),
+                    FormattedElevatedButton(
+                      onPressed: () {
+                        if (_endController.text != '' &&
+                            _end!.isBefore(_start!)) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text('End Date must be after Start Date'),
+                          ));
+                        } else {
+                          submit(context);
+                        }
+                      },
+                      text: widget.duty.id == null ? 'Add Duty' : 'Update Duty',
+                    ),
+                  ],
+                ),
               ),
-            )));
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/soldier.dart';
 import '../../methods/rank_sort.dart';
 import '../../widgets/anon_warning_banner.dart';
@@ -16,8 +17,8 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class EditSoldierPage extends StatefulWidget {
   const EditSoldierPage({
-    Key key,
-    @required this.soldier,
+    Key? key,
+    required this.soldier,
   }) : super(key: key);
   final Soldier soldier;
 
@@ -27,58 +28,83 @@ class EditSoldierPage extends StatefulWidget {
 
 class EditSoldierPageState extends State<EditSoldierPage> {
   String _title = 'New Soldier';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _rankController;
-  TextEditingController _lastNameController;
-  TextEditingController _firstNameController;
-  TextEditingController _miController;
-  TextEditingController _supervisorController;
-  TextEditingController _sectionController;
-  TextEditingController _dodIdController;
-  TextEditingController _dorController;
-  TextEditingController _mosController;
-  TextEditingController _paraLnController;
-  TextEditingController _reqMosController;
-  TextEditingController _dutyController;
-  TextEditingController _lossController;
-  TextEditingController _gainController;
-  TextEditingController _etsController;
-  TextEditingController _basdController;
-  TextEditingController _pebdController;
-  TextEditingController _nbcSuitController;
-  TextEditingController _nbcMaskController;
-  TextEditingController _nbcBootController;
-  TextEditingController _nbcGloveController;
-  TextEditingController _hatController;
-  TextEditingController _bootController;
-  TextEditingController _acuTopController;
-  TextEditingController _acuTrouserController;
-  TextEditingController _addressController;
-  TextEditingController _cityController;
-  TextEditingController _stateController;
-  TextEditingController _zipController;
-  TextEditingController _phoneController;
-  TextEditingController _workPhoneController;
-  TextEditingController _emailController;
-  TextEditingController _workEmailController;
-  TextEditingController _nokController;
-  TextEditingController _nokPhoneController;
-  TextEditingController _maritalStatusController;
-  TextEditingController _commentsController;
-  bool _promotable, updated, _assigned;
-  String _civEd, _milEd;
-  List<String> _civEds, _milEds;
-  DateTime _dorDate, _lossDate, _etsDate, _basdDate, _pebdDate, _gainDate;
-  RegExp regExp;
+  final TextEditingController _rankController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _miController = TextEditingController();
+  final TextEditingController _supervisorController = TextEditingController();
+  final TextEditingController _sectionController = TextEditingController();
+  final TextEditingController _dodIdController = TextEditingController();
+  final TextEditingController _dorController = TextEditingController();
+  final TextEditingController _mosController = TextEditingController();
+  final TextEditingController _paraLnController = TextEditingController();
+  final TextEditingController _reqMosController = TextEditingController();
+  final TextEditingController _dutyController = TextEditingController();
+  final TextEditingController _lossController = TextEditingController();
+  final TextEditingController _gainController = TextEditingController();
+  final TextEditingController _etsController = TextEditingController();
+  final TextEditingController _basdController = TextEditingController();
+  final TextEditingController _pebdController = TextEditingController();
+  final TextEditingController _nbcSuitController = TextEditingController();
+  final TextEditingController _nbcMaskController = TextEditingController();
+  final TextEditingController _nbcBootController = TextEditingController();
+  final TextEditingController _nbcGloveController = TextEditingController();
+  final TextEditingController _hatController = TextEditingController();
+  final TextEditingController _bootController = TextEditingController();
+  final TextEditingController _acuTopController = TextEditingController();
+  final TextEditingController _acuTrouserController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _zipController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _workPhoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _workEmailController = TextEditingController();
+  final TextEditingController _nokController = TextEditingController();
+  final TextEditingController _nokPhoneController = TextEditingController();
+  final TextEditingController _maritalStatusController =
+      TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+  bool _promotable = false, updated = false, _assigned = true;
+  String _civEd = '', _milEd = '';
+  final List<String> _civEds = [
+    '',
+    'GED',
+    'HS Diploma',
+    '30 Semester Hour',
+    '60 Semester Hours',
+    '90 Semester Hours',
+    'Associates',
+    'Bachelors',
+    'Masters',
+    'Doctorate',
+  ];
+  final List<String> _milEds = [
+    '',
+    'None',
+    'DLC1',
+    'BLC',
+    'DLC2',
+    'ALC',
+    'DLC3',
+    'SLC',
+    'DLC4',
+    'MLC',
+    'DLC5',
+    'SMA',
+  ];
+  DateTime? _dorDate, _lossDate, _etsDate, _basdDate, _pebdDate, _gainDate;
 
   Widget createField(
-      {String label,
-      TextEditingController controller,
-      TextInputType inputType}) {
+      {String? label,
+      TextEditingController? controller,
+      TextInputType? inputType}) {
     return Padding(
         padding: const EdgeInsets.all(8.0),
         child: TextFormField(
@@ -98,9 +124,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   Future<void> _pickDor(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dorDate,
+          initialDate: _dorDate!,
           firstDate: DateTime(1950),
           lastDate: DateTime(2050));
 
@@ -139,9 +165,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   Future<void> _pickLoss(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _lossDate,
+          initialDate: _lossDate!,
           firstDate: DateTime(1950),
           lastDate: DateTime(2050));
 
@@ -180,9 +206,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   Future<void> _pickEts(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _etsDate,
+          initialDate: _etsDate!,
           firstDate: DateTime(1950),
           lastDate: DateTime(2050));
 
@@ -220,9 +246,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   Future<void> _pickBasd(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _basdDate,
+          initialDate: _basdDate!,
           firstDate: DateTime(1950),
           lastDate: DateTime(2050));
 
@@ -261,9 +287,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   Future<void> _pickPebd(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _pebdDate,
+          initialDate: _pebdDate!,
           firstDate: DateTime(1950),
           lastDate: DateTime(2050));
 
@@ -302,9 +328,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   Future<void> _pickGain(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _gainDate,
+          initialDate: _gainDate!,
           firstDate: DateTime(1950),
           lastDate: DateTime(2050));
 
@@ -341,7 +367,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -423,11 +449,6 @@ class EditSoldierPageState extends State<EditSoldierPage> {
     }
   }
 
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
-  }
-
   @override
   void dispose() {
     _rankController.dispose();
@@ -474,92 +495,49 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   void initState() {
     super.initState();
 
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    firestore = FirebaseFirestore.instance;
-
-    _civEds = [];
-    _civEds.add('');
-    _civEds.add('GED');
-    _civEds.add('HS Diploma');
-    _civEds.add('30 Semester Hours');
-    _civEds.add('60 Semester Hours');
-    _civEds.add('90 Semester Hours');
-    _civEds.add('Associates');
-    _civEds.add('Bachelors');
-    _civEds.add('Masters');
-    _civEds.add('Doctorate');
-
-    _milEds = [];
-    _milEds.add('');
-    _milEds.add('None');
-    _milEds.add('DLC1');
-    _milEds.add('BLC');
-    _milEds.add('DLC2');
-    _milEds.add('ALC');
-    _milEds.add('DLC3');
-    _milEds.add('SLC');
-    _milEds.add('DLC4');
-    _milEds.add('MLC');
-    _milEds.add('DLC5');
-    _milEds.add('SMA');
-
     if (widget.soldier.id != null) {
       _title = '${widget.soldier.rank} ${widget.soldier.lastName}';
     }
-    _rankController = TextEditingController(text: widget.soldier.rank);
-    _lastNameController = TextEditingController(text: widget.soldier.lastName);
-    _firstNameController =
-        TextEditingController(text: widget.soldier.firstName);
-    _miController = TextEditingController(text: widget.soldier.mi);
-    _assigned = widget.soldier.assigned ?? true;
-    _supervisorController =
-        TextEditingController(text: widget.soldier.supervisor);
-    _sectionController = TextEditingController(text: widget.soldier.section);
-    _dodIdController = TextEditingController(text: widget.soldier.dodId ?? '');
-    _mosController = TextEditingController(text: widget.soldier.mos);
-    _dutyController = TextEditingController(text: widget.soldier.duty);
-    _paraLnController = TextEditingController(text: widget.soldier.paraLn);
-    _reqMosController = TextEditingController(text: widget.soldier.reqMos);
-    _dorController = TextEditingController(text: widget.soldier.dor);
-    _lossController = TextEditingController(text: widget.soldier.lossDate);
-    _etsController = TextEditingController(text: widget.soldier.ets);
-    _gainController = TextEditingController(text: widget.soldier.gainDate);
-    _basdController = TextEditingController(text: widget.soldier.basd);
-    _pebdController = TextEditingController(text: widget.soldier.pebd);
-    _nbcSuitController =
-        TextEditingController(text: widget.soldier.nbcSuitSize);
-    _nbcMaskController =
-        TextEditingController(text: widget.soldier.nbcMaskSize);
-    _nbcBootController =
-        TextEditingController(text: widget.soldier.nbcBootSize);
-    _nbcGloveController =
-        TextEditingController(text: widget.soldier.nbcGloveSize);
-    _hatController = TextEditingController(text: widget.soldier.hatSize);
-    _bootController = TextEditingController(text: widget.soldier.bootSize);
-    _acuTopController = TextEditingController(text: widget.soldier.acuTopSize);
-    _acuTrouserController =
-        TextEditingController(text: widget.soldier.acuTrouserSize);
-    _addressController =
-        TextEditingController(text: widget.soldier.address ?? '');
-    _cityController = TextEditingController(text: widget.soldier.city ?? '');
-    _stateController = TextEditingController(text: widget.soldier.state ?? '');
-    _zipController = TextEditingController(text: widget.soldier.zip ?? '');
-    _phoneController = TextEditingController(text: widget.soldier.phone);
-    _workEmailController =
-        TextEditingController(text: widget.soldier.workEmail);
-    _workPhoneController =
-        TextEditingController(text: widget.soldier.workPhone);
-    _emailController = TextEditingController(text: widget.soldier.email);
-    _nokController = TextEditingController(text: widget.soldier.nok);
-    _maritalStatusController =
-        TextEditingController(text: widget.soldier.maritalStatus ?? '');
-    _nokPhoneController = TextEditingController(text: widget.soldier.nokPhone);
-    _commentsController = TextEditingController(text: widget.soldier.comments);
+    _rankController.text = widget.soldier.rank;
+    _lastNameController.text = widget.soldier.lastName;
+    _firstNameController.text = widget.soldier.firstName;
+    _miController.text = widget.soldier.mi;
+    _assigned = widget.soldier.assigned;
+    _supervisorController.text = widget.soldier.supervisor;
+    _sectionController.text = widget.soldier.section;
+    _dodIdController.text = widget.soldier.dodId;
+    _mosController.text = widget.soldier.mos;
+    _dutyController.text = widget.soldier.duty;
+    _paraLnController.text = widget.soldier.paraLn;
+    _reqMosController.text = widget.soldier.reqMos;
+    _dorController.text = widget.soldier.dor;
+    _lossController.text = widget.soldier.lossDate;
+    _etsController.text = widget.soldier.ets;
+    _gainController.text = widget.soldier.gainDate;
+    _basdController.text = widget.soldier.basd;
+    _pebdController.text = widget.soldier.pebd;
+    _nbcSuitController.text = widget.soldier.nbcSuitSize;
+    _nbcMaskController.text = widget.soldier.nbcMaskSize;
+    _nbcBootController.text = widget.soldier.nbcBootSize;
+    _nbcGloveController.text = widget.soldier.nbcGloveSize;
+    _hatController.text = widget.soldier.hatSize;
+    _bootController.text = widget.soldier.bootSize;
+    _acuTopController.text = widget.soldier.acuTopSize;
+    _acuTrouserController.text = widget.soldier.acuTrouserSize;
+    _addressController.text = widget.soldier.address;
+    _cityController.text = widget.soldier.city;
+    _stateController.text = widget.soldier.state;
+    _zipController.text = widget.soldier.zip;
+    _phoneController.text = widget.soldier.phone;
+    _workEmailController.text = widget.soldier.workEmail;
+    _workPhoneController.text = widget.soldier.workPhone;
+    _emailController.text = widget.soldier.email;
+    _nokController.text = widget.soldier.nok;
+    _maritalStatusController.text = widget.soldier.maritalStatus;
+    _nokPhoneController.text = widget.soldier.nokPhone;
+    _commentsController.text = widget.soldier.comments;
 
     _promotable = widget.soldier.promotable == '(P)';
-    updated = false;
 
     _civEd = widget.soldier.civEd;
     _milEd = widget.soldier.milEd;
@@ -570,14 +548,12 @@ class EditSoldierPageState extends State<EditSoldierPage> {
     _gainDate = DateTime.tryParse(widget.soldier.gainDate) ?? DateTime.now();
     _basdDate = DateTime.tryParse(widget.soldier.basd) ?? DateTime.now();
     _pebdDate = DateTime.tryParse(widget.soldier.pebd) ?? DateTime.now();
-
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -586,7 +562,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -617,7 +595,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                   enabled: true,
                                   textCapitalization:
                                       TextCapitalization.characters,
-                                  validator: (value) => value.isEmpty
+                                  validator: (value) => value!.isEmpty
                                       ? 'Rank can\'t be empty'
                                       : null,
                                   decoration: const InputDecoration(
@@ -635,11 +613,9 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                     ListTileControlAffinity.leading,
                                 value: _promotable,
                                 onChanged: (checked) {
-                                  if (mounted) {
-                                    setState(() {
-                                      _promotable = checked;
-                                    });
-                                  }
+                                  setState(() {
+                                    _promotable = checked!;
+                                  });
                                 },
                               ),
                             ),
@@ -650,7 +626,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                   textCapitalization:
                                       TextCapitalization.sentences,
                                   enabled: true,
-                                  validator: (value) => value.isEmpty
+                                  validator: (value) => value!.isEmpty
                                       ? 'Last Name can\'t be empty'
                                       : null,
                                   decoration: const InputDecoration(
@@ -711,16 +687,18 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                 keyboardType: TextInputType.datetime,
                                 enabled: true,
                                 validator: (value) =>
-                                    regExp.hasMatch(value) || value.isEmpty
+                                    isValidDate(value!) || value.isEmpty
                                         ? null
                                         : 'Date must be in yyyy-MM-dd format',
                                 decoration: InputDecoration(
-                                    labelText: 'Date of Rank',
-                                    suffixIcon: IconButton(
-                                        icon: const Icon(Icons.date_range),
-                                        onPressed: () {
-                                          _pickDor(context);
-                                        })),
+                                  labelText: 'Date of Rank',
+                                  suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickDor(context);
+                                    },
+                                  ),
+                                ),
                                 onChanged: (value) {
                                   _dorDate =
                                       DateTime.tryParse(value) ?? _dorDate;
@@ -751,16 +729,18 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                 keyboardType: TextInputType.datetime,
                                 enabled: true,
                                 validator: (value) =>
-                                    regExp.hasMatch(value) || value.isEmpty
+                                    isValidDate(value!) || value.isEmpty
                                         ? null
                                         : 'Date must be in yyyy-MM-dd format',
                                 decoration: InputDecoration(
-                                    labelText: 'Loss Date',
-                                    suffixIcon: IconButton(
-                                        icon: const Icon(Icons.date_range),
-                                        onPressed: () {
-                                          _pickLoss(context);
-                                        })),
+                                  labelText: 'Loss Date',
+                                  suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickLoss(context);
+                                    },
+                                  ),
+                                ),
                                 onChanged: (value) {
                                   _lossDate =
                                       DateTime.tryParse(value) ?? _lossDate;
@@ -775,7 +755,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                 keyboardType: TextInputType.datetime,
                                 enabled: true,
                                 validator: (value) =>
-                                    regExp.hasMatch(value) || value.isEmpty
+                                    isValidDate(value!) || value.isEmpty
                                         ? null
                                         : 'Date must be in yyyy-MM-dd format',
                                 decoration: InputDecoration(
@@ -799,7 +779,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                 keyboardType: TextInputType.datetime,
                                 enabled: true,
                                 validator: (value) =>
-                                    regExp.hasMatch(value) || value.isEmpty
+                                    isValidDate(value!) || value.isEmpty
                                         ? null
                                         : 'Date must be in yyyy-MM-dd format',
                                 decoration: InputDecoration(
@@ -823,16 +803,18 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                 keyboardType: TextInputType.datetime,
                                 enabled: true,
                                 validator: (value) =>
-                                    regExp.hasMatch(value) || value.isEmpty
+                                    isValidDate(value!) || value.isEmpty
                                         ? null
                                         : 'Date must be in yyyy-MM-dd format',
                                 decoration: InputDecoration(
-                                    labelText: 'PEBD',
-                                    suffixIcon: IconButton(
-                                        icon: const Icon(Icons.date_range),
-                                        onPressed: () {
-                                          _pickPebd(context);
-                                        })),
+                                  labelText: 'PEBD',
+                                  suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickPebd(context);
+                                    },
+                                  ),
+                                ),
                                 onChanged: (value) {
                                   _pebdDate =
                                       DateTime.tryParse(value) ?? _pebdDate;
@@ -847,7 +829,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                 keyboardType: TextInputType.datetime,
                                 enabled: true,
                                 validator: (value) =>
-                                    regExp.hasMatch(value) || value.isEmpty
+                                    isValidDate(value!) || value.isEmpty
                                         ? null
                                         : 'Date must be in yyyy-MM-dd format',
                                 decoration: InputDecoration(
@@ -937,7 +919,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                     child: Text(value),
                                   );
                                 }).toList(),
-                                onChanged: (value) {
+                                onChanged: (dynamic value) {
                                   if (mounted) {
                                     setState(() {
                                       _civEd = value;
@@ -959,7 +941,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
                                     child: Text(value),
                                   );
                                 }).toList(),
-                                onChanged: (value) {
+                                onChanged: (dynamic value) {
                                   if (mounted) {
                                     setState(() {
                                       _milEd = value;

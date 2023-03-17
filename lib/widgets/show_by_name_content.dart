@@ -6,15 +6,15 @@ import '../methods/date_methods.dart';
 import '../models/setting.dart';
 
 class ShowByNameContent extends StatelessWidget {
-  const ShowByNameContent(
-      {Key key,
-      this.title,
-      this.list,
-      this.homeCard,
-      this.setting,
-      this.width,
-      this.height})
-      : super(key: key);
+  const ShowByNameContent({
+    Key? key,
+    required this.title,
+    required this.list,
+    required this.homeCard,
+    required this.setting,
+    required this.width,
+    required this.height,
+  }) : super(key: key);
   final String title;
   final List<DocumentSnapshot> list;
   final HomeCard homeCard;
@@ -31,7 +31,7 @@ class ShowByNameContent extends StatelessWidget {
         itemCount: list.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          Card card;
+          Card? card;
           switch (homeCard) {
             case HomeCard.appointments:
               card = Card(
@@ -181,6 +181,8 @@ class ShowByNameContent extends StatelessWidget {
                     subtitle: Text(subtitle)),
               );
               break;
+            default:
+              null;
           }
           return card;
         },

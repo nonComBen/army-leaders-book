@@ -23,8 +23,8 @@ import '../widgets/anon_warning_banner.dart';
 
 class WorkingEvalsPage extends StatefulWidget {
   const WorkingEvalsPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -35,12 +35,12 @@ class WorkingEvalsPage extends StatefulWidget {
 }
 
 class WorkingEvalsPageState extends State<WorkingEvalsPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscription;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscription;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -69,7 +69,7 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -79,11 +79,6 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
   void initState() {
     super.initState();
 
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('workingEvals')
         .where('owner', isEqualTo: widget.userId)
@@ -107,36 +102,9 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadWorkingEvalsPage()));
-      // Widget title = const Text('Upload Working Evals');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Working Evals, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page.'
-      //       'If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadWorkingEvalsPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+        context,
+        MaterialPageRoute(builder: (context) => const UploadWorkingEvalsPage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -190,7 +158,7 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -203,7 +171,7 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/workingEvals.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -305,7 +273,7 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -357,9 +325,9 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -483,7 +451,7 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -500,11 +468,11 @@ class WorkingEvalsPageState extends State<WorkingEvalsPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

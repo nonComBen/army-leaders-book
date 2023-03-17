@@ -46,21 +46,21 @@ List<Map<dynamic, dynamic>> convertToMap(String mapString) {
   return listMap;
 }
 
-String getCellValue(List<Data> row, List<String> headers, String header) {
+String getCellValue(List<Data?> row, List<String?>? headers, String? header) {
   if (header == '') {
     return '';
   }
-  if (row[headers.indexOf(header) - 1] == null) {
+  if (row[headers!.indexOf(header) - 1] == null) {
     return '';
   } else {
-    return row[headers.indexOf(header) - 1].value.toString();
+    return row[headers.indexOf(header) - 1]!.value.toString();
   }
 }
 
-List<String> getColumnHeaders(List<Data> row) {
-  List<String> columnHeaders = [''];
+List<String?> getColumnHeaders(List<Data?> row) {
+  List<String?> columnHeaders = [''];
   for (var cell in row) {
-    if (cell.value.toString() != '') {
+    if (cell!.value.toString() != '') {
       columnHeaders.add(cell.value.toString());
     }
   }

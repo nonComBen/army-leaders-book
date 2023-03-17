@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/profile.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditTempProfilePage extends StatefulWidget {
   const EditTempProfilePage({
-    Key key,
-    @required this.profile,
+    Key? key,
+    required this.profile,
   }) : super(key: key);
   final TempProfile profile;
 
@@ -26,15 +27,15 @@ class EditTempProfilePage extends StatefulWidget {
 
 class EditTempProfilePageState extends State<EditTempProfilePage> {
   String _title = 'New Temp Profile';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dateController;
-  TextEditingController _expController;
-  TextEditingController _commentsController;
-  String _type,
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _expController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+  String? _type,
       _soldierId,
       _rank,
       _lastName,
@@ -42,18 +43,17 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
       _section,
       _rankSort,
       _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  DateTime _dateTime, _expDate;
-  RegExp regExp;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _dateTime, _expDate;
 
   Future<void> _pickDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dateTime,
+          initialDate: _dateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -91,9 +91,9 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
   Future<void> _pickExp(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _expDate,
+          initialDate: _expDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -129,7 +129,7 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -140,21 +140,21 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       TempProfile saveProfile = TempProfile(
         id: widget.profile.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         date: _dateController.text,
         exp: _expController.text,
-        type: _type,
+        type: _type!,
         comments: _commentsController.text,
       );
 
@@ -170,9 +170,9 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
       } else {
         docRef = firestore.collection('profiles').doc(widget.profile.id);
         docRef.set(saveProfile.toMap());
-      }
-      if (mounted) {
-        Navigator.pop(context);
+        if (mounted) {
+          Navigator.pop(context);
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -181,9 +181,9 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('profiles')
           .where('users', arrayContains: userId)
@@ -191,12 +191,12 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -204,7 +204,7 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -212,11 +212,6 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -230,11 +225,6 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
   @override
   void initState() {
     super.initState();
-
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
 
     _type = widget.profile.type;
 
@@ -251,212 +241,204 @@ class EditTempProfilePageState extends State<EditTempProfilePage> {
     _owner = widget.profile.owner;
     _users = widget.profile.users;
 
-    _dateController = TextEditingController(text: widget.profile.date);
-    _expController = TextEditingController(text: widget.profile.exp);
-    _commentsController = TextEditingController(text: widget.profile.comments);
-
-    removeSoldiers = false;
-    updated = false;
+    _dateController.text = widget.profile.date;
+    _expController.text = widget.profile.exp;
+    _commentsController.text = widget.profile.comments;
 
     _dateTime = DateTime.tryParse(widget.profile.date) ?? DateTime.now();
     _expDate = DateTime.tryParse(widget.profile.exp) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
+      key: _scaffoldState,
+      appBar: AppBar(
+        title: Text(_title),
+      ),
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width > 932 ? (width - 916) / 2 : 16),
+          child: Card(
+            child: Container(
+                padding: const EdgeInsets.all(16.0),
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      if (user.isAnonymous) const AnonWarningBanner(),
+                      GridView.count(
+                        primary: false,
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 230
+                            : width > 700
+                                ? width / 230
+                                : width / 115,
+                        shrinkWrap: true,
                         children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('users', arrayContains: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers[index]
-                                                      ['firstName'];
-                                                  _section = soldiers[index]
-                                                      ['section'];
-                                                  _rankSort = soldiers[index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  _owner =
-                                                      soldiers[index]['owner'];
-                                                  _users =
-                                                      soldiers[index]['users'];
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: FutureBuilder(
+                                future: firestore
+                                    .collection('soldiers')
+                                    .where('users', arrayContains: user.uid)
+                                    .get(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  switch (snapshot.connectionState) {
+                                    case ConnectionState.waiting:
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    default:
+                                      allSoldiers = snapshot.data!.docs;
+                                      soldiers = removeSoldiers
+                                          ? lessSoldiers
+                                          : allSoldiers;
+                                      soldiers!.sort((a, b) => a['lastName']
+                                          .toString()
+                                          .compareTo(b['lastName'].toString()));
+                                      soldiers!.sort((a, b) => a['rankSort']
+                                          .toString()
+                                          .compareTo(b['rankSort'].toString()));
+                                      return DropdownButtonFormField<String>(
+                                        decoration: const InputDecoration(
+                                            labelText: 'Soldier'),
+                                        items: soldiers!.map((doc) {
+                                          return DropdownMenuItem<String>(
+                                            value: doc.id,
+                                            child: Text(
+                                                '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
                                           );
-                                      }
-                                    }),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    8.0, 16.0, 8.0, 8.0),
-                                child: CheckboxListTile(
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: removeSoldiers,
-                                  title: const Text(
-                                      'Remove Soldiers already added'),
-                                  onChanged: (checked) {
-                                    _removeSoldiers(checked, user.uid);
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _dateController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Issued Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickDate(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _dateTime =
-                                        DateTime.tryParse(value) ?? _dateTime;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _expController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Expiration Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickExp(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _expDate =
-                                        DateTime.tryParse(value) ?? _expDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          int index = soldiers!.indexWhere(
+                                              (doc) => doc.id == value);
+                                          if (mounted) {
+                                            setState(() {
+                                              _soldierId = value;
+                                              _rank = soldiers![index]['rank'];
+                                              _lastName =
+                                                  soldiers![index]['lastName'];
+                                              _firstName =
+                                                  soldiers![index]['firstName'];
+                                              _section =
+                                                  soldiers![index]['section'];
+                                              _rankSort = soldiers![index]
+                                                      ['rankSort']
+                                                  .toString();
+                                              _owner =
+                                                  soldiers![index]['owner'];
+                                              _users =
+                                                  soldiers![index]['users'];
+                                              updated = true;
+                                            });
+                                          }
+                                        },
+                                        value: _soldierId,
+                                      );
+                                  }
+                                }),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                            child: CheckboxListTile(
+                              controlAffinity: ListTileControlAffinity.leading,
+                              value: removeSoldiers,
+                              title:
+                                  const Text('Remove Soldiers already added'),
+                              onChanged: (checked) {
+                                _removeSoldiers(checked, user.uid);
+                              },
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 2,
-                              controller: _commentsController,
+                              controller: _dateController,
+                              keyboardType: TextInputType.datetime,
                               enabled: true,
-                              decoration:
-                                  const InputDecoration(labelText: 'Comments'),
+                              validator: (value) =>
+                                  isValidDate(value!) || value.isEmpty
+                                      ? null
+                                      : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'Issued Date',
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickDate(context);
+                                      })),
                               onChanged: (value) {
+                                _dateTime =
+                                    DateTime.tryParse(value) ?? _dateTime;
                                 updated = true;
                               },
                             ),
                           ),
-                          FormattedElevatedButton(
-                            onPressed: () {
-                              submit(context);
-                            },
-                            text: widget.profile.id == null
-                                ? 'Add Profile'
-                                : 'Update Profile',
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: _expController,
+                              keyboardType: TextInputType.datetime,
+                              enabled: true,
+                              validator: (value) =>
+                                  isValidDate(value!) || value.isEmpty
+                                      ? null
+                                      : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'Expiration Date',
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickExp(context);
+                                      })),
+                              onChanged: (value) {
+                                _expDate = DateTime.tryParse(value) ?? _expDate;
+                                updated = true;
+                              },
+                            ),
                           ),
                         ],
                       ),
-                    )),
-              ),
-            )));
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 2,
+                          controller: _commentsController,
+                          enabled: true,
+                          decoration:
+                              const InputDecoration(labelText: 'Comments'),
+                          onChanged: (value) {
+                            updated = true;
+                          },
+                        ),
+                      ),
+                      FormattedElevatedButton(
+                        onPressed: () {
+                          submit(context);
+                        },
+                        text: widget.profile.id == null
+                            ? 'Add Profile'
+                            : 'Update Profile',
+                      ),
+                    ],
+                  ),
+                )),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../methods/validate.dart';
 import '../../models/appointment.dart';
@@ -16,7 +17,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadAppointmentsPage extends StatefulWidget {
   const UploadAppointmentsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -24,22 +25,22 @@ class UploadAppointmentsPage extends StatefulWidget {
 }
 
 class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, title, date, start, end, status, comments, path, location;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, title, date, start, end, status, comments, path, location;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -54,14 +55,14 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      title = columnHeaders.contains('Title') ? 'Title' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
-      start = columnHeaders.contains('Start Time') ? 'Start Time' : '';
-      end = columnHeaders.contains('End Time') ? 'End Time' : '';
-      status = columnHeaders.contains('Status') ? 'Status' : '';
-      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
-      location = columnHeaders.contains('Location') ? 'Location' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      title = columnHeaders!.contains('Title') ? 'Title' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      start = columnHeaders!.contains('Start Time') ? 'Start Time' : '';
+      end = columnHeaders!.contains('End Time') ? 'End Time' : '';
+      status = columnHeaders!.contains('Status') ? 'Status' : '';
+      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
+      location = columnHeaders!.contains('Location') ? 'Location' : '';
     });
   }
 
@@ -77,7 +78,7 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> statuses = [];
       statuses.add('Scheduled');
@@ -87,8 +88,8 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
       statuses.add('Missed');
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -177,7 +178,7 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
     comments = '';
     location = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -215,7 +216,7 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -236,10 +237,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -254,10 +255,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Title'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: title,
@@ -272,10 +273,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -291,10 +292,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Start Time'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: start,
@@ -310,10 +311,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'End Time'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: end,
@@ -329,10 +330,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Location'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: location,
@@ -348,10 +349,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Status'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: status,
@@ -367,10 +368,10 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: comments,
@@ -384,11 +385,12 @@ class UploadAppointmentsPageState extends State<UploadAppointmentsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Appointments',
                   )
                 ],

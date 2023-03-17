@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/training.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditTrainingPage extends StatefulWidget {
   const EditTrainingPage({
-    Key key,
-    @required this.training,
+    Key? key,
+    required this.training,
   }) : super(key: key);
   final Training training;
 
@@ -26,43 +27,42 @@ class EditTrainingPage extends StatefulWidget {
 
 class EditTrainingPageState extends State<EditTrainingPage> {
   String _title = 'New Training';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _cyberController;
-  TextEditingController _opsecController;
-  TextEditingController _antiTerrorController;
-  TextEditingController _lawController;
-  TextEditingController _persRecController;
-  TextEditingController _infoSecController;
-  TextEditingController _ctipController;
-  TextEditingController _gatController;
-  TextEditingController _sereController;
-  TextEditingController _tarpController;
-  TextEditingController _eoController;
-  TextEditingController _asapController;
-  TextEditingController _suicideController;
-  TextEditingController _sharpController;
-  TextEditingController _add1Controller;
-  TextEditingController _add1DateController;
-  TextEditingController _add2Controller;
-  TextEditingController _add2DateController;
-  TextEditingController _add3Controller;
-  TextEditingController _add3DateController;
-  TextEditingController _add4Controller;
-  TextEditingController _add4DateController;
-  TextEditingController _add5Controller;
-  TextEditingController _add5DateController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  bool addMore;
-  String addMoreLess;
+  final TextEditingController _cyberController = TextEditingController();
+  final TextEditingController _opsecController = TextEditingController();
+  final TextEditingController _antiTerrorController = TextEditingController();
+  final TextEditingController _lawController = TextEditingController();
+  final TextEditingController _persRecController = TextEditingController();
+  final TextEditingController _infoSecController = TextEditingController();
+  final TextEditingController _ctipController = TextEditingController();
+  final TextEditingController _gatController = TextEditingController();
+  final TextEditingController _sereController = TextEditingController();
+  final TextEditingController _tarpController = TextEditingController();
+  final TextEditingController _eoController = TextEditingController();
+  final TextEditingController _asapController = TextEditingController();
+  final TextEditingController _suicideController = TextEditingController();
+  final TextEditingController _sharpController = TextEditingController();
+  final TextEditingController _add1Controller = TextEditingController();
+  final TextEditingController _add1DateController = TextEditingController();
+  final TextEditingController _add2Controller = TextEditingController();
+  final TextEditingController _add2DateController = TextEditingController();
+  final TextEditingController _add3Controller = TextEditingController();
+  final TextEditingController _add3DateController = TextEditingController();
+  final TextEditingController _add4Controller = TextEditingController();
+  final TextEditingController _add4DateController = TextEditingController();
+  final TextEditingController _add5Controller = TextEditingController();
+  final TextEditingController _add5DateController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false, addMore = false;
+  String? addMoreLess;
 
-  DateTime _cyberDate,
+  DateTime? _cyberDate,
       _opsecDate,
       _antiTerrorDate,
       _lawDate,
@@ -81,14 +81,13 @@ class EditTrainingPageState extends State<EditTrainingPage> {
       _add3Date,
       _add4Date,
       _add5Date;
-  RegExp regExp;
 
   Future<void> _pickCyber(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _cyberDate,
+          initialDate: _cyberDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -126,9 +125,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickOpsec(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _opsecDate,
+          initialDate: _opsecDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -166,9 +165,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickAntiTerror(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _antiTerrorDate,
+          initialDate: _antiTerrorDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -206,9 +205,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickLaw(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _lawDate,
+          initialDate: _lawDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -246,9 +245,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickPersRec(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _persRecDate,
+          initialDate: _persRecDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -286,9 +285,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickInfoSec(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _infoSecDate,
+          initialDate: _infoSecDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -326,9 +325,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickCtip(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _ctipDate,
+          initialDate: _ctipDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -366,9 +365,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickGat(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _gatDate,
+          initialDate: _gatDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -406,9 +405,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickSere(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _sereDate,
+          initialDate: _sereDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -446,9 +445,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickTarp(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _tarpDate,
+          initialDate: _tarpDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -486,9 +485,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickEo(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _eoDate,
+          initialDate: _eoDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -526,9 +525,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickAsap(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _asapDate,
+          initialDate: _asapDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -566,9 +565,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickSuicide(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _suicideDate,
+          initialDate: _suicideDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -606,9 +605,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickSharp(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _sharpDate,
+          initialDate: _sharpDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -646,9 +645,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickAdd1(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _add1Date,
+          initialDate: _add1Date!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -686,9 +685,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickAdd2(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _add2Date,
+          initialDate: _add2Date!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -726,9 +725,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickAdd3(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _add3Date,
+          initialDate: _add3Date!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -766,9 +765,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickAdd4(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _add4Date,
+          initialDate: _add4Date!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -806,9 +805,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   Future<void> _pickAdd5(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _add5Date,
+          initialDate: _add5Date!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -844,7 +843,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -855,18 +854,18 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Training saveTraining = Training(
         id: widget.training.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         cyber: _cyberController.text,
         opsec: _opsecController.text,
         antiTerror: _antiTerrorController.text,
@@ -950,7 +949,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                 controller: _add1DateController,
                 keyboardType: TextInputType.datetime,
                 enabled: true,
-                validator: (value) => regExp.hasMatch(value) || value.isEmpty
+                validator: (value) => isValidDate(value!) || value.isEmpty
                     ? null
                     : 'Date must be in yyyy-MM-dd format',
                 decoration: InputDecoration(
@@ -977,7 +976,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                 controller: _add2DateController,
                 keyboardType: TextInputType.datetime,
                 enabled: true,
-                validator: (value) => regExp.hasMatch(value) || value.isEmpty
+                validator: (value) => isValidDate(value!) || value.isEmpty
                     ? null
                     : 'Date must be in yyyy-MM-dd format',
                 decoration: InputDecoration(
@@ -1004,7 +1003,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                 controller: _add3DateController,
                 keyboardType: TextInputType.datetime,
                 enabled: true,
-                validator: (value) => regExp.hasMatch(value) || value.isEmpty
+                validator: (value) => isValidDate(value!) || value.isEmpty
                     ? null
                     : 'Date must be in yyyy-MM-dd format',
                 decoration: InputDecoration(
@@ -1031,7 +1030,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                 controller: _add4DateController,
                 keyboardType: TextInputType.datetime,
                 enabled: true,
-                validator: (value) => regExp.hasMatch(value) || value.isEmpty
+                validator: (value) => isValidDate(value!) || value.isEmpty
                     ? null
                     : 'Date must be in yyyy-MM-dd format',
                 decoration: InputDecoration(
@@ -1058,7 +1057,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                 controller: _add5DateController,
                 keyboardType: TextInputType.datetime,
                 enabled: true,
-                validator: (value) => regExp.hasMatch(value) || value.isEmpty
+                validator: (value) => isValidDate(value!) || value.isEmpty
                     ? null
                     : 'Date must be in yyyy-MM-dd format',
                 decoration: InputDecoration(
@@ -1078,21 +1077,21 @@ class EditTrainingPageState extends State<EditTrainingPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('training')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -1100,7 +1099,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -1108,11 +1107,6 @@ class EditTrainingPageState extends State<EditTrainingPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -1148,11 +1142,6 @@ class EditTrainingPageState extends State<EditTrainingPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.training.id != null) {
       _title = '${widget.training.rank} ${widget.training.name}';
     }
@@ -1166,35 +1155,30 @@ class EditTrainingPageState extends State<EditTrainingPage> {
     _owner = widget.training.owner;
     _users = widget.training.users;
 
-    _cyberController = TextEditingController(text: widget.training.cyber);
-    _opsecController = TextEditingController(text: widget.training.opsec);
-    _antiTerrorController =
-        TextEditingController(text: widget.training.antiTerror);
-    _lawController = TextEditingController(text: widget.training.lawOfWar);
-    _persRecController = TextEditingController(text: widget.training.persRec);
-    _infoSecController = TextEditingController(text: widget.training.infoSec);
-    _ctipController = TextEditingController(text: widget.training.ctip);
-    _gatController = TextEditingController(text: widget.training.gat);
-    _sereController = TextEditingController(text: widget.training.sere);
-    _tarpController = TextEditingController(text: widget.training.tarp);
-    _eoController = TextEditingController(text: widget.training.eo);
-    _asapController = TextEditingController(text: widget.training.asap);
-    _suicideController = TextEditingController(text: widget.training.suicide);
-    _sharpController = TextEditingController(text: widget.training.sharp);
-    _add1Controller = TextEditingController(text: widget.training.add1);
-    _add1DateController = TextEditingController(text: widget.training.add1Date);
-    _add2Controller = TextEditingController(text: widget.training.add2);
-    _add2DateController = TextEditingController(text: widget.training.add2Date);
-    _add3Controller = TextEditingController(text: widget.training.add3);
-    _add3DateController = TextEditingController(text: widget.training.add3Date);
-    _add4Controller = TextEditingController(text: widget.training.add4);
-    _add4DateController = TextEditingController(text: widget.training.add4Date);
-    _add5Controller = TextEditingController(text: widget.training.add5);
-    _add5DateController = TextEditingController(text: widget.training.add5Date);
-
-    removeSoldiers = false;
-    addMore = false;
-    updated = false;
+    _cyberController.text = widget.training.cyber;
+    _opsecController.text = widget.training.opsec;
+    _antiTerrorController.text = widget.training.antiTerror;
+    _lawController.text = widget.training.lawOfWar;
+    _persRecController.text = widget.training.persRec;
+    _infoSecController.text = widget.training.infoSec;
+    _ctipController.text = widget.training.ctip;
+    _gatController.text = widget.training.gat;
+    _sereController.text = widget.training.sere;
+    _tarpController.text = widget.training.tarp;
+    _eoController.text = widget.training.eo;
+    _asapController.text = widget.training.asap;
+    _suicideController.text = widget.training.suicide;
+    _sharpController.text = widget.training.sharp;
+    _add1Controller.text = widget.training.add1;
+    _add1DateController.text = widget.training.add1Date;
+    _add2Controller.text = widget.training.add2;
+    _add2DateController.text = widget.training.add2Date;
+    _add3Controller.text = widget.training.add3;
+    _add3DateController.text = widget.training.add3Date;
+    _add4Controller.text = widget.training.add4;
+    _add4DateController.text = widget.training.add4Date;
+    _add5Controller.text = widget.training.add5;
+    _add5DateController.text = widget.training.add5Date;
 
     if (_add1DateController.text != '' ||
         _add2DateController.text != '' ||
@@ -1229,14 +1213,12 @@ class EditTrainingPageState extends State<EditTrainingPage> {
     _add3Date = DateTime.tryParse(widget.training.add3Date) ?? DateTime.now();
     _add4Date = DateTime.tryParse(widget.training.add4Date) ?? DateTime.now();
     _add5Date = DateTime.tryParse(widget.training.add5Date) ?? DateTime.now();
-
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -1245,7 +1227,9 @@ class EditTrainingPageState extends State<EditTrainingPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -1284,15 +1268,15 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -1300,7 +1284,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -1308,26 +1292,26 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -1358,7 +1342,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1382,7 +1366,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1406,7 +1390,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1431,7 +1415,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1455,7 +1439,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1479,7 +1463,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1503,7 +1487,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1527,7 +1511,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1551,7 +1535,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1575,7 +1559,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1599,7 +1583,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1623,7 +1607,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1647,7 +1631,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1671,7 +1655,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -1705,7 +1689,7 @@ class EditTrainingPageState extends State<EditTrainingPage> {
                                   });
                                 }
                               },
-                              text: addMoreLess,
+                              text: addMoreLess!,
                             ),
                           ),
                           addMoreTraining(width),

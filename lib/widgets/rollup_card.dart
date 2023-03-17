@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
 class RollupCard extends StatelessWidget {
-  const RollupCard(
-      {Key key, this.title, this.info1, this.info2, this.button, this.button2})
-      : super(key: key);
+  const RollupCard({
+    Key? key,
+    required this.title,
+    required this.info1,
+    required this.info2,
+    required this.button,
+    this.button2,
+  }) : super(key: key);
 
   final String title;
   final Widget info1, info2;
-  final ElevatedButton button, button2;
+  final ElevatedButton? button, button2;
 
   Widget _row1() {
     return Padding(
@@ -29,12 +34,12 @@ class RollupCard extends StatelessWidget {
   Widget _buttonBar() {
     if (title == 'Profiles') {
       return ButtonBar(
-        children: <Widget>[button, button2],
+        children: <Widget>[button!, button2!],
       );
     } else {
       return ButtonBar(
         children: <Widget>[
-          button,
+          button!,
         ],
       );
     }

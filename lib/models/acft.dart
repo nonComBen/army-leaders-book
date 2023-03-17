@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class Acft {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -29,14 +28,13 @@ class Acft {
   int runScore;
   int total;
   String altEvent;
-  String physCat;
   bool pass;
 
   Acft({
     this.id,
     this.soldierId,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
     this.name = '',
     this.firstName = '',
@@ -59,7 +57,6 @@ class Acft {
     this.runScore = 0,
     this.total = 0,
     this.altEvent = 'Run',
-    this.physCat = 'Moderate',
     this.pass = true,
   });
 
@@ -90,7 +87,6 @@ class Acft {
     map['runScore'] = runScore;
     map['total'] = total;
     map['altEvent'] = altEvent;
-    map['physCat'] = physCat;
     map['pass'] = pass;
 
     return map;
@@ -137,7 +133,6 @@ class Acft {
       runScore: doc['runScore'],
       total: doc['total'],
       altEvent: doc['altEvent'],
-      physCat: doc['physCat'],
       pass: doc['pass'],
     );
   }

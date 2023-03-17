@@ -14,27 +14,27 @@ import '../models/store_state.dart';
 class SubscriptionPurchases extends ChangeNotifier {
   final SubscriptionState subscriptionState;
   final IAPRepo iapRepo;
-  StreamSubscription<List<PurchaseDetails>> _subscription;
+  late StreamSubscription<List<PurchaseDetails>> _subscription;
   final iapConnection = IAPConnection.instance;
   StoreState storeState = StoreState.loading;
   List<PurchasableProduct> products = [];
 
   SubscriptionPurchases(this.subscriptionState, this.iapRepo) {
     if (!kIsWeb) {
-      final purchaseUpdated = iapConnection.purchaseStream;
+      final purchaseUpdated = iapConnection!.purchaseStream;
       _subscription = purchaseUpdated.listen(
         _onPurchaseUpdate,
         onDone: _updateStreamOnDone,
         onError: _updateStreamOnError,
       );
-      iapConnection.restorePurchases();
+      iapConnection!.restorePurchases();
       iapRepo.addListener(purchasesUpdate);
       loadPurchases();
     }
   }
 
   Future<void> loadPurchases() async {
-    final available = await iapConnection.isAvailable();
+    final available = await iapConnection!.isAvailable();
     if (!available) {
       storeState = StoreState.notAvailable;
       notifyListeners();
@@ -45,7 +45,7 @@ class SubscriptionPurchases extends ChangeNotifier {
       storeKeyAndroidTwo,
       storeKeyIOS,
     };
-    final response = await iapConnection.queryProductDetails(ids);
+    final response = await iapConnection!.queryProductDetails(ids);
     for (var element in response.notFoundIDs) {
       // ignore: avoid_print
       print('Purchase $element not found');
@@ -58,7 +58,7 @@ class SubscriptionPurchases extends ChangeNotifier {
 
   Future<void> buy(PurchasableProduct product) async {
     final purchaseParam = PurchaseParam(productDetails: product.productDetails);
-    await iapConnection.buyNonConsumable(purchaseParam: purchaseParam);
+    await iapConnection!.buyNonConsumable(purchaseParam: purchaseParam);
   }
 
   @override
@@ -88,7 +88,7 @@ class SubscriptionPurchases extends ChangeNotifier {
     }
 
     if (purchaseDetails.pendingCompletePurchase) {
-      iapConnection.completePurchase(purchaseDetails);
+      iapConnection!.completePurchase(purchaseDetails);
     }
   }
 
@@ -133,7 +133,7 @@ class SubscriptionPurchases extends ChangeNotifier {
   Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
     var functions = FirebaseFunctions.instance;
     final callable = functions.httpsCallable('verifyPurchase');
-    final results = await callable({
+    final HttpsCallableResult<dynamic> results = await callable({
       'source': purchaseDetails.verificationData.source,
       'verificationData':
           purchaseDetails.verificationData.serverVerificationData,

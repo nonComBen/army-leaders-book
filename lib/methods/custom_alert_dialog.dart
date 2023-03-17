@@ -5,15 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:leaders_book/widgets/formatted_text_button.dart';
 
-void customAlertDialog({
-  @required BuildContext context,
-  @required Widget title,
-  @required Widget content,
-  @required String primaryText,
-  @required Function primary,
+Future<void> customAlertDialog({
+  required BuildContext context,
+  required Widget title,
+  required Widget content,
+  required String primaryText,
+  required Function primary,
   String secondaryText = 'Cancel',
-  Function secondary,
-}) {
+  void Function()? secondary,
+}) async {
   if (kIsWeb || Platform.isAndroid) {
     showDialog(
         context: context,
@@ -42,30 +42,31 @@ void customAlertDialog({
         });
   } else {
     showCupertinoDialog(
-        barrierDismissible: true,
-        context: context,
-        builder: (context2) {
-          return CupertinoAlertDialog(
-            title: title,
-            content: content,
-            actions: [
-              if (secondary != null)
-                CupertinoDialogAction(
-                  child: Text(secondaryText),
-                  onPressed: () {
-                    secondary();
-                    Navigator.pop(context2);
-                  },
-                ),
+      barrierDismissible: true,
+      context: context,
+      builder: (context2) {
+        return CupertinoAlertDialog(
+          title: title,
+          content: content,
+          actions: [
+            if (secondary != null)
               CupertinoDialogAction(
-                child: Text(primaryText),
+                child: Text(secondaryText),
                 onPressed: () {
+                  secondary();
                   Navigator.pop(context2);
-                  primary();
                 },
-              )
-            ],
-          );
-        });
+              ),
+            CupertinoDialogAction(
+              child: Text(primaryText),
+              onPressed: () {
+                Navigator.pop(context2);
+                primary();
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 }

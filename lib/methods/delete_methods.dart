@@ -7,8 +7,8 @@ import 'package:leaders_book/methods/custom_alert_dialog.dart';
 
 import '../models/soldier.dart';
 
-void deleteSoldiers(
-    BuildContext context, List<Soldier> selectedSoldiers, String userId) {
+Future<void> deleteSoldiers(
+    BuildContext context, List<Soldier> selectedSoldiers, String userId) async {
   bool superWarning = false;
   for (Soldier soldier in selectedSoldiers) {
     if (soldier.owner == userId && soldier.users.length > 1) {
@@ -27,7 +27,7 @@ void deleteSoldiers(
         ? superWarningText
         : const Text('Are you sure you want to delete the selected Soldiers?'),
   );
-  customAlertDialog(
+  await customAlertDialog(
     context: context,
     title: title,
     content: content,
@@ -55,8 +55,8 @@ Future<void> deleteSoldier(Soldier soldier, String uid) async {
   }
 }
 
-void deleteRecord(BuildContext context, List<DocumentSnapshot> selectedDocs,
-    String userId, String record) {
+void deleteRecord(BuildContext context, List<DocumentSnapshot>? selectedDocs,
+    String? userId, String record) {
   Widget title = Text('Delete $record?');
   Widget content = Container(
     padding: const EdgeInsets.all(8.0),
@@ -69,7 +69,7 @@ void deleteRecord(BuildContext context, List<DocumentSnapshot> selectedDocs,
     primaryText: 'Yes',
     secondaryText: 'Cancel',
     primary: () {
-      for (DocumentSnapshot doc in selectedDocs) {
+      for (DocumentSnapshot doc in selectedDocs!) {
         if (doc['owner'] == userId) {
           doc.reference.delete();
         } else {

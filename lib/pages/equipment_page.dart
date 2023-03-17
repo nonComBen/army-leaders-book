@@ -25,8 +25,8 @@ import '../pdf/equipment_pdf.dart';
 
 class EquipmentPage extends StatefulWidget {
   const EquipmentPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -37,12 +37,12 @@ class EquipmentPage extends StatefulWidget {
 }
 
 class EquipmentPageState extends State<EquipmentPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -71,7 +71,7 @@ class EquipmentPageState extends State<EquipmentPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -80,12 +80,6 @@ class EquipmentPageState extends State<EquipmentPage> {
   @override
   void initState() {
     super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('equipment')
@@ -110,35 +104,10 @@ class EquipmentPageState extends State<EquipmentPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadEquipmentPage()));
-      // Widget title = const Text('Upload Equipment');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Equipment, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadEquipmentPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadEquipmentPage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -205,7 +174,7 @@ class EquipmentPageState extends State<EquipmentPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -218,7 +187,7 @@ class EquipmentPageState extends State<EquipmentPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/equipment.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -286,7 +255,7 @@ class EquipmentPageState extends State<EquipmentPage> {
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
     EquipmentPdf pdf = EquipmentPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -428,7 +397,7 @@ class EquipmentPageState extends State<EquipmentPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -509,9 +478,9 @@ class EquipmentPageState extends State<EquipmentPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -651,7 +620,7 @@ class EquipmentPageState extends State<EquipmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -668,11 +637,11 @@ class EquipmentPageState extends State<EquipmentPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

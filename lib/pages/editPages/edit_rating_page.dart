@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/rating.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditRatingPage extends StatefulWidget {
   const EditRatingPage({
-    Key key,
-    @required this.rating,
+    Key? key,
+    required this.rating,
   }) : super(key: key);
   final Rating rating;
 
@@ -26,17 +27,17 @@ class EditRatingPage extends StatefulWidget {
 
 class EditRatingPageState extends State<EditRatingPage> {
   String _title = 'New Rating Scheme';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _lastController;
-  TextEditingController _nextController;
-  TextEditingController _raterController;
-  TextEditingController _srController;
-  TextEditingController _reviewerController;
-  String _type,
+  final TextEditingController _lastController = TextEditingController();
+  final TextEditingController _nextController = TextEditingController();
+  final TextEditingController _raterController = TextEditingController();
+  final TextEditingController _srController = TextEditingController();
+  final TextEditingController _reviewerController = TextEditingController();
+  String? _type,
       _soldierId,
       _rank,
       _lastName,
@@ -44,19 +45,30 @@ class EditRatingPageState extends State<EditRatingPage> {
       _section,
       _rankSort,
       _owner;
-  List<dynamic> _users;
-  List<String> _types;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  DateTime _lastDate, _nextDate;
-  RegExp regExp;
+  List<dynamic>? _users;
+  final List<String> _types = [
+    '',
+    'Annual',
+    'Ext Annual',
+    'Change of Rater',
+    'Relief for Cause',
+    'Complete the Record',
+    '60 Day Rater Option',
+    '60 Day Senior Rater Option',
+    'Temporary Duty/Special Duty',
+    'Change of Duty',
+    'Officer Failing Promotion Selection',
+  ];
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _lastDate, _nextDate;
 
   Future<void> _pickLast(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _lastDate,
+          initialDate: _lastDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -95,9 +107,9 @@ class EditRatingPageState extends State<EditRatingPage> {
   Future<void> _pickNext(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _nextDate,
+          initialDate: _nextDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -133,7 +145,7 @@ class EditRatingPageState extends State<EditRatingPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -144,21 +156,21 @@ class EditRatingPageState extends State<EditRatingPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Rating saveRating = Rating(
         id: widget.rating.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         last: _lastController.text,
         next: _nextController.text,
-        nextType: _type,
+        nextType: _type!,
         rater: _raterController.text,
         sr: _srController.text,
         reviewer: _reviewerController.text,
@@ -191,21 +203,21 @@ class EditRatingPageState extends State<EditRatingPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('ratings')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -213,7 +225,7 @@ class EditRatingPageState extends State<EditRatingPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -221,11 +233,6 @@ class EditRatingPageState extends State<EditRatingPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -242,24 +249,6 @@ class EditRatingPageState extends State<EditRatingPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    _types = [];
-    _types.add('');
-    _types.add('Annual');
-    _types.add('Ext Annual');
-    _types.add('Change of Rater');
-    _types.add('Relief for Cause');
-    _types.add('Complete the Record');
-    _types.add('60 Day Rater Option');
-    _types.add('60 Day Senior Rater Option');
-    _types.add('Temporary Duty/Special Duty');
-    _types.add('Change of Duty');
-    _types.add('Officer Failing Promotion Selection');
-
     if (widget.rating.id != null) {
       _title = '${widget.rating.rank} ${widget.rating.name}';
     }
@@ -274,24 +263,20 @@ class EditRatingPageState extends State<EditRatingPage> {
     _owner = widget.rating.owner;
     _users = widget.rating.users;
 
-    _lastController = TextEditingController(text: widget.rating.last);
-    _nextController = TextEditingController(text: widget.rating.next);
-    _raterController = TextEditingController(text: widget.rating.rater);
-    _srController = TextEditingController(text: widget.rating.sr);
-    _reviewerController = TextEditingController(text: widget.rating.reviewer);
-
-    removeSoldiers = false;
-    updated = false;
+    _lastController.text = widget.rating.last;
+    _nextController.text = widget.rating.next;
+    _raterController.text = widget.rating.rater;
+    _srController.text = widget.rating.sr;
+    _reviewerController.text = widget.rating.reviewer;
 
     _lastDate = DateTime.tryParse(widget.rating.last) ?? DateTime.now();
     _nextDate = DateTime.tryParse(widget.rating.next) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -300,7 +285,9 @@ class EditRatingPageState extends State<EditRatingPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -339,15 +326,15 @@ class EditRatingPageState extends State<EditRatingPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -355,7 +342,7 @@ class EditRatingPageState extends State<EditRatingPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -363,26 +350,26 @@ class EditRatingPageState extends State<EditRatingPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -455,7 +442,7 @@ class EditRatingPageState extends State<EditRatingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -480,7 +467,7 @@ class EditRatingPageState extends State<EditRatingPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -507,7 +494,7 @@ class EditRatingPageState extends State<EditRatingPage> {
                                         return DropdownMenuItem(
                                             value: type, child: Text(type));
                                       }).toList(),
-                                      onChanged: (value) {
+                                      onChanged: (dynamic value) {
                                         if (mounted) {
                                           setState(() {
                                             _type = value;

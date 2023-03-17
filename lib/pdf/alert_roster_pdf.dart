@@ -4,16 +4,16 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
 class AlertRosterPdf {
-  AlertRosterPdf(
-    this.documents,
-  );
+  AlertRosterPdf({
+    required this.documents,
+  });
 
   final List<dynamic> documents;
-  List<Widget> children;
+  List<Widget> children = [];
   int all = 0;
 
   Widget alertRow(
-      String name, String cell, String work, double padding, bool fullPage) {
+      String? name, String? cell, String? work, double padding, bool fullPage) {
     String cellPhone = cell ?? '';
     String workPhone = work ?? '';
     return Padding(
@@ -51,14 +51,14 @@ class AlertRosterPdf {
 
   void buildChildren(bool fullPage, int page) {}
 
-  List<Widget> alertChildren(bool fullPage, int page) {
+  List<Widget>? alertChildren(bool fullPage, int page) {
     children = [];
     int a, b, c, d, e, current = 1;
-    Map<String, dynamic> top = documents
+    Map<String, dynamic>? top = documents
         .firstWhere((doc) => doc['supervisorId'] == 'Top of Hierarchy');
     if (page == 1) {
       children.add(alertRow(
-          top['soldier'], top['phone'], top['workPhone'], 0.0, fullPage));
+          top!['soldier'], top['phone'], top['workPhone'], 0.0, fullPage));
       all = 1;
       //current = 1;
     }
@@ -66,7 +66,7 @@ class AlertRosterPdf {
       if ((fullPage && all >= page * 12) || (!fullPage && all >= page * 9)) {
         break;
       }
-      if (documents[a]['supervisorId'] == top['soldierId']) {
+      if (documents[a]['supervisorId'] == top!['soldierId']) {
         if (current >= all) {
           children.add(alertRow(documents[a]['soldier'], documents[a]['phone'],
               documents[a]['workPhone'], fullPage ? 36.0 : 18.0, fullPage));
@@ -157,7 +157,7 @@ class AlertRosterPdf {
         build: (Context context) {
           return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: alertChildren(true, 1));
+              children: alertChildren(true, 1)!);
         }));
 
     if (documents.length > 12) {
@@ -169,7 +169,7 @@ class AlertRosterPdf {
             return Center(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: alertChildren(true, 2)));
+                    children: alertChildren(true, 2)!));
           }));
       if (documents.length > 24) {
         pdf.addPage(Page(
@@ -180,7 +180,7 @@ class AlertRosterPdf {
               return Center(
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: alertChildren(true, 3)));
+                      children: alertChildren(true, 3)!));
             }));
         if (documents.length > 36) {
           pdf.addPage(Page(
@@ -191,7 +191,7 @@ class AlertRosterPdf {
                 return Center(
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: alertChildren(true, 4)));
+                        children: alertChildren(true, 4)!));
               }));
           if (documents.length > 48) {
             pdf.addPage(Page(
@@ -202,7 +202,7 @@ class AlertRosterPdf {
                   return Center(
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: alertChildren(true, 5)));
+                          children: alertChildren(true, 5)!));
                 }));
             if (documents.length > 60) {
               pdf.addPage(Page(
@@ -213,7 +213,7 @@ class AlertRosterPdf {
                     return Center(
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: alertChildren(true, 6)));
+                            children: alertChildren(true, 6)!));
                   }));
               if (documents.length > 72) {
                 pdf.addPage(Page(
@@ -224,7 +224,7 @@ class AlertRosterPdf {
                       return Center(
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: alertChildren(true, 7)));
+                              children: alertChildren(true, 7)!));
                     }));
                 if (documents.length > 84) {
                   pdf.addPage(Page(
@@ -235,7 +235,7 @@ class AlertRosterPdf {
                         return Center(
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: alertChildren(true, 8)));
+                                children: alertChildren(true, 8)!));
                       }));
                   if (documents.length > 96) {
                     pdf.addPage(Page(
@@ -246,7 +246,7 @@ class AlertRosterPdf {
                           return Center(
                               child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: alertChildren(true, 9)));
+                                  children: alertChildren(true, 9)!));
                         }));
                     if (documents.length > 108) {
                       pdf.addPage(Page(
@@ -258,7 +258,7 @@ class AlertRosterPdf {
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    children: alertChildren(true, 10)));
+                                    children: alertChildren(true, 10)!));
                           }));
                       if (documents.length > 120) {
                         pdf.addPage(Page(
@@ -270,7 +270,7 @@ class AlertRosterPdf {
                                   child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      children: alertChildren(true, 11)));
+                                      children: alertChildren(true, 11)!));
                             }));
                         if (documents.length > 132) {
                           pdf.addPage(Page(
@@ -282,7 +282,7 @@ class AlertRosterPdf {
                                     child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children: alertChildren(true, 12)));
+                                        children: alertChildren(true, 12)!));
                               }));
                         }
                       }
@@ -310,7 +310,7 @@ class AlertRosterPdf {
           return Center(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: alertChildren(false, 1)));
+                  children: alertChildren(false, 1)!));
         }));
 
     if (documents.length > 9) {
@@ -322,7 +322,7 @@ class AlertRosterPdf {
             return Center(
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: alertChildren(false, 2)));
+                    children: alertChildren(false, 2)!));
           }));
 
       if (documents.length > 18) {
@@ -334,7 +334,7 @@ class AlertRosterPdf {
               return Center(
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: alertChildren(false, 3)));
+                      children: alertChildren(false, 3)!));
             }));
 
         if (documents.length > 27) {
@@ -346,7 +346,7 @@ class AlertRosterPdf {
                 return Center(
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: alertChildren(false, 4)));
+                        children: alertChildren(false, 4)!));
               }));
 
           if (documents.length > 36) {
@@ -358,7 +358,7 @@ class AlertRosterPdf {
                   return Center(
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: alertChildren(false, 5)));
+                          children: alertChildren(false, 5)!));
                 }));
 
             if (documents.length > 45) {
@@ -370,7 +370,7 @@ class AlertRosterPdf {
                     return Center(
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: alertChildren(false, 6)));
+                            children: alertChildren(false, 6)!));
                   }));
 
               if (documents.length > 54) {
@@ -382,7 +382,7 @@ class AlertRosterPdf {
                       return Center(
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: alertChildren(false, 7)));
+                              children: alertChildren(false, 7)!));
                     }));
                 if (documents.length > 63) {
                   pdf.addPage(Page(
@@ -393,7 +393,7 @@ class AlertRosterPdf {
                         return Center(
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: alertChildren(false, 8)));
+                                children: alertChildren(false, 8)!));
                       }));
                   if (documents.length > 72) {
                     pdf.addPage(Page(
@@ -404,7 +404,7 @@ class AlertRosterPdf {
                           return Center(
                               child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: alertChildren(false, 9)));
+                                  children: alertChildren(false, 9)!));
                         }));
                     if (documents.length > 81) {
                       pdf.addPage(Page(
@@ -416,7 +416,7 @@ class AlertRosterPdf {
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    children: alertChildren(false, 10)));
+                                    children: alertChildren(false, 10)!));
                           }));
                       if (documents.length > 90) {
                         pdf.addPage(Page(
@@ -428,7 +428,7 @@ class AlertRosterPdf {
                                   child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
-                                      children: alertChildren(false, 11)));
+                                      children: alertChildren(false, 11)!));
                             }));
                         if (documents.length > 99) {
                           pdf.addPage(Page(
@@ -440,7 +440,7 @@ class AlertRosterPdf {
                                     child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children: alertChildren(false, 12)));
+                                        children: alertChildren(false, 12)!));
                               }));
                         }
                       }

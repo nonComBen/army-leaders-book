@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
-  const PrivacyPolicyPage({Key key}) : super(key: key);
+  const PrivacyPolicyPage({Key? key}) : super(key: key);
 
   static const routeName = '/privacy-policy-page';
 

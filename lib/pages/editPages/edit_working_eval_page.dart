@@ -11,8 +11,8 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class EditWorkingEvalPage extends StatefulWidget {
   const EditWorkingEvalPage({
-    Key key,
-    @required this.eval,
+    Key? key,
+    required this.eval,
   }) : super(key: key);
   final WorkingEval eval;
 
@@ -22,27 +22,30 @@ class EditWorkingEvalPage extends StatefulWidget {
 
 class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
   String _title = 'New Evaluation';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dutyDescriptionController;
-  TextEditingController _specialEmphasisController;
-  TextEditingController _appointedDutiesController;
-  TextEditingController _characterController;
-  TextEditingController _presenceController;
-  TextEditingController _intellectController;
-  TextEditingController _leadsController;
-  TextEditingController _developsController;
-  TextEditingController _achievesController;
-  TextEditingController _performanceController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
+  final TextEditingController _dutyDescriptionController =
+      TextEditingController();
+  final TextEditingController _specialEmphasisController =
+      TextEditingController();
+  final TextEditingController _appointedDutiesController =
+      TextEditingController();
+  final TextEditingController _characterController = TextEditingController();
+  final TextEditingController _presenceController = TextEditingController();
+  final TextEditingController _intellectController = TextEditingController();
+  final TextEditingController _leadsController = TextEditingController();
+  final TextEditingController _developsController = TextEditingController();
+  final TextEditingController _achievesController = TextEditingController();
+  final TextEditingController _performanceController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -56,11 +59,11 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
         id: widget.eval.id,
         soldierId: _soldierId,
         owner: userId,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         dutyDescription: _dutyDescriptionController.text,
         appointedDuties: _appointedDutiesController.text,
         specialEmphasis: _specialEmphasisController.text,
@@ -100,21 +103,21 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('workingEvals')
           .where('owner', isEqualTo: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -122,7 +125,7 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -130,11 +133,6 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -156,11 +154,6 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.eval.id != null) {
       _title = '${widget.eval.rank} ${widget.eval.name}';
     }
@@ -172,29 +165,22 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
     _section = widget.eval.section;
     _rankSort = widget.eval.rankSort;
 
-    _dutyDescriptionController =
-        TextEditingController(text: widget.eval.dutyDescription);
-    _specialEmphasisController =
-        TextEditingController(text: widget.eval.specialEmphasis);
-    _appointedDutiesController =
-        TextEditingController(text: widget.eval.appointedDuties);
-    _characterController = TextEditingController(text: widget.eval.character);
-    _presenceController = TextEditingController(text: widget.eval.presence);
-    _intellectController = TextEditingController(text: widget.eval.intellect);
-    _leadsController = TextEditingController(text: widget.eval.leads);
-    _developsController = TextEditingController(text: widget.eval.develops);
-    _achievesController = TextEditingController(text: widget.eval.achieves);
-    _performanceController =
-        TextEditingController(text: widget.eval.performance);
-
-    removeSoldiers = false;
-    updated = false;
+    _dutyDescriptionController.text = widget.eval.dutyDescription;
+    _specialEmphasisController.text = widget.eval.specialEmphasis;
+    _appointedDutiesController.text = widget.eval.appointedDuties;
+    _characterController.text = widget.eval.character;
+    _presenceController.text = widget.eval.presence;
+    _intellectController.text = widget.eval.intellect;
+    _leadsController.text = widget.eval.leads;
+    _developsController.text = widget.eval.develops;
+    _achievesController.text = widget.eval.achieves;
+    _performanceController.text = widget.eval.performance;
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -203,7 +189,9 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -242,15 +230,15 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -258,7 +246,7 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -266,20 +254,20 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   updated = true;

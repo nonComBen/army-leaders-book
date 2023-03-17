@@ -17,8 +17,8 @@ import '../widgets/anon_warning_banner.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -29,12 +29,12 @@ class NotesPage extends StatefulWidget {
 }
 
 class NotesPageState extends State<NotesPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents;
-  StreamSubscription _subscription;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [];
+  late StreamSubscription _subscription;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -55,15 +55,18 @@ class NotesPageState extends State<NotesPage> {
               : 'ca-app-pub-2431077176117105/9894231072';
 
       myBanner = BannerAd(
-          adUnitId: adUnitId,
-          size: AdSize.banner,
-          request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-          listener: BannerAdListener(onAdLoaded: (ad) {
+        adUnitId: adUnitId,
+        size: AdSize.banner,
+        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
             _adLoaded = true;
-          }));
+          },
+        ),
+      );
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -73,20 +76,20 @@ class NotesPageState extends State<NotesPage> {
   void initState() {
     super.initState();
 
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('notes')
         .where('owner', isEqualTo: widget.userId)
         .snapshots();
-    _subscription = stream.listen((updates) {
-      setState(() {
-        documents = updates.docs;
-        _selectedDocuments.clear();
-      });
-    });
+    _subscription = stream.listen(
+      (updates) {
+        setState(
+          () {
+            documents = updates.docs;
+            _selectedDocuments.clear();
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -115,22 +118,26 @@ class NotesPageState extends State<NotesPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditNotePage(
-                  note: Note.fromSnapshot(_selectedDocuments[0]),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditNotePage(
+          note: Note.fromSnapshot(_selectedDocuments[0]),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditNotePage(
-                  note: Note(
-                    owner: widget.userId,
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditNotePage(
+          note: Note(
+            owner: widget.userId,
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(Orientation orientation) {
@@ -166,7 +173,7 @@ class NotesPageState extends State<NotesPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
         selected: _selectedDocuments.contains(documentSnapshot),
-        onSelectChanged: (bool selected) =>
+        onSelectChanged: (bool? selected) =>
             onSelected(selected, documentSnapshot),
         cells: <DataCell>[
           DataCell(Text(documentSnapshot['title'])),
@@ -212,9 +219,9 @@ class NotesPageState extends State<NotesPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -224,63 +231,63 @@ class NotesPageState extends State<NotesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: const Text('Notes'),
-          actions: <Widget>[
-            Tooltip(
-                message: 'Delete Record(s)',
-                child: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _deleteRecord())),
-            Tooltip(
-                message: 'Edit Record',
-                child: IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => _editRecord())),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner,
-                ),
-              ),
-            Flexible(
-              flex: 1,
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).orientation),
-                      rows: _createRows(
-                          documents, MediaQuery.of(context).size.width),
-                    ),
-                  )
-                ],
+      key: _scaffoldState,
+      appBar: AppBar(
+        title: const Text('Notes'),
+        actions: <Widget>[
+          Tooltip(
+              message: 'Delete Record(s)',
+              child: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => _deleteRecord())),
+          Tooltip(
+              message: 'Edit Record',
+              child: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () => _editRecord())),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
             ),
-          ],
-        ));
+          Flexible(
+            flex: 1,
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(8.0),
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).orientation),
+                    rows: _createRows(
+                        documents, MediaQuery.of(context).size.width),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

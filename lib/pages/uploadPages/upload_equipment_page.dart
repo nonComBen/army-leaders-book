@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/equipment.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadEquipmentPage extends StatefulWidget {
   const UploadEquipmentPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,9 +24,9 @@ class UploadEquipmentPage extends StatefulWidget {
 }
 
 class UploadEquipmentPageState extends State<UploadEquipmentPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       weapon,
       buttStock,
       serial,
@@ -47,14 +48,14 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -69,32 +70,32 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      weapon = columnHeaders.contains('Weapon') ? 'Weapon' : '';
-      buttStock = columnHeaders.contains('Butt Stock') ? 'Butt Stock' : '';
-      serial = columnHeaders.contains('Serial #') ? 'Serial #' : '';
-      optic = columnHeaders.contains('Optics') ? 'Optics' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      weapon = columnHeaders!.contains('Weapon') ? 'Weapon' : '';
+      buttStock = columnHeaders!.contains('Butt Stock') ? 'Butt Stock' : '';
+      serial = columnHeaders!.contains('Serial #') ? 'Serial #' : '';
+      optic = columnHeaders!.contains('Optics') ? 'Optics' : '';
       opticSerial =
-          columnHeaders.contains('Optics Serial #') ? 'Optics Serial #' : '';
+          columnHeaders!.contains('Optics Serial #') ? 'Optics Serial #' : '';
       weapon2 =
-          columnHeaders.contains('Secondary Weapon') ? 'Secondary Weapon' : '';
-      buttStock2 = columnHeaders.contains('Secondary Butt Stock')
+          columnHeaders!.contains('Secondary Weapon') ? 'Secondary Weapon' : '';
+      buttStock2 = columnHeaders!.contains('Secondary Butt Stock')
           ? 'Secondary Butt Stock'
           : '';
-      serial2 = columnHeaders.contains('Secondary Serial #')
+      serial2 = columnHeaders!.contains('Secondary Serial #')
           ? 'Secondary Serial #'
           : '';
       optic2 =
-          columnHeaders.contains('Secondary Optics') ? 'Secondary Optics' : '';
-      opticSerial2 = columnHeaders.contains('Secondary Optics Serial #')
+          columnHeaders!.contains('Secondary Optics') ? 'Secondary Optics' : '';
+      opticSerial2 = columnHeaders!.contains('Secondary Optics Serial #')
           ? 'Secondary Optics Serial #'
           : '';
-      mask = columnHeaders.contains('Mask') ? 'Mask' : '';
-      veh = columnHeaders.contains('Vehicle Type') ? 'Vehicle Type' : '';
+      mask = columnHeaders!.contains('Mask') ? 'Mask' : '';
+      veh = columnHeaders!.contains('Vehicle Type') ? 'Vehicle Type' : '';
       bumper =
-          columnHeaders.contains('Vehicle Bumper #') ? 'Vehicle Bumper #' : '';
-      misc = columnHeaders.contains('Miscellaneous') ? 'Miscellaneous' : '';
-      miscSerial = columnHeaders.contains('Miscellaneous Serial #')
+          columnHeaders!.contains('Vehicle Bumper #') ? 'Vehicle Bumper #' : '';
+      misc = columnHeaders!.contains('Miscellaneous') ? 'Miscellaneous' : '';
+      miscSerial = columnHeaders!.contains('Miscellaneous Serial #')
           ? 'Miscellaneous Serial #'
           : '';
     });
@@ -112,11 +113,11 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -205,7 +206,7 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
     misc = '';
     miscSerial = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -243,7 +244,7 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -264,10 +265,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -283,10 +284,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Weapon'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: weapon,
@@ -302,10 +303,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Butt Stock'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: buttStock,
@@ -321,10 +322,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Serial No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: serial,
@@ -340,10 +341,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Optics'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: optic,
@@ -359,10 +360,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Optics Serial No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: opticSerial,
@@ -378,10 +379,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Secondary Weapon'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: weapon2,
@@ -397,10 +398,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Secondary Butt Stock'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: buttStock2,
@@ -416,10 +417,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Secondary Serial No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: serial2,
@@ -435,10 +436,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Secondary Optics'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: optic2,
@@ -454,10 +455,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Secondary Optics Serial No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: opticSerial2,
@@ -472,10 +473,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Mask'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: mask,
@@ -491,10 +492,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Vehicle'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: veh,
@@ -510,10 +511,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Vehicle Bumper'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: bumper,
@@ -529,10 +530,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Other Item'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: misc,
@@ -548,10 +549,10 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Other Item Serial No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: miscSerial,
@@ -565,11 +566,12 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Equipment',
                   )
                 ],

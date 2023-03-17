@@ -1,22 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class Award {
-  String id;
+  String? id;
   String owner;
   List<dynamic> users;
   String soldierId;
   String name;
   String number;
 
-  Award(
-      {this.id,
-      @required this.owner,
-      @required this.users,
-      @required this.soldierId,
-      this.name = '',
-      this.number = ''});
+  Award({
+    this.id,
+    required this.owner,
+    required this.users,
+    required this.soldierId,
+    this.name = '',
+    this.number = '',
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};

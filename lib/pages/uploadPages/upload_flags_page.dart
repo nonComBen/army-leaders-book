@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/flag.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadFlagsPage extends StatefulWidget {
   const UploadFlagsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,22 +24,22 @@ class UploadFlagsPage extends StatefulWidget {
 }
 
 class UploadFlagsPageState extends State<UploadFlagsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, date, type, expDate, comments, path;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, date, type, expDate, comments, path;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -53,12 +54,12 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
       expDate =
-          columnHeaders.contains('Expiration Date') ? 'Expiration Date' : '';
-      type = columnHeaders.contains('Flag Type') ? 'Flag Type' : '';
-      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
+          columnHeaders!.contains('Expiration Date') ? 'Expiration Date' : '';
+      type = columnHeaders!.contains('Flag Type') ? 'Flag Type' : '';
+      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
     });
   }
 
@@ -74,7 +75,7 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> types = [];
       types.add('Adverse Action');
@@ -93,8 +94,8 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
       types.add('Other');
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -151,7 +152,7 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
     type = '';
     comments = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -189,7 +190,7 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -210,10 +211,10 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -228,10 +229,10 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Type'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: type,
@@ -246,10 +247,10 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -265,10 +266,10 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Expiration Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: expDate,
@@ -284,10 +285,10 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: comments,
@@ -301,11 +302,12 @@ class UploadFlagsPageState extends State<UploadFlagsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Flags',
                   ),
                 ],

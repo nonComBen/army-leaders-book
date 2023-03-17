@@ -25,8 +25,8 @@ import '../pdf/duty_roster_pdf.dart';
 
 class DutyRosterPage extends StatefulWidget {
   const DutyRosterPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -37,12 +37,12 @@ class DutyRosterPage extends StatefulWidget {
 }
 
 class DutyRosterPageState extends State<DutyRosterPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -71,7 +71,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -81,11 +81,6 @@ class DutyRosterPageState extends State<DutyRosterPage> {
   void initState() {
     super.initState();
 
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('dutyRoster')
         .where('users', isNotEqualTo: null)
@@ -110,37 +105,9 @@ class DutyRosterPageState extends State<DutyRosterPage> {
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadDutyRosterPage()));
-      // Widget title = const Text('Upload Duty Roster');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Duty Roster, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Start/End Date '
-      //       'also needs to be in yyyy-MM-dd or M/d/yy format.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadDutyRosterPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+        context,
+        MaterialPageRoute(builder: (context) => const UploadDutyRosterPage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -191,7 +158,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -204,7 +171,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/dutyRoster.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -266,7 +233,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
       (a, b) => a['start'].toString().compareTo(b['start'].toString()),
     );
     DutyRosterPdf pdf = DutyRosterPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -417,7 +384,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -512,9 +479,9 @@ class DutyRosterPageState extends State<DutyRosterPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -654,7 +621,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -671,11 +638,11 @@ class DutyRosterPageState extends State<DutyRosterPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

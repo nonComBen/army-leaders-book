@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/rating.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadRatingsPage extends StatefulWidget {
   const UploadRatingsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,22 +24,22 @@ class UploadRatingsPage extends StatefulWidget {
 }
 
 class UploadRatingsPageStat extends State<UploadRatingsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, rater, sr, reviewer, lastEval, nextEval, nextType, path;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, rater, sr, reviewer, lastEval, nextEval, nextType, path;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -53,14 +54,14 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      rater = columnHeaders.contains('Rater') ? 'Rater' : '';
-      sr = columnHeaders.contains('Senior Rater') ? 'Senior Rater' : '';
-      reviewer = columnHeaders.contains('Reviewer') ? 'Reviewer' : '';
-      lastEval = columnHeaders.contains('Last Eval') ? 'Last Eval' : '';
-      nextEval = columnHeaders.contains('Next Eval') ? 'Next Eval' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      rater = columnHeaders!.contains('Rater') ? 'Rater' : '';
+      sr = columnHeaders!.contains('Senior Rater') ? 'Senior Rater' : '';
+      reviewer = columnHeaders!.contains('Reviewer') ? 'Reviewer' : '';
+      lastEval = columnHeaders!.contains('Last Eval') ? 'Last Eval' : '';
+      nextEval = columnHeaders!.contains('Next Eval') ? 'Next Eval' : '';
       nextType =
-          columnHeaders.contains('Next Eval Type') ? 'Next Eval Type' : '';
+          columnHeaders!.contains('Next Eval Type') ? 'Next Eval Type' : '';
     });
   }
 
@@ -76,7 +77,7 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> events = [];
       events.add('');
@@ -92,8 +93,8 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
       events.add('Officer Failing Promotion Selection');
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -156,7 +157,7 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
     nextEval = '';
     nextType = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -194,7 +195,7 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -215,10 +216,10 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -233,10 +234,10 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Rater'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: rater,
@@ -252,10 +253,10 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Senior Rater'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: sr,
@@ -271,10 +272,10 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Reviewer'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: reviewer,
@@ -290,10 +291,10 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Last Eval'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: lastEval,
@@ -309,10 +310,10 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Next Eval Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nextEval,
@@ -328,10 +329,10 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Next Eval Type'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nextType,
@@ -345,11 +346,12 @@ class UploadRatingsPageStat extends State<UploadRatingsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Rating Schemes',
                   )
                 ],

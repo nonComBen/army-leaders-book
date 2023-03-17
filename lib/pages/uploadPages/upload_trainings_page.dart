@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/training.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadTrainingsPage extends StatefulWidget {
   const UploadTrainingsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,9 +24,9 @@ class UploadTrainingsPage extends StatefulWidget {
 }
 
 class UploadTrainingsPageState extends State<UploadTrainingsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       cyber,
       opsec,
       antiTerror,
@@ -56,14 +57,14 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -78,48 +79,48 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
       cyber =
-          columnHeaders.contains('Cyber Awareness') ? 'Cyber Awareness' : '';
-      opsec = columnHeaders.contains('OPSEC') ? 'OPSEC' : '';
-      antiTerror = columnHeaders.contains('AT Level 1') ? 'AT Level 1' : '';
-      law = columnHeaders.contains('Law of War') ? 'Law of War' : '';
-      persRec = columnHeaders.contains('Personnel Recovery')
+          columnHeaders!.contains('Cyber Awareness') ? 'Cyber Awareness' : '';
+      opsec = columnHeaders!.contains('OPSEC') ? 'OPSEC' : '';
+      antiTerror = columnHeaders!.contains('AT Level 1') ? 'AT Level 1' : '';
+      law = columnHeaders!.contains('Law of War') ? 'Law of War' : '';
+      persRec = columnHeaders!.contains('Personnel Recovery')
           ? 'Personnel Recovery'
           : '';
-      infoSec = columnHeaders.contains('Information Security')
+      infoSec = columnHeaders!.contains('Information Security')
           ? 'Information Security'
           : '';
-      ctip = columnHeaders.contains('CTIP') ? 'CTIP' : '';
-      gat = columnHeaders.contains('GAT') ? 'GAT' : '';
-      tarp = columnHeaders.contains('TARP') ? 'TARP' : '';
-      sere = columnHeaders.contains('SERE') ? 'SERE' : '';
-      eo = columnHeaders.contains('Equal Opportunity')
+      ctip = columnHeaders!.contains('CTIP') ? 'CTIP' : '';
+      gat = columnHeaders!.contains('GAT') ? 'GAT' : '';
+      tarp = columnHeaders!.contains('TARP') ? 'TARP' : '';
+      sere = columnHeaders!.contains('SERE') ? 'SERE' : '';
+      eo = columnHeaders!.contains('Equal Opportunity')
           ? 'Equal Opportunity'
           : '';
-      asap = columnHeaders.contains('ASAP') ? 'ASAP' : '';
-      suicide = columnHeaders.contains('Suicide Prevention')
+      asap = columnHeaders!.contains('ASAP') ? 'ASAP' : '';
+      suicide = columnHeaders!.contains('Suicide Prevention')
           ? 'Suicide Prevention'
           : '';
-      sharp = columnHeaders.contains('SHARP') ? 'SHARP' : '';
-      add1 = columnHeaders.contains('Additional 1') ? 'Additional 1' : '';
-      add1Date = columnHeaders.contains('Additional 1 Date')
+      sharp = columnHeaders!.contains('SHARP') ? 'SHARP' : '';
+      add1 = columnHeaders!.contains('Additional 1') ? 'Additional 1' : '';
+      add1Date = columnHeaders!.contains('Additional 1 Date')
           ? 'Additional 1 Date'
           : '';
-      add2 = columnHeaders.contains('Additional 2') ? 'Additional 2' : '';
-      add2Date = columnHeaders.contains('Additional 2 Date')
+      add2 = columnHeaders!.contains('Additional 2') ? 'Additional 2' : '';
+      add2Date = columnHeaders!.contains('Additional 2 Date')
           ? 'Additional 2 Date'
           : '';
-      add3 = columnHeaders.contains('Additional 3') ? 'Additional 3' : '';
-      add3Date = columnHeaders.contains('Additional 3 Date')
+      add3 = columnHeaders!.contains('Additional 3') ? 'Additional 3' : '';
+      add3Date = columnHeaders!.contains('Additional 3 Date')
           ? 'Additional 3 Date'
           : '';
-      add4 = columnHeaders.contains('Additional 4') ? 'Additional 4' : '';
-      add4Date = columnHeaders.contains('Additional 4 Date')
+      add4 = columnHeaders!.contains('Additional 4') ? 'Additional 4' : '';
+      add4Date = columnHeaders!.contains('Additional 4 Date')
           ? 'Additional 4 Date'
           : '';
-      add5 = columnHeaders.contains('Additional 5') ? 'Additional 5' : '';
-      add5Date = columnHeaders.contains('Additional 5 Date')
+      add5 = columnHeaders!.contains('Additional 5') ? 'Additional 5' : '';
+      add5Date = columnHeaders!.contains('Additional 5 Date')
           ? 'Additional 5 Date'
           : '';
     });
@@ -137,11 +138,11 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -270,7 +271,7 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
     add5 = '';
     add5Date = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -308,7 +309,7 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -329,10 +330,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -348,10 +349,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Cyber Awareness Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: cyber,
@@ -367,10 +368,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'OPSEC Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: opsec,
@@ -386,10 +387,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Anti-Terror Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: antiTerror,
@@ -405,10 +406,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Law of War Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: law,
@@ -424,10 +425,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Personnel Recovery Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: persRec,
@@ -443,10 +444,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Info Security Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: infoSec,
@@ -462,10 +463,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'CTIP Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: ctip,
@@ -481,10 +482,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'GAT Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: gat,
@@ -500,10 +501,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SERE Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: sere,
@@ -519,10 +520,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'TARP Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: tarp,
@@ -538,10 +539,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'EO Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: eo,
@@ -557,10 +558,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'ASAP Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: asap,
@@ -576,10 +577,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Suicide Prev Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: suicide,
@@ -595,10 +596,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SHARP Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: sharp,
@@ -614,10 +615,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 1'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add1,
@@ -633,10 +634,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 1 Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add1Date,
@@ -652,10 +653,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 2'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add2,
@@ -671,10 +672,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 2 Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add2Date,
@@ -690,10 +691,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 3'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add3,
@@ -709,10 +710,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 3 Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add3Date,
@@ -728,10 +729,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 4'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add4,
@@ -747,10 +748,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 4 Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add4Date,
@@ -766,10 +767,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 5'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add5,
@@ -785,10 +786,10 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Additional Training 5 Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: add5Date,
@@ -802,11 +803,12 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Training',
                   )
                 ],

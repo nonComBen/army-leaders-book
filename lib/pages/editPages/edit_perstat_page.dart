@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/perstat.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditPerstatPage extends StatefulWidget {
   const EditPerstatPage({
-    Key key,
-    @required this.perstat,
+    Key? key,
+    required this.perstat,
   }) : super(key: key);
   final Perstat perstat;
 
@@ -26,17 +27,17 @@ class EditPerstatPage extends StatefulWidget {
 
 class EditPerstatPageState extends State<EditPerstatPage> {
   String _title = 'New Perstat';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _startController;
-  TextEditingController _endController;
-  TextEditingController _typeController;
-  TextEditingController _commentsController;
-  TextEditingController _locController;
-  String _type,
+  final TextEditingController _startController = TextEditingController();
+  final TextEditingController _endController = TextEditingController();
+  final TextEditingController _typeController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+  final TextEditingController _locController = TextEditingController();
+  String? _type,
       _otherType,
       _soldierId,
       _rank,
@@ -45,19 +46,30 @@ class EditPerstatPageState extends State<EditPerstatPage> {
       _section,
       _rankSort,
       _owner;
-  List<dynamic> _users;
-  List<String> _types;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated, saveToCalendar, updateCalendar;
-  DateTime _start, _end;
-  RegExp regExp;
+  List<dynamic>? _users;
+  final List<String> _types = [
+    'Leave',
+    'Pass',
+    'TDY',
+    'Duty',
+    'Comp Day',
+    'Hospital',
+    'AWOL',
+    'Confinement',
+    'SUTA',
+    'ADOS',
+    'Other',
+  ];
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _start, _end;
 
   Future<void> _pickStart(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _start,
+          initialDate: _start!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -95,9 +107,9 @@ class EditPerstatPageState extends State<EditPerstatPage> {
   Future<void> _pickEnd(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _end,
+          initialDate: _end!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -158,7 +170,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -168,28 +180,28 @@ class EditPerstatPageState extends State<EditPerstatPage> {
 
   void submit(BuildContext context) async {
     if (validateAndSave()) {
-      String type;
+      String? type;
       if (_type == 'Other' && _typeController.text != '') {
         type = _typeController.text;
       } else {
         type = _type;
       }
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Perstat savePerstat = Perstat(
         id: widget.perstat.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         start: _startController.text,
         end: _endController.text,
-        type: type,
+        type: type!,
         comments: _commentsController.text,
         location: _locController.text,
       );
@@ -210,21 +222,21 @@ class EditPerstatPageState extends State<EditPerstatPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('perstat')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -232,7 +244,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -240,11 +252,6 @@ class EditPerstatPageState extends State<EditPerstatPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -261,23 +268,6 @@ class EditPerstatPageState extends State<EditPerstatPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    _types = [];
-    _types.add('Leave');
-    _types.add('Pass');
-    _types.add('TDY');
-    _types.add('Duty');
-    _types.add('Comp Day');
-    _types.add('Hospital');
-    _types.add('AWOL');
-    _types.add('Confinement');
-    _types.add('SUTA');
-    _types.add('ADOS');
-    _types.add('Other');
     int matches = 0;
     for (var type in _types) {
       if (type == widget.perstat.type) {
@@ -305,24 +295,20 @@ class EditPerstatPageState extends State<EditPerstatPage> {
     _owner = widget.perstat.owner;
     _users = widget.perstat.users;
 
-    _startController = TextEditingController(text: widget.perstat.start);
-    _endController = TextEditingController(text: widget.perstat.end);
-    _typeController = TextEditingController(text: _otherType);
-    _commentsController = TextEditingController(text: widget.perstat.comments);
-    _locController = TextEditingController(text: widget.perstat.location ?? '');
-
-    removeSoldiers = false;
-    updated = false;
+    _startController.text = widget.perstat.start;
+    _endController.text = widget.perstat.end;
+    _typeController.text = _otherType!;
+    _commentsController.text = widget.perstat.comments;
+    _locController.text = widget.perstat.location;
 
     _start = DateTime.tryParse(_startController.text) ?? DateTime.now();
     _end = DateTime.tryParse(_endController.text) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -331,7 +317,9 @@ class EditPerstatPageState extends State<EditPerstatPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -371,15 +359,15 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -387,7 +375,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -395,26 +383,26 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -450,7 +438,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                       child: Text(value),
                                     );
                                   }).toList(),
-                                  onChanged: (value) {
+                                  onChanged: (dynamic value) {
                                     if (mounted) {
                                       setState(() {
                                         _type = value;
@@ -500,7 +488,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -511,7 +499,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                             _pickStart(context);
                                           })),
                                   onChanged: (value) {
-                                    if (regExp.hasMatch(value)) {
+                                    if (isValidDate(value)) {
                                       _start =
                                           DateTime.tryParse(value) ?? _start;
                                     }
@@ -526,7 +514,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -537,7 +525,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                                             _pickEnd(context);
                                           })),
                                   onChanged: (value) {
-                                    if (regExp.hasMatch(value)) {
+                                    if (isValidDate(value)) {
                                       _end = DateTime.tryParse(value) ?? _end;
                                     }
                                     updated = true;
@@ -563,7 +551,7 @@ class EditPerstatPageState extends State<EditPerstatPage> {
                           FormattedElevatedButton(
                             onPressed: () {
                               if (_endController.text != '' &&
-                                  _end.isBefore(_start)) {
+                                  _end!.isBefore(_start!)) {
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(const SnackBar(
                                   content:

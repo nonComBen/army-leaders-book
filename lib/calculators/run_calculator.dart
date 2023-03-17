@@ -1,8 +1,12 @@
 class RunCalculator {
-  List<String> events = ['Swim', 'Bike', 'Walk'];
+  List<String?> events = ['Swim', 'Bike', 'Walk'];
 
-  int getRunScore(bool male, int ageGroupIndex, int runRaw) {
-    int score;
+  int? getRunScore({
+    required bool male,
+    required int ageGroupIndex,
+    required int runRaw,
+  }) {
+    int? score;
     if (male) {
       if (runRaw > 2630) return 0;
       if (runRaw <= 1300) return 100;
@@ -25,19 +29,28 @@ class RunCalculator {
     return score;
   }
 
-  bool passAltEvent(bool male, int ageGroupIndex, int runRaw, String event) {
+  bool passAltEvent({
+    required bool male,
+    required int ageGroupIndex,
+    required int runRaw,
+    required String event,
+  }) {
     if (male) {
       String min = altMins[ageGroupIndex][events.indexOf(event)];
-      int minInt = int.tryParse(min.substring(0, 2) + min.substring(3));
+      int minInt = int.tryParse(min.substring(0, 2) + min.substring(3))!;
       return runRaw <= minInt;
     } else {
       String min = altMins[ageGroupIndex + 10][events.indexOf(event)];
-      int minInt = int.tryParse(min.substring(0, 2) + min.substring(3));
+      int minInt = int.tryParse(min.substring(0, 2) + min.substring(3))!;
       return runRaw <= minInt;
     }
   }
 
-  List<String> getBenchmarks(bool male, int ageGroupIndex, String event) {
+  List<String> getBenchmarks({
+    required bool male,
+    required int ageGroupIndex,
+    required String event,
+  }) {
     if (event != 'Run') {
       return [
         altMins[male ? ageGroupIndex : ageGroupIndex + 10]

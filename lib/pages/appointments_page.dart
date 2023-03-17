@@ -26,8 +26,8 @@ import '../providers/tracking_provider.dart';
 
 class AptsPage extends StatefulWidget {
   const AptsPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -38,12 +38,12 @@ class AptsPage extends StatefulWidget {
 }
 
 class AptsPageState extends State<AptsPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -72,7 +72,7 @@ class AptsPageState extends State<AptsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        myBanner.load();
+        myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -81,12 +81,6 @@ class AptsPageState extends State<AptsPage> {
   @override
   void initState() {
     super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('appointments')
@@ -197,7 +191,7 @@ class AptsPageState extends State<AptsPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -210,7 +204,7 @@ class AptsPageState extends State<AptsPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/appointments.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -271,7 +265,7 @@ class AptsPageState extends State<AptsPage> {
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
     AppointmentsPdf pdf = AppointmentsPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -423,7 +417,7 @@ class AptsPageState extends State<AptsPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -518,9 +512,9 @@ class AptsPageState extends State<AptsPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -661,7 +655,7 @@ class AptsPageState extends State<AptsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -678,11 +672,11 @@ class AptsPageState extends State<AptsPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

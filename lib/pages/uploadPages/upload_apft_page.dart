@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/apft.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadApftPage extends StatefulWidget {
   const UploadApftPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,9 +24,9 @@ class UploadApftPage extends StatefulWidget {
 }
 
 class UploadApftPageState extends State<UploadApftPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       date,
       age,
       puRaw,
@@ -42,14 +43,14 @@ class UploadApftPageState extends State<UploadApftPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -64,17 +65,17 @@ class UploadApftPageState extends State<UploadApftPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
-      age = columnHeaders.contains('Age') ? 'Age' : '';
-      puRaw = columnHeaders.contains('PU Raw') ? 'PU Raw' : '';
-      puScore = columnHeaders.contains('PU Score') ? 'PU Score' : '';
-      suRaw = columnHeaders.contains('SU Raw') ? 'SU Raw' : '';
-      suScore = columnHeaders.contains('SU Score') ? 'SU Score' : '';
-      runEvent = columnHeaders.contains('Alt Event') ? 'Alt Event' : '';
-      runRaw = columnHeaders.contains('Run Raw') ? 'Run Raw' : '';
-      runScore = columnHeaders.contains('Run Score') ? 'Run Score' : '';
-      gender = columnHeaders.contains('Gender') ? 'Gender' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      age = columnHeaders!.contains('Age') ? 'Age' : '';
+      puRaw = columnHeaders!.contains('PU Raw') ? 'PU Raw' : '';
+      puScore = columnHeaders!.contains('PU Score') ? 'PU Score' : '';
+      suRaw = columnHeaders!.contains('SU Raw') ? 'SU Raw' : '';
+      suScore = columnHeaders!.contains('SU Score') ? 'SU Score' : '';
+      runEvent = columnHeaders!.contains('Alt Event') ? 'Alt Event' : '';
+      runRaw = columnHeaders!.contains('Run Raw') ? 'Run Raw' : '';
+      runScore = columnHeaders!.contains('Run Score') ? 'Run Score' : '';
+      gender = columnHeaders!.contains('Gender') ? 'Gender' : '';
     });
   }
 
@@ -90,7 +91,7 @@ class UploadApftPageState extends State<UploadApftPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> events = [];
       events.add('');
@@ -100,10 +101,10 @@ class UploadApftPageState extends State<UploadApftPage> {
       events.add('Swim');
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         bool pass;
-        int puInt, suInt, runInt, ageInt, total;
+        int? puInt, suInt, runInt, ageInt, total;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -198,7 +199,7 @@ class UploadApftPageState extends State<UploadApftPage> {
     runScore = '';
     gender = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -236,7 +237,7 @@ class UploadApftPageState extends State<UploadApftPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -257,10 +258,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -275,10 +276,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -293,10 +294,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Age'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: age,
@@ -312,10 +313,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Gender'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: gender,
@@ -331,10 +332,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'PU Raw'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: puRaw,
@@ -350,10 +351,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'PU Score'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: puScore,
@@ -369,10 +370,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SU Raw'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: suRaw,
@@ -388,10 +389,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SU Score'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: suScore,
@@ -407,10 +408,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Aerobic Event'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: runEvent,
@@ -426,10 +427,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Aerobic Raw'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: runRaw,
@@ -445,10 +446,10 @@ class UploadApftPageState extends State<UploadApftPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Aerobic Score'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: runScore,
@@ -462,11 +463,12 @@ class UploadApftPageState extends State<UploadApftPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload APFT Stats',
                   )
                 ],

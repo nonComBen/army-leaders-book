@@ -10,8 +10,8 @@ import '../auth_provider.dart';
 import '../providers/root_provider.dart';
 
 class CreateAccountPage extends StatefulWidget {
-  const CreateAccountPage({Key key, this.onAccountCreated}) : super(key: key);
-  final Function onAccountCreated;
+  const CreateAccountPage({Key? key, this.onAccountCreated}) : super(key: key);
+  final Function? onAccountCreated;
 
   @override
   CreateAccountPageState createState() => CreateAccountPageState();
@@ -19,7 +19,7 @@ class CreateAccountPage extends StatefulWidget {
 
 class CreateAccountPageState extends State<CreateAccountPage> {
   final formKey = GlobalKey<FormState>();
-  String _email, _password;
+  String? _email, _password;
   bool tosAgree = false;
   final _passwordController = TextEditingController();
 
@@ -40,7 +40,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
               'You must agree to the Terms and Conditions to create an account.')));
       return false;
     }
-    final form = formKey.currentState;
+    final form = formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -48,14 +48,14 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     return false;
   }
 
-  void validateAndCreate(AuthService auth) async {
+  void validateAndCreate(AuthService? auth) async {
     if (validateAndSave()) {
       try {
         User user =
-            await auth.createUserWithEmailAndPassword(_email, _password);
+            (await auth!.createUserWithEmailAndPassword(_email!, _password!))!;
         final userObj = UserObj(
           userId: user.uid,
-          userEmail: user.email,
+          userEmail: user.email!,
           userName: user.displayName ?? '',
           createdDate: DateTime.now(),
           lastLoginDate: DateTime.now(),
@@ -65,7 +65,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
         FirebaseFirestore.instance
             .doc('users/${user.uid}')
             .set(userObj.toMap());
-        widget.onAccountCreated();
+        widget.onAccountCreated!();
       } catch (e) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
@@ -76,7 +76,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   @override
   Widget build(BuildContext context) {
     final rootProvider = Provider.of<RootProvider>(context);
-    var auth = AuthProvider.of(context).auth;
+    var auth = AuthProvider.of(context)!.auth;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       key: _scaffoldState,
@@ -112,15 +112,15 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                             labelText: 'Email', icon: Icon(Icons.mail)),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) =>
-                            value.isEmpty ? 'Email can\'t be empty' : null,
-                        onSaved: (value) => _email = value.trim(),
+                            value!.isEmpty ? 'Email can\'t be empty' : null,
+                        onSaved: (value) => _email = value!.trim(),
                       ),
                       TextFormField(
                         decoration: const InputDecoration(
                             labelText: 'Password', icon: Icon(Icons.lock)),
                         controller: _passwordController,
                         validator: (value) =>
-                            value.isEmpty ? 'Password can\'t be empty' : null,
+                            value!.isEmpty ? 'Password can\'t be empty' : null,
                         onSaved: (value) => _password = value,
                         obscureText: true,
                       ),
@@ -148,7 +148,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                           value: tosAgree,
                           onChanged: (value) {
                             setState(() {
-                              tosAgree = value;
+                              tosAgree = value!;
                             });
                           }),
                       Padding(
@@ -166,7 +166,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                                   style: TextStyle(fontSize: 20.0)),
                             ),
                             onPressed: () {
-                              validateAndCreate(auth);
+                              validateAndCreate(auth as AuthService?);
                             }),
                       ),
                       Padding(

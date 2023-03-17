@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/profile.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadPermProfilePage extends StatefulWidget {
   const UploadPermProfilePage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,22 +24,22 @@ class UploadPermProfilePage extends StatefulWidget {
 }
 
 class UploadPermProfilePageState extends State<UploadPermProfilePage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, date, shaving, pu, su, run, altEvent, comments, path;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, date, shaving, pu, su, run, altEvent, comments, path;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -53,14 +54,14 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
-      shaving = columnHeaders.contains('Shaving') ? 'Shaving' : '';
-      pu = columnHeaders.contains('PU') ? 'PU' : '';
-      su = columnHeaders.contains('SU') ? 'SU' : '';
-      run = columnHeaders.contains('Run') ? 'Run' : '';
-      altEvent = columnHeaders.contains('Alt Event') ? 'Alt Event' : '';
-      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      shaving = columnHeaders!.contains('Shaving') ? 'Shaving' : '';
+      pu = columnHeaders!.contains('PU') ? 'PU' : '';
+      su = columnHeaders!.contains('SU') ? 'SU' : '';
+      run = columnHeaders!.contains('Run') ? 'Run' : '';
+      altEvent = columnHeaders!.contains('Alt Event') ? 'Alt Event' : '';
+      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
     });
   }
 
@@ -76,7 +77,7 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> events = [];
       events.add('');
@@ -85,8 +86,8 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
       events.add('Swim');
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -153,7 +154,7 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
     altEvent = '';
     comments = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -191,7 +192,7 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -212,10 +213,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -230,10 +231,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -249,10 +250,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Shaving'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: shaving,
@@ -268,10 +269,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Push Ups'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: pu,
@@ -287,10 +288,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Sit Ups'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: su,
@@ -305,10 +306,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Run'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: run,
@@ -324,10 +325,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Alternative Event'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: altEvent,
@@ -343,10 +344,10 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: comments,
@@ -360,11 +361,12 @@ class UploadPermProfilePageState extends State<UploadPermProfilePage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Profiles',
                   )
                 ],

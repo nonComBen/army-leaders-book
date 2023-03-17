@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
-void updateUsersArray(String uid) async {
+void updateUsersArray(String? uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<dynamic> users = [];
 

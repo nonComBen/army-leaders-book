@@ -7,9 +7,9 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class ShareSoldierPage extends StatefulWidget {
   const ShareSoldierPage({
-    Key key,
-    @required this.userId,
-    @required this.soldiers,
+    Key? key,
+    required this.userId,
+    required this.soldiers,
   }) : super(key: key);
   final String userId;
   final List<Soldier> soldiers;
@@ -23,13 +23,13 @@ class ShareSoldierPage extends StatefulWidget {
 class ShareSoldierPageState extends State<ShareSoldierPage> {
   TextEditingController controller = TextEditingController();
 
-  List<DocumentSnapshot> allSnapshots;
-  FirebaseFirestore firestore;
+  List<DocumentSnapshot>? allSnapshots;
+  late FirebaseFirestore firestore;
   String userId = '';
   bool lookupUserId = true, lookupUserEmail = false;
 
   void _makeSure(
-      BuildContext context, String userId, String rank, String name) {
+      BuildContext context, String? userId, String? rank, String? name) {
     String soldierList = '';
     for (Soldier soldier in widget.soldiers) {
       soldierList = '$soldierList\n - ${soldier.rank} ${soldier.lastName}';
@@ -53,9 +53,9 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
     );
   }
 
-  void _shareSoldier(BuildContext context, String userId) {
+  void _shareSoldier(BuildContext context, String? userId) {
     for (Soldier soldier in widget.soldiers) {
-      List<dynamic> users = soldier.users ?? [widget.userId];
+      List<dynamic> users = soldier.users;
       users.add(userId);
       DocumentReference soldierRef =
           firestore.collection('soldiers').doc(soldier.id);
@@ -160,7 +160,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                           AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
                               snapshot) {
                         if (snapshot.data == null ||
-                            snapshot.data.docs.isEmpty) {
+                            snapshot.data!.docs.isEmpty) {
                           return const Card(
                             child: ListTile(
                               title: Text('No User Found'),
@@ -171,21 +171,20 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                           case ConnectionState.waiting:
                             return const CircularProgressIndicator();
                           default:
-                            if (snapshot.data.docs.first.exists) {
+                            if (snapshot.data!.docs.first.exists) {
                               return Card(
                                 child: ListTile(
                                   title: Text(
-                                      '${snapshot.data.docs.first['rank']} ${snapshot.data.docs.first['userName']}' ??
-                                          ''),
+                                      '${snapshot.data!.docs.first['rank']} ${snapshot.data!.docs.first['userName']}'),
                                   subtitle: Text(
-                                      snapshot.data.docs.first['userEmail'] ??
+                                      snapshot.data!.docs.first['userEmail'] ??
                                           ''),
                                   onTap: () {
                                     _makeSure(
                                         context,
-                                        snapshot.data.docs.first['userId'],
-                                        snapshot.data.docs.first['rank'],
-                                        snapshot.data.docs.first['userName']);
+                                        snapshot.data!.docs.first['userId'],
+                                        snapshot.data!.docs.first['rank'],
+                                        snapshot.data!.docs.first['userName']);
                                   },
                                 ),
                               );

@@ -22,33 +22,33 @@ import '../../widgets/formatted_text_button.dart';
 
 class EditUserPage extends StatefulWidget {
   const EditUserPage({
-    Key key,
+    Key? key,
     this.userId,
   }) : super(key: key);
-  final String userId;
+  final String? userId;
 
   @override
   EditUserPageState createState() => EditUserPageState();
 }
 
 class EditUserPageState extends State<EditUserPage> {
-  bool updated;
-  FirebaseFirestore firestore;
-  UserObj user;
+  bool updated = false;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  late UserObj user;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _rankController;
-  TextEditingController _nameController;
-  TextEditingController _unitController;
-  TextEditingController _emailController;
+  final TextEditingController _rankController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _unitController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   Future<void> deleteAccount(BuildContext context) async {
     // var rootBloc = BlocProvider.of<RootBloc>(context);
     final rootProvider = Provider.of<RootProvider>(context, listen: false);
-    var auth = AuthProvider.of(context).auth;
-    User user = auth.currentUser();
+    var auth = AuthProvider.of(context)!.auth!;
+    User user = auth.currentUser()!;
     try {
       user.delete();
       showSnackbar(context, 'Your account and data has been deleted.');
@@ -65,7 +65,7 @@ class EditUserPageState extends State<EditUserPage> {
       BuildContext context, BaseAuth auth, RootProvider rootProvider) {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
-    User user;
+    User? user;
     Widget title = const Text('Verify Authentication');
     Widget content = SingleChildScrollView(
       child: Column(
@@ -82,14 +82,14 @@ class EditUserPageState extends State<EditUserPage> {
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
             validator: (value) =>
-                value.isEmpty ? 'Email can\'t be empty' : null,
+                value!.isEmpty ? 'Email can\'t be empty' : null,
           ),
           TextFormField(
             controller: passwordController,
             decoration: const InputDecoration(
                 labelText: 'Password', icon: Icon(Icons.lock)),
             validator: (value) =>
-                value.isEmpty ? 'Password can\'t be empty' : null,
+                value!.isEmpty ? 'Password can\'t be empty' : null,
             obscureText: true,
           ),
           Padding(
@@ -117,7 +117,7 @@ class EditUserPageState extends State<EditUserPage> {
                   user = await auth.reathenticateWithCredential('google', '');
                   if (!mounted) return;
                   if (user != null) {
-                    user.delete();
+                    user!.delete();
                     showSnackbar(
                         context, 'Your account and data has been deleted.');
                     rootProvider.signOut();
@@ -137,7 +137,7 @@ class EditUserPageState extends State<EditUserPage> {
                 user = await auth.reathenticateWithCredential('apple', '');
                 if (!mounted) return;
                 if (user != null) {
-                  user.delete();
+                  user!.delete();
                   showSnackbar(
                       context, 'Your account and data has been deleted.');
                   rootProvider.signOut();
@@ -175,7 +175,7 @@ class EditUserPageState extends State<EditUserPage> {
                         emailController.text, passwordController.text);
                     if (!mounted) return;
                     if (user != null) {
-                      user.delete();
+                      user!.delete();
                       showSnackbar(
                           context, 'Your account and data has been deleted.');
                       rootProvider.signOut();
@@ -216,7 +216,7 @@ class EditUserPageState extends State<EditUserPage> {
                           emailController.text, passwordController.text);
                       if (!mounted) return;
                       if (user != null) {
-                        user.delete();
+                        user!.delete();
                         showSnackbar(
                             context, 'Your account and data has been deleted.');
                         rootProvider.signOut();
@@ -232,7 +232,7 @@ class EditUserPageState extends State<EditUserPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -286,25 +286,9 @@ class EditUserPageState extends State<EditUserPage> {
     );
   }
 
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
-  }
-
   @override
   void initState() {
     super.initState();
-
-    firestore = FirebaseFirestore.instance;
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    updated = false;
-
-    _rankController = TextEditingController();
-    _nameController = TextEditingController();
-    _unitController = TextEditingController();
-    _emailController = TextEditingController();
     init();
   }
 
@@ -337,7 +321,8 @@ class EditUserPageState extends State<EditUserPage> {
       body: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          onWillPop: _onBackPressed,
+          onWillPop:
+              updated ? () => onBackPressed(context) : () => Future(() => true),
           child: Padding(
             padding: EdgeInsets.symmetric(
                 horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -402,8 +387,9 @@ class EditUserPageState extends State<EditUserPage> {
                               controller: _nameController,
                               keyboardType: TextInputType.text,
                               textCapitalization: TextCapitalization.words,
-                              validator: (value) =>
-                                  value.isEmpty ? 'Name can\'t be empty' : null,
+                              validator: (value) => value!.isEmpty
+                                  ? 'Name can\'t be empty'
+                                  : null,
                               enabled: true,
                               decoration: const InputDecoration(
                                 labelText: 'Name',

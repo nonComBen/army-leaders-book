@@ -10,24 +10,16 @@ import './pages/login.dart';
 import 'pages/link_anonymous_page.dart';
 
 class RootPage extends StatefulWidget {
-  const RootPage({Key key}) : super(key: key);
+  const RootPage({Key? key}) : super(key: key);
 
   @override
   RootPageState createState() => RootPageState();
 }
 
 class RootPageState extends State<RootPage> {
-  String emailAddress;
-  User user;
-  RootProvider _rootProvider;
-
-  // void _signedIn(UserObj userObj) {
-  //   setState(() {
-  //     _userObj = userObj;
-  //     _soldiersProvider.loadSoldiers(userObj.userId);
-  //     _rootProvider.signIn();
-  //   });
-  // }
+  String? emailAddress;
+  User? user;
+  late RootProvider _rootProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +43,11 @@ class RootPageState extends State<RootPage> {
             );
           case AuthStatus.localAuthSignIn:
             return const LocalAuthLoginPage();
+          default:
+            return LoginPage(
+              onSignedIn: _rootProvider.signIn,
+            );
         }
-        return null;
       },
     );
   }

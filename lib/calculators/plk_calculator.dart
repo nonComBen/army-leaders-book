@@ -1,4 +1,8 @@
-int getPlkScore(int time, int ageGroup, bool male) {
+int getPlkScore({
+  required int time,
+  required int ageGroup,
+  required bool male,
+}) {
   if (male) {
     if (time > 340) return 100;
     if (time < 40) return 0;

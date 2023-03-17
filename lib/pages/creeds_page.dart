@@ -11,7 +11,7 @@ import '../widgets/anon_warning_banner.dart';
 
 class CreedsPage extends StatefulWidget {
   const CreedsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/creeds-page';
@@ -28,7 +28,7 @@ class Creed {
 }
 
 class CreedsPageState extends State<CreedsPage> {
-  bool isSubscribed;
+  bool isSubscribed = false;
   final List<Creed> _creeds = <Creed>[
     Creed(
         false,
@@ -274,7 +274,7 @@ class CreedsPageState extends State<CreedsPage> {
           ),
         )),
   ];
-  BannerAd myBanner;
+  BannerAd? myBanner;
 
   @override
   void didChangeDependencies() {
@@ -307,12 +307,10 @@ class CreedsPageState extends State<CreedsPage> {
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && !isSubscribed) {
-      myBanner
-          // typically this happens well before the ad is shown
-          .load();
+      myBanner!.load();
     }
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Creeds, Etc.'),
@@ -329,11 +327,11 @@ class CreedsPageState extends State<CreedsPage> {
               if (!isSubscribed && !kIsWeb)
                 Container(
                   alignment: Alignment.center,
-                  width: myBanner.size.width.toDouble(),
-                  height: myBanner.size.height.toDouble(),
+                  width: myBanner!.size.width.toDouble(),
+                  height: myBanner!.size.height.toDouble(),
                   constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                   child: AdWidget(
-                    ad: myBanner,
+                    ad: myBanner!,
                   ),
                 ),
               Flexible(

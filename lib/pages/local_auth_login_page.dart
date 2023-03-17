@@ -9,14 +9,14 @@ import '../providers/root_provider.dart';
 import '../providers/user_provider.dart';
 
 class LocalAuthLoginPage extends StatefulWidget {
-  const LocalAuthLoginPage({Key key}) : super(key: key);
+  const LocalAuthLoginPage({Key? key}) : super(key: key);
 
   @override
   LocalAuthLoginPageState createState() => LocalAuthLoginPageState();
 }
 
 class LocalAuthLoginPageState extends State<LocalAuthLoginPage> {
-  AuthService _auth;
+  AuthService? _auth;
 
   void onUnlockApp(BuildContext context) async {
     final rootProvider = Provider.of<RootProvider>(context, listen: false);
@@ -29,14 +29,14 @@ class LocalAuthLoginPageState extends State<LocalAuthLoginPage> {
         options: const AuthenticationOptions(stickyAuth: true));
 
     if (authenticated) {
-      soldiersProvider.loadSoldiers(_auth.currentUser().uid);
+      soldiersProvider.loadSoldiers(_auth!.currentUser()!.uid);
       rootProvider.signIn();
     }
   }
 
   void onSignOut(BuildContext context) {
     final rootProvider = Provider.of<RootProvider>(context, listen: false);
-    _auth.signOut();
+    _auth!.signOut();
     rootProvider.signOut();
   }
 
@@ -47,9 +47,9 @@ class LocalAuthLoginPageState extends State<LocalAuthLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    _auth = AuthProvider.of(context).auth;
+    _auth = AuthProvider.of(context)!.auth as AuthService?;
     Provider.of<UserProvider>(context, listen: false)
-        .loadUser(_auth.currentUser().uid);
+        .loadUser(_auth!.currentUser()!.uid);
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -83,8 +83,7 @@ class LocalAuthLoginPageState extends State<LocalAuthLoginPage> {
                             const RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(24.0))))),
-                    onPressed: () =>
-                        throw Exception('test crash'), // onUnlockApp(context),
+                    onPressed: () => onUnlockApp(context),
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(

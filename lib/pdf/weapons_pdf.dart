@@ -5,9 +5,9 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WeaponsPdf {
-  WeaponsPdf(
-    this.documents,
-  );
+  WeaponsPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 

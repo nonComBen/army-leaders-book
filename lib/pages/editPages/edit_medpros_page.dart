@@ -10,14 +10,16 @@ import 'package:leaders_book/methods/custom_alert_dialog.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/medpro.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditMedprosPage extends StatefulWidget {
   const EditMedprosPage({
-    Key key,
-    @required this.medpro,
+    Key? key,
+    required this.medpro,
   }) : super(key: key);
   final Medpro medpro;
 
@@ -27,37 +29,37 @@ class EditMedprosPage extends StatefulWidget {
 
 class EditMedprosPageState extends State<EditMedprosPage> {
   String _title = 'New MedPros';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _phaController;
-  TextEditingController _dentalController;
-  TextEditingController _visionController;
-  TextEditingController _hearingController;
-  TextEditingController _hivController;
-  TextEditingController _fluController;
-  TextEditingController _mmrController;
-  TextEditingController _varicellaController;
-  TextEditingController _polioController;
-  TextEditingController _tuberculinController;
-  TextEditingController _tetanusController;
-  TextEditingController _hepAController;
-  TextEditingController _hepBController;
-  TextEditingController _encephalitisController;
-  TextEditingController _meningController;
-  TextEditingController _typhoidController;
-  TextEditingController _yellowController;
-  TextEditingController _smallPoxController;
-  TextEditingController _anthraxController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  List<dynamic> _otherImms;
-  bool removeSoldiers, updated;
-  bool expanded;
-  DateTime _phaDate,
+  final TextEditingController _phaController = TextEditingController();
+  final TextEditingController _dentalController = TextEditingController();
+  final TextEditingController _visionController = TextEditingController();
+  final TextEditingController _hearingController = TextEditingController();
+  final TextEditingController _hivController = TextEditingController();
+  final TextEditingController _fluController = TextEditingController();
+  final TextEditingController _mmrController = TextEditingController();
+  final TextEditingController _varicellaController = TextEditingController();
+  final TextEditingController _polioController = TextEditingController();
+  final TextEditingController _tuberculinController = TextEditingController();
+  final TextEditingController _tetanusController = TextEditingController();
+  final TextEditingController _hepAController = TextEditingController();
+  final TextEditingController _hepBController = TextEditingController();
+  final TextEditingController _encephalitisController = TextEditingController();
+  final TextEditingController _meningController = TextEditingController();
+  final TextEditingController _typhoidController = TextEditingController();
+  final TextEditingController _yellowController = TextEditingController();
+  final TextEditingController _smallPoxController = TextEditingController();
+  final TextEditingController _anthraxController = TextEditingController();
+
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<dynamic>? _otherImms;
+  bool removeSoldiers = false, updated = false, expanded = false;
+  DateTime? _phaDate,
       _dentalDate,
       _visionDate,
       _hearingDate,
@@ -76,14 +78,13 @@ class EditMedprosPageState extends State<EditMedprosPage> {
       _yellowDate,
       _smallPoxDate,
       _anthraxDate;
-  RegExp regExp;
 
   Future<void> _pickPha(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _phaDate,
+          initialDate: _phaDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -121,9 +122,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickDental(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dentalDate,
+          initialDate: _dentalDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -161,9 +162,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickHearing(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _hearingDate,
+          initialDate: _hearingDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -202,9 +203,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickHiv(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _hivDate,
+          initialDate: _hivDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -242,9 +243,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickVision(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _visionDate,
+          initialDate: _visionDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -282,9 +283,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickFlu(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _fluDate,
+          initialDate: _fluDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -322,9 +323,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickMmr(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _mmrDate,
+          initialDate: _mmrDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -362,9 +363,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickVaricella(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _varicellaDate,
+          initialDate: _varicellaDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -402,9 +403,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickPolio(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _polioDate,
+          initialDate: _polioDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -442,9 +443,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickTuberculin(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _tuberDate,
+          initialDate: _tuberDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -482,9 +483,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickTetanus(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _tetanusDate,
+          initialDate: _tetanusDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -522,9 +523,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickHepA(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _hepADate,
+          initialDate: _hepADate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -562,9 +563,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickHepB(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _hepBDate,
+          initialDate: _hepBDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -602,9 +603,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickEncephalitis(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _encephalitisDate,
+          initialDate: _encephalitisDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -642,9 +643,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickMening(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _meningDate,
+          initialDate: _meningDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -682,9 +683,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickTyphoid(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _typhoidDate,
+          initialDate: _typhoidDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -722,9 +723,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickYellow(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _yellowDate,
+          initialDate: _yellowDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -762,9 +763,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickSmallPox(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _smallPoxDate,
+          initialDate: _smallPoxDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -802,9 +803,9 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   Future<void> _pickAnthrax(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _anthraxDate,
+          initialDate: _anthraxDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -840,7 +841,7 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -851,18 +852,18 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Medpro saveMedpros = Medpro(
         id: widget.medpro.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         pha: _phaController.text,
         dental: _dentalController.text,
         vision: _visionController.text,
@@ -933,11 +934,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _mmrController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'MMR Date',
                       prefixIcon: IconButton(
@@ -961,11 +961,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _varicellaController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Varicella Date',
                       prefixIcon: IconButton(
@@ -989,11 +988,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _polioController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Polio Date',
                       prefixIcon: IconButton(
@@ -1017,11 +1015,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _tuberculinController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Tuberculin Date',
                       prefixIcon: IconButton(
@@ -1045,11 +1042,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _tetanusController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Tetanus Date',
                       prefixIcon: IconButton(
@@ -1073,11 +1069,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _hepAController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Hepatitis A Date',
                       prefixIcon: IconButton(
@@ -1101,11 +1096,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _hepBController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Hepatitis B Date',
                       prefixIcon: IconButton(
@@ -1129,11 +1123,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _encephalitisController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Encephalitis Date',
                       prefixIcon: IconButton(
@@ -1157,11 +1150,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _meningController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Meningococcal Date',
                       prefixIcon: IconButton(
@@ -1185,11 +1177,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _typhoidController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Typhoid Date',
                       prefixIcon: IconButton(
@@ -1213,11 +1204,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _yellowController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Yellow Fever Date',
                       prefixIcon: IconButton(
@@ -1241,11 +1231,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _smallPoxController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Small Pox Date',
                       prefixIcon: IconButton(
@@ -1269,11 +1258,10 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                   controller: _anthraxController,
                   keyboardType: TextInputType.datetime,
                   enabled: true,
-                  validator: (value) => regExp.hasMatch(value) ||
-                          value.isEmpty ||
-                          value == 'Exempt'
-                      ? null
-                      : 'Date must be in yyyy-MM-dd format',
+                  validator: (value) =>
+                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
+                          ? null
+                          : 'Date must be in yyyy-MM-dd format',
                   decoration: InputDecoration(
                       labelText: 'Anthrax Date',
                       prefixIcon: IconButton(
@@ -1316,7 +1304,7 @@ class EditMedprosPageState extends State<EditMedprosPage> {
             )
           ],
         ),
-        if (_otherImms.isNotEmpty)
+        if (_otherImms!.isNotEmpty)
           GridView.count(
             primary: false,
             crossAxisCount: width > 700 ? 2 : 1,
@@ -1328,7 +1316,7 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                     ? width / 200
                     : width / 100,
             shrinkWrap: true,
-            children: _otherImms
+            children: _otherImms!
                 .map((imm) => Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: Card(
@@ -1339,12 +1327,12 @@ class EditMedprosPageState extends State<EditMedprosPage> {
                           icon: const Icon(Icons.delete),
                           onPressed: () {
                             setState(() {
-                              _otherImms.removeAt(_otherImms.indexOf(imm));
+                              _otherImms!.removeAt(_otherImms!.indexOf(imm));
                             });
                           },
                         ),
                         onTap: () {
-                          _editImm(context, _otherImms.indexOf(imm));
+                          _editImm(context, _otherImms!.indexOf(imm));
                         },
                       ),
                     )))
@@ -1358,11 +1346,11 @@ class EditMedprosPageState extends State<EditMedprosPage> {
     }
   }
 
-  void _editImm(BuildContext context, int index) {
+  void _editImm(BuildContext context, int? index) {
     TextEditingController titleController = TextEditingController();
-    if (index != null) titleController.text = _otherImms[index]['title'];
+    if (index != null) titleController.text = _otherImms![index]['title'];
     TextEditingController dateController = TextEditingController();
-    if (index != null) dateController.text = _otherImms[index]['date'];
+    if (index != null) dateController.text = _otherImms![index]['date'];
     Widget title =
         Text(index != null ? 'Edit Immunization' : 'Add Immunization');
     Widget content = Column(
@@ -1370,7 +1358,7 @@ class EditMedprosPageState extends State<EditMedprosPage> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
+          child: PlatformTextField(
             controller: titleController,
             keyboardType: TextInputType.text,
             decoration: const InputDecoration(labelText: 'Immunization'),
@@ -1378,7 +1366,7 @@ class EditMedprosPageState extends State<EditMedprosPage> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextFormField(
+          child: PlatformTextField(
             controller: dateController,
             keyboardType: TextInputType.text,
             decoration: const InputDecoration(labelText: 'Date'),
@@ -1398,34 +1386,34 @@ class EditMedprosPageState extends State<EditMedprosPage> {
     );
   }
 
-  void saveImms(int index, String title, String date) {
+  void saveImms(int? index, String title, String date) {
     setState(() {
       if (index != null) {
-        _otherImms[index]['title'] = title;
-        _otherImms[index]['date'] = date;
+        _otherImms![index]['title'] = title;
+        _otherImms![index]['date'] = date;
       } else {
-        _otherImms.add(
+        _otherImms!.add(
           {'title': title, 'date': date},
         );
       }
     });
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('medpros')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -1433,7 +1421,7 @@ class EditMedprosPageState extends State<EditMedprosPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -1441,11 +1429,6 @@ class EditMedprosPageState extends State<EditMedprosPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -1476,11 +1459,6 @@ class EditMedprosPageState extends State<EditMedprosPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.medpro.id != null) {
       _title = '${widget.medpro.rank} ${widget.medpro.name}';
     }
@@ -1494,32 +1472,26 @@ class EditMedprosPageState extends State<EditMedprosPage> {
     _owner = widget.medpro.owner;
     _users = widget.medpro.users;
 
-    _phaController = TextEditingController(text: widget.medpro.pha);
-    _dentalController = TextEditingController(text: widget.medpro.dental);
-    _visionController = TextEditingController(text: widget.medpro.vision);
-    _hearingController = TextEditingController(text: widget.medpro.hearing);
-    _hivController = TextEditingController(text: widget.medpro.hiv);
-    _fluController = TextEditingController(text: widget.medpro.flu);
-    _mmrController = TextEditingController(text: widget.medpro.mmr);
-    _varicellaController = TextEditingController(text: widget.medpro.varicella);
-    _polioController = TextEditingController(text: widget.medpro.polio);
-    _tuberculinController =
-        TextEditingController(text: widget.medpro.tuberculin);
-    _tetanusController = TextEditingController(text: widget.medpro.tetanus);
-    _hepAController = TextEditingController(text: widget.medpro.hepA);
-    _hepBController = TextEditingController(text: widget.medpro.hepB);
-    _encephalitisController =
-        TextEditingController(text: widget.medpro.encephalitis);
-    _meningController =
-        TextEditingController(text: widget.medpro.meningococcal);
-    _typhoidController = TextEditingController(text: widget.medpro.typhoid);
-    _yellowController = TextEditingController(text: widget.medpro.yellow);
-    _smallPoxController = TextEditingController(text: widget.medpro.smallPox);
-    _anthraxController = TextEditingController(text: widget.medpro.anthrax);
+    _phaController.text = widget.medpro.pha;
+    _dentalController.text = widget.medpro.dental;
+    _visionController.text = widget.medpro.vision;
+    _hearingController.text = widget.medpro.hearing;
+    _hivController.text = widget.medpro.hiv;
+    _fluController.text = widget.medpro.flu;
+    _mmrController.text = widget.medpro.mmr;
+    _varicellaController.text = widget.medpro.varicella;
+    _polioController.text = widget.medpro.polio;
+    _tuberculinController.text = widget.medpro.tuberculin;
+    _tetanusController.text = widget.medpro.tetanus;
+    _hepAController.text = widget.medpro.hepA;
+    _hepBController.text = widget.medpro.hepB;
+    _encephalitisController.text = widget.medpro.encephalitis;
+    _meningController.text = widget.medpro.meningococcal;
+    _typhoidController.text = widget.medpro.typhoid;
+    _yellowController.text = widget.medpro.yellow;
+    _smallPoxController.text = widget.medpro.smallPox;
+    _anthraxController.text = widget.medpro.anthrax;
     _otherImms = widget.medpro.otherImms;
-
-    removeSoldiers = false;
-    updated = false;
 
     if (widget.medpro.mmr != '' ||
         widget.medpro.varicella != '' ||
@@ -1561,323 +1533,314 @@ class EditMedprosPageState extends State<EditMedprosPage> {
     _yellowDate = DateTime.tryParse(widget.medpro.yellow) ?? DateTime.now();
     _smallPoxDate = DateTime.tryParse(widget.medpro.smallPox) ?? DateTime.now();
     _anthraxDate = DateTime.tryParse(widget.medpro.anthrax) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
+      key: _scaffoldState,
+      appBar: AppBar(
+        title: Text(_title),
+      ),
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width > 932 ? (width - 916) / 2 : 16),
+          child: Card(
+            child: Container(
+                padding: const EdgeInsets.all(16.0),
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      if (user.isAnonymous) const AnonWarningBanner(),
+                      GridView.count(
+                        primary: false,
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 230
+                            : width > 700
+                                ? width / 230
+                                : width / 115,
+                        shrinkWrap: true,
                         children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('users', arrayContains: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers[index]
-                                                      ['firstName'];
-                                                  _section = soldiers[index]
-                                                      ['section'];
-                                                  _rankSort = soldiers[index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  _owner =
-                                                      soldiers[index]['owner'];
-                                                  _users =
-                                                      soldiers[index]['users'];
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
-                                          );
-                                      }
-                                    }),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    8.0, 16.0, 8.0, 8.0),
-                                child: CheckboxListTile(
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: removeSoldiers,
-                                  title: const Text(
-                                      'Remove Soldiers already added'),
-                                  onChanged: (checked) {
-                                    _removeSoldiers(checked, user.uid);
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _phaController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'PHA Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickPha(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _phaDate =
-                                        DateTime.tryParse(value) ?? _phaDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _dentalController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Dental Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickDental(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _dentalDate =
-                                        DateTime.tryParse(value) ?? _dentalDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _visionController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Vision Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickVision(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _visionDate =
-                                        DateTime.tryParse(value) ?? _visionDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _hearingController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Hearing Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickHearing(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _hearingDate = DateTime.tryParse(value) ??
-                                        _hearingDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _hivController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'HIV Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickHiv(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _hivDate =
-                                        DateTime.tryParse(value) ?? _hivDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _fluController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) ||
-                                              value.isEmpty ||
-                                              value == 'Exempt'
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Influenza Date',
-                                      prefixIcon: IconButton(
-                                          icon: const Icon(Icons.clear),
-                                          onPressed: () {
-                                            if (mounted) {
-                                              setState(() {
-                                                _fluController.text == 'Exempt'
-                                                    ? _fluController.text = ''
-                                                    : _fluController.text =
-                                                        'Exempt';
-                                              });
-                                            }
-                                          }),
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickFlu(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _fluDate =
-                                        DateTime.tryParse(value) ?? _fluDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                        Theme.of(context).primaryColor),
-                              ),
-                              onPressed: () {
-                                if (mounted) {
-                                  setState(() {
-                                    expanded = !expanded;
-                                  });
-                                }
+                            child: FutureBuilder(
+                                future: firestore
+                                    .collection('soldiers')
+                                    .where('users', arrayContains: user.uid)
+                                    .get(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  switch (snapshot.connectionState) {
+                                    case ConnectionState.waiting:
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    default:
+                                      allSoldiers = snapshot.data!.docs;
+                                      soldiers = removeSoldiers
+                                          ? lessSoldiers
+                                          : allSoldiers;
+                                      soldiers!.sort((a, b) => a['lastName']
+                                          .toString()
+                                          .compareTo(b['lastName'].toString()));
+                                      soldiers!.sort((a, b) => a['rankSort']
+                                          .toString()
+                                          .compareTo(b['rankSort'].toString()));
+                                      return DropdownButtonFormField<String>(
+                                        decoration: const InputDecoration(
+                                            labelText: 'Soldier'),
+                                        items: soldiers!.map((doc) {
+                                          return DropdownMenuItem<String>(
+                                            value: doc.id,
+                                            child: Text(
+                                                '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          int index = soldiers!.indexWhere(
+                                              (doc) => doc.id == value);
+                                          if (mounted) {
+                                            setState(() {
+                                              _soldierId = value;
+                                              _rank = soldiers![index]['rank'];
+                                              _lastName =
+                                                  soldiers![index]['lastName'];
+                                              _firstName =
+                                                  soldiers![index]['firstName'];
+                                              _section =
+                                                  soldiers![index]['section'];
+                                              _rankSort = soldiers![index]
+                                                      ['rankSort']
+                                                  .toString();
+                                              _owner =
+                                                  soldiers![index]['owner'];
+                                              _users =
+                                                  soldiers![index]['users'];
+                                              updated = true;
+                                            });
+                                          }
+                                        },
+                                        value: _soldierId,
+                                      );
+                                  }
+                                }),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                            child: CheckboxListTile(
+                              controlAffinity: ListTileControlAffinity.leading,
+                              value: removeSoldiers,
+                              title:
+                                  const Text('Remove Soldiers already added'),
+                              onChanged: (checked) {
+                                _removeSoldiers(checked, user.uid);
                               },
-                              child: expanded
-                                  ? const Text('Less Immunizations')
-                                  : const Text('More Immunizations'),
                             ),
                           ),
-                          moreImmunizations(width),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: FormattedElevatedButton(
-                              onPressed: () {
-                                submit(context);
+                            child: TextFormField(
+                              controller: _phaController,
+                              keyboardType: TextInputType.datetime,
+                              enabled: true,
+                              validator: (value) =>
+                                  isValidDate(value!) || value.isEmpty
+                                      ? null
+                                      : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'PHA Date',
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickPha(context);
+                                      })),
+                              onChanged: (value) {
+                                _phaDate = DateTime.tryParse(value) ?? _phaDate;
+                                updated = true;
                               },
-                              text: widget.medpro.id == null
-                                  ? 'Add MedPros'
-                                  : 'Update MedPros',
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: _dentalController,
+                              keyboardType: TextInputType.datetime,
+                              enabled: true,
+                              validator: (value) =>
+                                  isValidDate(value!) || value.isEmpty
+                                      ? null
+                                      : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'Dental Date',
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickDental(context);
+                                      })),
+                              onChanged: (value) {
+                                _dentalDate =
+                                    DateTime.tryParse(value) ?? _dentalDate;
+                                updated = true;
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: _visionController,
+                              keyboardType: TextInputType.datetime,
+                              enabled: true,
+                              validator: (value) =>
+                                  isValidDate(value!) || value.isEmpty
+                                      ? null
+                                      : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'Vision Date',
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickVision(context);
+                                      })),
+                              onChanged: (value) {
+                                _visionDate =
+                                    DateTime.tryParse(value) ?? _visionDate;
+                                updated = true;
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: _hearingController,
+                              keyboardType: TextInputType.datetime,
+                              enabled: true,
+                              validator: (value) =>
+                                  isValidDate(value!) || value.isEmpty
+                                      ? null
+                                      : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'Hearing Date',
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickHearing(context);
+                                      })),
+                              onChanged: (value) {
+                                _hearingDate =
+                                    DateTime.tryParse(value) ?? _hearingDate;
+                                updated = true;
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: _hivController,
+                              keyboardType: TextInputType.datetime,
+                              enabled: true,
+                              validator: (value) =>
+                                  isValidDate(value!) || value.isEmpty
+                                      ? null
+                                      : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'HIV Date',
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickHiv(context);
+                                      })),
+                              onChanged: (value) {
+                                _hivDate = DateTime.tryParse(value) ?? _hivDate;
+                                updated = true;
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: _fluController,
+                              keyboardType: TextInputType.datetime,
+                              enabled: true,
+                              validator: (value) => isValidDate(value!) ||
+                                      value.isEmpty ||
+                                      value == 'Exempt'
+                                  ? null
+                                  : 'Date must be in yyyy-MM-dd format',
+                              decoration: InputDecoration(
+                                  labelText: 'Influenza Date',
+                                  prefixIcon: IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        if (mounted) {
+                                          setState(() {
+                                            _fluController.text == 'Exempt'
+                                                ? _fluController.text = ''
+                                                : _fluController.text =
+                                                    'Exempt';
+                                          });
+                                        }
+                                      }),
+                                  suffixIcon: IconButton(
+                                      icon: const Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _pickFlu(context);
+                                      })),
+                              onChanged: (value) {
+                                _fluDate = DateTime.tryParse(value) ?? _fluDate;
+                                updated = true;
+                              },
                             ),
                           ),
                         ],
                       ),
-                    )),
-              ),
-            )));
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).primaryColor),
+                          ),
+                          onPressed: () {
+                            if (mounted) {
+                              setState(() {
+                                expanded = !expanded;
+                              });
+                            }
+                          },
+                          child: expanded
+                              ? const Text('Less Immunizations')
+                              : const Text('More Immunizations'),
+                        ),
+                      ),
+                      moreImmunizations(width),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FormattedElevatedButton(
+                          onPressed: () {
+                            submit(context);
+                          },
+                          text: widget.medpro.id == null
+                              ? 'Add MedPros'
+                              : 'Update MedPros',
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ),
+        ),
+      ),
+    );
   }
 }

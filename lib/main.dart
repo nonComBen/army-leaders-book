@@ -63,7 +63,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget with WidgetsBindingObserver {
-  MyApp({Key key, @required this.prefs}) : super(key: key);
+  MyApp({Key? key, required this.prefs}) : super(key: key);
   final SharedPreferences prefs;
 
   static const int _blackPrimaryValue = 0xFF000000;
@@ -123,7 +123,7 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
         auth: auth,
         child: StreamBuilder(
             stream: auth.onAuthStateChanged,
-            builder: (BuildContext context, AsyncSnapshot<User> firebaseUser) {
+            builder: (BuildContext context, AsyncSnapshot<User?> firebaseUser) {
               return MultiProvider(
                 providers: [
                   ChangeNotifierProvider<SubscriptionState>(
@@ -157,11 +157,11 @@ class MyApp extends StatelessWidget with WidgetsBindingObserver {
                     theme: lightTheme,
                     darkTheme: darkTheme,
                     themeMode: themeProvider.currentThemeMode,
-                    builder: (BuildContext context, Widget child) {
+                    builder: (BuildContext context, Widget? child) {
                       return MediaQuery(
                         data: MediaQuery.of(context)
                             .copyWith(alwaysUse24HourFormat: true),
-                        child: child,
+                        child: child!,
                       );
                     },
                     debugShowCheckedModeBanner: false,

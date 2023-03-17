@@ -26,8 +26,8 @@ import '../providers/tracking_provider.dart';
 
 class MilLicPage extends StatefulWidget {
   const MilLicPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -38,12 +38,12 @@ class MilLicPage extends StatefulWidget {
 }
 
 class MilLicPageState extends State<MilLicPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -72,7 +72,7 @@ class MilLicPageState extends State<MilLicPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -81,12 +81,6 @@ class MilLicPageState extends State<MilLicPage> {
   @override
   void initState() {
     super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('milLic')
@@ -112,38 +106,9 @@ class MilLicPageState extends State<MilLicPage> {
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UploadMilLicensePage()));
-      // Widget title = const Text('Upload Military Licenses');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Military Licenses, the file must be in .csv format. Also, there needs to be a Soldier Id column and '
-      //       'the Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from '
-      //       'Soldiers page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the '
-      //       '\'=\'. Date/Expiration Date also need to be in yyyy-MM-dd or M/d/yy format and vehicles need to be listed in one cell, separated '
-      //       'by commas with no \'and\'.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadMilLicensePage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+        context,
+        MaterialPageRoute(builder: (context) => const UploadMilLicensePage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -200,7 +165,7 @@ class MilLicPageState extends State<MilLicPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -213,7 +178,7 @@ class MilLicPageState extends State<MilLicPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/milLicenses.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -273,7 +238,7 @@ class MilLicPageState extends State<MilLicPage> {
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
     MilLicPdf pdf = MilLicPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -394,7 +359,7 @@ class MilLicPageState extends State<MilLicPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -504,9 +469,9 @@ class MilLicPageState extends State<MilLicPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -646,7 +611,7 @@ class MilLicPageState extends State<MilLicPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -663,11 +628,11 @@ class MilLicPageState extends State<MilLicPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

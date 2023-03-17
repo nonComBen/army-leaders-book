@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class Soldier {
-  String id;
+  String? id;
   String owner;
   List<dynamic> users;
   String rank;
@@ -51,10 +50,10 @@ class Soldier {
 
   Soldier({
     this.id,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
-    this.rankSort,
+    this.rankSort = 0,
     this.promotable = '',
     this.lastName = '',
     this.firstName = '',

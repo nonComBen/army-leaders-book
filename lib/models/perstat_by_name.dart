@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class PerstatByName {
-  String owner;
+  String? owner;
   String date;
   List<dynamic> dailies;
 
-  PerstatByName(
-      {@required this.owner, this.date = '', this.dailies = const []});
+  PerstatByName({required this.owner, this.date = '', this.dailies = const []});
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};

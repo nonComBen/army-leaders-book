@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/hand_receipt_item.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadHandReceiptPage extends StatefulWidget {
   const UploadHandReceiptPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -23,9 +24,9 @@ class UploadHandReceiptPage extends StatefulWidget {
 }
 
 class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       item,
       model,
       serial,
@@ -40,14 +41,14 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -62,16 +63,16 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      item = columnHeaders.contains('Item') ? 'Item' : '';
-      model = columnHeaders.contains('Model #') ? 'Model #' : '';
-      serial = columnHeaders.contains('Serial #') ? 'Serial #' : '';
-      nsn = columnHeaders.contains('NSN #') ? 'NSN #' : '';
-      location = columnHeaders.contains('Location') ? 'Location' : '';
-      value = columnHeaders.contains('Value') ? 'Value' : '';
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      item = columnHeaders!.contains('Item') ? 'Item' : '';
+      model = columnHeaders!.contains('Model #') ? 'Model #' : '';
+      serial = columnHeaders!.contains('Serial #') ? 'Serial #' : '';
+      nsn = columnHeaders!.contains('NSN #') ? 'NSN #' : '';
+      location = columnHeaders!.contains('Location') ? 'Location' : '';
+      value = columnHeaders!.contains('Value') ? 'Value' : '';
       subComponents =
-          columnHeaders.contains('Subcomponents') ? 'Subcomponents' : '';
-      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
+          columnHeaders!.contains('Subcomponents') ? 'Subcomponents' : '';
+      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
     });
   }
 
@@ -87,11 +88,11 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -183,7 +184,7 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
     subComponents = '';
     comments = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -221,7 +222,7 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -242,10 +243,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -260,10 +261,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Item'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: item,
@@ -279,10 +280,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Model No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: model,
@@ -298,10 +299,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Serial No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: serial,
@@ -317,10 +318,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'NSN No.'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: nsn,
@@ -336,10 +337,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Locataion'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: location,
@@ -354,10 +355,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Value'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: value,
@@ -373,10 +374,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Subcomponents'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: subComponents,
@@ -392,10 +393,10 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: comments,
@@ -409,11 +410,12 @@ class UploadHandReceiptPageState extends State<UploadHandReceiptPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Hand Receipt',
                   )
                 ],

@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class Medpro {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -31,13 +30,13 @@ class Medpro {
   String typhoid;
   String varicella;
   String yellow;
-  List<dynamic> otherImms;
+  List<dynamic>? otherImms;
 
   Medpro({
     this.id,
     this.soldierId,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
     this.name = '',
     this.firstName = '',
@@ -101,7 +100,7 @@ class Medpro {
 
   factory Medpro.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
-    List<dynamic> otherImms = [];
+    List<dynamic>? otherImms = [];
     try {
       users = doc['users'];
       otherImms = doc['otherImms'];

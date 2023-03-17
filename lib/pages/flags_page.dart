@@ -26,8 +26,8 @@ import '../pdf/flags_pdf.dart';
 
 class FlagsPage extends StatefulWidget {
   const FlagsPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -38,12 +38,12 @@ class FlagsPage extends StatefulWidget {
 }
 
 class FlagsPageState extends State<FlagsPage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -72,7 +72,7 @@ class FlagsPageState extends State<FlagsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -81,12 +81,6 @@ class FlagsPageState extends State<FlagsPage> {
   @override
   void initState() {
     super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('flags')
@@ -111,37 +105,10 @@ class FlagsPageState extends State<FlagsPage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadFlagsPage()));
-      // Widget title = const Text('Upload Flags');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Flags, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date/Expiration Date '
-      //       'also needs to be in yyyy-MM-dd or M/d/yy format and Type will default to Adverse Action if the type does not match an option in '
-      //       'the dropdown menu (case sensitive).',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadFlagsPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadFlagsPage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -184,7 +151,7 @@ class FlagsPageState extends State<FlagsPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -197,7 +164,7 @@ class FlagsPageState extends State<FlagsPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/flags.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -259,7 +226,7 @@ class FlagsPageState extends State<FlagsPage> {
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
     FlagsPdf pdf = FlagsPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -321,23 +288,27 @@ class FlagsPageState extends State<FlagsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditFlagPage(
-                  flag: Flag.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditFlagPage(
+          flag: Flag.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditFlagPage(
-                  flag: Flag(
-                    owner: widget.userId,
-                    users: [widget.userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditFlagPage(
+          flag: Flag(
+            owner: widget.userId,
+            users: [widget.userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -378,7 +349,7 @@ class FlagsPageState extends State<FlagsPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -466,9 +437,9 @@ class FlagsPageState extends State<FlagsPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -608,7 +579,7 @@ class FlagsPageState extends State<FlagsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -625,11 +596,11 @@ class FlagsPageState extends State<FlagsPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

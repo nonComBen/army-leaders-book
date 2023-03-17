@@ -18,8 +18,8 @@ import '../providers/soldiers_provider.dart';
 import '../providers/user_provider.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key key, this.onSignedIn}) : super(key: key);
-  final Function onSignedIn;
+  const LoginPage({Key? key, this.onSignedIn}) : super(key: key);
+  final Function? onSignedIn;
 
   @override
   LoginPageState createState() => LoginPageState();
@@ -30,11 +30,11 @@ enum FormType { login, register, forgotPassword }
 class LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
 
-  String _email;
-  String _password;
+  String? _email;
+  String? _password;
   FormType _formType = FormType.login;
-  SharedPreferences prefs;
-  PackageInfo pInfo;
+  SharedPreferences? prefs;
+  late PackageInfo pInfo;
   bool localAuthAvail = false, isLoggingIn = false;
   final LocalAuthentication localAuth = LocalAuthentication();
 
@@ -50,7 +50,7 @@ class LoginPageState extends State<LoginPage> {
     Provider.of<SoldiersProvider>(context, listen: false)
         .loadSoldiers(user.uid);
 
-    if (user.metadata.creationTime
+    if (user.metadata.creationTime!
         .isBefore(DateTime.now().subtract(const Duration(minutes: 1)))) {
       FirebaseFirestore.instance.doc('users/${user.uid}').update(
           {'lastLogin': DateTime.now(), 'created': user.metadata.creationTime});
@@ -70,7 +70,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   bool validateAndSave() {
-    final form = formKey.currentState;
+    final form = formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -79,28 +79,28 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void validateAndSubmit(String loginType) async {
-    User user;
+    User? user;
     try {
-      var auth = AuthProvider.of(context).auth;
+      var auth = AuthProvider.of(context)!.auth;
       if (_formType == FormType.login) {
         // show progress bar while signing in
         setState(() {
           isLoggingIn = true;
         });
         if (loginType == 'email' && validateAndSave()) {
-          prefs.setString('email', _emailController.text);
-          user = await auth.signInWithEmailAndPassword(_email, _password);
-          createAccount(user);
+          prefs!.setString('email', _emailController.text);
+          user = await auth!.signInWithEmailAndPassword(_email, _password);
+          createAccount(user!);
         } else if (loginType == 'google') {
-          user = await auth.signInWithGoogle();
-          createAccount(user);
+          user = await auth!.signInWithGoogle();
+          createAccount(user!);
         } else {
-          user = await auth.signInWithApple();
-          createAccount(user);
+          user = await auth!.signInWithApple();
+          createAccount(user!);
         }
-        widget.onSignedIn();
+        widget.onSignedIn!();
       } else {
-        await auth.resetPassword(_email).then((result) {
+        await auth!.resetPassword(_email).then((result) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Check email to reset password'),
           ));
@@ -125,14 +125,14 @@ class LoginPageState extends State<LoginPage> {
     setState(() {
       isLoggingIn = true;
     });
-    var auth = AuthProvider.of(context).auth;
-    final user = await auth.createAnonymousUser();
+    var auth = AuthProvider.of(context)!.auth!;
+    final user = (await auth.createAnonymousUser())!;
     createAccount(user);
-    widget.onSignedIn();
+    widget.onSignedIn!();
   }
 
   void moveToLogin() {
-    formKey.currentState.reset();
+    formKey.currentState!.reset();
     if (mounted) {
       setState(() {
         _formType = FormType.login;
@@ -141,7 +141,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void moveToForgotPassword() {
-    formKey.currentState.reset();
+    formKey.currentState!.reset();
     if (mounted) {
       setState(() {
         _formType = FormType.forgotPassword;
@@ -161,23 +161,23 @@ class LoginPageState extends State<LoginPage> {
       pInfo = await PackageInfo.fromPlatform();
       localAuthAvail = await localAuth.isDeviceSupported();
     } else {
-      bool showNipr = prefs.getBool('niprWarning') == null
+      bool showNipr = prefs!.getBool('niprWarning') == null
           ? true
-          : !prefs.getBool('niprWarning');
+          : !prefs!.getBool('niprWarning')!;
       localAuthAvail = false;
       if (mounted && showNipr) {
         showNiprWarning(context, prefs);
       }
     }
-    if (prefs.getBool("Agree") == null || !prefs.getBool('Agree')) {
-      prefs.setBool('Agree', true);
+    if (prefs!.getBool("Agree") == null || !prefs!.getBool('Agree')!) {
+      prefs!.setBool('Agree', true);
       if (!kIsWeb) {
-        prefs.setString('Version', pInfo.version);
+        prefs!.setString('Version', pInfo.version);
       }
     }
     if (mounted) {
       setState(() {
-        _emailController.text = prefs.getString('email') ?? '';
+        _emailController.text = prefs!.getString('email') ?? '';
       });
     }
   }
@@ -253,7 +253,7 @@ class LoginPageState extends State<LoginPage> {
             const InputDecoration(labelText: 'Email', icon: Icon(Icons.mail)),
         controller: _emailController,
         keyboardType: TextInputType.emailAddress,
-        validator: (value) => value.isEmpty ? 'Email can\'t be empty' : null,
+        validator: (value) => value!.isEmpty ? 'Email can\'t be empty' : null,
         onSaved: (value) => _email = value,
       ),
     ];
@@ -265,7 +265,7 @@ class LoginPageState extends State<LoginPage> {
         controller: _passwordController,
         decoration: const InputDecoration(
             labelText: 'Password', icon: Icon(Icons.lock)),
-        validator: (value) => value.isEmpty ? 'Password can\'t be empty' : null,
+        validator: (value) => value!.isEmpty ? 'Password can\'t be empty' : null,
         onSaved: (value) => _password = value,
         obscureText: true,
       ),
@@ -287,7 +287,7 @@ class LoginPageState extends State<LoginPage> {
     return [
       TextFormField(
         controller: _nameController,
-        validator: (value) => value.isEmpty ? 'Name can\'t be empty' : null,
+        validator: (value) => value!.isEmpty ? 'Name can\'t be empty' : null,
         decoration: const InputDecoration(
           labelText: 'Name',
         ),

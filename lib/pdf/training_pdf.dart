@@ -5,13 +5,13 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TrainingPdf {
-  TrainingPdf(
-    this.documents,
-  );
+  TrainingPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 
-  Widget createLabeledField(String value, String label, double inches) {
+  Widget createLabeledField(String? value, String? label, double inches) {
     double width = inches * 72;
     return DecoratedBox(
       decoration: BoxDecoration(

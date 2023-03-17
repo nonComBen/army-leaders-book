@@ -11,10 +11,10 @@ import '../../models/user.dart';
 
 class LinkAnonymousPage extends StatefulWidget {
   const LinkAnonymousPage({
-    Key key,
+    Key? key,
     this.onAccountLinked,
   }) : super(key: key);
-  final Function onAccountLinked;
+  final void Function()? onAccountLinked;
 
   @override
   LinkAnonymousPageState createState() => LinkAnonymousPageState();
@@ -22,12 +22,12 @@ class LinkAnonymousPage extends StatefulWidget {
 
 class LinkAnonymousPageState extends State<LinkAnonymousPage> {
   final formKey = GlobalKey<FormState>();
-  String _email, _password;
+  String? _email, _password;
   bool tosAgree = false;
   final _passwordController = TextEditingController();
   final _rankController = TextEditingController();
   final _nameController = TextEditingController();
-  User user;
+  User? user;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -46,7 +46,7 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
               'You must agree to the Terms and Conditions to create an account.')));
       return false;
     }
-    final form = formKey.currentState;
+    final form = formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -57,19 +57,21 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
   void validateAndLink(AuthService auth) async {
     if (validateAndSave()) {
       try {
-        await auth.linkEmailAccount(_email, _password, user);
+        await auth.linkEmailAccount(_email!, _password!, user!);
         UserObj userObj = UserObj(
-            userId: user.uid,
+            userId: user!.uid,
             userRank: _rankController.text,
             userName: _nameController.text,
-            userEmail: _email,
+            userEmail: _email!,
             tosAgree: true,
+            createdDate: DateTime.now(),
+            lastLoginDate: DateTime.now(),
             agreeDate: DateTime.now());
         FirebaseFirestore.instance
             .collection('users')
-            .doc(user.uid)
+            .doc(user!.uid)
             .set(userObj.toMap(), SetOptions(merge: true));
-        widget.onAccountLinked(userObj);
+        widget.onAccountLinked!();
       } catch (e) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
@@ -80,7 +82,7 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
   @override
   Widget build(BuildContext context) {
     final rootProvider = Provider.of<RootProvider>(context);
-    var auth = AuthProvider.of(context).auth;
+    var auth = AuthProvider.of(context)!.auth!;
     user = auth.currentUser();
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -132,15 +134,16 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
                               labelText: 'Email', icon: Icon(Icons.mail)),
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) =>
-                              value.isEmpty ? 'Email can\'t be empty' : null,
-                          onSaved: (value) => _email = value.trim(),
+                              value!.isEmpty ? 'Email can\'t be empty' : null,
+                          onSaved: (value) => _email = value!.trim(),
                         ),
                         TextFormField(
                           decoration: const InputDecoration(
                               labelText: 'Password', icon: Icon(Icons.lock)),
                           controller: _passwordController,
-                          validator: (value) =>
-                              value.isEmpty ? 'Password can\'t be empty' : null,
+                          validator: (value) => value!.isEmpty
+                              ? 'Password can\'t be empty'
+                              : null,
                           onSaved: (value) => _password = value,
                           obscureText: true,
                         ),
@@ -172,7 +175,7 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
                             value: tosAgree,
                             onChanged: (value) {
                               setState(() {
-                                tosAgree = value;
+                                tosAgree = value!;
                               });
                             }),
                         Padding(
@@ -193,7 +196,7 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
                                     style: TextStyle(fontSize: 18.0)),
                               ),
                               onPressed: () {
-                                validateAndLink(auth);
+                                validateAndLink(auth as AuthService);
                               }),
                         ),
                         Padding(

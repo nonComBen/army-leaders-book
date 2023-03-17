@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AlertSoldiers {
-  String id;
-  String owner;
-  List<dynamic> soldiers;
+  String? id;
+  String? owner;
+  List<dynamic>? soldiers;
 
   AlertSoldiers(this.id, this.owner, this.soldiers);
 

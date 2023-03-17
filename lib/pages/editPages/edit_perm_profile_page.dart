@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/profile.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditPermProfilePage extends StatefulWidget {
   const EditPermProfilePage({
-    Key key,
-    @required this.profile,
+    Key? key,
+    required this.profile,
   }) : super(key: key);
   final PermProfile profile;
 
@@ -26,14 +27,14 @@ class EditPermProfilePage extends StatefulWidget {
 
 class EditPermProfilePageState extends State<EditPermProfilePage> {
   String _title = 'New Permanent Profile';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dateController;
-  TextEditingController _commentsController;
-  String _event,
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+  String? _event,
       _soldierId,
       _rank,
       _lastName,
@@ -41,20 +42,28 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
       _section,
       _rankSort,
       _owner;
-  List<dynamic> _users;
-  List<String> _events;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  bool shaving, pu, su, run;
-  DateTime _dateTime;
-  RegExp regExp;
+  List<dynamic>? _users;
+  final List<String> _events = [
+    '',
+    'Walk',
+    'Bike',
+    'Swim',
+  ];
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false,
+      updated = false,
+      shaving = false,
+      pu = false,
+      su = false,
+      run = false;
+  DateTime? _dateTime;
 
   Future<void> _pickDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dateTime,
+          initialDate: _dateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -69,28 +78,29 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
       }
     } else {
       showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _dateTime,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _dateTime = value;
-                  _dateController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
+        context: context,
+        builder: (BuildContext context) {
+          return SizedBox(
+            height: MediaQuery.of(context).size.height / 4,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: _dateTime,
+              minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
+              maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
+              onDateTimeChanged: (value) {
+                _dateTime = value;
+                _dateController.text = formatter.format(value);
+                updated = true;
+              },
+            ),
+          );
+        },
+      );
     }
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -101,24 +111,24 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       PermProfile saveProfile = PermProfile(
         id: widget.profile.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         date: _dateController.text,
         shaving: shaving,
         pu: pu,
         su: su,
         run: run,
-        altEvent: _event,
+        altEvent: _event!,
         comments: _commentsController.text,
       );
 
@@ -180,7 +190,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
               onChanged: (value) {
                 if (mounted) {
                   setState(() {
-                    pu = value;
+                    pu = value!;
                     updated = true;
                   });
                 }
@@ -195,7 +205,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
               onChanged: (value) {
                 if (mounted) {
                   setState(() {
-                    su = value;
+                    su = value!;
                     updated = true;
                   });
                 }
@@ -210,7 +220,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
               onChanged: (value) {
                 if (mounted) {
                   setState(() {
-                    run = value;
+                    run = value!;
                     if (value) _event = '';
                     updated = true;
                   });
@@ -232,7 +242,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
               return DropdownMenuItem(value: event, child: Text(event));
             }).toList(),
             value: _event,
-            onChanged: (value) {
+            onChanged: (dynamic value) {
               if (mounted) {
                 setState(() {
                   _event = value;
@@ -247,9 +257,9 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('profiles')
           .where('users', arrayContains: userId)
@@ -257,12 +267,12 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -270,7 +280,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -278,11 +288,6 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -295,17 +300,6 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
   @override
   void initState() {
     super.initState();
-
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    _events = [];
-    _events.add('');
-    _events.add('Walk');
-    _events.add('Bike');
-    _events.add('Swim');
 
     if (widget.profile.id != null) {
       _title = '${widget.profile.rank} ${widget.profile.name}';
@@ -321,24 +315,21 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
     _owner = widget.profile.owner;
     _users = widget.profile.users;
 
-    _dateController = TextEditingController(text: widget.profile.date);
-    _commentsController = TextEditingController(text: widget.profile.comments);
+    _dateController.text = widget.profile.date;
+    _commentsController.text = widget.profile.comments;
 
     shaving = widget.profile.shaving;
     pu = widget.profile.pu;
     su = widget.profile.su;
     run = widget.profile.run;
-    removeSoldiers = false;
-    updated = false;
 
     _dateTime = DateTime.tryParse(widget.profile.date) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -347,7 +338,9 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -386,15 +379,15 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -402,7 +395,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -410,26 +403,26 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -460,7 +453,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -488,7 +481,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
                                       onChanged: (value) {
                                         if (mounted) {
                                           setState(() {
-                                            shaving = value;
+                                            shaving = value!;
                                             updated = true;
                                           });
                                         }

@@ -28,8 +28,8 @@ import '../providers/tracking_provider.dart';
 
 class SoldiersPage extends StatefulWidget {
   const SoldiersPage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -41,13 +41,13 @@ class SoldiersPage extends StatefulWidget {
 
 class SoldiersPageState extends State<SoldiersPage> {
   int _sortColumnIndex = 0;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
   final List<Soldier> _selectedSoldiers = [];
   List<Soldier> soldiers = [];
   List<Soldier> filteredSoldiers = [];
-  BannerAd myBanner;
+  BannerAd? myBanner;
   String _filter = 'All';
-  SoldiersProvider _soldiersProvider;
+  late SoldiersProvider _soldiersProvider;
 
   final _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -77,7 +77,7 @@ class SoldiersPageState extends State<SoldiersPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -190,7 +190,7 @@ class SoldiersPageState extends State<SoldiersPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, loc;
@@ -203,7 +203,7 @@ class SoldiersPageState extends State<SoldiersPage> {
       dir = dirs[0];
       loc = dirs[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/soldiers.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -234,33 +234,6 @@ class SoldiersPageState extends State<SoldiersPage> {
     if (isSubscribed) {
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const UploadSoldierPage()));
-      // Widget title = const Text('Upload Roster');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Soldier Roster, the file must be in .csv format. Also, dates need to be in yyyy-MM-dd or M/d/yy format. '
-      //       'Civilian and Military Education will also be skipped if your values do not match those in their respective dropdown '
-      //       'menu (case sensitive). To update current Soldiers, download the Excel from the app first and then update the fields you '
-      //       'wish to update, but make sure not to change the Soldier Ids.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadSoldierPage(
-      //                   userId: widget.userId,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content:
@@ -368,7 +341,8 @@ class SoldiersPageState extends State<SoldiersPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
           content: Text(message),
           duration: const Duration(seconds: 5),
           action: location == '' || kIsWeb
@@ -378,18 +352,20 @@ class SoldiersPageState extends State<SoldiersPage> {
                   onPressed: () {
                     OpenFile.open('$location/soldiers.pdf');
                   },
-                )));
+                ),
+        ),
+      );
     }
   }
 
-  void _deleteRecord(BuildContext context) {
+  void _deleteRecord(BuildContext context) async {
     if (_selectedSoldiers.isEmpty) {
       //show snack bar requiring at least one item selected
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    deleteSoldiers(context, _selectedSoldiers, widget.userId); // showDialog
+    await deleteSoldiers(context, _selectedSoldiers, widget.userId);
   }
 
   void _filterRecords(String section) {
@@ -523,7 +499,7 @@ class SoldiersPageState extends State<SoldiersPage> {
           _selectedSoldiers.map((e) => e.id).toList().contains(soldier.id);
       return DataRow(
           selected: selected,
-          onSelectChanged: (bool selected) => onSelected(selected, soldier),
+          onSelectChanged: (bool? selected) => onSelected(selected, soldier),
           cells: getCells(soldier, width));
     }).toList();
 
@@ -619,9 +595,9 @@ class SoldiersPageState extends State<SoldiersPage> {
     });
   }
 
-  void onSelected(bool selected, Soldier soldier) {
+  void onSelected(bool? selected, Soldier soldier) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedSoldiers.add(soldier);
       } else {
         _selectedSoldiers.removeWhere((e) => e.id == soldier.id);
@@ -795,9 +771,11 @@ class SoldiersPageState extends State<SoldiersPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     _soldiersProvider = Provider.of<SoldiersProvider>(context);
     soldiers = _soldiersProvider.soldiers;
+    _selectedSoldiers.removeWhere(
+        (element) => !soldiers.map((e) => e.id).toList().contains(element.id));
     _filterRecords(_filter);
     return Scaffold(
         key: _scaffoldState,
@@ -816,11 +794,11 @@ class SoldiersPageState extends State<SoldiersPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

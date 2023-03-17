@@ -11,8 +11,8 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class EditWorkingAwardPage extends StatefulWidget {
   const EditWorkingAwardPage({
-    Key key,
-    @required this.award,
+    Key? key,
+    required this.award,
   }) : super(key: key);
   final WorkingAward award;
 
@@ -22,23 +22,37 @@ class EditWorkingAwardPage extends StatefulWidget {
 
 class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
   String _title = 'New Award';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _ach1Controller;
-  TextEditingController _ach2Controller;
-  TextEditingController _ach3Controller;
-  TextEditingController _ach4Controller;
-  TextEditingController _citationController;
-  String _reason, _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
-  List<String> _reasons;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
+  final TextEditingController _ach1Controller = TextEditingController();
+  final TextEditingController _ach2Controller = TextEditingController();
+  final TextEditingController _ach3Controller = TextEditingController();
+  final TextEditingController _ach4Controller = TextEditingController();
+  final TextEditingController _citationController = TextEditingController();
+  String? _reason,
+      _soldierId,
+      _rank,
+      _lastName,
+      _firstName,
+      _section,
+      _rankSort;
+  final List<String> _reasons = [
+    'Achievement',
+    'Service',
+    'PCS',
+    'ETS',
+    'Retirement',
+    'Heroism',
+    'Valor',
+  ];
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -52,12 +66,12 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
         id: widget.award.id,
         soldierId: _soldierId,
         owner: userId,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
-        awardReason: _reason,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
+        awardReason: _reason!,
         ach1: _ach1Controller.text,
         ach2: _ach2Controller.text,
         ach3: _ach3Controller.text,
@@ -92,21 +106,21 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('workingAwards')
           .where('owner', isEqualTo: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -114,7 +128,7 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -122,11 +136,6 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -143,20 +152,6 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    _reasons = [];
-    _reasons.add('Achievement');
-    _reasons.add('Service');
-    _reasons.add('PCS');
-    _reasons.add('ETS');
-    _reasons.add('Retirement');
-    _reasons.add('Heroism');
-    _reasons.add('Valor');
-
     if (widget.award.id != null) {
       _title = '${widget.award.rank} ${widget.award.name}';
     }
@@ -169,20 +164,17 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
     _rankSort = widget.award.rankSort;
     _reason = widget.award.awardReason;
 
-    _ach1Controller = TextEditingController(text: widget.award.ach1);
-    _ach2Controller = TextEditingController(text: widget.award.ach2);
-    _ach3Controller = TextEditingController(text: widget.award.ach3);
-    _ach4Controller = TextEditingController(text: widget.award.ach4);
-    _citationController = TextEditingController(text: widget.award.citation);
-
-    removeSoldiers = false;
-    updated = false;
+    _ach1Controller.text = widget.award.ach1;
+    _ach2Controller.text = widget.award.ach2;
+    _ach3Controller.text = widget.award.ach3;
+    _ach4Controller.text = widget.award.ach4;
+    _citationController.text = widget.award.citation;
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -191,7 +183,9 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -230,15 +224,15 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -246,7 +240,7 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -254,20 +248,20 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   updated = true;
@@ -304,7 +298,7 @@ class EditWorkingAwardPageState extends State<EditWorkingAwardPage> {
                                       child: Text(value),
                                     );
                                   }).toList(),
-                                  onChanged: (value) {
+                                  onChanged: (dynamic value) {
                                     if (mounted) {
                                       setState(() {
                                         _reason = value;

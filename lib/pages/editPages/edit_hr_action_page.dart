@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/hr_action.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditHrActionPage extends StatefulWidget {
   const EditHrActionPage({
-    Key key,
-    @required this.hrAction,
+    Key? key,
+    required this.hrAction,
   }) : super(key: key);
   final HrAction hrAction;
 
@@ -26,27 +27,26 @@ class EditHrActionPage extends StatefulWidget {
 
 class EditHrActionPageState extends State<EditHrActionPage> {
   String _title = 'New HR Metrics';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dd93Controller;
-  TextEditingController _sglvController;
-  TextEditingController _prrController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  DateTime _dd93Date, _sglvDate, _prrDate;
-  RegExp regExp;
+  final TextEditingController _dd93Controller = TextEditingController();
+  final TextEditingController _sglvController = TextEditingController();
+  final TextEditingController _prrController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _dd93Date, _sglvDate, _prrDate;
 
   Future<void> _pickDd93(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dd93Date,
+          initialDate: _dd93Date!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -83,9 +83,9 @@ class EditHrActionPageState extends State<EditHrActionPage> {
   Future<void> _pickSglv(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _sglvDate,
+          initialDate: _sglvDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -123,9 +123,9 @@ class EditHrActionPageState extends State<EditHrActionPage> {
   Future<void> _pickPrr(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _prrDate,
+          initialDate: _prrDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -161,7 +161,7 @@ class EditHrActionPageState extends State<EditHrActionPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -172,18 +172,18 @@ class EditHrActionPageState extends State<EditHrActionPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       HrAction saveHrAction = HrAction(
         id: widget.hrAction.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         dd93: _dd93Controller.text,
         sglv: _sglvController.text,
         prr: _prrController.text,
@@ -216,21 +216,21 @@ class EditHrActionPageState extends State<EditHrActionPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('hrActions')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -238,7 +238,7 @@ class EditHrActionPageState extends State<EditHrActionPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -246,11 +246,6 @@ class EditHrActionPageState extends State<EditHrActionPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -265,11 +260,6 @@ class EditHrActionPageState extends State<EditHrActionPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.hrAction.id != null) {
       _title = '${widget.hrAction.rank} ${widget.hrAction.name}';
     }
@@ -283,9 +273,9 @@ class EditHrActionPageState extends State<EditHrActionPage> {
     _owner = widget.hrAction.owner;
     _users = widget.hrAction.users;
 
-    _dd93Controller = TextEditingController(text: widget.hrAction.dd93);
-    _sglvController = TextEditingController(text: widget.hrAction.sglv);
-    _prrController = TextEditingController(text: widget.hrAction.prr);
+    _dd93Controller.text = widget.hrAction.dd93;
+    _sglvController.text = widget.hrAction.sglv;
+    _prrController.text = widget.hrAction.prr;
 
     removeSoldiers = false;
     updated = false;
@@ -293,213 +283,204 @@ class EditHrActionPageState extends State<EditHrActionPage> {
     _dd93Date = DateTime.tryParse(widget.hrAction.dd93) ?? DateTime.now();
     _sglvDate = DateTime.tryParse(widget.hrAction.sglv) ?? DateTime.now();
     _prrDate = DateTime.tryParse(widget.hrAction.prr) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('users', arrayContains: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers[index]
-                                                      ['firstName'];
-                                                  _section = soldiers[index]
-                                                      ['section'];
-                                                  _rankSort = soldiers[index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  _owner =
-                                                      soldiers[index]['owner'];
-                                                  _users =
-                                                      soldiers[index]['users'];
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
-                                          );
-                                      }
-                                    }),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    8.0, 16.0, 8.0, 8.0),
-                                child: CheckboxListTile(
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: removeSoldiers,
-                                  title: const Text(
-                                      'Remove Soldiers already added'),
-                                  onChanged: (checked) {
-                                    _removeSoldiers(checked, user.uid);
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _dd93Controller,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'DD93 Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickDd93(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _dd93Date =
-                                        DateTime.tryParse(value) ?? _dd93Date;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _sglvController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'SGLV Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickSglv(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _sglvDate =
-                                        DateTime.tryParse(value) ?? _sglvDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _prrController,
-                                  keyboardType: TextInputType.datetime,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Record Review Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickPrr(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _prrDate =
-                                        DateTime.tryParse(value) ?? _prrDate;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          FormattedElevatedButton(
-                            onPressed: () {
-                              submit(context);
+      key: _scaffoldState,
+      appBar: AppBar(
+        title: Text(_title),
+      ),
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width > 932 ? (width - 916) / 2 : 16),
+          child: Card(
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    if (user.isAnonymous) const AnonWarningBanner(),
+                    GridView.count(
+                      primary: false,
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 230
+                          : width > 700
+                              ? width / 230
+                              : width / 115,
+                      shrinkWrap: true,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FutureBuilder(
+                              future: firestore
+                                  .collection('soldiers')
+                                  .where('users', arrayContains: user.uid)
+                                  .get(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.waiting:
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  default:
+                                    allSoldiers = snapshot.data!.docs;
+                                    soldiers = removeSoldiers
+                                        ? lessSoldiers
+                                        : allSoldiers;
+                                    soldiers!.sort((a, b) => a['lastName']
+                                        .toString()
+                                        .compareTo(b['lastName'].toString()));
+                                    soldiers!.sort((a, b) => a['rankSort']
+                                        .toString()
+                                        .compareTo(b['rankSort'].toString()));
+                                    return DropdownButtonFormField<String>(
+                                      decoration: const InputDecoration(
+                                          labelText: 'Soldier'),
+                                      items: soldiers!.map((doc) {
+                                        return DropdownMenuItem<String>(
+                                          value: doc.id,
+                                          child: Text(
+                                              '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        int index = soldiers!.indexWhere(
+                                            (doc) => doc.id == value);
+                                        if (mounted) {
+                                          setState(() {
+                                            _soldierId = value;
+                                            _rank = soldiers![index]['rank'];
+                                            _lastName =
+                                                soldiers![index]['lastName'];
+                                            _firstName =
+                                                soldiers![index]['firstName'];
+                                            _section =
+                                                soldiers![index]['section'];
+                                            _rankSort = soldiers![index]
+                                                    ['rankSort']
+                                                .toString();
+                                            _owner = soldiers![index]['owner'];
+                                            _users = soldiers![index]['users'];
+                                            updated = true;
+                                          });
+                                        }
+                                      },
+                                      value: _soldierId,
+                                    );
+                                }
+                              }),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                          child: CheckboxListTile(
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: removeSoldiers,
+                            title: const Text('Remove Soldiers already added'),
+                            onChanged: (checked) {
+                              _removeSoldiers(checked, user.uid);
                             },
-                            text: widget.hrAction.id == null
-                                ? 'Add HR Metrics'
-                                : 'Update HR Metrics',
                           ),
-                        ],
-                      ),
-                    )),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _dd93Controller,
+                            keyboardType: TextInputType.datetime,
+                            enabled: true,
+                            validator: (value) =>
+                                isValidDate(value!) || value.isEmpty
+                                    ? null
+                                    : 'Date must be in yyyy-MM-dd format',
+                            decoration: InputDecoration(
+                                labelText: 'DD93 Date',
+                                suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickDd93(context);
+                                    })),
+                            onChanged: (value) {
+                              _dd93Date = DateTime.tryParse(value) ?? _dd93Date;
+                              updated = true;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _sglvController,
+                            keyboardType: TextInputType.datetime,
+                            enabled: true,
+                            validator: (value) =>
+                                isValidDate(value!) || value.isEmpty
+                                    ? null
+                                    : 'Date must be in yyyy-MM-dd format',
+                            decoration: InputDecoration(
+                                labelText: 'SGLV Date',
+                                suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickSglv(context);
+                                    })),
+                            onChanged: (value) {
+                              _sglvDate = DateTime.tryParse(value) ?? _sglvDate;
+                              updated = true;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _prrController,
+                            keyboardType: TextInputType.datetime,
+                            enabled: true,
+                            validator: (value) =>
+                                isValidDate(value!) || value.isEmpty
+                                    ? null
+                                    : 'Date must be in yyyy-MM-dd format',
+                            decoration: InputDecoration(
+                                labelText: 'Record Review Date',
+                                suffixIcon: IconButton(
+                                    icon: const Icon(Icons.date_range),
+                                    onPressed: () {
+                                      _pickPrr(context);
+                                    })),
+                            onChanged: (value) {
+                              _prrDate = DateTime.tryParse(value) ?? _prrDate;
+                              updated = true;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    FormattedElevatedButton(
+                      onPressed: () {
+                        submit(context);
+                      },
+                      text: widget.hrAction.id == null
+                          ? 'Add HR Metrics'
+                          : 'Update HR Metrics',
+                    ),
+                  ],
+                ),
               ),
-            )));
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

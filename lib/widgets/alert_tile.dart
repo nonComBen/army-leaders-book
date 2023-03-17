@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AlertTile extends StatelessWidget {
-  const AlertTile({Key key, this.soldier, this.phone, this.workPhone})
+  const AlertTile(
+      {Key? key,
+      required this.soldier,
+      required this.phone,
+      required this.workPhone})
       : super(key: key);
   final String soldier;
   final String phone;

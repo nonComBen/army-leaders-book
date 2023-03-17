@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/flag.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditFlagPage extends StatefulWidget {
   const EditFlagPage({
-    Key key,
-    @required this.flag,
+    Key? key,
+    required this.flag,
   }) : super(key: key);
   final Flag flag;
 
@@ -26,15 +27,15 @@ class EditFlagPage extends StatefulWidget {
 
 class EditFlagPageState extends State<EditFlagPage> {
   String _title = 'New Flag';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dateController;
-  TextEditingController _expController;
-  TextEditingController _commentsController;
-  String _type,
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _expController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+  String? _type,
       _soldierId,
       _rank,
       _lastName,
@@ -42,19 +43,34 @@ class EditFlagPageState extends State<EditFlagPage> {
       _section,
       _rankSort,
       _owner;
-  List<dynamic> _users;
-  List<String> _types;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  DateTime _dateTime, _expDate;
-  RegExp regExp;
+  List<dynamic>? _users;
+  final List<String> _types = [
+    'Adverse Action',
+    'Alcohol Abuse',
+    'APFT Failure',
+    'Commanders Investigatio',
+    'Deny Automatic Promotion',
+    'Drug Abuse',
+    'Involuntary Separation',
+    'Law Enforcement Investigation',
+    'Punishment Phase',
+    'Referred OER/Relief For Cause NCOER',
+    'Removal From Selection List',
+    'Security Violation',
+    'Weight Control Program',
+    'Other',
+  ];
+
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _dateTime, _expDate;
 
   Future<void> _pickDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dateTime,
+          initialDate: _dateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -91,9 +107,9 @@ class EditFlagPageState extends State<EditFlagPage> {
   Future<void> _pickExp(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _expDate,
+          initialDate: _expDate!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -129,7 +145,7 @@ class EditFlagPageState extends State<EditFlagPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -140,18 +156,18 @@ class EditFlagPageState extends State<EditFlagPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Flag saveFlag = Flag(
         id: widget.flag.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         date: _dateController.text,
         exp: _expController.text,
         type: _type,
@@ -185,21 +201,21 @@ class EditFlagPageState extends State<EditFlagPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('flags')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -207,7 +223,7 @@ class EditFlagPageState extends State<EditFlagPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -215,11 +231,6 @@ class EditFlagPageState extends State<EditFlagPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -233,27 +244,6 @@ class EditFlagPageState extends State<EditFlagPage> {
   @override
   void initState() {
     super.initState();
-
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    _types = [];
-    _types.add('Adverse Action');
-    _types.add('Alcohol Abuse');
-    _types.add('APFT Failure');
-    _types.add('Commanders Investigation');
-    _types.add('Deny Automatic Promotion');
-    _types.add('Drug Abuse');
-    _types.add('Involuntary Separation');
-    _types.add('Law Enforcement Investigation');
-    _types.add('Punishment Phase');
-    _types.add('Referred OER/Relief For Cause NCOER');
-    _types.add('Removal From Selection List');
-    _types.add('Security Violation');
-    _types.add('Weight Control Program');
-    _types.add('Other');
 
     if (widget.flag.id != null) {
       _title = '${widget.flag.rank} ${widget.flag.name}';
@@ -269,22 +259,18 @@ class EditFlagPageState extends State<EditFlagPage> {
     _owner = widget.flag.owner;
     _users = widget.flag.users;
 
-    _dateController = TextEditingController(text: widget.flag.date);
-    _expController = TextEditingController(text: widget.flag.exp);
-    _commentsController = TextEditingController(text: widget.flag.comments);
-
-    removeSoldiers = false;
-    updated = false;
+    _dateController.text = widget.flag.date;
+    _expController.text = widget.flag.exp;
+    _commentsController.text = widget.flag.comments;
 
     _dateTime = DateTime.tryParse(widget.flag.date) ?? DateTime.now();
     _expDate = DateTime.tryParse(widget.flag.exp) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -293,7 +279,9 @@ class EditFlagPageState extends State<EditFlagPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -321,70 +309,70 @@ class EditFlagPageState extends State<EditFlagPage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('users', arrayContains: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers[index]
-                                                      ['firstName'];
-                                                  _section = soldiers[index]
-                                                      ['section'];
-                                                  _rankSort = soldiers[index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  _owner =
-                                                      soldiers[index]['owner'];
-                                                  _users =
-                                                      soldiers[index]['users'];
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
-                                          );
-                                      }
-                                    }),
+                                  future: firestore
+                                      .collection('soldiers')
+                                      .where('users', arrayContains: user.uid)
+                                      .get(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    switch (snapshot.connectionState) {
+                                      case ConnectionState.waiting:
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      default:
+                                        allSoldiers = snapshot.data!.docs;
+                                        soldiers = removeSoldiers
+                                            ? lessSoldiers
+                                            : allSoldiers;
+                                        soldiers!.sort((a, b) => a['lastName']
+                                            .toString()
+                                            .compareTo(
+                                                b['lastName'].toString()));
+                                        soldiers!.sort((a, b) => a['rankSort']
+                                            .toString()
+                                            .compareTo(
+                                                b['rankSort'].toString()));
+                                        return DropdownButtonFormField<String>(
+                                          decoration: const InputDecoration(
+                                            labelText: 'Soldier',
+                                          ),
+                                          items: soldiers!.map((doc) {
+                                            return DropdownMenuItem<String>(
+                                              value: doc.id,
+                                              child: Text(
+                                                  '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value) {
+                                            int index = soldiers!.indexWhere(
+                                                (doc) => doc.id == value);
+                                            if (mounted) {
+                                              setState(() {
+                                                _soldierId = value;
+                                                _rank =
+                                                    soldiers![index]['rank'];
+                                                _lastName = soldiers![index]
+                                                    ['lastName'];
+                                                _firstName = soldiers![index]
+                                                    ['firstName'];
+                                                _section =
+                                                    soldiers![index]['section'];
+                                                _rankSort = soldiers![index]
+                                                        ['rankSort']
+                                                    .toString();
+                                                _owner =
+                                                    soldiers![index]['owner'];
+                                                _users =
+                                                    soldiers![index]['users'];
+                                                updated = true;
+                                              });
+                                            }
+                                          },
+                                          value: _soldierId,
+                                        );
+                                    }
+                                  },
+                                ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(
@@ -402,24 +390,28 @@ class EditFlagPageState extends State<EditFlagPage> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: DropdownButtonFormField(
+                                child: DropdownButtonFormField<String>(
                                   decoration:
                                       const InputDecoration(labelText: 'Type'),
                                   items: _types.map((value) {
                                     return DropdownMenuItem(
                                       value: value,
-                                      child: Text(value),
+                                      child: Text(
+                                        value,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     );
                                   }).toList(),
-                                  onChanged: (value) {
-                                    if (mounted) {
-                                      setState(() {
-                                        _type = value;
-                                        updated = true;
-                                      });
-                                    }
+                                  onChanged: (dynamic value) {
+                                    setState(() {
+                                      _type = value;
+                                      updated = true;
+                                    });
                                   },
                                   value: _type,
+                                  style: const TextStyle(
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                               Padding(
@@ -430,7 +422,7 @@ class EditFlagPageState extends State<EditFlagPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -454,8 +446,8 @@ class EditFlagPageState extends State<EditFlagPage> {
                                       controller: _expController,
                                       keyboardType: TextInputType.datetime,
                                       enabled: true,
-                                      validator: (value) => regExp
-                                                  .hasMatch(value) ||
+                                      validator: (value) => isValidDate(
+                                                  value!) ||
                                               value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',

@@ -11,8 +11,8 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class EditEquipmentPage extends StatefulWidget {
   const EditEquipmentPage({
-    Key key,
-    @required this.equipment,
+    Key? key,
+    required this.equipment,
   }) : super(key: key);
   final Equipment equipment;
 
@@ -22,35 +22,34 @@ class EditEquipmentPage extends StatefulWidget {
 
 class EditEquipmentPageState extends State<EditEquipmentPage> {
   String _title = 'New Equipment';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _weaponController;
-  TextEditingController _buttStockController;
-  TextEditingController _serialController;
-  TextEditingController _opticController;
-  TextEditingController _opticSerialController;
-  TextEditingController _weapon2Controller;
-  TextEditingController _buttStock2Controller;
-  TextEditingController _serial2Controller;
-  TextEditingController _optic2Controller;
-  TextEditingController _opticSerial2Controller;
-  TextEditingController _maskController;
-  TextEditingController _vehicleController;
-  TextEditingController _bumperController;
-  TextEditingController _licenseController;
-  TextEditingController _otherController;
-  TextEditingController _otherSerialController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  bool secondaryExpanded = false;
+  final TextEditingController _weaponController = TextEditingController();
+  final TextEditingController _buttStockController = TextEditingController();
+  final TextEditingController _serialController = TextEditingController();
+  final TextEditingController _opticController = TextEditingController();
+  final TextEditingController _opticSerialController = TextEditingController();
+  final TextEditingController _weapon2Controller = TextEditingController();
+  final TextEditingController _buttStock2Controller = TextEditingController();
+  final TextEditingController _serial2Controller = TextEditingController();
+  final TextEditingController _optic2Controller = TextEditingController();
+  final TextEditingController _opticSerial2Controller = TextEditingController();
+  final TextEditingController _maskController = TextEditingController();
+  final TextEditingController _vehicleController = TextEditingController();
+  final TextEditingController _bumperController = TextEditingController();
+  final TextEditingController _licenseController = TextEditingController();
+  final TextEditingController _otherController = TextEditingController();
+  final TextEditingController _otherSerialController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false, secondaryExpanded = false;
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -61,18 +60,18 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       Equipment saveEquipment = Equipment(
         id: widget.equipment.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         weapon: _weaponController.text,
         buttStock: _buttStockController.text,
         serial: _serialController.text,
@@ -195,21 +194,21 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('equipment')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -217,7 +216,7 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -225,11 +224,6 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -257,11 +251,6 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.equipment.id != null) {
       _title = '${widget.equipment.rank} ${widget.equipment.name}';
     }
@@ -275,30 +264,22 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
     _owner = widget.equipment.owner;
     _users = widget.equipment.users;
 
-    _weaponController = TextEditingController(text: widget.equipment.weapon);
-    _buttStockController =
-        TextEditingController(text: widget.equipment.buttStock);
-    _serialController = TextEditingController(text: widget.equipment.serial);
-    _opticController = TextEditingController(text: widget.equipment.optic);
-    _opticSerialController =
-        TextEditingController(text: widget.equipment.opticSerial);
-    _weapon2Controller = TextEditingController(text: widget.equipment.weapon2);
-    _buttStock2Controller =
-        TextEditingController(text: widget.equipment.buttStock2);
-    _serial2Controller = TextEditingController(text: widget.equipment.serial2);
-    _optic2Controller = TextEditingController(text: widget.equipment.optic2);
-    _opticSerial2Controller =
-        TextEditingController(text: widget.equipment.opticSerial2);
-    _maskController = TextEditingController(text: widget.equipment.mask);
-    _vehicleController = TextEditingController(text: widget.equipment.vehType);
-    _bumperController = TextEditingController(text: widget.equipment.veh);
-    _licenseController = TextEditingController(text: widget.equipment.license);
-    _otherController = TextEditingController(text: widget.equipment.other);
-    _otherSerialController =
-        TextEditingController(text: widget.equipment.otherSerial);
-
-    removeSoldiers = false;
-    updated = false;
+    _weaponController.text = widget.equipment.weapon;
+    _buttStockController.text = widget.equipment.buttStock;
+    _serialController.text = widget.equipment.serial;
+    _opticController.text = widget.equipment.optic;
+    _opticSerialController.text = widget.equipment.opticSerial;
+    _weapon2Controller.text = widget.equipment.weapon2;
+    _buttStock2Controller.text = widget.equipment.buttStock2;
+    _serial2Controller.text = widget.equipment.serial2;
+    _optic2Controller.text = widget.equipment.optic2;
+    _opticSerial2Controller.text = widget.equipment.opticSerial2;
+    _maskController.text = widget.equipment.mask;
+    _vehicleController.text = widget.equipment.vehType;
+    _bumperController.text = widget.equipment.veh;
+    _licenseController.text = widget.equipment.license;
+    _otherController.text = widget.equipment.other;
+    _otherSerialController.text = widget.equipment.otherSerial;
 
     if (_weapon2Controller.text != '' || _optic2Controller.text != '') {
       secondaryExpanded = true;
@@ -308,7 +289,7 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -317,7 +298,9 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -356,15 +339,15 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -372,7 +355,7 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -380,26 +363,26 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }

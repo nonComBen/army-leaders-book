@@ -6,9 +6,9 @@ import '../../models/soldier.dart';
 
 class TransferSoldierPage extends StatefulWidget {
   const TransferSoldierPage({
-    Key key,
-    @required this.userId,
-    @required this.soldiers,
+    Key? key,
+    required this.userId,
+    required this.soldiers,
   }) : super(key: key);
   final String userId;
   final List<Soldier> soldiers;
@@ -22,14 +22,14 @@ class TransferSoldierPage extends StatefulWidget {
 class TransferSoldierPageState extends State<TransferSoldierPage> {
   TextEditingController controller = TextEditingController();
 
-  List<DocumentSnapshot> allSnapshots;
-  FirebaseFirestore firestore;
-  String userId = '';
+  List<DocumentSnapshot>? allSnapshots;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String? userId = '';
   List<dynamic> userIds = [];
-  bool typeInUserId = false, retainAccess = true;
+  bool? typeInUserId = false, retainAccess = true;
 
   void _makeSure(
-      BuildContext context, String userId, String rank, String name) {
+      BuildContext context, String? userId, String? rank, String? name) {
     String soldierList = '';
     for (Soldier soldier in widget.soldiers) {
       soldierList = '$soldierList\n - ${soldier.rank} ${soldier.lastName}';
@@ -54,13 +54,13 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
   }
 
   void _transferSoldier(
-      BuildContext context, String userId, bool remainMember) async {
+      BuildContext context, String? userId, bool? remainMember) async {
     for (Soldier soldier in widget.soldiers) {
-      List<dynamic> users = soldier.users ?? [widget.userId];
+      List<dynamic> users = soldier.users;
       if (!users.contains(userId)) {
         users.add(userId);
       }
-      if (!remainMember) {
+      if (!remainMember!) {
         users.remove(widget.userId);
       }
       DocumentReference soldierRef =
@@ -72,7 +72,6 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
   @override
   void initState() {
     super.initState();
-    firestore = FirebaseFirestore.instance;
 
     List<dynamic> ids = [];
     for (Soldier soldier in widget.soldiers) {
@@ -99,21 +98,21 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SwitchListTile(
-                  title: typeInUserId
+                  title: typeInUserId!
                       ? const Text('Type In User Id')
                       : const Text('Select User Id From Dropdown'),
-                  value: typeInUserId,
+                  value: typeInUserId!,
                   onChanged: (value) {
                     setState(() {
                       typeInUserId = value;
-                      if (!typeInUserId) {
+                      if (!typeInUserId!) {
                         userId = userIds.first;
                       }
                     });
                   },
                 ),
               ),
-              typeInUserId
+              typeInUserId!
                   ? Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: TextField(
@@ -138,14 +137,14 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                                 ))
                             .toList(),
                         value: userId,
-                        onChanged: (value) {
+                        onChanged: (dynamic value) {
                           setState(() {
                             userId = value;
                           });
                         },
                       ),
                     ),
-              typeInUserId
+              typeInUserId!
                   ? Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
@@ -199,18 +198,18 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                       case ConnectionState.waiting:
                         return const CircularProgressIndicator();
                       default:
-                        if (snapshot.data.exists) {
+                        if (snapshot.data!.exists) {
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${snapshot.data['rank'] ?? ''} ${snapshot.data['userName'] ?? ''}'),
-                              subtitle: Text(snapshot.data['userEmail'] ?? ''),
+                                  '${snapshot.data!['rank'] ?? ''} ${snapshot.data!['userName'] ?? ''}'),
+                              subtitle: Text(snapshot.data!['userEmail'] ?? ''),
                               onTap: () {
                                 _makeSure(
                                     context,
-                                    snapshot.data['userId'],
-                                    snapshot.data['rank'],
-                                    snapshot.data['userName']);
+                                    snapshot.data!['userId'],
+                                    snapshot.data!['rank'],
+                                    snapshot.data!['userName']);
                               },
                             ),
                           );

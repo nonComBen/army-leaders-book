@@ -25,8 +25,8 @@ import '../widgets/anon_warning_banner.dart';
 
 class PhonePage extends StatefulWidget {
   const PhonePage({
-    Key key,
-    @required this.userId,
+    Key? key,
+    required this.userId,
   }) : super(key: key);
   final String userId;
 
@@ -37,12 +37,12 @@ class PhonePage extends StatefulWidget {
 }
 
 class PhonePageState extends State<PhonePage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents;
-  StreamSubscription _subscription;
-  BannerAd myBanner;
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [];
+  late StreamSubscription _subscription;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -71,7 +71,7 @@ class PhonePageState extends State<PhonePage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -81,10 +81,6 @@ class PhonePageState extends State<PhonePage> {
   void initState() {
     super.initState();
 
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('phoneNumbers')
         .where('owner', isEqualTo: widget.userId)
@@ -94,27 +90,6 @@ class PhonePageState extends State<PhonePage> {
         documents = updates.docs;
         _selectedDocuments.clear();
       });
-      // for (DocumentChange dc in updates.docChanges) {
-      //   if (dc.type == DocumentChangeType.removed) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       _selectedDocuments.removeWhere((doc) => doc.id == dc.doc.id);
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.added) {
-      //     setState(() {
-      //       documents.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.modified) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       documents.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      // }
     });
   }
 
@@ -127,31 +102,10 @@ class PhonePageState extends State<PhonePage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadPhonePage()));
-      // Widget title = const Text('Upload Phone Numbers');
-      // Widget content = Container(
-      //   padding: const EdgeInsets.all(8.0),
-      //   child: const Text(
-      //     'To upload your Phone Numbers, the file must be in .csv format.',
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadPhonePage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadPhonePage()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Uploading data is only available for subscribed users.'),
@@ -177,7 +131,7 @@ class PhonePageState extends State<PhonePage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -190,7 +144,7 @@ class PhonePageState extends State<PhonePage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/phoneDirectory.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -252,7 +206,7 @@ class PhonePageState extends State<PhonePage> {
       (a, b) => a['title'].toString().compareTo(b['title'].toString()),
     );
     PhonePdf pdf = PhonePdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -356,7 +310,7 @@ class PhonePageState extends State<PhonePage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -416,9 +370,9 @@ class PhonePageState extends State<PhonePage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -527,7 +481,7 @@ class PhonePageState extends State<PhonePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -544,11 +498,11 @@ class PhonePageState extends State<PhonePage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

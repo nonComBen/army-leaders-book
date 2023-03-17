@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 
 class UserProvider with ChangeNotifier {
-  UserObj _user;
+  UserObj? _user;
   UserProvider();
 
   void loadUser(String userId) {
@@ -16,7 +16,7 @@ class UserProvider with ChangeNotifier {
     });
   }
 
-  UserObj get user {
+  UserObj? get user {
     return _user;
   }
 }

@@ -5,9 +5,9 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MedprosPdf {
-  MedprosPdf(
-    this.documents,
-  );
+  MedprosPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 

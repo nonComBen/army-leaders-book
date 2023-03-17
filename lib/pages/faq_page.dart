@@ -9,7 +9,7 @@ import '../widgets/anon_warning_banner.dart';
 
 class FaqPage extends StatefulWidget {
   const FaqPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/faq-page';
@@ -131,26 +131,27 @@ class FaqPageState extends State<FaqPage> {
         )),
   ];
 
-  BannerAd myBanner;
+  BannerAd? myBanner;
 
   @override
   void initState() {
     super.initState();
 
     myBanner = BannerAd(
-        adUnitId: kIsWeb
-            ? ''
-            : Platform.isAndroid
-                ? 'ca-app-pub-2431077176117105/1369522276'
-                : 'ca-app-pub-2431077176117105/9894231072',
-        size: AdSize.banner,
-        request: const AdRequest(),
-        listener: const BannerAdListener());
+      adUnitId: kIsWeb
+          ? ''
+          : Platform.isAndroid
+              ? 'ca-app-pub-2431077176117105/1369522276'
+              : 'ca-app-pub-2431077176117105/9894231072',
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: const BannerAdListener(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(

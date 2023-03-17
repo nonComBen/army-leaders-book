@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/counseling.dart';
 import '../../models/soldier.dart';
@@ -16,7 +17,7 @@ import '../../widgets/formatted_elevated_button.dart';
 
 class UploadCounselingsPage extends StatefulWidget {
   const UploadCounselingsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -24,9 +25,9 @@ class UploadCounselingsPage extends StatefulWidget {
 }
 
 class UploadCounselingsPageState extends State<UploadCounselingsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       date,
       assessment,
       indivRemarks,
@@ -40,14 +41,14 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -62,19 +63,19 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders.contains('Date') ? 'Date' : '';
-      assessment = columnHeaders.contains('Assessment') ? 'Assessment' : '';
-      indivRemarks = columnHeaders.contains('Individual Remarks')
+      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      assessment = columnHeaders!.contains('Assessment') ? 'Assessment' : '';
+      indivRemarks = columnHeaders!.contains('Individual Remarks')
           ? 'Individual Remarks'
           : '';
-      keyPoints = columnHeaders.contains('Key Points') ? 'Key Points' : '';
-      leaderResp = columnHeaders.contains('Leader Responsibilities')
+      keyPoints = columnHeaders!.contains('Key Points') ? 'Key Points' : '';
+      leaderResp = columnHeaders!.contains('Leader Responsibilities')
           ? 'Leader Responsibilities'
           : '';
       planOfAction =
-          columnHeaders.contains('Plan of Action') ? 'Plan of Action' : '';
-      purpose = columnHeaders.contains('Purpose of Counseling')
+          columnHeaders!.contains('Plan of Action') ? 'Plan of Action' : '';
+      purpose = columnHeaders!.contains('Purpose of Counseling')
           ? 'Purpose of Counseling'
           : '';
     });
@@ -92,11 +93,11 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
       final soldiers =
           Provider.of<SoldiersProvider>(context, listen: false).soldiers;
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort;
-        String owner = AuthProvider.of(context).auth.currentUser().uid;
+        String? rank, name, firstName, section, rankSort;
+        String owner = AuthProvider.of(context)!.auth!.currentUser()!.uid;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -158,7 +159,7 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
     planOfAction = '';
     purpose = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -196,7 +197,7 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -217,10 +218,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: soldierId,
@@ -235,10 +236,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: date,
@@ -254,10 +255,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Purpose of Counseling'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: purpose,
@@ -273,10 +274,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Key Points'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: keyPoints,
@@ -292,10 +293,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Plan of Action'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: planOfAction,
@@ -311,10 +312,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Individual Remarks'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: indivRemarks,
@@ -330,10 +331,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                               labelText: 'Leader Responsibilities'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: leaderResp,
@@ -349,10 +350,10 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Assessment'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: assessment,
@@ -366,11 +367,12 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Counselings',
                   )
                 ],

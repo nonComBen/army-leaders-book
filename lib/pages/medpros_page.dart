@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,13 +13,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/subscription_state.dart';
-import '../providers/notifications_plugin_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/setting.dart';
 import '../../models/medpro.dart';
 import 'editPages/edit_medpros_page.dart';
 import 'uploadPages/upload_medpros_page.dart';
@@ -29,7 +26,7 @@ import '../providers/tracking_provider.dart';
 
 class MedProsPage extends StatefulWidget {
   const MedProsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/medpros-page';
@@ -39,19 +36,18 @@ class MedProsPage extends StatefulWidget {
 }
 
 class MedProsPageState extends State<MedProsPage> {
-  int _sortColumnIndex, startingId;
+  int _sortColumnIndex = 0, startingId = 0;
   bool _sortAscending = true,
       _adLoaded = false,
-      isSubscribed,
+      isSubscribed = false,
       notificationsRefreshed = false,
       isInitial = true;
-  String _userId;
-  List<DocumentSnapshot> documents, filteredDocs, _selectedDocuments;
-  StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
-  BannerAd myBanner;
+  String? _userId;
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  late StreamSubscription _subscriptionUsers;
+  late SharedPreferences prefs;
+  BannerAd? myBanner;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -59,15 +55,8 @@ class MedProsPageState extends State<MedProsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
+    _userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
     isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
 
     if (!_adLoaded) {
       bool trackingAllowed =
@@ -88,7 +77,7 @@ class MedProsPageState extends State<MedProsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -96,24 +85,6 @@ class MedProsPageState extends State<MedProsPage> {
       initialize();
       isInitial = false;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
-
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
   }
 
   void initialize() async {
@@ -138,116 +109,6 @@ class MedProsPageState extends State<MedProsPage> {
     _subscriptionUsers.cancel();
     myBanner?.dispose();
     super.dispose();
-  }
-
-  void refreshNotifications() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    int phaMonthsDue = 12;
-    int dentalMonthsDue = 12;
-    int visionMonthsDue = 12;
-    int hearingMonthsDue = 12;
-    int hivMonthsDue = 24;
-    List<dynamic> phaDaysBefore = [0, 30];
-    List<dynamic> dentalDaysBefore = [0, 30];
-    List<dynamic> visionDaysBefore = [0, 30];
-    List<dynamic> hearingDaysBefore = [0, 30];
-    List<dynamic> hivDaysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      phaMonthsDue = setting.phaMonths ?? 12;
-      dentalMonthsDue = setting.dentalMonths ?? 12;
-      visionMonthsDue = setting.visionMonths ?? 12;
-      hearingMonthsDue = setting.hearingMonths ?? 12;
-      hivMonthsDue = setting.hivMonths ?? 24;
-      phaDaysBefore = setting.phaNotifications ?? [0, 30];
-      dentalDaysBefore = setting.dentalNotifications ?? [0, 30];
-      visionDaysBefore = setting.visionNotifications ?? [0, 30];
-      hearingDaysBefore = setting.hearingNotifications ?? [0, 30];
-      hivDaysBefore = setting.hivNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending
-        .where((pr) =>
-            pr.payload == 'PHA' ||
-            pr.payload == 'Dental' ||
-            pr.payload == 'Vision' ||
-            pr.payload == 'Hearing' ||
-            pr.payload == 'HIV')
-        .toList();
-
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    startingId = prefs.getInt('runningId') ?? 0;
-
-    scheduleNotifications('pha', 'PHA', phaMonthsDue, phaDaysBefore);
-    scheduleNotifications(
-        'dental', 'Dental', dentalMonthsDue, dentalDaysBefore);
-    scheduleNotifications(
-        'vision', 'Vision', visionMonthsDue, visionDaysBefore);
-    scheduleNotifications(
-        'hearing', 'Hearing', hearingMonthsDue, hearingDaysBefore);
-    scheduleNotifications('hiv', 'HIV', hivMonthsDue, hivDaysBefore);
-
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
-  }
-
-  void scheduleNotifications(
-      String key, String payload, int monthsDue, List<dynamic> daysBefore) {
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a[key].toString().compareTo(b[key].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      String soldier =
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      if (i == 0) {
-        dates.add([soldier, docs[i][key]]);
-      } else if (docs[i][key] == docs[i - 1][key]) {
-        dates.last[0] = '${dates.last[0]}, $soldier';
-      } else {
-        dates.add([soldier, docs[i][key]]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                '$payload(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                androidAllowWhileIdle: true,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                payload: payload,
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
   }
 
   _uploadExcel(BuildContext context) {
@@ -294,10 +155,10 @@ class MedProsPageState extends State<MedProsPage> {
       'Other Immunizations'
     ]);
     for (DocumentSnapshot doc in documents) {
-      List<dynamic> imms = doc['otherImms'];
+      List<dynamic>? imms = doc['otherImms'];
       String otherImms = '';
       if (doc['otherImms'].length > 0) {
-        for (int i = 0; i < imms.length; i++) {
+        for (int i = 0; i < imms!.length; i++) {
           otherImms =
               '$otherImms{title: ${imms[i]['title']}, date: ${imms[i]['date']}';
           if (i < imms.length - 1) {
@@ -339,7 +200,7 @@ class MedProsPageState extends State<MedProsPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -352,7 +213,7 @@ class MedProsPageState extends State<MedProsPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/medpros.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
@@ -414,7 +275,7 @@ class MedProsPageState extends State<MedProsPage> {
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
     MedprosPdf pdf = MedprosPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -475,24 +336,28 @@ class MedProsPageState extends State<MedProsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditMedprosPage(
-                  medpro: Medpro.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditMedprosPage(
+          medpro: Medpro.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditMedprosPage(
-                  medpro: Medpro(
-                    owner: _userId,
-                    users: [_userId],
-                    otherImms: [],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditMedprosPage(
+          medpro: Medpro(
+            owner: _userId!,
+            users: [_userId],
+            otherImms: [],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -545,7 +410,7 @@ class MedProsPageState extends State<MedProsPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -633,9 +498,9 @@ class MedProsPageState extends State<MedProsPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -775,7 +640,7 @@ class MedProsPageState extends State<MedProsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -792,11 +657,11 @@ class MedProsPageState extends State<MedProsPage> {
             if (_adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner,
+                  ad: myBanner!,
                 ),
               ),
             Flexible(

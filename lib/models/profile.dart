@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class TempProfile {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -17,26 +16,23 @@ class TempProfile {
   String recExp;
   String type;
   String comments;
-  String eventId;
-  String calendarId;
 
-  TempProfile(
-      {this.id,
-      this.soldierId,
-      @required this.owner,
-      @required this.users,
-      this.rank = '',
-      this.name = '',
-      this.firstName = '',
-      this.section = '',
-      this.rankSort = '',
-      this.date = '',
-      this.exp = '',
-      this.recExp = '',
-      this.type = 'Temporary',
-      this.comments = '',
-      this.eventId,
-      this.calendarId});
+  TempProfile({
+    this.id,
+    this.soldierId,
+    required this.owner,
+    required this.users,
+    this.rank = '',
+    this.name = '',
+    this.firstName = '',
+    this.section = '',
+    this.rankSort = '',
+    this.date = '',
+    this.exp = '',
+    this.recExp = '',
+    this.type = 'Temporary',
+    this.comments = '',
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -53,8 +49,6 @@ class TempProfile {
     map['recExp'] = recExp;
     map['type'] = type;
     map['comments'] = comments;
-    map['eventId'] = eventId;
-    map['calendarId'] = calendarId;
 
     return map;
   }
@@ -67,28 +61,27 @@ class TempProfile {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return TempProfile(
-        id: doc.id,
-        soldierId: doc['soldierId'],
-        owner: doc['owner'],
-        users: users,
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        date: doc['date'],
-        exp: doc['exp'],
-        recExp: doc['recExp'],
-        type: doc['type'],
-        comments: doc['comments'],
-        eventId: null,
-        calendarId: null);
+      id: doc.id,
+      soldierId: doc['soldierId'],
+      owner: doc['owner'],
+      users: users,
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      date: doc['date'],
+      exp: doc['exp'],
+      recExp: doc['recExp'],
+      type: doc['type'],
+      comments: doc['comments'],
+    );
   }
 }
 
 class PermProfile {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -108,8 +101,8 @@ class PermProfile {
   PermProfile({
     this.id,
     this.soldierId,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
     this.name = '',
     this.firstName = '',

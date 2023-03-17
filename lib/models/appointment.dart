@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/foundation.dart';
 
 class Appointment {
-  String id;
+  String? id;
   List<dynamic> users;
-  String soldierId;
+  String? soldierId;
   String rank;
   String name;
   String firstName;
@@ -22,7 +21,7 @@ class Appointment {
 
   Appointment({
     this.id,
-    @required this.users,
+    required this.users,
     this.soldierId,
     this.rank = '',
     this.name = '',
@@ -35,7 +34,7 @@ class Appointment {
     this.end = '',
     this.status = 'Scheduled',
     this.comments = '',
-    @required this.owner,
+    required this.owner,
     this.location = '',
   });
 

@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/counseling.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditCounselingPage extends StatefulWidget {
   const EditCounselingPage({
-    Key key,
-    @required this.counseling,
+    Key? key,
+    required this.counseling,
   }) : super(key: key);
   final Counseling counseling;
 
@@ -26,30 +27,29 @@ class EditCounselingPage extends StatefulWidget {
 
 class EditCounselingPageState extends State<EditCounselingPage> {
   String _title = 'New Counseling';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dateController;
-  TextEditingController _assessmentController;
-  TextEditingController _indivRemarksController;
-  TextEditingController _keyPointsController;
-  TextEditingController _leaderRespController;
-  TextEditingController _planOfActionController;
-  TextEditingController _purposeController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  DateTime _dateTime;
-  RegExp regExp;
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _assessmentController = TextEditingController();
+  final TextEditingController _indivRemarksController = TextEditingController();
+  final TextEditingController _keyPointsController = TextEditingController();
+  final TextEditingController _leaderRespController = TextEditingController();
+  final TextEditingController _planOfActionController = TextEditingController();
+  final TextEditingController _purposeController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _dateTime;
 
   Future<void> _pickDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dateTime,
+          initialDate: _dateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -84,7 +84,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -98,11 +98,11 @@ class EditCounselingPageState extends State<EditCounselingPage> {
         id: widget.counseling.id,
         soldierId: _soldierId,
         owner: userId,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         date: _dateController.text,
         assessment: _assessmentController.text,
         indivRemarks: _indivRemarksController.text,
@@ -140,21 +140,21 @@ class EditCounselingPageState extends State<EditCounselingPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('counselings')
           .where('owner', isEqualTo: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -162,7 +162,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -170,11 +170,6 @@ class EditCounselingPageState extends State<EditCounselingPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -193,11 +188,6 @@ class EditCounselingPageState extends State<EditCounselingPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.counseling.id != null) {
       _title = '${widget.counseling.rank} ${widget.counseling.name}';
     }
@@ -209,30 +199,21 @@ class EditCounselingPageState extends State<EditCounselingPage> {
     _section = widget.counseling.section;
     _rankSort = widget.counseling.rankSort;
 
-    _dateController = TextEditingController(text: widget.counseling.date);
-    _assessmentController =
-        TextEditingController(text: widget.counseling.assessment);
-    _indivRemarksController =
-        TextEditingController(text: widget.counseling.indivRemarks);
-    _leaderRespController =
-        TextEditingController(text: widget.counseling.leaderResp);
-    _planOfActionController =
-        TextEditingController(text: widget.counseling.planOfAction);
-    _purposeController = TextEditingController(text: widget.counseling.purpose);
-    _keyPointsController =
-        TextEditingController(text: widget.counseling.keyPoints);
-
-    removeSoldiers = false;
-    updated = false;
+    _dateController.text = widget.counseling.date;
+    _assessmentController.text = widget.counseling.assessment;
+    _indivRemarksController.text = widget.counseling.indivRemarks;
+    _leaderRespController.text = widget.counseling.leaderResp;
+    _planOfActionController.text = widget.counseling.planOfAction;
+    _purposeController.text = widget.counseling.purpose;
+    _keyPointsController.text = widget.counseling.keyPoints;
 
     _dateTime = DateTime.tryParse(widget.counseling.date) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -241,7 +222,9 @@ class EditCounselingPageState extends State<EditCounselingPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -280,15 +263,15 @@ class EditCounselingPageState extends State<EditCounselingPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -296,7 +279,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -304,20 +287,20 @@ class EditCounselingPageState extends State<EditCounselingPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   updated = true;
@@ -350,7 +333,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
                                   controller: _dateController,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(

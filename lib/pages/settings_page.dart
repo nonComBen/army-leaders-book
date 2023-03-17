@@ -12,10 +12,11 @@ import '../methods/on_back_pressed.dart';
 import '../providers/theme_provider.dart';
 import '../../models/setting.dart';
 import '../providers/notifications_plugin_provider.dart';
+import '../widgets/platform_widgets/platform_text_field.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/settings-page';
@@ -27,7 +28,7 @@ class SettingsPage extends StatefulWidget {
 enum Notification { acft, bf, weapon, pha, dental, vision, hearing, hiv }
 
 class SettingsPageState extends State<SettingsPage> {
-  int acftMos,
+  int? acftMos,
       bfMos,
       weaponMos,
       phaMos,
@@ -35,7 +36,7 @@ class SettingsPageState extends State<SettingsPage> {
       visionMos,
       hearingMos,
       hivMos;
-  List<dynamic> acftNotifications,
+  List<dynamic>? acftNotifications,
       bfNotifications,
       weaponNotifications,
       phaNotifications,
@@ -43,69 +44,69 @@ class SettingsPageState extends State<SettingsPage> {
       visionNotifications,
       hearingNotifications,
       hivNotifications;
-  bool updated,
-      addNotification,
-      perstat,
-      apts,
-      apft,
-      acft,
-      profiles,
-      bf,
-      weapons,
-      flags,
-      medpros,
-      training,
+  bool updated = false,
+      addNotification = true,
+      perstat = true,
+      apts = true,
+      apft = true,
+      acft = true,
+      profiles = true,
+      bf = true,
+      weapons = true,
+      flags = false,
+      medpros = false,
+      training = false,
       isInitial = true;
-  String userId;
+  String? userId;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  Setting setting;
+  late Setting setting;
   ThemeData _theme = ThemeData(brightness: Brightness.light);
   // ThemeBloc _themeBloc;
-  SharedPreferences prefs;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
+  late SharedPreferences prefs;
+  FlutterLocalNotificationsPlugin? notificationsPlugin;
 
-  TextEditingController acftController;
-  TextEditingController bfController;
-  TextEditingController weaponsController;
-  TextEditingController phaController;
-  TextEditingController dentalController;
-  TextEditingController visionController;
-  TextEditingController hearingController;
-  TextEditingController hivController;
+  final TextEditingController acftController = TextEditingController();
+  final TextEditingController bfController = TextEditingController();
+  final TextEditingController weaponsController = TextEditingController();
+  final TextEditingController phaController = TextEditingController();
+  final TextEditingController dentalController = TextEditingController();
+  final TextEditingController visionController = TextEditingController();
+  final TextEditingController hearingController = TextEditingController();
+  final TextEditingController hivController = TextEditingController();
 
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _editNotification(
-      BuildContext context, int index, Notification notification) {
+      BuildContext context, int? index, Notification notification) {
     int number = 10;
     TextEditingController numController =
         TextEditingController(text: number.toString());
     if (index != null) {
       switch (notification) {
         case Notification.acft:
-          number = acftNotifications[index];
+          number = acftNotifications![index];
           break;
         case Notification.bf:
-          number = bfNotifications[index];
+          number = bfNotifications![index];
           break;
         case Notification.weapon:
-          number = weaponNotifications[index];
+          number = weaponNotifications![index];
           break;
         case Notification.pha:
-          number = phaNotifications[index];
+          number = phaNotifications![index];
           break;
         case Notification.dental:
-          number = dentalNotifications[index];
+          number = dentalNotifications![index];
           break;
         case Notification.vision:
-          number = visionNotifications[index];
+          number = visionNotifications![index];
           break;
         case Notification.hearing:
-          number = hearingNotifications[index];
+          number = hearingNotifications![index];
           break;
         case Notification.hiv:
-          number = hivNotifications[index];
+          number = hivNotifications![index];
           break;
       }
       numController.text = number.toString();
@@ -118,7 +119,7 @@ class SettingsPageState extends State<SettingsPage> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
+            child: PlatformTextField(
               controller: numController,
               keyboardType: TextInputType.number,
               decoration:
@@ -139,28 +140,28 @@ class SettingsPageState extends State<SettingsPage> {
           setState(() {
             switch (notification) {
               case Notification.acft:
-                acftNotifications[index] = number;
+                acftNotifications![index] = number;
                 break;
               case Notification.bf:
-                bfNotifications[index] = number;
+                bfNotifications![index] = number;
                 break;
               case Notification.weapon:
-                weaponNotifications[index] = number;
+                weaponNotifications![index] = number;
                 break;
               case Notification.pha:
-                phaNotifications[index] = number;
+                phaNotifications![index] = number;
                 break;
               case Notification.dental:
-                dentalNotifications[index] = number;
+                dentalNotifications![index] = number;
                 break;
               case Notification.vision:
-                visionNotifications[index] = number;
+                visionNotifications![index] = number;
                 break;
               case Notification.hearing:
-                hearingNotifications[index] = number;
+                hearingNotifications![index] = number;
                 break;
               case Notification.hiv:
-                hivNotifications[index] = number;
+                hivNotifications![index] = number;
                 break;
             }
           });
@@ -168,28 +169,28 @@ class SettingsPageState extends State<SettingsPage> {
           setState(() {
             switch (notification) {
               case Notification.acft:
-                acftNotifications.add(number);
+                acftNotifications!.add(number);
                 break;
               case Notification.bf:
-                bfNotifications.add(number);
+                bfNotifications!.add(number);
                 break;
               case Notification.weapon:
-                weaponNotifications.add(number);
+                weaponNotifications!.add(number);
                 break;
               case Notification.pha:
-                phaNotifications.add(number);
+                phaNotifications!.add(number);
                 break;
               case Notification.dental:
-                dentalNotifications.add(number);
+                dentalNotifications!.add(number);
                 break;
               case Notification.vision:
-                visionNotifications.add(number);
+                visionNotifications!.add(number);
                 break;
               case Notification.hearing:
-                hearingNotifications.add(number);
+                hearingNotifications!.add(number);
                 break;
               case Notification.hiv:
-                hivNotifications.add(number);
+                hivNotifications!.add(number);
                 break;
             }
           });
@@ -212,22 +213,22 @@ class SettingsPageState extends State<SettingsPage> {
       medpros: medpros,
       training: training,
       addNotifications: addNotification,
-      acftMonths: acftMos,
-      bfMonths: bfMos,
-      weaponsMonths: weaponMos,
-      phaMonths: phaMos,
-      dentalMonths: dentalMos,
-      visionMonths: visionMos,
-      hearingMonths: hearingMos,
-      hivMonths: hivMos,
-      acftNotifications: acftNotifications,
-      bfNotifications: bfNotifications,
-      weaponsNotifications: weaponNotifications,
-      phaNotifications: phaNotifications,
-      dentalNotifications: dentalNotifications,
-      visionNotifications: visionNotifications,
-      hearingNotifications: hearingNotifications,
-      hivNotifications: hivNotifications,
+      acftMonths: acftMos!,
+      bfMonths: bfMos!,
+      weaponsMonths: weaponMos!,
+      phaMonths: phaMos!,
+      dentalMonths: dentalMos!,
+      visionMonths: visionMos!,
+      hearingMonths: hearingMos!,
+      hivMonths: hivMos!,
+      acftNotifications: acftNotifications!,
+      bfNotifications: bfNotifications!,
+      weaponsNotifications: weaponNotifications!,
+      phaNotifications: phaNotifications!,
+      dentalNotifications: dentalNotifications!,
+      visionNotifications: visionNotifications!,
+      hearingNotifications: hearingNotifications!,
+      hivNotifications: hivNotifications!,
       owner: userId,
     );
 
@@ -237,15 +238,10 @@ class SettingsPageState extends State<SettingsPage> {
         .set(saveSetting.toMap(), SetOptions(merge: true));
 
     if (!saveSetting.addNotifications) {
-      notificationsPlugin.cancelAll();
+      notificationsPlugin!.cancelAll();
     }
 
     Navigator.pop(context);
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -264,27 +260,11 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    userId = AuthProvider.of(context).auth.currentUser().uid;
+    userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
     if (isInitial) {
       initialize();
       isInitial = false;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    addNotification = true;
-    perstat = true;
-    apts = true;
-    apft = true;
-    acft = false;
-    profiles = true;
-    bf = true;
-    weapons = true;
-    flags = false;
-    medpros = false;
-    training = false;
   }
 
   void initialize() async {
@@ -292,7 +272,7 @@ class SettingsPageState extends State<SettingsPage> {
         .collection('settings')
         .where('owner', isEqualTo: userId)
         .get();
-    DocumentSnapshot doc;
+    DocumentSnapshot? doc;
     if (snapshot.docs.isNotEmpty) {
       doc = snapshot.docs.firstWhere((doc) => doc.id == userId);
     }
@@ -300,7 +280,7 @@ class SettingsPageState extends State<SettingsPage> {
 
     setState(() {
       if (doc != null) {
-        setting = Setting.fromMap(doc.data());
+        setting = Setting.fromMap(doc.data() as Map<String, dynamic>);
         updated = false;
       } else {
         setting = Setting(
@@ -317,51 +297,44 @@ class SettingsPageState extends State<SettingsPage> {
         updated = true;
       }
 
-      perstat = setting.perstat ?? true;
-      apts = setting.apts ?? true;
-      apft = setting.apft ?? true;
-      acft = setting.acft ?? false;
-      profiles = setting.profiles ?? true;
-      bf = setting.bf ?? true;
-      weapons = setting.weapons ?? true;
-      flags = setting.flags ?? false;
-      medpros = setting.medpros ?? false;
-      training = setting.training ?? false;
-      addNotification = setting.addNotifications ?? true;
-      acftMos = setting.acftMonths ?? 6;
-      bfMos = setting.bfMonths ?? 6;
-      weaponMos = setting.weaponsMonths ?? 6;
-      phaMos = setting.phaMonths ?? 12;
-      dentalMos = setting.dentalMonths ?? 12;
-      visionMos = setting.visionMonths ?? 12;
-      hearingMos = setting.hearingMonths ?? 12;
-      hivMos = setting.hivMonths ?? 24;
+      perstat = setting.perstat;
+      apts = setting.apts;
+      apft = setting.apft;
+      acft = setting.acft;
+      profiles = setting.profiles;
+      bf = setting.bf;
+      weapons = setting.weapons;
+      flags = setting.flags;
+      medpros = setting.medpros;
+      training = setting.training;
+      addNotification = setting.addNotifications;
+      acftMos = setting.acftMonths;
+      bfMos = setting.bfMonths;
+      weaponMos = setting.weaponsMonths;
+      phaMos = setting.phaMonths;
+      dentalMos = setting.dentalMonths;
+      visionMos = setting.visionMonths;
+      hearingMos = setting.hearingMonths;
+      hivMos = setting.hivMonths;
 
-      acftController = TextEditingController(text: acftMos.toString());
-      bfController = TextEditingController(text: bfMos.toString());
-      weaponsController = TextEditingController(text: weaponMos.toString());
-      phaController = TextEditingController(text: phaMos.toString());
-      dentalController = TextEditingController(text: dentalMos.toString());
-      visionController = TextEditingController(text: visionMos.toString());
-      hearingController = TextEditingController(text: hearingMos.toString());
-      hivController = TextEditingController(text: hivMos.toString());
+      acftController.text = acftMos.toString();
+      bfController.text = bfMos.toString();
+      weaponsController.text = weaponMos.toString();
+      phaController.text = phaMos.toString();
+      dentalController.text = dentalMos.toString();
+      visionController.text = visionMos.toString();
+      hearingController.text = hearingMos.toString();
+      hivController.text = hivMos.toString();
 
-      bfNotifications =
-          setting.bfNotifications.toList(growable: true) ?? [0, 30];
-      weaponNotifications =
-          setting.weaponsNotifications.toList(growable: true) ?? [0, 30];
-      phaNotifications =
-          setting.phaNotifications.toList(growable: true) ?? [0, 30];
-      dentalNotifications =
-          setting.dentalNotifications.toList(growable: true) ?? [0, 30];
-      visionNotifications =
-          setting.visionNotifications.toList(growable: true) ?? [0, 30];
+      bfNotifications = setting.bfNotifications.toList(growable: true);
+      weaponNotifications = setting.weaponsNotifications.toList(growable: true);
+      phaNotifications = setting.phaNotifications.toList(growable: true);
+      dentalNotifications = setting.dentalNotifications.toList(growable: true);
+      visionNotifications = setting.visionNotifications.toList(growable: true);
       hearingNotifications =
-          setting.hearingNotifications.toList(growable: true) ?? [0, 30];
-      hivNotifications =
-          setting.hivNotifications.toList(growable: true) ?? [0, 30];
-      acftNotifications =
-          setting.acftNotifications.toList(growable: true) ?? [0, 30];
+          setting.hearingNotifications.toList(growable: true);
+      hivNotifications = setting.hivNotifications.toList(growable: true);
+      acftNotifications = setting.acftNotifications.toList(growable: true);
 
       _theme = Theme.of(context);
     });
@@ -389,7 +362,9 @@ class SettingsPageState extends State<SettingsPage> {
             child: SingleChildScrollView(
               child: Form(
                 key: _formState,
-                onWillPop: _onBackPressed,
+                onWillPop: updated
+                    ? () => onBackPressed(context)
+                    : () => Future(() => true),
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   children: <Widget>[
@@ -406,10 +381,9 @@ class SettingsPageState extends State<SettingsPage> {
                           value: Brightness.light,
                           groupValue: _theme.brightness,
                           title: const Text('Light'),
-                          onChanged: (Brightness value) {
+                          onChanged: (Brightness? value) {
                             setState(() {
                               _theme = ThemeData(brightness: value);
-                              // _themeBloc.add(LightThemeEvent());
                               themeProvider.lightTheme();
                               prefs.setBool('darkMode', false);
                             });
@@ -419,10 +393,9 @@ class SettingsPageState extends State<SettingsPage> {
                           value: Brightness.dark,
                           groupValue: _theme.brightness,
                           title: const Text('Dark'),
-                          onChanged: (Brightness value) {
+                          onChanged: (Brightness? value) {
                             setState(() {
                               _theme = ThemeData(brightness: value);
-                              // _themeBloc.add(DarkThemeEvent());
                               themeProvider.darkTheme();
                               prefs.setBool('darkMode', true);
                             });
@@ -560,7 +533,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          acftMos = int.tryParse(value) ?? 6;
+                          acftMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -582,18 +555,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: acftNotifications == null
                             ? 0
-                            : acftNotifications.length,
+                            : acftNotifications!.length,
                         itemBuilder: (context, index) {
-                          acftNotifications.sort();
+                          acftNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${acftNotifications[index].toString()} Days Before'),
+                                  '${acftNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      acftNotifications.removeAt(index);
+                                      acftNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -621,7 +594,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          bfMos = int.tryParse(value) ?? 6;
+                          bfMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -642,18 +615,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: bfNotifications == null
                             ? 0
-                            : bfNotifications.length,
+                            : bfNotifications!.length,
                         itemBuilder: (context, index) {
-                          bfNotifications.sort();
+                          bfNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${bfNotifications[index].toString()} Days Before'),
+                                  '${bfNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      bfNotifications.removeAt(index);
+                                      bfNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -681,7 +654,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          weaponMos = int.tryParse(value) ?? 6;
+                          weaponMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -703,18 +676,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: weaponNotifications == null
                             ? 0
-                            : weaponNotifications.length,
+                            : weaponNotifications!.length,
                         itemBuilder: (context, index) {
-                          weaponNotifications.sort();
+                          weaponNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${weaponNotifications[index].toString()} Days Before'),
+                                  '${weaponNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      weaponNotifications.removeAt(index);
+                                      weaponNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -742,7 +715,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          phaMos = int.tryParse(value) ?? 12;
+                          phaMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -764,18 +737,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: phaNotifications == null
                             ? 0
-                            : phaNotifications.length,
+                            : phaNotifications!.length,
                         itemBuilder: (context, index) {
-                          phaNotifications.sort();
+                          phaNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${phaNotifications[index].toString()} Days Before'),
+                                  '${phaNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      phaNotifications.removeAt(index);
+                                      phaNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -803,7 +776,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          dentalMos = int.tryParse(value) ?? 12;
+                          dentalMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -825,18 +798,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: dentalNotifications == null
                             ? 0
-                            : dentalNotifications.length,
+                            : dentalNotifications!.length,
                         itemBuilder: (context, index) {
-                          dentalNotifications.sort();
+                          dentalNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${dentalNotifications[index].toString()} Days Before'),
+                                  '${dentalNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      dentalNotifications.removeAt(index);
+                                      dentalNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -864,7 +837,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          visionMos = int.tryParse(value) ?? 12;
+                          visionMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -886,18 +859,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: visionNotifications == null
                             ? 0
-                            : visionNotifications.length,
+                            : visionNotifications!.length,
                         itemBuilder: (context, index) {
-                          visionNotifications.sort();
+                          visionNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${visionNotifications[index].toString()} Days Before'),
+                                  '${visionNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      visionNotifications.removeAt(index);
+                                      visionNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -925,7 +898,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          hearingMos = int.tryParse(value) ?? 12;
+                          hearingMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -947,18 +920,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: hearingNotifications == null
                             ? 0
-                            : hearingNotifications.length,
+                            : hearingNotifications!.length,
                         itemBuilder: (context, index) {
-                          hearingNotifications.sort();
+                          hearingNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${hearingNotifications[index].toString()} Days Before'),
+                                  '${hearingNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      hearingNotifications.removeAt(index);
+                                      hearingNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -986,7 +959,7 @@ class SettingsPageState extends State<SettingsPage> {
                       ),
                       onChanged: (value) {
                         setState(() {
-                          hivMos = int.tryParse(value) ?? 24;
+                          hivMos = int.tryParse(value);
                           updated = true;
                         });
                       },
@@ -1008,18 +981,18 @@ class SettingsPageState extends State<SettingsPage> {
                         primary: false,
                         itemCount: hivNotifications == null
                             ? 0
-                            : hivNotifications.length,
+                            : hivNotifications!.length,
                         itemBuilder: (context, index) {
-                          hivNotifications.sort();
+                          hivNotifications!.sort();
                           return Card(
                             child: ListTile(
                               title: Text(
-                                  '${hivNotifications[index].toString()} Days Before'),
+                                  '${hivNotifications![index].toString()} Days Before'),
                               trailing: IconButton(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
                                     setState(() {
-                                      hivNotifications.removeAt(index);
+                                      hivNotifications!.removeAt(index);
                                     });
                                   }),
                               onTap: () {
@@ -1032,7 +1005,7 @@ class SettingsPageState extends State<SettingsPage> {
                     ElevatedButton(
                         child: const Text('Save'),
                         onPressed: () {
-                          if (_formState.currentState.validate()) {
+                          if (_formState.currentState!.validate()) {
                             submit();
                           } else {
                             ScaffoldMessenger.of(context)

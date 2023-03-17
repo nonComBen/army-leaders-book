@@ -20,9 +20,9 @@ import '../widgets/anon_warning_banner.dart';
 
 class SoldierDetailsPage extends StatefulWidget {
   const SoldierDetailsPage({
-    Key key,
-    @required this.userId,
-    @required this.soldier,
+    Key? key,
+    required this.userId,
+    required this.soldier,
   }) : super(key: key);
   final String userId;
   final Soldier soldier;
@@ -34,20 +34,22 @@ class SoldierDetailsPage extends StatefulWidget {
 }
 
 class SoldierDetailsPageState extends State<SoldierDetailsPage> {
-  String _soldierName;
-  FirebaseFirestore firestore;
-  BannerAd myBanner;
-  bool _adLoaded = false, isSubscribed;
+  late String _soldierName;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  BannerAd? myBanner;
+  bool _adLoaded = false, isSubscribed = false;
 
-  Widget createField(String value, String label) {
+  Widget createField(String? value, String label) {
     return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextFormField(
-            initialValue: value,
-            enabled: false,
-            decoration: InputDecoration(
-              labelText: label,
-            )));
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        initialValue: value,
+        enabled: false,
+        decoration: InputDecoration(
+          labelText: label,
+        ),
+      ),
+    );
   }
 
   String getTimeIn(String date) {
@@ -184,7 +186,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
     TextEditingController make = TextEditingController(text: pov.make);
     TextEditingController model = TextEditingController(text: pov.model);
     TextEditingController plate = TextEditingController(text: pov.plate);
-    TextEditingController state = TextEditingController(text: pov.state ?? '');
+    TextEditingController state = TextEditingController(text: pov.state);
     TextEditingController regExp = TextEditingController(text: pov.regExp);
     TextEditingController ins = TextEditingController(text: pov.ins);
     TextEditingController insExp = TextEditingController(text: pov.insExp);
@@ -321,7 +323,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -331,7 +333,6 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
     _soldierName =
         '${widget.soldier.rank}${widget.soldier.promotable} ${widget.soldier.lastName}';
     if (widget.soldier.milEd.length == 4 &&
@@ -346,7 +347,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
       appBar: AppBar(
         title: Text(_soldierName),
@@ -452,32 +453,32 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
                       shrinkWrap: true,
                       children: <Widget>[
                         Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                                initialValue: widget.soldier.address ?? '',
-                                enabled: true,
-                                decoration: InputDecoration(
-                                    labelText: 'Address',
-                                    suffixIcon: IconButton(
-                                      icon: const Icon(Icons.map),
-                                      tooltip: 'Show on Map',
-                                      onPressed: (() {
-                                        String address =
-                                            widget.soldier.address ?? '';
-                                        if (widget.soldier.address != '') {
-                                          String city =
-                                              widget.soldier.city ?? '';
-                                          String state =
-                                              widget.soldier.state ?? '';
-                                          String zip = widget.soldier.zip ?? '';
-                                          MapsLauncher.launchQuery(
-                                              '$address $city, $state $zip');
-                                        }
-                                      }),
-                                    )))),
-                        createField(widget.soldier.city ?? '', 'City'),
-                        createField(widget.soldier.state ?? '', 'State'),
-                        createField(widget.soldier.zip ?? '', 'Zip Code'),
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            initialValue: widget.soldier.address,
+                            enabled: true,
+                            decoration: InputDecoration(
+                              labelText: 'Address',
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.map),
+                                tooltip: 'Show on Map',
+                                onPressed: (() {
+                                  String address = widget.soldier.address;
+                                  if (widget.soldier.address != '') {
+                                    String city = widget.soldier.city;
+                                    String state = widget.soldier.state;
+                                    String zip = widget.soldier.zip;
+                                    MapsLauncher.launchQuery(
+                                        '$address $city, $state $zip');
+                                  }
+                                }),
+                              ),
+                            ),
+                          ),
+                        ),
+                        createField(widget.soldier.city, 'City'),
+                        createField(widget.soldier.state, 'State'),
+                        createField(widget.soldier.zip, 'Zip Code'),
                         createField(widget.soldier.phone, 'Personal Phone'),
                         createField(widget.soldier.workPhone, 'Work Phone'),
                         createField(widget.soldier.email, 'Personal Email'),
@@ -508,7 +509,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
                               POV(
                                 owner: widget.soldier.owner,
                                 users: widget.soldier.users,
-                                soldierId: widget.soldier.id,
+                                soldierId: widget.soldier.id!,
                               ));
                         },
                         child: const Text('Add POV'),
@@ -533,7 +534,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
                                 return const CircularProgressIndicator();
                               default:
                                 List<DocumentSnapshot> povSnapshots =
-                                    snapshot.data.docs;
+                                    snapshot.data!.docs;
                                 return ListView.builder(
                                     scrollDirection: Axis.vertical,
                                     shrinkWrap: true,
@@ -577,7 +578,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
                               Award(
                                 owner: widget.soldier.owner,
                                 users: widget.soldier.users,
-                                soldierId: widget.soldier.id,
+                                soldierId: widget.soldier.id!,
                               ));
                         },
                         child: const Text('Add Award'),
@@ -602,7 +603,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
                                 return const CircularProgressIndicator();
                               default:
                                 List<DocumentSnapshot> awardSnapshots =
-                                    snapshot.data.docs;
+                                    snapshot.data!.docs;
                                 return ListView.builder(
                                     scrollDirection: Axis.vertical,
                                     shrinkWrap: true,
@@ -642,11 +643,11 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
               if (_adLoaded)
                 Container(
                   alignment: Alignment.center,
-                  width: myBanner.size.width.toDouble(),
-                  height: myBanner.size.height.toDouble(),
+                  width: myBanner!.size.width.toDouble(),
+                  height: myBanner!.size.height.toDouble(),
                   constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                   child: AdWidget(
-                    ad: myBanner,
+                    ad: myBanner!,
                   ),
                 )
             ],

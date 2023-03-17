@@ -9,14 +9,15 @@ import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/validate.dart';
 import '../../models/action.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class EditActionsTrackerPage extends StatefulWidget {
   const EditActionsTrackerPage({
-    Key key,
-    @required this.action,
+    Key? key,
+    required this.action,
   }) : super(key: key);
   final ActionObj action;
 
@@ -26,29 +27,28 @@ class EditActionsTrackerPage extends StatefulWidget {
 
 class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
   String _title = 'New Action';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  TextEditingController _dateController;
-  TextEditingController _actionController;
-  TextEditingController _statusController;
-  TextEditingController _statusDateController;
-  TextEditingController _remarksController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
-  List<dynamic> _users;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  DateTime _dateTime, _statusDateTime;
-  RegExp regExp;
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _actionController = TextEditingController();
+  final TextEditingController _statusController = TextEditingController();
+  final TextEditingController _statusDateController = TextEditingController();
+  final TextEditingController _remarksController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  List<dynamic>? _users;
+  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _dateTime, _statusDateTime;
 
   Future<void> _pickDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _dateTime,
+          initialDate: _dateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -63,32 +63,33 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
       }
     } else {
       showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _dateTime,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _dateTime = value;
-                  _dateController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
+        context: context,
+        builder: (BuildContext context) {
+          return SizedBox(
+            height: MediaQuery.of(context).size.height / 4,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: _dateTime,
+              minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
+              maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
+              onDateTimeChanged: (value) {
+                _dateTime = value;
+                _dateController.text = formatter.format(value);
+                updated = true;
+              },
+            ),
+          );
+        },
+      );
     }
   }
 
   Future<void> _pickStatusDate(BuildContext context) async {
     var formatter = DateFormat('yyyy-MM-dd');
     if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: _statusDateTime,
+          initialDate: _statusDateTime!,
           firstDate: DateTime(2000),
           lastDate: DateTime(2050));
 
@@ -124,7 +125,7 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
   }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -135,18 +136,18 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
   void submit(BuildContext context) async {
     if (validateAndSave()) {
       DocumentSnapshot doc =
-          soldiers.firstWhere((element) => element.id == _soldierId);
+          soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
       ActionObj saveAction = ActionObj(
         id: widget.action.id,
         soldierId: _soldierId,
-        owner: _owner,
-        users: _users,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         action: _actionController.text,
         dateSubmitted: _dateController.text,
         currentStatus: _statusController.text,
@@ -181,21 +182,21 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
     }
   }
 
-  void _removeSoldiers(bool checked, String userId) async {
+  void _removeSoldiers(bool? checked, String userId) async {
     if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
+      lessSoldiers = List.from(allSoldiers!, growable: true);
       QuerySnapshot apfts = await firestore
           .collection('actions')
           .where('users', arrayContains: userId)
           .get();
       if (apfts.docs.isNotEmpty) {
         for (var doc in apfts.docs) {
-          lessSoldiers
+          lessSoldiers!
               .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
         }
       }
     }
-    if (lessSoldiers.isEmpty) {
+    if (lessSoldiers!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All Soldiers have been added')));
@@ -203,7 +204,7 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
     }
 
     setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
+      if (checked! && lessSoldiers!.isNotEmpty) {
         _soldierId = null;
         removeSoldiers = true;
       } else {
@@ -211,11 +212,6 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
         removeSoldiers = false;
       }
     });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
   }
 
   @override
@@ -232,11 +228,6 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
   void initState() {
     super.initState();
 
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
     if (widget.action.id != null) {
       _title = '${widget.action.rank} ${widget.action.name}';
     }
@@ -250,28 +241,22 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
     _owner = widget.action.owner;
     _users = widget.action.users;
 
-    _dateController = TextEditingController(text: widget.action.dateSubmitted);
-    _actionController = TextEditingController(text: widget.action.action);
-    _statusController =
-        TextEditingController(text: widget.action.currentStatus);
-    _statusDateController =
-        TextEditingController(text: widget.action.statusDate);
-    _remarksController = TextEditingController(text: widget.action.remarks);
-
-    removeSoldiers = false;
-    updated = false;
+    _dateController.text = widget.action.dateSubmitted;
+    _actionController.text = widget.action.action;
+    _statusController.text = widget.action.currentStatus;
+    _statusDateController.text = widget.action.statusDate;
+    _remarksController.text = widget.action.remarks;
 
     _dateTime =
         DateTime.tryParse(widget.action.dateSubmitted) ?? DateTime.now();
     _statusDateTime =
         DateTime.tryParse(widget.action.statusDate) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
+    final user = AuthProvider.of(context)!.auth!.currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(
@@ -280,7 +265,9 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
             child: Padding(
               padding: EdgeInsets.symmetric(
                   horizontal: width > 932 ? (width - 916) / 2 : 16),
@@ -319,15 +306,15 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
                                               child:
                                                   CircularProgressIndicator());
                                         default:
-                                          allSoldiers = snapshot.data.docs;
+                                          allSoldiers = snapshot.data!.docs;
                                           soldiers = removeSoldiers
                                               ? lessSoldiers
                                               : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
+                                          soldiers!.sort((a, b) => a['lastName']
                                               .toString()
                                               .compareTo(
                                                   b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
+                                          soldiers!.sort((a, b) => a['rankSort']
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
@@ -335,7 +322,7 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
                                               String>(
                                             decoration: const InputDecoration(
                                                 labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
+                                            items: soldiers!.map((doc) {
                                               return DropdownMenuItem<String>(
                                                 value: doc.id,
                                                 child: Text(
@@ -343,26 +330,26 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
                                               );
                                             }).toList(),
                                             onChanged: (value) {
-                                              int index = soldiers.indexWhere(
+                                              int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);
                                               if (mounted) {
                                                 setState(() {
                                                   _soldierId = value;
                                                   _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
+                                                      soldiers![index]['rank'];
+                                                  _lastName = soldiers![index]
                                                       ['lastName'];
-                                                  _firstName = soldiers[index]
+                                                  _firstName = soldiers![index]
                                                       ['firstName'];
-                                                  _section = soldiers[index]
+                                                  _section = soldiers![index]
                                                       ['section'];
-                                                  _rankSort = soldiers[index]
+                                                  _rankSort = soldiers![index]
                                                           ['rankSort']
                                                       .toString();
                                                   _owner =
-                                                      soldiers[index]['owner'];
+                                                      soldiers![index]['owner'];
                                                   _users =
-                                                      soldiers[index]['users'];
+                                                      soldiers![index]['users'];
                                                   updated = true;
                                                 });
                                               }
@@ -408,7 +395,7 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(
@@ -448,7 +435,7 @@ class EditActionsTrackerPageState extends State<EditActionsTrackerPage> {
                                   keyboardType: TextInputType.datetime,
                                   enabled: true,
                                   validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
+                                      isValidDate(value!) || value.isEmpty
                                           ? null
                                           : 'Date must be in yyyy-MM-dd format',
                                   decoration: InputDecoration(

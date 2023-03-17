@@ -7,13 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:leaders_book/auth_provider.dart';
 
+import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
 class UploadPhonePage extends StatefulWidget {
   const UploadPhonePage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -21,22 +22,22 @@ class UploadPhonePage extends StatefulWidget {
 }
 
 class UploadPhonePageState extends State<UploadPhonePage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String title, poc, phone, loc, path;
+  List<String?>? columnHeaders;
+  late List<List<Data?>> rows;
+  String? title, poc, phone, loc, path;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -51,17 +52,17 @@ class UploadPhonePageState extends State<UploadPhonePage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      title = columnHeaders.contains('Title') ? 'Title' : '';
-      poc = columnHeaders.contains('POC') ? 'POC' : '';
-      phone = columnHeaders.contains('Phone Number') ? 'Phone Number' : '';
-      loc = columnHeaders.contains('Location') ? 'Location' : '';
+      title = columnHeaders!.contains('Title') ? 'Title' : '';
+      poc = columnHeaders!.contains('POC') ? 'POC' : '';
+      phone = columnHeaders!.contains('Phone Number') ? 'Phone Number' : '';
+      loc = columnHeaders!.contains('Location') ? 'Location' : '';
     });
   }
 
   void _saveData(BuildContext context) {
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final owner = AuthProvider.of(context).auth.currentUser().uid;
+      final owner = AuthProvider.of(context)!.auth!.currentUser()!.uid;
 
       for (int i = 1; i < rows.length; i++) {
         String saveTitle = getCellValue(rows[i], columnHeaders, title);
@@ -92,7 +93,7 @@ class UploadPhonePageState extends State<UploadPhonePage> {
     phone = '';
     loc = '';
     columnHeaders = [];
-    columnHeaders.add('');
+    columnHeaders!.add('');
     rows = [];
   }
 
@@ -130,7 +131,7 @@ class UploadPhonePageState extends State<UploadPhonePage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      path,
+                      path!,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -150,10 +151,10 @@ class UploadPhonePageState extends State<UploadPhonePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'Title'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: title,
@@ -168,10 +169,10 @@ class UploadPhonePageState extends State<UploadPhonePage> {
                         padding: const EdgeInsets.all(8.0),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(labelText: 'POC'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: poc,
@@ -187,10 +188,10 @@ class UploadPhonePageState extends State<UploadPhonePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Phone Number'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: phone,
@@ -206,10 +207,10 @@ class UploadPhonePageState extends State<UploadPhonePage> {
                         child: DropdownButtonFormField<String>(
                           decoration:
                               const InputDecoration(labelText: 'Location'),
-                          items: columnHeaders.map((header) {
+                          items: columnHeaders!.map((header) {
                             return DropdownMenuItem<String>(
                               value: header,
-                              child: Text(header),
+                              child: Text(header!),
                             );
                           }).toList(),
                           value: loc,
@@ -223,11 +224,12 @@ class UploadPhonePageState extends State<UploadPhonePage> {
                     ],
                   ),
                   FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
+                    onPressed: () {
+                      if (path == '') {
+                        showSnackbar(context, 'Please select a file to upload');
+                      }
+                      _saveData(context);
+                    },
                     text: 'Upload Phone Numbers',
                   )
                 ],

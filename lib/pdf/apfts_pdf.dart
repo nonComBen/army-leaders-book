@@ -5,9 +5,9 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ApftsPdf {
-  ApftsPdf(
-    this.documents,
-  );
+  ApftsPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 
@@ -39,9 +39,9 @@ class ApftsPdf {
   }
 
   Map<String, int> getAverages() {
-    List<int> pu = [];
-    List<int> su = [];
-    List<int> run = [];
+    List<int?> pu = [];
+    List<int?> su = [];
+    List<int?> run = [];
     List<int> total = [];
     for (DocumentSnapshot doc in documents) {
       int events = 0;
@@ -58,15 +58,15 @@ class ApftsPdf {
         events++;
       }
       if (events == 3) {
-        total.add(pu.last + su.last + run.last);
+        total.add(pu.last! + su.last! + run.last!);
       }
     }
     return <String, int>{
-      'pu':
-          (pu.reduce((value, element) => value + element) / pu.length).floor(),
-      'su':
-          (su.reduce((value, element) => value + element) / su.length).floor(),
-      'run': (run.reduce((value, element) => value + element) / run.length)
+      'pu': (pu.reduce((value, element) => value! + element!)! / pu.length)
+          .floor(),
+      'su': (su.reduce((value, element) => value! + element!)! / su.length)
+          .floor(),
+      'run': (run.reduce((value, element) => value! + element!)! / run.length)
           .floor(),
       'total':
           (total.reduce((value, element) => value + element) / total.length)

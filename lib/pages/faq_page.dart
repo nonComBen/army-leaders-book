@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../auth_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class FaqPage extends StatefulWidget {
+class FaqPage extends ConsumerStatefulWidget {
   const FaqPage({
     Key? key,
   }) : super(key: key);
@@ -25,7 +26,7 @@ class Faq {
   Faq(this.isExpanded, this.header, this.body);
 }
 
-class FaqPageState extends State<FaqPage> {
+class FaqPageState extends ConsumerState<FaqPage> {
   List<Faq> faqs = [
     Faq(
         false,
@@ -151,7 +152,7 @@ class FaqPageState extends State<FaqPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(

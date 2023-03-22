@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:leaders_book/pages/privacy_policy_page.dart';
 import 'package:leaders_book/pages/tos_page.dart';
-import 'package:provider/provider.dart';
 
 import '../methods/home_page_methods.dart';
 import '../providers/subscription_state.dart';
@@ -45,7 +45,7 @@ import '../pages/phone_page.dart';
 import '../pages/notes_page.dart';
 import 'custom_drawer_header.dart';
 
-class MainDrawer extends StatelessWidget {
+class MainDrawer extends ConsumerWidget {
   final VoidCallback subscribe;
   final VoidCallback signOutWarning;
   final VoidCallback signOut;
@@ -78,10 +78,9 @@ class MainDrawer extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final user = AuthProvider.of(context)!.auth!.currentUser();
-    final isSubscribedAdFree =
-        Provider.of<SubscriptionState>(context).isSubscribed;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.read(authProvider).currentUser();
+    final isSubscribedAdFree = ref.read(subscriptionStateProvider);
     return Drawer(
       child: ListView(
         children: <Widget>[
@@ -92,11 +91,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SoldiersPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SoldiersPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -105,11 +106,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => PerstatPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PerstatPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -118,11 +121,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => AptsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AptsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -130,8 +135,12 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.directions_run),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const ApftPage()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ApftPage(),
+                ),
+              );
             },
           ),
           ListTile(
@@ -139,8 +148,12 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.fitness_center),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const AcftPage()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AcftPage(),
+                ),
+              );
             },
           ),
           ListTile(
@@ -149,11 +162,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TempProfilesPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TempProfilesPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -162,11 +177,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => PermProfilesPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PermProfilesPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -174,8 +191,12 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.accessibility),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const BodyfatPage()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BodyfatPage(),
+                ),
+              );
             },
           ),
           ListTile(
@@ -183,8 +204,12 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.my_location),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const WeaponsPage()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const WeaponsPage(),
+                ),
+              );
             },
           ),
           ListTile(
@@ -193,11 +218,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => FlagsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FlagsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -206,11 +233,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => RatingsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => RatingsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -218,8 +247,12 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.local_hospital),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const MedProsPage()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MedProsPage(),
+                ),
+              );
             },
           ),
           ListTile(
@@ -228,11 +261,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TrainingPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TrainingPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -241,11 +276,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => EquipmentPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EquipmentPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -254,11 +291,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HandReceiptPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HandReceiptPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -267,11 +306,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => MilLicPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MilLicPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -280,11 +321,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => DutyRosterPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DutyRosterPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -293,11 +336,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TaskingsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TaskingsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -306,11 +351,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => HrActionsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HrActionsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -319,11 +366,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CounselingsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CounselingsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -332,11 +381,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => WorkingAwardsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WorkingAwardsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -345,11 +396,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => WorkingEvalsPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WorkingEvalsPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -358,11 +411,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ActionsTrackerPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ActionsTrackerPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -371,11 +426,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => PhonePage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PhonePage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -384,11 +441,13 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => NotesPage(
-                            userId: user!.uid,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotesPage(
+                    userId: user!.uid,
+                  ),
+                ),
+              );
             },
           ),
           ListTile(
@@ -397,9 +456,11 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AlertRosterPage()));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AlertRosterPage(),
+                ),
+              );
             },
           ),
           const Divider(),
@@ -474,9 +535,11 @@ class MainDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingsPage()));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
+                ),
+              );
             },
           ),
           ListTile(
@@ -486,16 +549,21 @@ class MainDrawer extends StatelessWidget {
               if (!user!.isAnonymous) {
                 Navigator.pop(context);
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => EditUserPage(
-                              userId: user.uid,
-                            )));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditUserPage(
+                      userId: user.uid,
+                    ),
+                  ),
+                );
               } else {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
                     content: Text(
-                        'You need to create an account before you can edit profile.')));
+                        'You need to create an account before you can edit profile.'),
+                  ),
+                );
               }
             },
           ),

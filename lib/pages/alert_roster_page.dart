@@ -6,18 +6,18 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:leaders_book/methods/show_snackbar.dart';
 import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../pdf/alert_roster_pdf.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
 import '../methods/download_methods.dart';
 import '../models/alert_soldier.dart';
 import '../../models/soldier.dart';
@@ -26,7 +26,7 @@ import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
 import '../widgets/alert_tile.dart';
 
-class AlertRosterPage extends StatefulWidget {
+class AlertRosterPage extends ConsumerStatefulWidget {
   const AlertRosterPage({Key? key}) : super(key: key);
 
   static const routeName = '/alert-roster-page';
@@ -35,7 +35,7 @@ class AlertRosterPage extends StatefulWidget {
   AlertRosterPageState createState() => AlertRosterPageState();
 }
 
-class AlertRosterPageState extends State<AlertRosterPage> {
+class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   List<dynamic> _soldiers = [];
   List<Soldier> _allSoldiers = [];
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -611,9 +611,9 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-    prefs = Provider.of<SharedPreferencesProvider>(context).prefs;
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
+    prefs = ref.read(sharedPreferencesProvider);
     bool dontShow = prefs.getBool('dontShowHelpAlert') ?? false;
     if (!dontShow) {
       _showHelp();
@@ -630,8 +630,7 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   }
 
   initialize() async {
-    _allSoldiers =
-        Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+    _allSoldiers = ref.read(soldiersProvider);
     DocumentSnapshot snapshot;
     AlertSoldiers? alertSoldiers;
     try {
@@ -649,30 +648,6 @@ class AlertRosterPageState extends State<AlertRosterPage> {
       setState(() {
         _soldiers = alertSoldiers!.soldiers!.toList();
         buildRoster();
-        //   List<dynamic> soldierIds =
-        //       _soldiers.map((e) => e['soldierId']).toList();
-        //   for (int n = 0; n < _soldiers.length; n++) {
-        //     Soldier? soldier = _allSoldiers.firstWhereOrNull(
-        //         (element) => element.id == _soldiers[n]['soldierId']);
-        //     if (soldier != null) {
-        //       _soldiers[n]['soldier'] =
-        //           '${soldier.rank} ${soldier.lastName}, ${soldier.firstName}';
-        //       _soldiers[n]['phone'] = soldier.phone;
-        //       _soldiers[n]['workPhone'] = soldier.workPhone;
-        //       _soldiers[n]['rankSort'] = soldier.rankSort.toString();
-        //     }
-        //   }
-        //   for (Soldier doc in _allSoldiers) {
-        //     if (soldierIds.contains(doc.id)) {
-        //       soldierIds.remove(doc.id);
-        //     } else {
-        //       addSoldier(doc);
-        //     }
-        //   }
-        //   if (soldierIds.isNotEmpty) {
-        //     _soldiers.removeWhere(
-        //         (element) => soldierIds.contains(element['soldierId']));
-        //   }
       });
     }
   }
@@ -680,37 +655,26 @@ class AlertRosterPageState extends State<AlertRosterPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
       key: _scaffoldState,
       appBar: AppBar(
         title: const Text('Alert Roster'),
         actions: <Widget>[
-          // Tooltip(
-          //     message: kIsWeb ? 'Unavailable for Web' : 'Download as Image',
-          //     child: IconButton(
-          //       icon: const Icon(
-          //         Icons.image,
-          //       ),
-          //       onPressed: kIsWeb
-          //           ? null
-          //           : () {
-          //               _shareRoster();
-          //             },
-          //     )),
           Tooltip(
-              message:
-                  kIsWeb || Platform.isIOS ? 'Feature Unavailable' : 'Text All',
-              child: IconButton(
-                icon: const Icon(
-                  Icons.sms,
-                ),
-                onPressed: kIsWeb || Platform.isIOS
-                    ? null
-                    : () {
-                        _textAll();
-                      },
-              )),
+            message:
+                kIsWeb || Platform.isIOS ? 'Feature Unavailable' : 'Text All',
+            child: IconButton(
+              icon: const Icon(
+                Icons.sms,
+              ),
+              onPressed: kIsWeb || Platform.isIOS
+                  ? null
+                  : () {
+                      _textAll();
+                    },
+            ),
+          ),
           Tooltip(
               message: 'Download as PDF',
               child: IconButton(

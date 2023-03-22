@@ -4,20 +4,20 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/apft.dart';
 import 'editPages/edit_apft_page.dart';
 import '../pdf/apfts_pdf.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
@@ -26,7 +26,7 @@ import 'uploadPages/upload_apft_page.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../providers/tracking_provider.dart';
 
-class ApftPage extends StatefulWidget {
+class ApftPage extends ConsumerStatefulWidget {
   const ApftPage({
     Key? key,
   }) : super(key: key);
@@ -37,7 +37,7 @@ class ApftPage extends StatefulWidget {
   ApftPageState createState() => ApftPageState();
 }
 
-class ApftPageState extends State<ApftPage> {
+class ApftPageState extends ConsumerState<ApftPage> {
   int _sortColumnIndex = 0,
       puAve = 0,
       suAve = 0,
@@ -64,12 +64,11 @@ class ApftPageState extends State<ApftPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -739,7 +738,7 @@ class ApftPageState extends State<ApftPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:provider/provider.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
@@ -15,7 +15,7 @@ import 'editPages/edit_note_page.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class NotesPage extends StatefulWidget {
+class NotesPage extends ConsumerStatefulWidget {
   const NotesPage({
     Key? key,
     required this.userId,
@@ -28,7 +28,7 @@ class NotesPage extends StatefulWidget {
   NotesPageState createState() => NotesPageState();
 }
 
-class NotesPageState extends State<NotesPage> {
+class NotesPageState extends ConsumerState<NotesPage> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
   final List<DocumentSnapshot> _selectedDocuments = [];
@@ -42,11 +42,10 @@ class NotesPageState extends State<NotesPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -231,7 +230,7 @@ class NotesPageState extends State<NotesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
       key: _scaffoldState,
       appBar: AppBar(

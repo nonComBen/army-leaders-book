@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
 
 import '../../methods/show_snackbar.dart';
@@ -12,7 +13,7 @@ import '../../methods/upload_methods.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class UploadPhonePage extends StatefulWidget {
+class UploadPhonePage extends ConsumerStatefulWidget {
   const UploadPhonePage({
     Key? key,
   }) : super(key: key);
@@ -21,7 +22,7 @@ class UploadPhonePage extends StatefulWidget {
   UploadPhonePageState createState() => UploadPhonePageState();
 }
 
-class UploadPhonePageState extends State<UploadPhonePage> {
+class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? title, poc, phone, loc, path;
@@ -62,7 +63,7 @@ class UploadPhonePageState extends State<UploadPhonePage> {
   void _saveData(BuildContext context) {
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final owner = AuthProvider.of(context)!.auth!.currentUser()!.uid;
+      final owner = ref.read(authProvider).currentUser()!.uid;
 
       for (int i = 1; i < rows.length; i++) {
         String saveTitle = getCellValue(rows[i], columnHeaders, title);

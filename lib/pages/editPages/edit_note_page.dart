@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/note.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditNotePage extends StatefulWidget {
+class EditNotePage extends ConsumerStatefulWidget {
   const EditNotePage({
     Key? key,
     required this.note,
@@ -20,7 +21,7 @@ class EditNotePage extends StatefulWidget {
   EditNotePageState createState() => EditNotePageState();
 }
 
-class EditNotePageState extends State<EditNotePage> {
+class EditNotePageState extends ConsumerState<EditNotePage> {
   String _title = 'New Note';
   bool updated = false;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -98,7 +99,7 @@ class EditNotePageState extends State<EditNotePage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

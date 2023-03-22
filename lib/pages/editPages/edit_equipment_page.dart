@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/equipment.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditEquipmentPage extends StatefulWidget {
+class EditEquipmentPage extends ConsumerStatefulWidget {
   const EditEquipmentPage({
     Key? key,
     required this.equipment,
@@ -20,7 +21,7 @@ class EditEquipmentPage extends StatefulWidget {
   EditEquipmentPageState createState() => EditEquipmentPageState();
 }
 
-class EditEquipmentPageState extends State<EditEquipmentPage> {
+class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
   String _title = 'New Equipment';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -289,7 +290,7 @@ class EditEquipmentPageState extends State<EditEquipmentPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

@@ -5,7 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
@@ -14,7 +14,7 @@ import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class UploadMilLicensePage extends StatefulWidget {
+class UploadMilLicensePage extends ConsumerStatefulWidget {
   const UploadMilLicensePage({
     Key? key,
   }) : super(key: key);
@@ -23,7 +23,7 @@ class UploadMilLicensePage extends StatefulWidget {
   UploadMilLicensePageState createState() => UploadMilLicensePageState();
 }
 
-class UploadMilLicensePageState extends State<UploadMilLicensePage> {
+class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
   late FirebaseFirestore firestore;
 
   List<String?>? columnHeaders;
@@ -77,8 +77,7 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
     }
     if (rows.length > 1) {
       firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
       List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 

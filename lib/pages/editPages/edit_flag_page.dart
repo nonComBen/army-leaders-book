@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
@@ -14,7 +15,7 @@ import '../../models/flag.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditFlagPage extends StatefulWidget {
+class EditFlagPage extends ConsumerStatefulWidget {
   const EditFlagPage({
     Key? key,
     required this.flag,
@@ -25,7 +26,7 @@ class EditFlagPage extends StatefulWidget {
   EditFlagPageState createState() => EditFlagPageState();
 }
 
-class EditFlagPageState extends State<EditFlagPage> {
+class EditFlagPageState extends ConsumerState<EditFlagPage> {
   String _title = 'New Flag';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -270,7 +271,7 @@ class EditFlagPageState extends State<EditFlagPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

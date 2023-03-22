@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
@@ -26,7 +26,7 @@ import '../../widgets/anon_warning_banner.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/tracking_provider.dart';
 
-class SoldiersPage extends StatefulWidget {
+class SoldiersPage extends ConsumerStatefulWidget {
   const SoldiersPage({
     Key? key,
     required this.userId,
@@ -39,7 +39,7 @@ class SoldiersPage extends StatefulWidget {
   SoldiersPageState createState() => SoldiersPageState();
 }
 
-class SoldiersPageState extends State<SoldiersPage> {
+class SoldiersPageState extends ConsumerState<SoldiersPage> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
   final List<Soldier> _selectedSoldiers = [];
@@ -47,7 +47,7 @@ class SoldiersPageState extends State<SoldiersPage> {
   List<Soldier> filteredSoldiers = [];
   BannerAd? myBanner;
   String _filter = 'All';
-  late SoldiersProvider _soldiersProvider;
+  late SoldiersService _soldiersService;
 
   final _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -55,12 +55,10 @@ class SoldiersPageState extends State<SoldiersPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    isSubscribed =
-        Provider.of<SubscriptionState>(context, listen: false).isSubscribed;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded && !isSubscribed) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -413,7 +411,7 @@ class SoldiersPageState extends State<SoldiersPage> {
           child: Text('Rank'),
         ),
         onSort: (int columnIndex, bool ascending) {
-          _soldiersProvider.sortSoldiers(columnIndex, ascending);
+          _soldiersService.sortSoldiers(columnIndex, ascending);
           _sortAscending = ascending;
           _sortColumnIndex = columnIndex;
         },
@@ -424,7 +422,7 @@ class SoldiersPageState extends State<SoldiersPage> {
             child: Text('Name'),
           ),
           onSort: (int columnIndex, bool ascending) {
-            _soldiersProvider.sortSoldiers(columnIndex, ascending);
+            _soldiersService.sortSoldiers(columnIndex, ascending);
             _sortAscending = ascending;
             _sortColumnIndex = columnIndex;
           }),
@@ -436,7 +434,7 @@ class SoldiersPageState extends State<SoldiersPage> {
             child: Text('Section'),
           ),
           onSort: (int columnIndex, bool ascending) {
-            _soldiersProvider.sortSoldiers(columnIndex, ascending);
+            _soldiersService.sortSoldiers(columnIndex, ascending);
             _sortAscending = ascending;
             _sortColumnIndex = columnIndex;
           }));
@@ -448,7 +446,7 @@ class SoldiersPageState extends State<SoldiersPage> {
             child: Text('Duty'),
           ),
           onSort: (int columnIndex, bool ascending) {
-            _soldiersProvider.sortSoldiers(columnIndex, ascending);
+            _soldiersService.sortSoldiers(columnIndex, ascending);
             _sortAscending = ascending;
             _sortColumnIndex = columnIndex;
           }));
@@ -460,7 +458,7 @@ class SoldiersPageState extends State<SoldiersPage> {
             child: Text('Loss Date'),
           ),
           onSort: (int columnIndex, bool ascending) {
-            _soldiersProvider.sortSoldiers(columnIndex, ascending);
+            _soldiersService.sortSoldiers(columnIndex, ascending);
             _sortAscending = ascending;
             _sortColumnIndex = columnIndex;
           }));
@@ -472,7 +470,7 @@ class SoldiersPageState extends State<SoldiersPage> {
             child: Text('ETS Date'),
           ),
           onSort: (int columnIndex, bool ascending) {
-            _soldiersProvider.sortSoldiers(columnIndex, ascending);
+            _soldiersService.sortSoldiers(columnIndex, ascending);
             _sortAscending = ascending;
             _sortColumnIndex = columnIndex;
           }));
@@ -484,7 +482,7 @@ class SoldiersPageState extends State<SoldiersPage> {
             child: Text('DOR'),
           ),
           onSort: (int columnIndex, bool ascending) {
-            _soldiersProvider.sortSoldiers(columnIndex, ascending);
+            _soldiersService.sortSoldiers(columnIndex, ascending);
             _sortAscending = ascending;
             _sortColumnIndex = columnIndex;
           }));
@@ -771,9 +769,9 @@ class SoldiersPageState extends State<SoldiersPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
-    _soldiersProvider = Provider.of<SoldiersProvider>(context);
-    soldiers = _soldiersProvider.soldiers;
+    final user = ref.read(authProvider).currentUser()!;
+    _soldiersService = ref.read(soldiersProvider.notifier);
+    soldiers = ref.watch(soldiersProvider);
     _selectedSoldiers.removeWhere(
         (element) => !soldiers.map((e) => e.id).toList().contains(element.id));
     _filterRecords(_filter);

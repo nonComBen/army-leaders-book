@@ -8,11 +8,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
@@ -23,7 +23,7 @@ import '../models/soldier.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
 
-class DailyPerstatPage extends StatefulWidget {
+class DailyPerstatPage extends ConsumerStatefulWidget {
   const DailyPerstatPage({Key? key}) : super(key: key);
 
   static const routeName = '/daily-perstat-page';
@@ -32,7 +32,7 @@ class DailyPerstatPage extends StatefulWidget {
   DailyPerstatPageState createState() => DailyPerstatPageState();
 }
 
-class DailyPerstatPageState extends State<DailyPerstatPage> {
+class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   List<DocumentSnapshot> perstats = [];
   List<Soldier> soldiers = [];
   List<dynamic> dailies = [], filteredDailies = [];
@@ -451,7 +451,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   }
 
   buildNewDailies() async {
-    soldiers = Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+    soldiers = ref.read(soldiersProvider);
     QuerySnapshot perstatSnapshot = await firestore
         .collection('perstat')
         .where('users', isNotEqualTo: null)
@@ -524,7 +524,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
 
   void submit(BuildContext context) async {
     onWillPop();
-    soldiers = Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+    soldiers = ref.read(soldiersProvider);
     debugPrint(soldiers.length.toString());
     if (perstats.isEmpty) {
       QuerySnapshot perstatSnapshot = await firestore
@@ -583,7 +583,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
+    _userId = ref.read(authProvider).currentUser()!.uid;
     if (isInitial) {
       initialize();
       isInitial = false;

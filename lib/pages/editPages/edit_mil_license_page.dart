@@ -5,10 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../../auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
 import '../../models/mil_license.dart';
@@ -16,7 +17,7 @@ import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 import '../../widgets/platform_widgets/platform_text_field.dart';
 
-class EditMilLicPage extends StatefulWidget {
+class EditMilLicPage extends ConsumerStatefulWidget {
   const EditMilLicPage({
     Key? key,
     required this.milLic,
@@ -27,7 +28,7 @@ class EditMilLicPage extends StatefulWidget {
   EditMilLicPageState createState() => EditMilLicPageState();
 }
 
-class EditMilLicPageState extends State<EditMilLicPage> {
+class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
   String _title = 'New Military License';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -351,7 +352,7 @@ class EditMilLicPageState extends State<EditMilLicPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

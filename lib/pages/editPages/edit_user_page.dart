@@ -7,20 +7,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_service.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../methods/on_back_pressed.dart';
 import '../../models/user.dart';
 import '../../widgets/formatted_elevated_button.dart';
-import '../../auth.dart';
 import '../../auth_provider.dart';
 import '../../methods/show_snackbar.dart';
 import '../../providers/root_provider.dart';
 import '../../widgets/formatted_text_button.dart';
 
-class EditUserPage extends StatefulWidget {
+class EditUserPage extends ConsumerStatefulWidget {
   const EditUserPage({
     Key? key,
     this.userId,
@@ -31,7 +31,7 @@ class EditUserPage extends StatefulWidget {
   EditUserPageState createState() => EditUserPageState();
 }
 
-class EditUserPageState extends State<EditUserPage> {
+class EditUserPageState extends ConsumerState<EditUserPage> {
   bool updated = false;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   late UserObj user;
@@ -46,23 +46,23 @@ class EditUserPageState extends State<EditUserPage> {
 
   Future<void> deleteAccount(BuildContext context) async {
     // var rootBloc = BlocProvider.of<RootBloc>(context);
-    final rootProvider = Provider.of<RootProvider>(context, listen: false);
-    var auth = AuthProvider.of(context)!.auth!;
+    final rootService = ref.read(rootProvider.notifier);
+    var auth = ref.read(authProvider);
     User user = auth.currentUser()!;
     try {
       user.delete();
       showSnackbar(context, 'Your account and data has been deleted.');
       // rootBloc.onSignOut();
-      rootProvider.signOut();
+      rootService.signOut();
     } on Exception catch (e) {
       if (e is FirebaseAuthException) {
-        reauthenticate(context, auth, rootProvider);
+        reauthenticate(context, auth, rootService);
       }
     }
   }
 
   void reauthenticate(
-      BuildContext context, BaseAuth auth, RootProvider rootProvider) {
+      BuildContext context, AuthService auth, RootService rootProvider) {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
     User? user;

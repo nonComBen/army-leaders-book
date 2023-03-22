@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 
 import '../../auth_provider.dart';
@@ -11,7 +12,7 @@ import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 import '../../widgets/platform_widgets/platform_text_field.dart';
 
-class EditHandReceiptPage extends StatefulWidget {
+class EditHandReceiptPage extends ConsumerStatefulWidget {
   const EditHandReceiptPage({
     Key? key,
     required this.item,
@@ -22,7 +23,7 @@ class EditHandReceiptPage extends StatefulWidget {
   EditHandReceiptPageState createState() => EditHandReceiptPageState();
 }
 
-class EditHandReceiptPageState extends State<EditHandReceiptPage> {
+class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
   String _title = 'New Hand Receipt Item';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -288,7 +289,7 @@ class EditHandReceiptPageState extends State<EditHandReceiptPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

@@ -5,7 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
@@ -14,7 +14,7 @@ import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class UploadHrActionsPage extends StatefulWidget {
+class UploadHrActionsPage extends ConsumerStatefulWidget {
   const UploadHrActionsPage({
     Key? key,
   }) : super(key: key);
@@ -23,7 +23,7 @@ class UploadHrActionsPage extends StatefulWidget {
   UploadHrActionsPageState createState() => UploadHrActionsPageState();
 }
 
-class UploadHrActionsPageState extends State<UploadHrActionsPage> {
+class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, dd93, sglv, prr, path;
@@ -72,8 +72,7 @@ class UploadHrActionsPageState extends State<UploadHrActionsPage> {
     }
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
       List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 

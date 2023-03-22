@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
@@ -20,7 +21,7 @@ import '../../calculators/mdl_calculator.dart';
 import '../../calculators/sdc_calculator.dart';
 import '../../calculators/spt_calculator.dart';
 
-class EditAcftPage extends StatefulWidget {
+class EditAcftPage extends ConsumerStatefulWidget {
   const EditAcftPage({
     Key? key,
     required this.acft,
@@ -31,7 +32,7 @@ class EditAcftPage extends StatefulWidget {
   EditAcftPageState createState() => EditAcftPageState();
 }
 
-class EditAcftPageState extends State<EditAcftPage> {
+class EditAcftPageState extends ConsumerState<EditAcftPage> {
   String _title = 'New ACFT';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -488,7 +489,7 @@ class EditAcftPageState extends State<EditAcftPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
       key: _scaffoldState,
       appBar: AppBar(

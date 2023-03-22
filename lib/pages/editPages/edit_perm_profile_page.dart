@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
@@ -14,7 +15,7 @@ import '../../models/profile.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditPermProfilePage extends StatefulWidget {
+class EditPermProfilePage extends ConsumerStatefulWidget {
   const EditPermProfilePage({
     Key? key,
     required this.profile,
@@ -25,7 +26,7 @@ class EditPermProfilePage extends StatefulWidget {
   EditPermProfilePageState createState() => EditPermProfilePageState();
 }
 
-class EditPermProfilePageState extends State<EditPermProfilePage> {
+class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
   String _title = 'New Permanent Profile';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -329,7 +330,7 @@ class EditPermProfilePageState extends State<EditPermProfilePage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

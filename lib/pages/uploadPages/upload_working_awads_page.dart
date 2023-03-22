@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
@@ -14,7 +14,7 @@ import '../../models/working_award.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class UploadWorkingAwardsPage extends StatefulWidget {
+class UploadWorkingAwardsPage extends ConsumerStatefulWidget {
   const UploadWorkingAwardsPage({
     Key? key,
   }) : super(key: key);
@@ -23,7 +23,8 @@ class UploadWorkingAwardsPage extends StatefulWidget {
   UploadWorkingAwardsPageState createState() => UploadWorkingAwardsPageState();
 }
 
-class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
+class UploadWorkingAwardsPageState
+    extends ConsumerState<UploadWorkingAwardsPage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, reason, ach1, ach2, ach3, ach4, citation, path;
@@ -73,8 +74,7 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
     }
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
       List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 

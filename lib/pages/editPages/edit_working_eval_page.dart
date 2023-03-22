@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/working_eval.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditWorkingEvalPage extends StatefulWidget {
+class EditWorkingEvalPage extends ConsumerStatefulWidget {
   const EditWorkingEvalPage({
     Key? key,
     required this.eval,
@@ -20,7 +21,7 @@ class EditWorkingEvalPage extends StatefulWidget {
   EditWorkingEvalPageState createState() => EditWorkingEvalPageState();
 }
 
-class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
+class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
   String _title = 'New Evaluation';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -180,7 +181,7 @@ class EditWorkingEvalPageState extends State<EditWorkingEvalPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

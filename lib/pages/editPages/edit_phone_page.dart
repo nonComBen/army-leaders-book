@@ -2,14 +2,15 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditPhonePage extends StatefulWidget {
+class EditPhonePage extends ConsumerStatefulWidget {
   const EditPhonePage({
     Key? key,
     required this.phone,
@@ -20,7 +21,7 @@ class EditPhonePage extends StatefulWidget {
   EditPhonePageState createState() => EditPhonePageState();
 }
 
-class EditPhonePageState extends State<EditPhonePage> {
+class EditPhonePageState extends ConsumerState<EditPhonePage> {
   String _title = 'New Phone';
   bool updated = false;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -106,7 +107,7 @@ class EditPhonePageState extends State<EditPhonePage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

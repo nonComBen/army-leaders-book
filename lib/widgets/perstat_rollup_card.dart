@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/soldiers_provider.dart';
 
-class PerstatRollupCard extends StatelessWidget {
+class PerstatRollupCard extends ConsumerWidget {
   const PerstatRollupCard({
     Key? key,
     required this.title,
@@ -19,8 +19,8 @@ class PerstatRollupCard extends StatelessWidget {
   final ElevatedButton button, button2;
 
   @override
-  Widget build(BuildContext context) {
-    var soldiers = Provider.of<SoldiersProvider>(context).soldiers;
+  Widget build(BuildContext context, WidgetRef ref) {
+    var soldiers = ref.read(soldiersProvider);
     return Card(
       child: Container(
         padding: const EdgeInsets.all(8.0),

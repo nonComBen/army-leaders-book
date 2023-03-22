@@ -5,9 +5,9 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../../methods/rank_sort.dart';
 import '../../methods/show_snackbar.dart';
@@ -15,7 +15,7 @@ import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class UploadSoldierPage extends StatefulWidget {
+class UploadSoldierPage extends ConsumerStatefulWidget {
   const UploadSoldierPage({
     Key? key,
   }) : super(key: key);
@@ -24,7 +24,7 @@ class UploadSoldierPage extends StatefulWidget {
   UploadSoldierPageState createState() => UploadSoldierPageState();
 }
 
-class UploadSoldierPageState extends State<UploadSoldierPage> {
+class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
@@ -151,8 +151,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
       return;
     }
     FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final soldiers =
-        Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+    final soldiers = ref.read(soldiersProvider);
 
     List<String?> soldierIds = soldiers.map((soldier) => soldier.id).toList();
 
@@ -187,7 +186,7 @@ class UploadSoldierPageState extends State<UploadSoldierPage> {
     for (int i = 1; i < rows.length; i++) {
       String? saveSoldierId;
       String currentSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
-      String? owner = AuthProvider.of(context)!.auth!.currentUser()!.uid;
+      String? owner = ref.read(authProvider).currentUser()!.uid;
       List<dynamic>? users = [owner];
       if (soldierIds.contains(currentSoldierId)) {
         var soldier =

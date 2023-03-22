@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/providers/user_provider.dart';
-import 'package:provider/provider.dart';
 
 import '../pages/editPages/edit_user_page.dart';
 
@@ -9,15 +9,15 @@ class CustomDrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (_, userProvider, child) {
-        if (userProvider.user == null) {
+    return Consumer(
+      builder: (_, ref, child) {
+        if (ref.read(userProvider).user == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         } else {
           String initials = '';
-          String name = userProvider.user!.userName;
+          String name = ref.read(userProvider).user!.userName;
           name = name.trim();
           if (!name.contains(' ')) {
             if (name.length > 2) {
@@ -32,7 +32,7 @@ class CustomDrawerHeader extends StatelessWidget {
               name,
             ),
             accountEmail: Text(
-              userProvider.user!.userEmail,
+              ref.read(userProvider).user!.userEmail,
             ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -41,11 +41,13 @@ class CustomDrawerHeader extends StatelessWidget {
             onDetailsPressed: () {
               Navigator.pop(context);
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => EditUserPage(
-                            userId: userProvider.user!.userId,
-                          )));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditUserPage(
+                    userId: ref.read(userProvider).user!.userId,
+                  ),
+                ),
+              );
             },
           );
         }

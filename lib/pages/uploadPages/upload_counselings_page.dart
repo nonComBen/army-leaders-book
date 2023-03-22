@@ -5,9 +5,9 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../auth_provider.dart';
 import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/counseling.dart';
@@ -15,7 +15,7 @@ import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class UploadCounselingsPage extends StatefulWidget {
+class UploadCounselingsPage extends ConsumerStatefulWidget {
   const UploadCounselingsPage({
     Key? key,
   }) : super(key: key);
@@ -24,7 +24,7 @@ class UploadCounselingsPage extends StatefulWidget {
   UploadCounselingsPageState createState() => UploadCounselingsPageState();
 }
 
-class UploadCounselingsPageState extends State<UploadCounselingsPage> {
+class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
@@ -90,14 +90,13 @@ class UploadCounselingsPageState extends State<UploadCounselingsPage> {
     }
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
       List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
         String? rank, name, firstName, section, rankSort;
-        String owner = AuthProvider.of(context)!.auth!.currentUser()!.uid;
+        String owner = ref.read(authProvider).currentUser()!.uid;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {

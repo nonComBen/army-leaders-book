@@ -5,16 +5,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/auth_provider.dart';
 
 import '../../methods/validate.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/appointment.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditAppointmentPage extends StatefulWidget {
+class EditAppointmentPage extends ConsumerStatefulWidget {
   const EditAppointmentPage({
     Key? key,
     required this.apt,
@@ -25,7 +26,7 @@ class EditAppointmentPage extends StatefulWidget {
   EditAppointmentPageState createState() => EditAppointmentPageState();
 }
 
-class EditAppointmentPageState extends State<EditAppointmentPage> {
+class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   String _title = 'New Appointment';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -330,7 +331,7 @@ class EditAppointmentPageState extends State<EditAppointmentPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
       key: _scaffoldState,
       appBar: AppBar(

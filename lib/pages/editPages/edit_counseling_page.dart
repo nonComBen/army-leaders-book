@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
@@ -14,7 +15,7 @@ import '../../models/counseling.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditCounselingPage extends StatefulWidget {
+class EditCounselingPage extends ConsumerStatefulWidget {
   const EditCounselingPage({
     Key? key,
     required this.counseling,
@@ -25,7 +26,7 @@ class EditCounselingPage extends StatefulWidget {
   EditCounselingPageState createState() => EditCounselingPageState();
 }
 
-class EditCounselingPageState extends State<EditCounselingPage> {
+class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
   String _title = 'New Counseling';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -213,7 +214,7 @@ class EditCounselingPageState extends State<EditCounselingPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

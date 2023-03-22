@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../classes/iap_connection.dart';
@@ -11,7 +12,14 @@ import './subscription_state.dart';
 import '../models/purchasable_product.dart';
 import '../models/store_state.dart';
 
-class SubscriptionPurchases extends ChangeNotifier {
+final subscriptionPurchasesProvider = Provider<SubscriptionPurchases>((ref) {
+  return SubscriptionPurchases(
+    ref.read(subscriptionStateProvider.notifier),
+    ref.read(iapRepoProvider),
+  );
+});
+
+class SubscriptionPurchases {
   final SubscriptionState subscriptionState;
   final IAPRepo iapRepo;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
@@ -28,7 +36,7 @@ class SubscriptionPurchases extends ChangeNotifier {
         onError: _updateStreamOnError,
       );
       iapConnection!.restorePurchases();
-      iapRepo.addListener(purchasesUpdate);
+      // iapRepo.addListener(purchasesUpdate);
       loadPurchases();
     }
   }
@@ -37,7 +45,6 @@ class SubscriptionPurchases extends ChangeNotifier {
     final available = await iapConnection!.isAvailable();
     if (!available) {
       storeState = StoreState.notAvailable;
-      notifyListeners();
       return;
     }
     const ids = <String>{
@@ -53,7 +60,6 @@ class SubscriptionPurchases extends ChangeNotifier {
     products =
         response.productDetails.map((e) => PurchasableProduct(e)).toList();
     storeState = StoreState.available;
-    notifyListeners();
   }
 
   Future<void> buy(PurchasableProduct product) async {
@@ -61,15 +67,8 @@ class SubscriptionPurchases extends ChangeNotifier {
     await iapConnection!.buyNonConsumable(purchaseParam: purchaseParam);
   }
 
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
-
   void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
     purchaseDetailsList.forEach(_handlePurchase);
-    notifyListeners();
   }
 
   void _handlePurchase(PurchaseDetails purchaseDetails) async {
@@ -126,7 +125,6 @@ class SubscriptionPurchases extends ChangeNotifier {
   void _updateStatus(PurchasableProduct product, ProductStatus status) {
     if (product.status != ProductStatus.purchased) {
       product.status = ProductStatus.purchased;
-      notifyListeners();
     }
   }
 

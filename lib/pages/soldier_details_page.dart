@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:maps_launcher/maps_launcher.dart';
-import 'package:provider/provider.dart';
 
 import '../../providers/subscription_state.dart';
 import '../../models/award.dart';
@@ -14,11 +15,10 @@ import '../../models/pov.dart';
 import '../../models/soldier.dart';
 import 'editPages/edit_soldier_page.dart';
 import 'share_soldier_page.dart';
-import '../auth_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class SoldierDetailsPage extends StatefulWidget {
+class SoldierDetailsPage extends ConsumerStatefulWidget {
   const SoldierDetailsPage({
     Key? key,
     required this.userId,
@@ -33,7 +33,7 @@ class SoldierDetailsPage extends StatefulWidget {
   SoldierDetailsPageState createState() => SoldierDetailsPageState();
 }
 
-class SoldierDetailsPageState extends State<SoldierDetailsPage> {
+class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
   late String _soldierName;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   BannerAd? myBanner;
@@ -302,11 +302,10 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
 
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -347,7 +346,7 @@ class SoldierDetailsPageState extends State<SoldierDetailsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
       appBar: AppBar(
         title: Text(_soldierName),

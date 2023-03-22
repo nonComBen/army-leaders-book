@@ -3,13 +3,13 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/subscription_state.dart';
@@ -25,7 +25,7 @@ import '../pdf/weapons_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class WeaponsPage extends StatefulWidget {
+class WeaponsPage extends ConsumerStatefulWidget {
   const WeaponsPage({
     Key? key,
   }) : super(key: key);
@@ -36,7 +36,7 @@ class WeaponsPage extends StatefulWidget {
   WeaponsPageState createState() => WeaponsPageState();
 }
 
-class WeaponsPageState extends State<WeaponsPage> {
+class WeaponsPageState extends ConsumerState<WeaponsPage> {
   int _sortColumnIndex = 0, overdueDays = 180, amberDays = 150;
   bool _sortAscending = true,
       _adLoaded = false,
@@ -55,12 +55,11 @@ class WeaponsPageState extends State<WeaponsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -655,7 +654,7 @@ class WeaponsPageState extends State<WeaponsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

@@ -5,9 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
 import '../../models/soldier.dart';
@@ -15,7 +16,7 @@ import '../../methods/rank_sort.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditSoldierPage extends StatefulWidget {
+class EditSoldierPage extends ConsumerStatefulWidget {
   const EditSoldierPage({
     Key? key,
     required this.soldier,
@@ -26,7 +27,7 @@ class EditSoldierPage extends StatefulWidget {
   EditSoldierPageState createState() => EditSoldierPageState();
 }
 
-class EditSoldierPageState extends State<EditSoldierPage> {
+class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
   String _title = 'New Soldier';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -553,7 +554,7 @@ class EditSoldierPageState extends State<EditSoldierPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

@@ -5,12 +5,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/models/user.dart';
+import 'package:leaders_book/providers/root_provider.dart';
+import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
@@ -43,14 +46,11 @@ import 'weapons_page.dart';
 import 'flags_page.dart';
 import 'medpros_page.dart';
 import 'training_page.dart';
-import '../providers/root_provider.dart';
-import '../auth_provider.dart';
 import '../classes/iap_repo.dart';
 import '../methods/custom_alert_dialog.dart';
-import '../providers/shared_prefs_provider.dart';
 import '../widgets/show_by_name_content.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({
     Key? key,
   }) : super(key: key);
@@ -71,7 +71,8 @@ enum HomeCard {
   training
 }
 
-class HomePageState extends State<HomePage> with WidgetsBindingObserver {
+class HomePageState extends ConsumerState<HomePage>
+    with WidgetsBindingObserver {
   final subId = 'ad_free_sub',
       iosSubId = 'premium_sub',
       subIdTwo = 'ad_free_two';
@@ -96,18 +97,18 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late SubscriptionPurchases sp;
   SubscriptionState? subState;
   BannerAd? myBanner;
-  late RootProvider _rootProvider;
+  late RootService _rootService;
   UserObj? _userObj;
 
   final _scaffoldState = GlobalKey<ScaffoldState>();
 
   void signOut(BuildContext context) {
-    var auth = AuthProvider.of(context)!.auth!;
+    var auth = ref.read(authProvider);
     try {
-      _rootProvider.signOut();
+      _rootService.signOut();
       auth.signOut();
 
-      Provider.of<SubscriptionState>(context, listen: false).unSubscribe();
+      ref.read(subscriptionStateProvider.notifier).unSubscribe();
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Sign Out Error');
     }
@@ -131,7 +132,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       },
       secondaryText: 'Create Account',
       secondary: () {
-        _rootProvider.linkAnonymous();
+        _rootService.linkAnonymous();
       },
     );
   }
@@ -208,24 +209,22 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userObj = Provider.of<UserProvider>(context).user;
+    _userObj = ref.read(userProvider).user;
     if (isInitial && _userObj != null) {
       isInitial = false;
       init();
     }
 
-    isSubscribed =
-        Provider.of<SubscriptionState>(context, listen: false).isSubscribed;
+    isSubscribed = ref.watch(subscriptionStateProvider);
 
     if (_adLoaded && isSubscribed) {
       removeAds();
     }
     if (!kIsWeb && !_adLoaded && !isSubscribed) {
-      final trackingProvider =
-          Provider.of<TrackingProvider>(context, listen: false);
-      bool trackingAllowed = trackingProvider.trackingAllowed;
+      final trackingService = ref.read(trackingProvider);
+      bool trackingAllowed = trackingService.trackingAllowed;
       if (trackingAllowed) {
-        trackingAllowed = await trackingProvider.getTrackingFromPermission();
+        trackingAllowed = await trackingService.getTrackingFromPermission();
       }
 
       String adUnitId = kIsWeb
@@ -235,12 +234,15 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               : iosAd;
 
       myBanner = BannerAd(
-          adUnitId: adUnitId,
-          size: AdSize.banner,
-          request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-          listener: BannerAdListener(onAdLoaded: (ad) {
+        adUnitId: adUnitId,
+        size: AdSize.banner,
+        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
             _adLoaded = true;
-          }));
+          },
+        ),
+      );
 
       await myBanner!.load();
       _adLoaded = true;
@@ -257,12 +259,11 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   //performs initial async functions
   void init() async {
     PackageInfo packageInfo;
-    final prefs =
-        Provider.of<SharedPreferencesProvider>(context, listen: false).prefs;
+    final prefs = ref.read(sharedPreferencesProvider);
 
     // if old home page overwrote user profile, rewrite
     if (_userObj!.userEmail == 'anonymous@email.com') {
-      final user = AuthProvider.of(context)!.auth!.currentUser()!;
+      final user = ref.read(authProvider).currentUser()!;
       _userObj!.userEmail = user.email!;
       _userObj!.userName = user.displayName ?? 'Anonymous User';
       _userObj!.createdDate = user.metadata.creationTime;
@@ -325,7 +326,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       case AppLifecycleState.resumed:
         timer?.cancel();
         if (_requireUnlock) {
-          _rootProvider.localSignOut();
+          _rootService.localSignOut();
         }
         break;
       case AppLifecycleState.detached:
@@ -1029,136 +1030,118 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    _rootProvider = Provider.of<RootProvider>(context, listen: false);
-    final user = AuthProvider.of(context)!.auth!.currentUser();
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<IAPRepo>(
-          create: (context) => IAPRepo(context, user),
-        ),
-        ChangeNotifierProvider<SubscriptionPurchases>(
-          create: (context) => SubscriptionPurchases(
-            context.read<SubscriptionState>(),
-            context.read<IAPRepo>(),
-          ),
-          lazy: false,
-        ),
-      ],
-      builder: (context, child) {
-        sp = context.read<SubscriptionPurchases>();
-        return Scaffold(
-          key: _scaffoldState,
-          appBar: AppBar(
-            title: const Text('Rollup'),
-            actions: <Widget>[
-              Tooltip(
-                message: 'Settings',
-                child: IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsPage(),
-                    ),
-                  ),
+    _rootService = ref.read(rootProvider.notifier);
+    final user = ref.read(authProvider).currentUser();
+    ref.read(iapRepoProvider);
+    return Scaffold(
+      key: _scaffoldState,
+      appBar: AppBar(
+        title: const Text('Rollup'),
+        actions: <Widget>[
+          Tooltip(
+            message: 'Settings',
+            child: IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
                 ),
               ),
-              Tooltip(
-                message: 'Sign Out',
-                child: IconButton(
-                    icon: const Icon(Icons.directions_walk),
-                    onPressed: () {
-                      if (user!.isAnonymous) {
-                        signOutWarning(context);
-                      } else {
-                        signOut(context);
-                      }
-                    }),
-              ),
-            ],
-          ),
-          drawer: MainDrawer(
-            subscribe: subscribe,
-            signOut: () => signOut(context),
-            signOutWarning: () => signOutWarning(context),
-          ),
-          body: Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: ListView(
-                    primary: true,
-                    shrinkWrap: true,
-                    children: [
-                      if (user!.isAnonymous) const AnonWarningBanner(),
-                      StreamBuilder<DocumentSnapshot>(
-                          stream: _firestore
-                              .collection('settings')
-                              .doc(user.uid)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.waiting:
-                                return const Card(
-                                    child: CenterProgressIndicator());
-                              default:
-                                if (snapshot.hasData) {
-                                  setting = Setting.fromMap(snapshot.data!
-                                      .data() as Map<String, dynamic>);
-                                } else {
-                                  setting = Setting(
-                                    owner: user.uid,
-                                    hearingNotifications: [0, 30],
-                                    weaponsNotifications: [0, 30],
-                                    acftNotifications: [0, 30],
-                                    dentalNotifications: [0, 30],
-                                    visionNotifications: [0, 30],
-                                    bfNotifications: [0, 30],
-                                    hivNotifications: [0, 30],
-                                    phaNotifications: [0, 30],
-                                  );
-                                  if (!user.isAnonymous) {
-                                    _firestore
-                                        .collection('settings')
-                                        .doc(user.uid)
-                                        .set(setting!.toMap());
-                                  }
-                                }
-
-                                return GridView.count(
-                                  crossAxisCount: width > 700 ? 2 : 1,
-                                  childAspectRatio:
-                                      width > 700 ? width / 450 : width / 225,
-                                  shrinkWrap: true,
-                                  primary: false,
-                                  crossAxisSpacing: 1.0,
-                                  mainAxisSpacing: 1.0,
-                                  children: homeCards(user.uid),
-                                );
-                            }
-                          })
-                    ],
-                  ),
-                ),
-                if (_adLoaded && !isSubscribed)
-                  Container(
-                    alignment: Alignment.center,
-                    width: myBanner!.size.width.toDouble(),
-                    height: myBanner!.size.height.toDouble(),
-                    constraints:
-                        const BoxConstraints(minHeight: 0, minWidth: 0),
-                    child: AdWidget(
-                      ad: myBanner!,
-                    ),
-                  )
-              ],
             ),
           ),
-        );
-      },
+          Tooltip(
+            message: 'Sign Out',
+            child: IconButton(
+                icon: const Icon(Icons.directions_walk),
+                onPressed: () {
+                  if (user!.isAnonymous) {
+                    signOutWarning(context);
+                  } else {
+                    signOut(context);
+                  }
+                }),
+          ),
+        ],
+      ),
+      drawer: MainDrawer(
+        subscribe: subscribe,
+        signOut: () => signOut(context),
+        signOutWarning: () => signOutWarning(context),
+      ),
+      body: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Flexible(
+              flex: 1,
+              child: ListView(
+                primary: true,
+                shrinkWrap: true,
+                children: [
+                  if (user!.isAnonymous) const AnonWarningBanner(),
+                  StreamBuilder<DocumentSnapshot>(
+                      stream: _firestore
+                          .collection('settings')
+                          .doc(user.uid)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.waiting:
+                            return const Card(child: CenterProgressIndicator());
+                          default:
+                            if (snapshot.hasData) {
+                              setting = Setting.fromMap(snapshot.data!.data()
+                                  as Map<String, dynamic>);
+                            } else {
+                              setting = Setting(
+                                owner: user.uid,
+                                hearingNotifications: [0, 30],
+                                weaponsNotifications: [0, 30],
+                                acftNotifications: [0, 30],
+                                dentalNotifications: [0, 30],
+                                visionNotifications: [0, 30],
+                                bfNotifications: [0, 30],
+                                hivNotifications: [0, 30],
+                                phaNotifications: [0, 30],
+                              );
+                              if (!user.isAnonymous) {
+                                _firestore
+                                    .collection('settings')
+                                    .doc(user.uid)
+                                    .set(setting!.toMap());
+                              }
+                            }
+
+                            return GridView.count(
+                              crossAxisCount: width > 700 ? 2 : 1,
+                              childAspectRatio:
+                                  width > 700 ? width / 450 : width / 225,
+                              shrinkWrap: true,
+                              primary: false,
+                              crossAxisSpacing: 1.0,
+                              mainAxisSpacing: 1.0,
+                              children: homeCards(user.uid),
+                            );
+                        }
+                      })
+                ],
+              ),
+            ),
+            if (_adLoaded && !isSubscribed)
+              Container(
+                alignment: Alignment.center,
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
+                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                child: AdWidget(
+                  ad: myBanner!,
+                ),
+              )
+          ],
+        ),
+      ),
     );
   }
 }

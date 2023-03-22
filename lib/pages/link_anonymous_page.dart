@@ -1,26 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/root_provider.dart';
-import '../../auth.dart';
 import '../auth_provider.dart';
 import '../../models/user.dart';
 
-class LinkAnonymousPage extends StatefulWidget {
+class LinkAnonymousPage extends ConsumerStatefulWidget {
   const LinkAnonymousPage({
     Key? key,
-    this.onAccountLinked,
   }) : super(key: key);
-  final void Function()? onAccountLinked;
 
   @override
   LinkAnonymousPageState createState() => LinkAnonymousPageState();
 }
 
-class LinkAnonymousPageState extends State<LinkAnonymousPage> {
+class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
   final formKey = GlobalKey<FormState>();
   String? _email, _password;
   bool tosAgree = false;
@@ -54,24 +51,26 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
     return false;
   }
 
-  void validateAndLink(AuthService auth) async {
+  void validateAndLink() async {
+    final auth = ref.read(authProvider);
     if (validateAndSave()) {
       try {
         await auth.linkEmailAccount(_email!, _password!, user!);
         UserObj userObj = UserObj(
-            userId: user!.uid,
-            userRank: _rankController.text,
-            userName: _nameController.text,
-            userEmail: _email!,
-            tosAgree: true,
-            createdDate: DateTime.now(),
-            lastLoginDate: DateTime.now(),
-            agreeDate: DateTime.now());
+          userId: user!.uid,
+          userRank: _rankController.text,
+          userName: _nameController.text,
+          userEmail: _email!,
+          tosAgree: true,
+          createdDate: DateTime.now(),
+          lastLoginDate: DateTime.now(),
+          agreeDate: DateTime.now(),
+        );
         FirebaseFirestore.instance
             .collection('users')
             .doc(user!.uid)
             .set(userObj.toMap(), SetOptions(merge: true));
-        widget.onAccountLinked!();
+        ref.read(rootProvider.notifier).signIn();
       } catch (e) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
@@ -81,8 +80,8 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
 
   @override
   Widget build(BuildContext context) {
-    final rootProvider = Provider.of<RootProvider>(context);
-    var auth = AuthProvider.of(context)!.auth!;
+    final rootService = ref.read(rootProvider.notifier);
+    var auth = ref.read(authProvider);
     user = auth.currentUser();
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -196,7 +195,7 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
                                     style: TextStyle(fontSize: 18.0)),
                               ),
                               onPressed: () {
-                                validateAndLink(auth as AuthService);
+                                validateAndLink();
                               }),
                         ),
                         Padding(
@@ -220,8 +219,7 @@ class LinkAnonymousPageState extends State<LinkAnonymousPage> {
                                 ),
                               ),
                               onPressed: () {
-                                // widget.rootBloc.onSignIn();
-                                rootProvider.signIn();
+                                rootService.signIn();
                               }),
                         ),
                       ],

@@ -2,19 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../methods/on_back_pressed.dart';
 import '../providers/theme_provider.dart';
 import '../../models/setting.dart';
-import '../providers/notifications_plugin_provider.dart';
 import '../widgets/platform_widgets/platform_text_field.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({
     Key? key,
   }) : super(key: key);
@@ -27,7 +25,7 @@ class SettingsPage extends StatefulWidget {
 
 enum Notification { acft, bf, weapon, pha, dental, vision, hearing, hiv }
 
-class SettingsPageState extends State<SettingsPage> {
+class SettingsPageState extends ConsumerState<SettingsPage> {
   int? acftMos,
       bfMos,
       weaponMos,
@@ -63,7 +61,6 @@ class SettingsPageState extends State<SettingsPage> {
   ThemeData _theme = ThemeData(brightness: Brightness.light);
   // ThemeBloc _themeBloc;
   late SharedPreferences prefs;
-  FlutterLocalNotificationsPlugin? notificationsPlugin;
 
   final TextEditingController acftController = TextEditingController();
   final TextEditingController bfController = TextEditingController();
@@ -232,14 +229,10 @@ class SettingsPageState extends State<SettingsPage> {
       owner: userId,
     );
 
-    firestore
-        .collection('settings')
-        .doc(userId)
-        .set(saveSetting.toMap(), SetOptions(merge: true));
-
-    if (!saveSetting.addNotifications) {
-      notificationsPlugin!.cancelAll();
-    }
+    firestore.collection('settings').doc(userId).set(
+          saveSetting.toMap(),
+          SetOptions(merge: true),
+        );
 
     Navigator.pop(context);
   }
@@ -260,7 +253,7 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
+    userId = ref.read(authProvider).currentUser()!.uid;
     if (isInitial) {
       initialize();
       isInitial = false;
@@ -342,9 +335,7 @@ class SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeService = ref.read(themeProvider.notifier);
     double width = MediaQuery.of(context).size.width;
     final accentColor = Theme.of(context).colorScheme.onPrimary;
     return Scaffold(
@@ -384,7 +375,7 @@ class SettingsPageState extends State<SettingsPage> {
                           onChanged: (Brightness? value) {
                             setState(() {
                               _theme = ThemeData(brightness: value);
-                              themeProvider.lightTheme();
+                              themeService.lightTheme();
                               prefs.setBool('darkMode', false);
                             });
                           },
@@ -396,7 +387,7 @@ class SettingsPageState extends State<SettingsPage> {
                           onChanged: (Brightness? value) {
                             setState(() {
                               _theme = ThemeData(brightness: value);
-                              themeProvider.darkTheme();
+                              themeService.darkTheme();
                               prefs.setBool('darkMode', true);
                             });
                           },

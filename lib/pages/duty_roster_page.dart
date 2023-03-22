@@ -3,15 +3,15 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
-import '../auth_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
@@ -23,7 +23,7 @@ import '../../models/duty.dart';
 import 'uploadPages/upload_duty_roster_page.dart';
 import '../pdf/duty_roster_pdf.dart';
 
-class DutyRosterPage extends StatefulWidget {
+class DutyRosterPage extends ConsumerStatefulWidget {
   const DutyRosterPage({
     Key? key,
     required this.userId,
@@ -36,7 +36,7 @@ class DutyRosterPage extends StatefulWidget {
   DutyRosterPageState createState() => DutyRosterPageState();
 }
 
-class DutyRosterPageState extends State<DutyRosterPage> {
+class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
   final List<DocumentSnapshot> _selectedDocuments = [];
@@ -50,11 +50,10 @@ class DutyRosterPageState extends State<DutyRosterPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -621,7 +620,7 @@ class DutyRosterPageState extends State<DutyRosterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

@@ -1,19 +1,24 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/constants.dart';
 import 'package:leaders_book/models/past_purchase.dart';
 import 'package:leaders_book/models/user.dart';
 import 'package:leaders_book/providers/subscription_state.dart';
-import 'package:provider/provider.dart';
 
-class IAPRepo extends ChangeNotifier {
+final iapRepoProvider = Provider<IAPRepo>((ref) {
+  return IAPRepo(
+    ref.read(subscriptionStateProvider.notifier),
+    ref.read(authProvider).currentUser(),
+  );
+});
+
+class IAPRepo {
   User? _user;
-  final BuildContext context;
+  final SubscriptionState subState;
 
-  IAPRepo(this.context, this._user) {
+  IAPRepo(this.subState, this._user) {
     updatePurchases();
     listenToLogin();
   }
@@ -21,8 +26,6 @@ class IAPRepo extends ChangeNotifier {
   UserObj? _userObj;
   bool hasActiveSubscription = false;
   List<PastPurchase> purchases = [];
-
-  StreamSubscription<User?>? _userSubscription;
 
   bool get isLoggedIn => _user != null;
   UserObj? get user => _userObj;
@@ -40,7 +43,7 @@ class IAPRepo extends ChangeNotifier {
   ];
 
   void listenToLogin() {
-    _userSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
       _user = user;
       updatePurchases();
     });
@@ -52,7 +55,6 @@ class IAPRepo extends ChangeNotifier {
       hasActiveSubscription = false;
       return;
     }
-    final subState = Provider.of<SubscriptionState>(context, listen: false);
     final purchaseSnapshot = await FirebaseFirestore.instance
         .collection('purchases')
         .where('userId', isEqualTo: _user!.uid)
@@ -89,13 +91,5 @@ class IAPRepo extends ChangeNotifier {
     if (hasActiveSubscription) {
       subState.subscribe();
     }
-
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _userSubscription?.cancel();
-    super.dispose();
   }
 }

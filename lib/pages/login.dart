@@ -2,24 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/models/user.dart';
+import 'package:leaders_book/providers/root_provider.dart';
 import 'package:leaders_book/widgets/center_progress_indicator.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../apple_sign_in_available.dart';
-import '../auth_provider.dart';
 import '../methods/show_on_login.dart';
-import '../providers/root_provider.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/user_provider.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key, this.onSignedIn}) : super(key: key);
-  final Function? onSignedIn;
+class LoginPage extends ConsumerStatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   LoginPageState createState() => LoginPageState();
@@ -27,7 +26,7 @@ class LoginPage extends StatefulWidget {
 
 enum FormType { login, register, forgotPassword }
 
-class LoginPageState extends State<LoginPage> {
+class LoginPageState extends ConsumerState<LoginPage> {
   final formKey = GlobalKey<FormState>();
 
   String? _email;
@@ -35,6 +34,7 @@ class LoginPageState extends State<LoginPage> {
   FormType _formType = FormType.login;
   SharedPreferences? prefs;
   late PackageInfo pInfo;
+  late RootService rootService;
   bool localAuthAvail = false, isLoggingIn = false;
   final LocalAuthentication localAuth = LocalAuthentication();
 
@@ -45,13 +45,14 @@ class LoginPageState extends State<LoginPage> {
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
-  void createAccount(User user) {
-    Provider.of<UserProvider>(context, listen: false).loadUser(user.uid);
-    Provider.of<SoldiersProvider>(context, listen: false)
-        .loadSoldiers(user.uid);
+  void createAccount(User user) async {
+    ref.read(soldiersProvider.notifier).loadSoldiers(user.uid);
 
-    if (user.metadata.creationTime!
-        .isBefore(DateTime.now().subtract(const Duration(minutes: 1)))) {
+    if (user.metadata.creationTime!.isBefore(
+      DateTime.now().subtract(
+        const Duration(minutes: 1),
+      ),
+    )) {
       FirebaseFirestore.instance.doc('users/${user.uid}').update(
           {'lastLogin': DateTime.now(), 'created': user.metadata.creationTime});
 
@@ -66,7 +67,11 @@ class LoginPageState extends State<LoginPage> {
       createdDate: DateTime.now(),
       lastLoginDate: DateTime.now(),
     );
-    FirebaseFirestore.instance.doc('users/${user.uid}').set(userObj.toMap());
+    await FirebaseFirestore.instance
+        .doc('users/${user.uid}')
+        .set(userObj.toMap());
+
+    ref.read(userProvider).loadUser(user.uid);
   }
 
   bool validateAndSave() {
@@ -81,7 +86,7 @@ class LoginPageState extends State<LoginPage> {
   void validateAndSubmit(String loginType) async {
     User? user;
     try {
-      var auth = AuthProvider.of(context)!.auth;
+      var auth = ref.read(authProvider);
       if (_formType == FormType.login) {
         // show progress bar while signing in
         setState(() {
@@ -89,18 +94,18 @@ class LoginPageState extends State<LoginPage> {
         });
         if (loginType == 'email' && validateAndSave()) {
           prefs!.setString('email', _emailController.text);
-          user = await auth!.signInWithEmailAndPassword(_email, _password);
+          user = await auth.signInWithEmailAndPassword(_email, _password);
           createAccount(user!);
         } else if (loginType == 'google') {
-          user = await auth!.signInWithGoogle();
+          user = await auth.signInWithGoogle();
           createAccount(user!);
         } else {
-          user = await auth!.signInWithApple();
+          user = await auth.signInWithApple();
           createAccount(user!);
         }
-        widget.onSignedIn!();
+        rootService.signIn();
       } else {
-        await auth!.resetPassword(_email).then((result) {
+        await auth.resetPassword(_email).then((result) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Check email to reset password'),
           ));
@@ -125,10 +130,10 @@ class LoginPageState extends State<LoginPage> {
     setState(() {
       isLoggingIn = true;
     });
-    var auth = AuthProvider.of(context)!.auth!;
+    var auth = ref.read(authProvider);
     final user = (await auth.createAnonymousUser())!;
     createAccount(user);
-    widget.onSignedIn!();
+    rootService.signIn();
   }
 
   void moveToLogin() {
@@ -152,6 +157,7 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    rootService = ref.read(rootProvider.notifier);
     init();
   }
 
@@ -184,10 +190,10 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final rootProvider = Provider.of<RootProvider>(context);
+    final rootService = ref.read(rootProvider.notifier);
     double width = MediaQuery.of(context).size.width;
     final appleSignInAvailable =
-        Provider.of<AppleSignInAvailable>(context, listen: false);
+        ref.read(appleSignInAvailableProvider).isAvailable;
     return Scaffold(
       key: _scaffoldState,
       appBar: AppBar(title: const Text('Login')),
@@ -212,7 +218,7 @@ class LoginPageState extends State<LoginPage> {
                             sizedBox(32.0) +
                             buildInputs() +
                             buildSubmitButtons(
-                                appleSignInAvailable.isAvailable, rootProvider),
+                                appleSignInAvailable, rootService),
                       ),
                     ),
                   )),
@@ -265,7 +271,8 @@ class LoginPageState extends State<LoginPage> {
         controller: _passwordController,
         decoration: const InputDecoration(
             labelText: 'Password', icon: Icon(Icons.lock)),
-        validator: (value) => value!.isEmpty ? 'Password can\'t be empty' : null,
+        validator: (value) =>
+            value!.isEmpty ? 'Password can\'t be empty' : null,
         onSaved: (value) => _password = value,
         obscureText: true,
       ),
@@ -310,7 +317,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   List<Widget> buildSubmitButtons(
-      bool appleAvailable, RootProvider rootProvider) {
+      bool appleAvailable, RootService rootService) {
     if (_formType == FormType.login) {
       List<Widget> list = [
         Padding(
@@ -401,7 +408,7 @@ class LoginPageState extends State<LoginPage> {
             textAlign: TextAlign.center,
           ),
           onPressed: () {
-            rootProvider.createAccout();
+            rootService.createAccout();
           },
         ),
       ));
@@ -500,7 +507,7 @@ class LoginPageState extends State<LoginPage> {
               textAlign: TextAlign.center,
             ),
             onPressed: () {
-              rootProvider.createAccout();
+              rootService.createAccout();
             },
           ),
         )
@@ -538,7 +545,7 @@ class LoginPageState extends State<LoginPage> {
             textAlign: TextAlign.center,
           ),
           onPressed: () {
-            rootProvider.createAccout();
+            rootService.createAccout();
           },
         )
       ];

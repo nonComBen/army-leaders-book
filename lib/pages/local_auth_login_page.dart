@@ -1,43 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_service.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:provider/provider.dart';
 
-import '../auth.dart';
 import '../auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../providers/user_provider.dart';
 
-class LocalAuthLoginPage extends StatefulWidget {
+class LocalAuthLoginPage extends ConsumerStatefulWidget {
   const LocalAuthLoginPage({Key? key}) : super(key: key);
 
   @override
   LocalAuthLoginPageState createState() => LocalAuthLoginPageState();
 }
 
-class LocalAuthLoginPageState extends State<LocalAuthLoginPage> {
+class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
   AuthService? _auth;
 
   void onUnlockApp(BuildContext context) async {
-    final rootProvider = Provider.of<RootProvider>(context, listen: false);
-    final soldiersProvider =
-        Provider.of<SoldiersProvider>(context, listen: false);
-    final LocalAuthentication auth = LocalAuthentication();
+    final rootService = ref.read(rootProvider.notifier);
+    final soldiersService = ref.read(soldiersProvider.notifier);
+    final LocalAuthentication localAuth = LocalAuthentication();
 
-    bool authenticated = await auth.authenticate(
+    bool authenticated = await localAuth.authenticate(
         localizedReason: 'Let OS determine authentication method',
         options: const AuthenticationOptions(stickyAuth: true));
 
     if (authenticated) {
-      soldiersProvider.loadSoldiers(_auth!.currentUser()!.uid);
-      rootProvider.signIn();
+      soldiersService.loadSoldiers(_auth!.currentUser()!.uid);
+      rootService.signIn();
     }
   }
 
   void onSignOut(BuildContext context) {
-    final rootProvider = Provider.of<RootProvider>(context, listen: false);
+    final rootService = ref.read(rootProvider.notifier);
     _auth!.signOut();
-    rootProvider.signOut();
+    rootService.signOut();
   }
 
   @override
@@ -47,9 +46,8 @@ class LocalAuthLoginPageState extends State<LocalAuthLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    _auth = AuthProvider.of(context)!.auth as AuthService?;
-    Provider.of<UserProvider>(context, listen: false)
-        .loadUser(_auth!.currentUser()!.uid);
+    _auth = ref.read(authProvider);
+    ref.read(userProvider).loadUser(_auth!.currentUser()!.uid);
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(

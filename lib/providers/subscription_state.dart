@@ -1,18 +1,18 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SubscriptionState extends ChangeNotifier {
-  SubscriptionState();
-  bool _isSubscribed = false;
+final subscriptionStateProvider =
+    StateNotifierProvider<SubscriptionState, bool>((ref) {
+  return SubscriptionState();
+});
+
+class SubscriptionState extends StateNotifier<bool> {
+  SubscriptionState() : super(false);
 
   void subscribe() {
-    _isSubscribed = true;
-    notifyListeners();
+    state = true;
   }
 
   void unSubscribe() {
-    _isSubscribed = false;
-    notifyListeners();
+    state = false;
   }
-
-  bool get isSubscribed => _isSubscribed;
 }

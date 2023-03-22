@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
 import '../auth_provider.dart';
 import '../providers/tracking_provider.dart';
@@ -21,7 +21,7 @@ import '../../models/counseling.dart';
 import 'editPages/edit_counseling_page.dart';
 import 'uploadPages/upload_counselings_page.dart';
 
-class CounselingsPage extends StatefulWidget {
+class CounselingsPage extends ConsumerStatefulWidget {
   const CounselingsPage({
     Key? key,
     required this.userId,
@@ -34,7 +34,7 @@ class CounselingsPage extends StatefulWidget {
   CounselingsPageState createState() => CounselingsPageState();
 }
 
-class CounselingsPageState extends State<CounselingsPage> {
+class CounselingsPageState extends ConsumerState<CounselingsPage> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
   final List<DocumentSnapshot> _selectedDocuments = [];
@@ -48,11 +48,10 @@ class CounselingsPageState extends State<CounselingsPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -458,7 +457,7 @@ class CounselingsPageState extends State<CounselingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

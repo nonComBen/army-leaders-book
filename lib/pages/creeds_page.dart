@@ -2,14 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:provider/provider.dart';
+import 'package:leaders_book/auth_provider.dart';
 
-import '../auth_provider.dart';
 import '../providers/subscription_state.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class CreedsPage extends StatefulWidget {
+class CreedsPage extends ConsumerStatefulWidget {
   const CreedsPage({
     Key? key,
   }) : super(key: key);
@@ -27,7 +27,7 @@ class Creed {
   Creed(this.isExpanded, this.header, this.body);
 }
 
-class CreedsPageState extends State<CreedsPage> {
+class CreedsPageState extends ConsumerState<CreedsPage> {
   bool isSubscribed = false;
   final List<Creed> _creeds = <Creed>[
     Creed(
@@ -280,7 +280,7 @@ class CreedsPageState extends State<CreedsPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    isSubscribed = ref.read(subscriptionStateProvider);
   }
 
   @override
@@ -310,7 +310,7 @@ class CreedsPageState extends State<CreedsPage> {
       myBanner!.load();
     }
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Creeds, Etc.'),

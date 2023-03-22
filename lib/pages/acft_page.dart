@@ -4,13 +4,13 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth_provider.dart';
@@ -26,7 +26,7 @@ import '../pdf/acft_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class AcftPage extends StatefulWidget {
+class AcftPage extends ConsumerStatefulWidget {
   const AcftPage({
     Key? key,
   }) : super(key: key);
@@ -37,7 +37,7 @@ class AcftPage extends StatefulWidget {
   AcftPageState createState() => AcftPageState();
 }
 
-class AcftPageState extends State<AcftPage> {
+class AcftPageState extends ConsumerState<AcftPage> {
   int _sortColumnIndex = 0,
       deadliftAve = 0,
       powerThrowAve = 0,
@@ -67,12 +67,11 @@ class AcftPageState extends State<AcftPage> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context)!.auth!.currentUser()!.uid;
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded && !isSubscribed) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -878,7 +877,7 @@ class AcftPageState extends State<AcftPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

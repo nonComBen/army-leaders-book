@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
@@ -14,7 +15,7 @@ import '../../models/rating.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/formatted_elevated_button.dart';
 
-class EditRatingPage extends StatefulWidget {
+class EditRatingPage extends ConsumerStatefulWidget {
   const EditRatingPage({
     Key? key,
     required this.rating,
@@ -25,7 +26,7 @@ class EditRatingPage extends StatefulWidget {
   EditRatingPageState createState() => EditRatingPageState();
 }
 
-class EditRatingPageState extends State<EditRatingPage> {
+class EditRatingPageState extends ConsumerState<EditRatingPage> {
   String _title = 'New Rating Scheme';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -276,7 +277,7 @@ class EditRatingPageState extends State<EditRatingPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context)!.auth!.currentUser()!;
+    final user = ref.read(authProvider).currentUser()!;
     return Scaffold(
         key: _scaffoldState,
         appBar: AppBar(

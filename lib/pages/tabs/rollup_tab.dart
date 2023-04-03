@@ -17,43 +17,40 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-import '../../providers/subscription_purchases.dart';
-import '../../providers/subscription_state.dart';
-import '../methods/date_methods.dart';
-import '../providers/tracking_provider.dart';
-import '../methods/show_on_login.dart';
-import '../../methods/show_snackbar.dart';
-import '../methods/update_methods.dart';
-import '../../methods/validate.dart';
-import '../../models/purchasable_product.dart';
-import '../../models/setting.dart';
-import 'acft_page.dart';
-import 'daily_perstat_page.dart';
-import 'settings_page.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/center_progress_indicator.dart';
-import '../../widgets/main_drawer.dart';
-import '../providers/user_provider.dart';
-import '../widgets/perstat_rollup_card.dart';
-import '../widgets/rollup_card.dart';
-import 'apft_page.dart';
-import 'perstat_page.dart';
-import 'appointments_page.dart';
-import 'temp_profiles_page.dart';
-import 'perm_profile_page.dart';
-import 'bodyfat_page.dart';
-import 'weapons_page.dart';
-import 'flags_page.dart';
-import 'medpros_page.dart';
-import 'training_page.dart';
-import '../classes/iap_repo.dart';
-import '../methods/custom_alert_dialog.dart';
-import '../widgets/show_by_name_content.dart';
+import '../../../providers/subscription_state.dart';
+import '../../methods/date_methods.dart';
+import '../../providers/tracking_provider.dart';
+import '../../methods/show_on_login.dart';
+import '../../methods/update_methods.dart';
+import '../../../methods/validate.dart';
+import '../../../models/setting.dart';
+import '../acft_page.dart';
+import '../daily_perstat_page.dart';
+import '../../../widgets/anon_warning_banner.dart';
+import '../../../widgets/center_progress_indicator.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/perstat_rollup_card.dart';
+import '../../widgets/rollup_card.dart';
+import '../apft_page.dart';
+import '../perstat_page.dart';
+import '../appointments_page.dart';
+import '../temp_profiles_page.dart';
+import '../perm_profile_page.dart';
+import '../bodyfat_page.dart';
+import '../weapons_page.dart';
+import '../flags_page.dart';
+import '../medpros_page.dart';
+import '../training_page.dart';
+import '../../classes/iap_repo.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../widgets/show_by_name_content.dart';
 
-class HomePage extends ConsumerStatefulWidget {
-  const HomePage({
+class RollupTab extends ConsumerStatefulWidget {
+  const RollupTab({
     Key? key,
   }) : super(key: key);
+
+  static const String title = 'Rollup';
 
   @override
   HomePageState createState() => HomePageState();
@@ -71,7 +68,7 @@ enum HomeCard {
   training
 }
 
-class HomePageState extends ConsumerState<HomePage>
+class HomePageState extends ConsumerState<RollupTab>
     with WidgetsBindingObserver {
   final subId = 'ad_free_sub',
       iosSubId = 'premium_sub',
@@ -79,8 +76,7 @@ class HomePageState extends ConsumerState<HomePage>
   final androidAd = 'ca-app-pub-2431077176117105/1369522276';
   final iosAd = 'ca-app-pub-2431077176117105/9894231072';
   String subToken = '';
-  bool _storeAvailable = true,
-      _requireUnlock = false,
+  bool _requireUnlock = false,
       _localAuthSupported = false,
       _adLoaded = false,
       verified = false,
@@ -94,15 +90,12 @@ class HomePageState extends ConsumerState<HomePage>
   final format = DateFormat('yyyy-MM-dd');
   Setting? setting;
   late LocalAuthentication _localAuth;
-  late SubscriptionPurchases sp;
   SubscriptionState? subState;
   BannerAd? myBanner;
   late RootService _rootService;
   UserObj? _userObj;
 
-  final _scaffoldState = GlobalKey<ScaffoldState>();
-
-  void signOut(BuildContext context) {
+  void signOut() {
     var auth = ref.read(authProvider);
     try {
       _rootService.signOut();
@@ -128,7 +121,7 @@ class HomePageState extends ConsumerState<HomePage>
       content: content,
       primaryText: 'Yes',
       primary: () {
-        signOut(context);
+        signOut();
       },
       secondaryText: 'Create Account',
       secondary: () {
@@ -141,22 +134,6 @@ class HomePageState extends ConsumerState<HomePage>
     if (_adLoaded) {
       myBanner?.dispose();
       _adLoaded = false;
-    }
-  }
-
-  void subscribe() async {
-    if (_storeAvailable) {
-      PurchasableProduct product;
-      if (Platform.isAndroid) {
-        product =
-            sp.products.firstWhere((element) => element.id == 'ad_free_two');
-      } else {
-        product =
-            sp.products.firstWhere((element) => element.id == 'premium_sub');
-      }
-      await sp.buy(product);
-    } else {
-      showSnackbar(context, 'Store is not available');
     }
   }
 
@@ -288,7 +265,6 @@ class HomePageState extends ConsumerState<HomePage>
       packageInfo = await PackageInfo.fromPlatform();
       _localAuth = LocalAuthentication();
       _localAuthSupported = await _localAuth.isDeviceSupported();
-      _storeAvailable = await InAppPurchase.instance.isAvailable();
       if (prefs.getString('Version') == null ||
           packageInfo.version != prefs.getString('Version')) {
         prefs.setString('Version', packageInfo.version);
@@ -319,7 +295,7 @@ class HomePageState extends ConsumerState<HomePage>
         timer = Timer.periodic(const Duration(minutes: 10), (_) {
           _requireUnlock = true;
           if (!_localAuthSupported) {
-            signOut(context);
+            signOut();
           }
         });
         break;
@@ -1033,114 +1009,77 @@ class HomePageState extends ConsumerState<HomePage>
     _rootService = ref.read(rootProvider.notifier);
     final user = ref.read(authProvider).currentUser();
     ref.read(iapRepoProvider);
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Rollup'),
-        actions: <Widget>[
-          Tooltip(
-            message: 'Settings',
-            child: IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsPage(),
-                ),
-              ),
-            ),
-          ),
-          Tooltip(
-            message: 'Sign Out',
-            child: IconButton(
-                icon: const Icon(Icons.directions_walk),
-                onPressed: () {
-                  if (user!.isAnonymous) {
-                    signOutWarning(context);
-                  } else {
-                    signOut(context);
-                  }
-                }),
-          ),
-        ],
-      ),
-      drawer: MainDrawer(
-        subscribe: subscribe,
-        signOut: () => signOut(context),
-        signOutWarning: () => signOutWarning(context),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Flexible(
-              flex: 1,
-              child: ListView(
-                primary: true,
-                shrinkWrap: true,
-                children: [
-                  if (user!.isAnonymous) const AnonWarningBanner(),
-                  StreamBuilder<DocumentSnapshot>(
-                      stream: _firestore
-                          .collection('settings')
-                          .doc(user.uid)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        switch (snapshot.connectionState) {
-                          case ConnectionState.waiting:
-                            return const Card(child: CenterProgressIndicator());
-                          default:
-                            if (snapshot.hasData) {
-                              setting = Setting.fromMap(snapshot.data!.data()
-                                  as Map<String, dynamic>);
-                            } else {
-                              setting = Setting(
-                                owner: user.uid,
-                                hearingNotifications: [0, 30],
-                                weaponsNotifications: [0, 30],
-                                acftNotifications: [0, 30],
-                                dentalNotifications: [0, 30],
-                                visionNotifications: [0, 30],
-                                bfNotifications: [0, 30],
-                                hivNotifications: [0, 30],
-                                phaNotifications: [0, 30],
-                              );
-                              if (!user.isAnonymous) {
-                                _firestore
-                                    .collection('settings')
-                                    .doc(user.uid)
-                                    .set(setting!.toMap());
-                              }
-                            }
-
-                            return GridView.count(
-                              crossAxisCount: width > 700 ? 2 : 1,
-                              childAspectRatio:
-                                  width > 700 ? width / 450 : width / 225,
-                              shrinkWrap: true,
-                              primary: false,
-                              crossAxisSpacing: 1.0,
-                              mainAxisSpacing: 1.0,
-                              children: homeCards(user.uid),
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Flexible(
+            flex: 1,
+            child: ListView(
+              primary: true,
+              shrinkWrap: true,
+              children: [
+                if (user!.isAnonymous) const AnonWarningBanner(),
+                StreamBuilder<DocumentSnapshot>(
+                    stream: _firestore
+                        .collection('settings')
+                        .doc(user.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return const Card(child: CenterProgressIndicator());
+                        default:
+                          if (snapshot.hasData) {
+                            setting = Setting.fromMap(
+                                snapshot.data!.data() as Map<String, dynamic>);
+                          } else {
+                            setting = Setting(
+                              owner: user.uid,
+                              hearingNotifications: [0, 30],
+                              weaponsNotifications: [0, 30],
+                              acftNotifications: [0, 30],
+                              dentalNotifications: [0, 30],
+                              visionNotifications: [0, 30],
+                              bfNotifications: [0, 30],
+                              hivNotifications: [0, 30],
+                              phaNotifications: [0, 30],
                             );
-                        }
-                      })
-                ],
-              ),
+                            if (!user.isAnonymous) {
+                              _firestore
+                                  .collection('settings')
+                                  .doc(user.uid)
+                                  .set(setting!.toMap());
+                            }
+                          }
+
+                          return GridView.count(
+                            crossAxisCount: width > 700 ? 2 : 1,
+                            childAspectRatio:
+                                width > 700 ? width / 450 : width / 225,
+                            shrinkWrap: true,
+                            primary: false,
+                            crossAxisSpacing: 1.0,
+                            mainAxisSpacing: 1.0,
+                            children: homeCards(user.uid),
+                          );
+                      }
+                    })
+              ],
             ),
-            if (_adLoaded && !isSubscribed)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              )
-          ],
-        ),
+          ),
+          if (_adLoaded && !isSubscribed)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
+              ),
+            )
+        ],
       ),
     );
   }

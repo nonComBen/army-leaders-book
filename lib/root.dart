@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_home_page.dart';
 
 import 'pages/create_account_page.dart';
-import 'pages/home_page.dart';
 import './providers/root_provider.dart';
 import 'pages/local_auth_login_page.dart';
 import './pages/login.dart';
@@ -29,7 +29,7 @@ class RootPageState extends ConsumerState<RootPage> {
           case AuthStatus.notSignedIn:
             return const LoginPage();
           case AuthStatus.signedIn:
-            return const HomePage();
+            return PlatformHomePage();
           case AuthStatus.linkAnonymous:
             return const LinkAnonymousPage();
           case AuthStatus.createAccount:

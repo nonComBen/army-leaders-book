@@ -13,6 +13,10 @@ final soldiersProvider =
 class SoldiersService extends StateNotifier<List<Soldier>> {
   SoldiersService() : super([]);
 
+  get soldiers {
+    return state;
+  }
+
   void loadSoldiers(String userId) {
     Stream<QuerySnapshot<Map<String, dynamic>>> soldiersStream =
         FirebaseFirestore.instance

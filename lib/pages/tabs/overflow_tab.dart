@@ -1,65 +1,71 @@
 import 'dart:io';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:leaders_book/auth_provider.dart';
+import 'package:leaders_book/auth_service.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:leaders_book/pages/privacy_policy_page.dart';
 import 'package:leaders_book/pages/tos_page.dart';
+import 'package:leaders_book/providers/root_provider.dart';
+import 'package:leaders_book/providers/subscription_purchases.dart';
 
-import '../methods/home_page_methods.dart';
-import '../providers/subscription_state.dart';
-import '../methods/show_snackbar.dart';
-import '../pages/acft_page.dart';
-import '../pages/actions_tracker_page.dart';
-import '../pages/alert_roster_page.dart';
-import '../pages/apft_page.dart';
-import '../pages/appointments_page.dart';
-import '../pages/bodyfat_page.dart';
-import '../pages/creeds_page.dart';
-import '../pages/editPages/edit_user_page.dart';
-import '../pages/faq_page.dart';
-import '../pages/hand_receipt_page.dart';
-import '../pages/hr_actions_page.dart';
-import '../pages/perm_profile_page.dart';
-import '../pages/perstat_page.dart';
-import '../pages/settings_page.dart';
-import '../pages/temp_profiles_page.dart';
-import '../pages/weapons_page.dart';
-import '../pages/flags_page.dart';
-import '../pages/ratings_page.dart';
-import '../pages/medpros_page.dart';
-import '../pages/training_page.dart';
-import '../pages/equipment_page.dart';
-import '../pages/mil_license_page.dart';
-import '../pages/duty_roster_page.dart';
-import '../pages/taskings_page.dart';
-import '../pages/counselings_page.dart';
-import '../pages/working_awards_page.dart';
-import '../pages/working_evals_page.dart';
-import '../pages/phone_page.dart';
-import '../pages/notes_page.dart';
-import 'custom_drawer_header.dart';
+import '../../methods/home_page_methods.dart';
+import '../../models/purchasable_product.dart';
+import '../../providers/subscription_state.dart';
+import '../../methods/show_snackbar.dart';
+import '../../pages/acft_page.dart';
+import '../../pages/actions_tracker_page.dart';
+import '../../pages/alert_roster_page.dart';
+import '../../pages/apft_page.dart';
+import '../../pages/appointments_page.dart';
+import '../../pages/bodyfat_page.dart';
+import '../../pages/creeds_page.dart';
+import '../../pages/editPages/edit_user_page.dart';
+import '../../pages/faq_page.dart';
+import '../../pages/hand_receipt_page.dart';
+import '../../pages/hr_actions_page.dart';
+import '../../pages/perm_profile_page.dart';
+import '../../pages/perstat_page.dart';
+import '../../pages/settings_page.dart';
+import '../../pages/temp_profiles_page.dart';
+import '../../pages/weapons_page.dart';
+import '../../pages/flags_page.dart';
+import '../../pages/ratings_page.dart';
+import '../../pages/medpros_page.dart';
+import '../../pages/training_page.dart';
+import '../../pages/equipment_page.dart';
+import '../../pages/mil_license_page.dart';
+import '../../pages/duty_roster_page.dart';
+import '../../pages/taskings_page.dart';
+import '../../pages/counselings_page.dart';
+import '../../pages/working_awards_page.dart';
+import '../../pages/working_evals_page.dart';
+import '../../pages/phone_page.dart';
+import '../../pages/notes_page.dart';
+import '../../widgets/custom_drawer_header.dart';
 
-class MainDrawer extends ConsumerWidget {
-  final VoidCallback subscribe;
-  final VoidCallback signOutWarning;
-  final VoidCallback signOut;
-
-  const MainDrawer({
+class OverflowTab extends ConsumerWidget {
+  const OverflowTab({
     Key? key,
-    required this.subscribe,
-    required this.signOutWarning,
-    required this.signOut,
   }) : super(key: key);
 
-  void subscriptionMessage(BuildContext context) {
+  static const String title = 'Overflow page';
+
+  void subscriptionMessage(BuildContext context, SubscriptionPurchases sp) {
     DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-    String date =
-        dateFormat.format(DateTime.now().add(const Duration(days: 365)));
+    String date = dateFormat.format(
+      DateTime.now().add(
+        const Duration(
+          days: 365,
+        ),
+      ),
+    );
     String store = Platform.isAndroid ? 'Google Play Store' : 'Apple App Store';
     Text title = const Text('Premium Subscription');
     Text content = Text(
@@ -69,10 +75,59 @@ class MainDrawer extends ConsumerWidget {
       title: title,
       content: content,
       primaryText: 'Suscribe',
-      primary: () {
-        subscribe();
+      primary: () async {
+        InAppPurchase.instance.isAvailable().then((isAvailable) async {
+          if (isAvailable) {
+            PurchasableProduct product;
+            if (Platform.isAndroid) {
+              product = sp.products
+                  .firstWhere((element) => element.id == 'ad_free_two');
+            } else {
+              product = sp.products
+                  .firstWhere((element) => element.id == 'premium_sub');
+            }
+            await sp.buy(product);
+          } else {
+            showSnackbar(context, 'Store is not available');
+          }
+        });
       },
       secondary: () {},
+    );
+  }
+
+  void signOut({required AuthService auth, required RootService root}) {
+    try {
+      root.signOut();
+      auth.signOut();
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Sign Out Error');
+    }
+  }
+
+  void signOutWarning(
+      {required BuildContext context,
+      required AuthService auth,
+      required RootService root}) {
+    // ignore: close_sinks
+    Widget title = const Text('Sign Out?');
+    Widget content = Container(
+      padding: const EdgeInsets.all(8.0),
+      child: const Text(
+          'Are you sure you want to sign out? Any data you saved will be lost unless you create an account.'),
+    );
+    customAlertDialog(
+      context: context,
+      title: title,
+      content: content,
+      primaryText: 'Yes',
+      primary: () {
+        signOut(auth: auth, root: root);
+      },
+      secondaryText: 'Create Account',
+      secondary: () {
+        root.linkAnonymous();
+      },
     );
   }
 
@@ -80,7 +135,11 @@ class MainDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.read(authProvider).currentUser();
     final isSubscribedAdFree = ref.read(subscriptionStateProvider);
-    return Drawer(
+    final auth = ref.read(authProvider);
+    final root = ref.read(rootProvider.notifier);
+    final sp = ref.read(subscriptionPurchasesProvider);
+    return Container(
+      padding: const EdgeInsets.all(16.0),
       child: ListView(
         children: <Widget>[
           const CustomDrawerHeader(),
@@ -462,7 +521,7 @@ class MainDrawer extends ConsumerWidget {
             onTap: () {
               Navigator.pop(context);
               if (!isSubscribedAdFree) {
-                subscriptionMessage(context);
+                subscriptionMessage(context, sp);
               } else {
                 showSnackbar(context, 'You are already subscribed to Premium.');
               }
@@ -557,9 +616,13 @@ class MainDrawer extends ConsumerWidget {
             onTap: () {
               Navigator.pop(context);
               if (user!.isAnonymous) {
-                signOutWarning();
+                signOutWarning(
+                  context: context,
+                  auth: auth,
+                  root: root,
+                );
               } else {
-                signOut();
+                signOut(auth: auth, root: root);
               }
             },
           ),

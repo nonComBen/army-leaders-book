@@ -26,9 +26,7 @@ import '../widgets/anon_warning_banner.dart';
 class TrainingPage extends ConsumerStatefulWidget {
   const TrainingPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/training-page';
 
@@ -43,6 +41,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -79,11 +78,12 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('training')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -321,7 +321,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Training$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Training$s');
   }
 
   void _editRecord() {
@@ -345,8 +345,8 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
         MaterialPageRoute(
             builder: (context) => EditTrainingPage(
                   training: Training(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

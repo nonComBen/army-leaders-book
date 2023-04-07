@@ -26,9 +26,7 @@ import '../pdf/equipment_pdf.dart';
 class EquipmentPage extends ConsumerStatefulWidget {
   const EquipmentPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/equipment-page';
 
@@ -43,6 +41,7 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -80,10 +79,12 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
   void initState() {
     super.initState();
 
+    userId = ref.read(authProvider).currentUser()!.uid;
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('equipment')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -304,7 +305,7 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Equipment');
+    deleteRecord(context, _selectedDocuments, userId, 'Equipment');
   }
 
   void _editRecord() {
@@ -328,8 +329,8 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
         MaterialPageRoute(
             builder: (context) => EditEquipmentPage(
                   equipment: Equipment(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

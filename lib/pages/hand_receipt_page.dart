@@ -9,6 +9,7 @@ import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -26,9 +27,7 @@ import '../widgets/anon_warning_banner.dart';
 class HandReceiptPage extends ConsumerStatefulWidget {
   const HandReceiptPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/hand-receipt-page';
 
@@ -43,8 +42,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+  late String userId;
 
   @override
   void didChangeDependencies() async {
@@ -80,10 +78,12 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
   void initState() {
     super.initState();
 
+    userId = ref.read(authProvider).currentUser()!.uid;
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('handReceipt')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -288,8 +288,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
           const SnackBar(content: Text('You must select at least one record')));
       return;
     }
-    deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Hand Receipt Item');
+    deleteRecord(context, _selectedDocuments, userId, 'Hand Receipt Item');
   }
 
   void _editRecord() {
@@ -313,8 +312,8 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
         MaterialPageRoute(
             builder: (context) => EditHandReceiptPage(
                   item: HandReceiptItem(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                     subComponents: [],
                   ),
                 )));
@@ -604,12 +603,9 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Hand Receipt'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
-        //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+    return PlatformScaffold(
+        title: 'Hand Receipt',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

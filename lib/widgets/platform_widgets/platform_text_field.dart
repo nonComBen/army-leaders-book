@@ -144,6 +144,7 @@ class IOSTextField extends StatelessWidget implements PlatformTextField {
               height: 30,
               child: Text(
                 label!,
+                style: TextStyle(color: getTextColor(context)),
                 textAlign: TextAlign.start,
               )),
         CupertinoTextField(

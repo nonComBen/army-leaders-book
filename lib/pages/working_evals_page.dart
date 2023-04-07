@@ -24,9 +24,7 @@ import '../widgets/anon_warning_banner.dart';
 class WorkingEvalsPage extends ConsumerStatefulWidget {
   const WorkingEvalsPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/working-evaluations-page';
 
@@ -41,6 +39,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscription;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -77,10 +76,11 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('workingEvals')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
       setState(() {
@@ -215,7 +215,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Eval$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Eval$s');
   }
 
   void _editRecord() {
@@ -241,7 +241,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
         MaterialPageRoute(
             builder: (context) => EditWorkingEvalPage(
                   eval: WorkingEval(
-                    owner: widget.userId,
+                    owner: userId,
                   ),
                 )));
   }

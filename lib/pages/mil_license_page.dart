@@ -27,9 +27,7 @@ import '../providers/tracking_provider.dart';
 class MilLicPage extends ConsumerStatefulWidget {
   const MilLicPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/military-license-page';
 
@@ -44,6 +42,7 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -80,11 +79,12 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('milLic')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -288,8 +288,7 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Military License$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Military License$s');
   }
 
   void _editRecord() {
@@ -313,8 +312,8 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
         MaterialPageRoute(
             builder: (context) => EditMilLicPage(
                   milLic: MilLic(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                     vehicles: [],
                   ),
                 )));

@@ -18,9 +18,7 @@ import '../widgets/anon_warning_banner.dart';
 class NotesPage extends ConsumerStatefulWidget {
   const NotesPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/notes-page';
 
@@ -35,6 +33,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
   List<DocumentSnapshot> documents = [];
   late StreamSubscription _subscription;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -74,10 +73,11 @@ class NotesPageState extends ConsumerState<NotesPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('notes')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen(
       (updates) {
@@ -106,7 +106,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Note$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Note$s');
   }
 
   void _editRecord() {
@@ -132,7 +132,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
       MaterialPageRoute(
         builder: (context) => EditNotePage(
           note: Note(
-            owner: widget.userId,
+            owner: userId,
           ),
         ),
       ),

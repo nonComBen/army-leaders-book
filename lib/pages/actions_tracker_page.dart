@@ -27,9 +27,7 @@ import '../../widgets/anon_warning_banner.dart';
 class ActionsTrackerPage extends ConsumerStatefulWidget {
   const ActionsTrackerPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/actions-tracker-page';
 
@@ -45,6 +43,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   late StreamSubscription _subscriptionUsers;
   QuerySnapshot? snapshot;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -82,10 +81,12 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   void initState() {
     super.initState();
 
+    userId = ref.read(authProvider).currentUser()!.uid;
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('actions')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -276,7 +277,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Action$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Action$s');
   }
 
   void _editRecord() {
@@ -300,8 +301,8 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
         MaterialPageRoute(
             builder: (context) => EditActionsTrackerPage(
                   action: ActionObj(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

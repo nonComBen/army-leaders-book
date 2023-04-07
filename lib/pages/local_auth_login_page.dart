@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_service.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_button.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../auth_provider.dart';
@@ -49,14 +52,13 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
     _auth = ref.read(authProvider);
     ref.read(userProvider).loadUser(_auth!.currentUser()!.uid);
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lock Screen'),
-      ),
+    return PlatformScaffold(
+      title: 'Lock Screen',
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width > 932 ? (width - 916) / 2 : 16),
         child: Card(
+          color: getBackgroundColor(context),
           child: Container(
             padding: const EdgeInsets.all(16.0),
             constraints: const BoxConstraints(maxWidth: 900),
@@ -64,23 +66,15 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(32.0),
-                  child: Hero(
-                    tag: 'hero',
-                    child: CircleAvatar(
-                      backgroundColor: Colors.transparent,
-                      radius: 96.0,
-                      child: Image.asset('assets/icon-512.png'),
-                    ),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    radius: 96.0,
+                    child: Image.asset('assets/icon-512.png'),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                        shape: MaterialStateProperty.all<OutlinedBorder>(
-                            const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(24.0))))),
+                  child: PlatformButton(
                     onPressed: () => onUnlockApp(context),
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),

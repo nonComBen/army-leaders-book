@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_selection_widget.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../methods/theme_methods.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_list_tile.dart';
+import '../../widgets/platform_widgets/platform_loading_widget.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/standard_text.dart';
 import '../../models/soldier.dart';
 
 class TransferSoldierPage extends StatefulWidget {
@@ -24,8 +37,9 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
 
   List<DocumentSnapshot>? allSnapshots;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  String? userId = '';
-  List<dynamic> userIds = [];
+  String? userId = '', method = 'UserId';
+  List<String> userIds = [];
+  final List<String> methods = ['UserId', 'DropDown'];
   bool? typeInUserId = false, retainAccess = true;
 
   void _makeSure(
@@ -56,9 +70,9 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
   void _transferSoldier(
       BuildContext context, String? userId, bool? remainMember) async {
     for (Soldier soldier in widget.soldiers) {
-      List<dynamic> users = soldier.users;
+      List<String> users = soldier.users as List<String>;
       if (!users.contains(userId)) {
-        users.add(userId);
+        users.add(userId!);
       }
       if (!remainMember!) {
         users.remove(widget.userId);
@@ -73,39 +87,34 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
   void initState() {
     super.initState();
 
-    List<dynamic> ids = [];
     for (Soldier soldier in widget.soldiers) {
-      ids.addAll(soldier.users);
+      userIds.addAll(soldier.users as List<String>);
     }
-    for (dynamic id in ids) {
-      if (!userIds.contains(id)) {
-        userIds.add(id);
-      }
-    }
+    userIds = userIds.toSet().toList();
     userId = userIds.first;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Transfer Soldiers'),
-        ),
+    return PlatformScaffold(
+        title: 'Transfer Soldiers',
         body: Container(
           padding: const EdgeInsets.all(16.0),
           child: ListView(
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: SwitchListTile(
-                  title: typeInUserId!
-                      ? const Text('Type In User Id')
-                      : const Text('Select User Id From Dropdown'),
-                  value: typeInUserId!,
+                child: PlatformSelectionWidget(
+                  titles: const [
+                    StandardText('Type In User Id'),
+                    StandardText('Select User Id From Dropdown')
+                  ],
+                  values: methods,
+                  groupValue: method,
                   onChanged: (value) {
                     setState(() {
-                      typeInUserId = value;
-                      if (!typeInUserId!) {
+                      method = value.toString();
+                      if (method == 'UserId') {
                         userId = userIds.first;
                       }
                     });
@@ -113,48 +122,39 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                 ),
               ),
               typeInUserId!
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: controller,
-                        decoration: const InputDecoration(
-                            labelText: 'User Id',
-                            hintText: 'Enter the User Id',
-                            prefixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(25.0)),
-                            )),
+                  ? PaddedTextField(
+                      controller: controller,
+                      label: 'User ID',
+                      decoration: const InputDecoration(
+                        labelText: 'User ID',
+                        hintText: 'Enter the User ID',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                        ),
                       ),
                     )
                   : Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: DropdownButtonFormField(
-                        items: userIds
-                            .map((e) => DropdownMenuItem<String>(
-                                  value: e,
-                                  child: Text(e),
-                                ))
-                            .toList(),
-                        value: userId,
-                        onChanged: (dynamic value) {
-                          setState(() {
-                            userId = value;
-                          });
+                      child: PlatformItemPicker(
+                        label: const StandardText('User'),
+                        items: userIds,
+                        value: userId!,
+                        onChanged: (value) {
+                          setState(
+                            () {
+                              userId = value.toString();
+                            },
+                          );
                         },
                       ),
                     ),
               typeInUserId!
                   ? Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Theme.of(context).primaryColor),
-                        ),
-                        child: const Text(
+                      child: PlatformButton(
+                        child: const HeaderText(
                           'Find User',
-                          style: TextStyle(fontSize: 18),
                         ),
                         onPressed: () {
                           if (controller.text.isNotEmpty) {
@@ -162,10 +162,17 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                               userId = controller.text;
                             });
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('User Id must not be blank')));
+                            FToast toast = FToast();
+                            toast.context = context;
+                            toast.showToast(
+                              child: const MyToast(
+                                contents: [
+                                  StandardText(
+                                    'User Id must not be blank',
+                                  ),
+                                ],
+                              ),
+                            );
                           }
                         },
                       ),
@@ -173,9 +180,9 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                   : const SizedBox(),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: CheckboxListTile(
-                  value: retainAccess,
-                  title: const Text('Retain Read/Update Access'),
+                child: PlatformCheckboxListTile(
+                  value: retainAccess!,
+                  title: const StandardText('Retain Read/Update Access'),
                   onChanged: (value) {
                     setState(() {
                       retainAccess = value;
@@ -184,44 +191,51 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                 ),
               ),
               FutureBuilder<DocumentSnapshot>(
-                  future: firestore.collection('users').doc(userId).get(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<DocumentSnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return const Card(
-                        child: ListTile(
-                          title: Text('No User Found'),
+                future: firestore.collection('users').doc(userId).get(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return Card(
+                      color: getBackgroundColor(context),
+                      child: PlatformListTile(
+                        title: const StandardText(
+                          'No User Found',
                         ),
-                      );
-                    }
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return const CircularProgressIndicator();
-                      default:
-                        if (snapshot.data!.exists) {
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${snapshot.data!['rank'] ?? ''} ${snapshot.data!['userName'] ?? ''}'),
-                              subtitle: Text(snapshot.data!['userEmail'] ?? ''),
-                              onTap: () {
-                                _makeSure(
-                                    context,
-                                    snapshot.data!['userId'],
-                                    snapshot.data!['rank'],
-                                    snapshot.data!['userName']);
-                              },
-                            ),
-                          );
-                        } else {
-                          return const Card(
-                            child: ListTile(
-                              title: Text('No User Found'),
-                            ),
-                          );
-                        }
-                    }
-                  }),
+                      ),
+                    );
+                  }
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return PlatformLoadingWidget();
+                    default:
+                      if (snapshot.data!.exists) {
+                        return Card(
+                          color: getBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: StandardText(
+                                '${snapshot.data!['rank'] ?? ''} ${snapshot.data!['userName'] ?? ''}'),
+                            subtitle:
+                                StandardText(snapshot.data!['userEmail'] ?? ''),
+                            onTap: () {
+                              _makeSure(
+                                  context,
+                                  snapshot.data!['userId'],
+                                  snapshot.data!['rank'],
+                                  snapshot.data!['userName']);
+                            },
+                          ),
+                        );
+                      } else {
+                        return Card(
+                          color: getBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: const StandardText('No User Found'),
+                          ),
+                        );
+                      }
+                  }
+                },
+              ),
             ],
           ),
         ));

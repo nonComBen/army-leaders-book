@@ -9,6 +9,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/pages/acft_page.dart';
+import 'package:leaders_book/pages/actions_tracker_page.dart';
+import 'package:leaders_book/pages/alert_roster_page.dart';
+import 'package:leaders_book/pages/apft_page.dart';
+import 'package:leaders_book/pages/appointments_page.dart';
+import 'package:leaders_book/pages/bodyfat_page.dart';
+import 'package:leaders_book/pages/counselings_page.dart';
+import 'package:leaders_book/pages/daily_perstat_page.dart';
+import 'package:leaders_book/pages/duty_roster_page.dart';
+import 'package:leaders_book/pages/equipment_page.dart';
+import 'package:leaders_book/pages/flags_page.dart';
+import 'package:leaders_book/pages/hand_receipt_page.dart';
+import 'package:leaders_book/pages/hr_actions_page.dart';
+import 'package:leaders_book/pages/medpros_page.dart';
+import 'package:leaders_book/pages/mil_license_page.dart';
+import 'package:leaders_book/pages/notes_page.dart';
+import 'package:leaders_book/pages/perm_profile_page.dart';
+import 'package:leaders_book/pages/perstat_page.dart';
+import 'package:leaders_book/pages/phone_page.dart';
+import 'package:leaders_book/pages/ratings_page.dart';
+import 'package:leaders_book/pages/settings_page.dart';
+import 'package:leaders_book/pages/taskings_page.dart';
+import 'package:leaders_book/pages/temp_profiles_page.dart';
+import 'package:leaders_book/pages/training_page.dart';
+import 'package:leaders_book/pages/weapons_page.dart';
+import 'package:leaders_book/pages/working_awards_page.dart';
+import 'package:leaders_book/pages/working_evals_page.dart';
 import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_app.dart';
@@ -76,6 +102,38 @@ class MyApp extends ConsumerWidget with WidgetsBindingObserver {
                     const PrivacyPolicyPage(),
                 TosPage.routeName: (BuildContext context) => const TosPage(),
                 AcftPage.routeName: (context) => const AcftPage(),
+                ActionsTrackerPage.routeName: (context) =>
+                    const ActionsTrackerPage(),
+                AlertRosterPage.routeName: (context) => const AlertRosterPage(),
+                ApftPage.routeName: (context) => const ApftPage(),
+                AptsPage.routeName: (context) => const AptsPage(),
+                BodyfatPage.routeName: (context) => const BodyfatPage(),
+                CounselingsPage.routeName: (context) => const CounselingsPage(),
+                DailyPerstatPage.routeName: (context) =>
+                    const DailyPerstatPage(),
+                DutyRosterPage.routeName: (context) => const DutyRosterPage(),
+                EquipmentPage.routeName: (context) => const EquipmentPage(),
+                FlagsPage.routeName: (context) => const FlagsPage(),
+                HandReceiptPage.routeName: (context) => const HandReceiptPage(),
+                HrActionsPage.routeName: (context) => const HrActionsPage(),
+                MedProsPage.routeName: (context) => const MedProsPage(),
+                MilLicPage.routeName: (context) => const MilLicPage(),
+                NotesPage.routeName: (context) => const NotesPage(),
+                PermProfilesPage.routeName: (context) =>
+                    const PermProfilesPage(),
+                PerstatPage.routeName: (context) => const PerstatPage(),
+                PhonePage.routeName: (context) => const PhonePage(),
+                RatingsPage.routeName: (context) => const RatingsPage(),
+                SettingsPage.routeName: (context) => const SettingsPage(),
+                TaskingsPage.routeName: (context) => const TaskingsPage(),
+                TempProfilesPage.routeName: (context) =>
+                    const TempProfilesPage(),
+                TrainingPage.routeName: (context) => const TrainingPage(),
+                WeaponsPage.routeName: (context) => const WeaponsPage(),
+                WorkingAwardsPage.routeName: (context) =>
+                    const WorkingAwardsPage(),
+                WorkingEvalsPage.routeName: (context) =>
+                    const WorkingEvalsPage(),
               },
               home: const RootPage(),
             );

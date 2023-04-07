@@ -5,10 +5,17 @@ import 'package:excel/excel.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
+import 'package:leaders_book/widgets/header_text.dart';
+import 'package:leaders_book/widgets/my_toast.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_text_button.dart';
+import 'package:leaders_book/widgets/standard_text.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,8 +67,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
   late SharedPreferences prefs;
   QuerySnapshot? snapshot;
   BannerAd? myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -158,8 +163,13 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+          child: const MyToast(
+        contents: [
+          StandardText('Uploading data is only available for subscribed users.')
+        ],
       ));
     }
   }
@@ -245,18 +255,21 @@ class AcftPageState extends ConsumerState<AcftPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Data successfully downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open('$path/acftStats.xlsx');
-                    },
-                  )
-                : null,
-          ));
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            toastDuration: const Duration(seconds: 5),
+            child: MyToast(
+              contents: [
+                StandardText('Data successfully downloaded to $location'),
+                if (!kIsWeb)
+                  PlatformTextButton(
+                    child: const Text('Open'),
+                    onPressed: () => OpenFile.open('$path/acftStats.xlsx'),
+                  ),
+              ],
+            ),
+          );
         }
       } catch (e) {
         FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
@@ -282,9 +295,14 @@ class AcftPageState extends ConsumerState<AcftPage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+          child: const MyToast(
+        contents: [
+          StandardText(
+              'Downloading PDF files is only available for subscribed users.')
+        ],
       ));
     }
   }
@@ -315,18 +333,18 @@ class AcftPageState extends ConsumerState<AcftPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/acftStats.pdf');
-                  },
-                ),
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        toastDuration: const Duration(seconds: 5),
+        child: MyToast(
+          contents: [
+            StandardText(message),
+            PlatformTextButton(
+              child: const Text('Open'),
+              onPressed: () => OpenFile.open('$location/acftStats.pdf'),
+            ),
+          ],
         ),
       );
     }
@@ -345,9 +363,15 @@ class AcftPageState extends ConsumerState<AcftPage> {
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          contents: [
+            StandardText('You must select at least one record'),
+          ],
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -357,8 +381,14 @@ class AcftPageState extends ConsumerState<AcftPage> {
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
       //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must select exactly one record')),
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          contents: [
+            StandardText('You must select exactly one record'),
+          ],
+        ),
       );
       return;
     }
@@ -374,14 +404,16 @@ class AcftPageState extends ConsumerState<AcftPage> {
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditAcftPage(
-                  acft: Acft(
-                    owner: _userId!,
-                    users: [_userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditAcftPage(
+          acft: Acft(
+            owner: _userId!,
+            users: [_userId],
+          ),
+        ),
+      ),
+    );
   }
 
   void _calcAves() {
@@ -451,57 +483,82 @@ class AcftPageState extends ConsumerState<AcftPage> {
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Text('Name'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)),
+        label: const Text('Name'),
+        onSort: (int columnIndex, bool ascending) =>
+            onSortColumn(columnIndex, ascending),
+      ),
     ];
     if (width > 430) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 520) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Total'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 650) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('MDL'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 735) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('SPT'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 830) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('HRP'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 935) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('SDC'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 1030) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('PLK'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 1140) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('2MR'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     return columnList;
   }
@@ -530,122 +587,158 @@ class AcftPageState extends ConsumerState<AcftPage> {
     TextStyle failTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
+      DataCell(
+        Text(
+          documentSnapshot['rank'],
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
+      DataCell(
+        Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
     ];
     if (width > 430) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['date'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 520) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['total'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['total'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 650) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['deadliftScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['deadliftScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 735) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['powerThrowScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['powerThrowScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 830) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['puScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['puScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 935) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['dragScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['dragScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 1030) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['legTuckScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['legTuckScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 1140) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['runScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['runScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     return cellList;
   }
@@ -777,9 +870,12 @@ class AcftPageState extends ConsumerState<AcftPage> {
             },
           )),
       Tooltip(
-          message: 'Edit Record',
-          child: IconButton(
-              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
+        message: 'Edit Record',
+        child: IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: () => _editRecord(),
+        ),
+      ),
     ];
 
     List<PopupMenuEntry<String>> popupItems = [];
@@ -787,60 +883,76 @@ class AcftPageState extends ConsumerState<AcftPage> {
     if (width > 600) {
       buttons.add(
         Tooltip(
-            message: 'Download as Excel',
-            child: IconButton(
-                icon: const Icon(Icons.file_download),
-                onPressed: () {
-                  _downloadExcel();
-                })),
+          message: 'Download as Excel',
+          child: IconButton(
+            icon: const Icon(Icons.file_download),
+            onPressed: () {
+              _downloadExcel();
+            },
+          ),
+        ),
       );
       buttons.add(
         Tooltip(
-            message: 'Upload Data',
-            child: IconButton(
-                icon: const Icon(Icons.file_upload),
-                onPressed: () {
-                  _uploadExcel(context);
-                })),
+          message: 'Upload Data',
+          child: IconButton(
+            icon: const Icon(Icons.file_upload),
+            onPressed: () {
+              _uploadExcel(context);
+            },
+          ),
+        ),
       );
       buttons.add(
         Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
+          message: 'Download as PDF',
+          child: IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: () {
+              _downloadPdf();
+            },
+          ),
+        ),
       );
     } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'download',
-        child: Text('Download as Excel'),
-      ));
+      popupItems.add(
+        const PopupMenuItem(
+          value: 'download',
+          child: Text('Download as Excel'),
+        ),
+      );
       if (!kIsWeb) {
-        popupItems.add(const PopupMenuItem(
-          value: 'upload',
-          child: Text('Upload Data'),
-        ));
+        popupItems.add(
+          const PopupMenuItem(
+            value: 'upload',
+            child: Text('Upload Data'),
+          ),
+        );
       }
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
-      ));
+      popupItems.add(
+        const PopupMenuItem(
+          value: 'pdf',
+          child: Text('Download as PDF'),
+        ),
+      );
     }
     if (width > 400) {
       buttons.add(
         Tooltip(
-            message: 'Delete Record(s)',
-            child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteRecord())),
+          message: 'Delete Record(s)',
+          child: IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => _deleteRecord(),
+          ),
+        ),
       );
     } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'delete',
-        child: Text('Delete Record(s)'),
-      ));
+      popupItems.add(
+        const PopupMenuItem(
+          value: 'delete',
+          child: Text('Delete Record(s)'),
+        ),
+      );
     }
 
     List<Widget> overflowButton = <Widget>[
@@ -878,11 +990,9 @@ class AcftPageState extends ConsumerState<AcftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('ACFT Stats'),
-            actions: appBarMenu(context, width)),
+    return PlatformScaffold(
+        title: 'ACFT Stats',
+        actions: appBarMenu(context, width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {
@@ -904,7 +1014,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
             Flexible(
               flex: 1,
               child: ListView(
-                shrinkWrap: true,
                 padding: const EdgeInsets.all(8.0),
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
@@ -921,14 +1030,13 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 850.0),
                     child: Card(
+                      color: getBackgroundColor(context),
                       child: Column(
                         children: <Widget>[
                           const Padding(
                             padding: EdgeInsets.all(4.0),
-                            child: Text(
+                            child: HeaderText(
                               'Average',
-                              style: TextStyle(fontSize: 18),
-                              textAlign: TextAlign.center,
                             ),
                           ),
                           width > 675

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +23,7 @@ import '../../methods/show_on_login.dart';
 import '../../methods/update_methods.dart';
 import '../../../methods/validate.dart';
 import '../../../models/setting.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 import '../acft_page.dart';
 import '../daily_perstat_page.dart';
 import '../../../widgets/anon_warning_banner.dart';
@@ -272,51 +272,6 @@ class HomePageState extends ConsumerState<RollupTab>
     }
   }
 
-  @pragma('vm:entry-point')
-  Future onSelectNotification(BuildContext context, String payload) async {
-    if (payload == 'ACFT') {
-      await Navigator.of(context).pushNamed(AcftPage.routeName);
-    } else if (payload == 'APFT') {
-      await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const ApftPage()));
-    } else if (payload == 'WEAPON') {
-      await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const WeaponsPage()));
-    } else if (payload == 'PHA' ||
-        payload == 'Dental' ||
-        payload == 'Vision' ||
-        payload == 'Hearing' ||
-        payload == 'HIV') {
-      await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const MedProsPage()));
-    } else if (payload == 'BF') {
-      await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const BodyfatPage()));
-    } else {
-      return Future.value(null);
-    }
-  }
-
-  Future onDidReceiveNotification(
-      int id, String? title, String? body, String? payload) async {
-    showCupertinoDialog(
-      context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text(title!),
-        content: Text(body!),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('Ok'),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop();
-            },
-          )
-        ],
-      ),
-    );
-  }
-
   showByName(String title, List<DocumentSnapshot> list, HomeCard homeCard) {
     Widget content = ShowByNameContent(
       title: title,
@@ -384,22 +339,16 @@ class HomePageState extends ConsumerState<RollupTab>
                     leave: leave,
                     tdy: tdy,
                     other: other,
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PerstatPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(PerstatPage.routeName),
                       child: const Text('Go to PERSTAT'),
                     ),
-                    button2: ElevatedButton(
-                        child: const Text('By Name'),
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const DailyPerstatPage()))),
+                    button2: PlatformButton(
+                      child: const Text('By Name'),
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(DailyPerstatPage.routeName),
+                    ),
                   );
               }
             }));
@@ -466,15 +415,9 @@ class HomePageState extends ConsumerState<RollupTab>
                             'Future Apts', futureByName, HomeCard.appointments);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AptsPage(
-                            userId: userId,
-                          ),
-                        ),
-                      ),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed(AptsPage.routeName),
                       child: const Text('Go to Appointments'),
                     ),
                   );
@@ -535,11 +478,9 @@ class HomePageState extends ConsumerState<RollupTab>
                         showByName('Failed APFTs', fails, HomeCard.apft);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ApftPage())),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed(ApftPage.routeName),
                       child: const Text('Go to APFT'),
                     ),
                   );
@@ -600,7 +541,7 @@ class HomePageState extends ConsumerState<RollupTab>
                         showByName('Failed ACFTs', fails, HomeCard.acft);
                       },
                     ),
-                    button: ElevatedButton(
+                    button: PlatformButton(
                       onPressed: () =>
                           Navigator.of(context).pushNamed(AcftPage.routeName),
                       child: const Text('Go to ACFT'),
@@ -660,22 +601,14 @@ class HomePageState extends ConsumerState<RollupTab>
                         showByName('Perm Profiles', permList, HomeCard.profile);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TempProfilesPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(TempProfilesPage.routeName),
                       child: const Text('Go to Temp'),
                     ),
-                    button2: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PermProfilesPage(
-                                    userId: userId,
-                                  ))),
+                    button2: PlatformButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(PermProfilesPage.routeName),
                       child: const Text('Go to Perm'),
                     ),
                   );
@@ -739,11 +672,9 @@ class HomePageState extends ConsumerState<RollupTab>
                             'Failed Body Compositions', fails, HomeCard.bf);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const BodyfatPage())),
+                    button: PlatformButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(BodyfatPage.routeName),
                       child: const Text('Go to Body Comp'),
                     ),
                   );
@@ -807,11 +738,9 @@ class HomePageState extends ConsumerState<RollupTab>
                             'Failed Weapons Quals', fails, HomeCard.weapons);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const WeaponsPage())),
+                    button: PlatformButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(WeaponsPage.routeName),
                       child: const Text('Go to Weapons'),
                     ),
                   );
@@ -862,13 +791,9 @@ class HomePageState extends ConsumerState<RollupTab>
                         showByName('Flags > 180 Days', overdue, HomeCard.flags);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => FlagsPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed(FlagsPage.routeName),
                       child: const Text('Go to Flags'),
                     ),
                   );
@@ -925,11 +850,9 @@ class HomePageState extends ConsumerState<RollupTab>
                             'Overdue MedPros', overdue, HomeCard.medpros);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const MedProsPage())),
+                    button: PlatformButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(MedProsPage.routeName),
                       child: const Text('Go to Medpros'),
                     ),
                   );
@@ -991,13 +914,9 @@ class HomePageState extends ConsumerState<RollupTab>
                             'Overdue Trainings', overdue, HomeCard.training);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TrainingPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(TrainingPage.routeName),
                       child: const Text('Go to Training'),
                     ),
                   );

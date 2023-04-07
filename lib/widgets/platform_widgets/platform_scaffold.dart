@@ -10,7 +10,7 @@ abstract class PlatformScaffold extends StatelessWidget {
   factory PlatformScaffold({
     String? title,
     List<Widget> actions = const [],
-    FloatingActionButton? floatingActionButton,
+    Widget? floatingActionButton,
     FloatingActionButtonLocation? floatingActionButtonLocation,
     required Widget body,
   }) {
@@ -43,7 +43,7 @@ class AndroidScaffold extends StatelessWidget implements PlatformScaffold {
   });
   final String? title;
   final List<Widget> actions;
-  final FloatingActionButton? floatingActionButton;
+  final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
   final Widget body;
 

@@ -26,9 +26,7 @@ import '../widgets/anon_warning_banner.dart';
 class HrActionsPage extends ConsumerStatefulWidget {
   const HrActionsPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/hr-actions-page';
 
@@ -43,6 +41,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -79,11 +78,12 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('hrActions')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -127,7 +127,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
       //         context,
       //         MaterialPageRoute(
       //             builder: (context) => UploadHrActionsPage(
-      //                   userId: widget.userId,
+      //                   userId: userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
       //   },
@@ -299,7 +299,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'HR Metric$s');
+    deleteRecord(context, _selectedDocuments, userId, 'HR Metric$s');
   }
 
   void _editRecord() {
@@ -323,8 +323,8 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
         MaterialPageRoute(
             builder: (context) => EditHrActionPage(
                   hrAction: HrAction(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

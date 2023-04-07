@@ -26,9 +26,7 @@ import '../pdf/duty_roster_pdf.dart';
 class DutyRosterPage extends ConsumerStatefulWidget {
   const DutyRosterPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/duty-roster-page';
 
@@ -43,6 +41,7 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -80,10 +79,12 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
   void initState() {
     super.initState();
 
+    userId = ref.read(authProvider).currentUser()!.uid;
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('dutyRoster')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -308,11 +309,11 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
 
   void delete() {
     for (DocumentSnapshot doc in _selectedDocuments) {
-      if (doc['owner'] == widget.userId) {
+      if (doc['owner'] == userId) {
         doc.reference.delete();
       } else {
         List<dynamic> users = doc['users'];
-        users.remove(widget.userId);
+        users.remove(userId);
         doc.reference.update({'users': users});
       }
     }
@@ -339,8 +340,8 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
         MaterialPageRoute(
             builder: (context) => EditDutyRosterPage(
                   duty: Duty(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

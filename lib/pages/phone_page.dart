@@ -26,9 +26,7 @@ import '../widgets/anon_warning_banner.dart';
 class PhonePage extends ConsumerStatefulWidget {
   const PhonePage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/phone-page';
 
@@ -43,6 +41,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
   List<DocumentSnapshot> documents = [];
   late StreamSubscription _subscription;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -79,10 +78,11 @@ class PhonePageState extends ConsumerState<PhonePage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('phoneNumbers')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
       setState(() {
@@ -246,7 +246,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Phone Number$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Phone Number$s');
   }
 
   void _editRecord() {
@@ -272,7 +272,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
         MaterialPageRoute(
             builder: (context) => EditPhonePage(
                   phone: Phone(
-                    owner: widget.userId,
+                    owner: userId,
                   ),
                 )));
   }

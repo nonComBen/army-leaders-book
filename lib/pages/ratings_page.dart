@@ -27,9 +27,7 @@ import '../widgets/anon_warning_banner.dart';
 class RatingsPage extends ConsumerStatefulWidget {
   const RatingsPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/ratings-page';
 
@@ -44,6 +42,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -80,11 +79,12 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('ratings')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -280,7 +280,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Rating Scheme$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Rating Scheme$s');
   }
 
   void _editRecord() {
@@ -304,8 +304,8 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
         MaterialPageRoute(
             builder: (context) => EditRatingPage(
                   rating: Rating(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

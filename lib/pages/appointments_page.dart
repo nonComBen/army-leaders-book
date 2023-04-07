@@ -27,9 +27,7 @@ import '../providers/tracking_provider.dart';
 class AptsPage extends ConsumerStatefulWidget {
   const AptsPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/appointments-page';
 
@@ -44,6 +42,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -81,10 +80,12 @@ class AptsPageState extends ConsumerState<AptsPage> {
   void initState() {
     super.initState();
 
+    userId = ref.read(authProvider).currentUser()!.uid;
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('appointments')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -131,7 +132,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
       //         context,
       //         MaterialPageRoute(
       //             builder: (context) => UploadAppointmentsPage(
-      //                   userId: widget.userId,
+      //                   userId: userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
       //   },
@@ -340,11 +341,11 @@ class AptsPageState extends ConsumerState<AptsPage> {
 
   void delete() {
     for (DocumentSnapshot doc in _selectedDocuments) {
-      if (doc['owner'] == widget.userId) {
+      if (doc['owner'] == userId) {
         doc.reference.delete();
       } else {
         List<dynamic> users = doc['users'];
-        users.remove(widget.userId);
+        users.remove(userId);
         doc.reference.update({'users': users});
       }
     }
@@ -372,8 +373,8 @@ class AptsPageState extends ConsumerState<AptsPage> {
         MaterialPageRoute(
             builder: (context) => EditAppointmentPage(
                   apt: Appointment(
-                    users: [widget.userId],
-                    owner: widget.userId,
+                    users: [userId],
+                    owner: userId,
                   ),
                 )));
   }

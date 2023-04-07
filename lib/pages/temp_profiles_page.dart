@@ -27,9 +27,7 @@ import '../widgets/anon_warning_banner.dart';
 class TempProfilesPage extends ConsumerStatefulWidget {
   const TempProfilesPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/temporary-profiles-page';
 
@@ -44,6 +42,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -80,11 +79,12 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('profiles')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .where('type', isEqualTo: 'Temporary')
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
@@ -275,8 +275,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Temporary Profile$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Temporary Profile$s');
   }
 
   void _editRecord() {
@@ -300,8 +299,8 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
       MaterialPageRoute(
         builder: (context) => EditTempProfilePage(
           profile: TempProfile(
-            owner: widget.userId,
-            users: [widget.userId],
+            owner: userId,
+            users: [userId],
           ),
         ),
       ),

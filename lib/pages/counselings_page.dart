@@ -24,9 +24,7 @@ import 'uploadPages/upload_counselings_page.dart';
 class CounselingsPage extends ConsumerStatefulWidget {
   const CounselingsPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/counseling-page';
 
@@ -41,6 +39,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscription;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -78,9 +77,11 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
   void initState() {
     super.initState();
 
+    userId = ref.read(authProvider).currentUser()!.uid;
+
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('counselings')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
       setState(() {
@@ -209,7 +210,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Counseling$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Counseling$s');
   }
 
   void _editRecord() {
@@ -233,7 +234,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
         MaterialPageRoute(
             builder: (context) => EditCounselingPage(
                   counseling: Counseling(
-                    owner: widget.userId,
+                    owner: userId,
                   ),
                 )));
   }

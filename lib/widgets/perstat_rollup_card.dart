@@ -16,7 +16,7 @@ class PerstatRollupCard extends ConsumerWidget {
 
   final String title;
   final int leave, tdy, other;
-  final ElevatedButton button, button2;
+  final Widget button, button2;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

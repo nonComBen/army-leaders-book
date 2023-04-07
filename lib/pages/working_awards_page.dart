@@ -24,9 +24,7 @@ import '../widgets/anon_warning_banner.dart';
 class WorkingAwardsPage extends ConsumerStatefulWidget {
   const WorkingAwardsPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/working-awards-page';
 
@@ -41,6 +39,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscription;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -77,10 +76,11 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('workingAwards')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
       setState(() {
@@ -125,7 +125,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
       //         context,
       //         MaterialPageRoute(
       //             builder: (context) => UploadWorkingAwardsPage(
-      //                   userId: widget.userId,
+      //                   userId: userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
       //   },
@@ -234,7 +234,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Award$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Award$s');
   }
 
   void _editRecord() {
@@ -260,7 +260,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
         MaterialPageRoute(
             builder: (context) => EditWorkingAwardPage(
                   award: WorkingAward(
-                    owner: widget.userId,
+                    owner: userId,
                   ),
                 )));
   }

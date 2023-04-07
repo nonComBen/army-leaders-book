@@ -12,7 +12,7 @@ class RollupCard extends StatelessWidget {
 
   final String title;
   final Widget info1, info2;
-  final ElevatedButton? button, button2;
+  final Widget? button, button2;
 
   Widget _row1() {
     return Padding(

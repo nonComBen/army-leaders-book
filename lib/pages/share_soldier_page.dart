@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_selection_widget.dart';
 
+import '../../methods/custom_alert_dialog.dart';
+import '../../methods/theme_methods.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_list_tile.dart';
+import '../../widgets/platform_widgets/platform_loading_widget.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../models/soldier.dart';
-import '../../widgets/formatted_elevated_button.dart';
 
 class ShareSoldierPage extends StatefulWidget {
   const ShareSoldierPage({
@@ -24,9 +32,9 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
   TextEditingController controller = TextEditingController();
 
   List<DocumentSnapshot>? allSnapshots;
-  late FirebaseFirestore firestore;
-  String userId = '';
-  bool lookupUserId = true, lookupUserEmail = false;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String userId = '', lookUpMethod = 'User ID';
+  final List<String> lookUpMethods = ['User ID', 'User Email'];
 
   void _makeSure(
       BuildContext context, String? userId, String? rank, String? name) {
@@ -67,85 +75,128 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
   @override
   void initState() {
     super.initState();
-    firestore = FirebaseFirestore.instance;
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Share Soldiers'),
-        ),
+    return PlatformScaffold(
+        title: 'Share Soldiers',
         body: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 900),
             padding: const EdgeInsets.all(16.0),
             child: Card(
+              color: getBackgroundColor(context),
               child: ListView(
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: ToggleButtons(
-                          isSelected: [lookupUserId, lookupUserEmail],
-                          fillColor: Theme.of(context).primaryColor,
-                          selectedColor: Colors.white,
-                          onPressed: ((value) {
-                            setState(() {
-                              switch (value) {
-                                case 0:
-                                  lookupUserId = true;
-                                  lookupUserEmail = false;
-                                  break;
-                                case 1:
-                                  lookupUserId = false;
-                                  lookupUserEmail = true;
-                                  break;
-                              }
-                            });
-                          }),
-                          children: [
-                            SizedBox(
-                              width: width > 500 ? 200 : 100,
-                              child: const Center(child: Text('User Id')),
-                            ),
-                            SizedBox(
-                              width: width > 500 ? 200 : 100,
-                              child: const Center(child: Text('User Email')),
-                            )
-                          ]),
+                    child: PlatformSelectionWidget(
+                      titles: [
+                        Text(
+                          'User ID',
+                          style: TextStyle(
+                            color: getTextColor(context),
+                          ),
+                        ),
+                        Text(
+                          'User Email',
+                          style: TextStyle(
+                            color: getTextColor(context),
+                          ),
+                        )
+                      ],
+                      values: lookUpMethods,
+                      groupValue: lookUpMethod,
+                      onChanged: (value) => setState(() {
+                        lookUpMethod = value.toString();
+                      }),
+                    ),
+                    // child: Center(
+                    //   child: ToggleButtons(
+                    //       borderRadius: BorderRadius.circular(12.0),
+                    //       isSelected: [lookupUserId, lookupUserEmail],
+                    //       fillColor: Theme.of(context).primaryColor,
+                    //       selectedColor: Colors.white,
+                    //       color: getOnPrimaryColor(context),
+                    //       onPressed: ((value) {
+                    //         setState(() {
+                    //           switch (value) {
+                    //             case 0:
+                    //               lookupUserId = true;
+                    //               lookupUserEmail = false;
+                    //               break;
+                    //             case 1:
+                    //               lookupUserId = false;
+                    //               lookupUserEmail = true;
+                    //               break;
+                    //           }
+                    //         });
+                    //       }),
+                    //       children: [
+                    //         SizedBox(
+                    //           width: width > 500 ? 200 : 100,
+                    //           child: Center(
+                    //             child: Text(
+                    //               'User Id',
+                    //               style: TextStyle(
+                    //                 color: getTextColor(context),
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //         SizedBox(
+                    //           width: width > 500 ? 200 : 100,
+                    //           child: Center(
+                    //             child: Text(
+                    //               'User Email',
+                    //               style: TextStyle(
+                    //                 color: getTextColor(context),
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         )
+                    //       ]),
+                    // ),
+                  ),
+                  PaddedTextField(
+                    controller: controller,
+                    label: lookUpMethod,
+                    decoration: InputDecoration(
+                      labelText: lookUpMethod,
+                      hintText: lookUpMethod == 'User ID'
+                          ? 'Enter the User Id'
+                          : 'Enter the User Email',
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                      ),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: controller,
-                      decoration: InputDecoration(
-                          labelText: lookupUserId ? 'User Id' : 'User Email',
-                          hintText: lookupUserId
-                              ? 'Enter the User Id'
-                              : 'Enter the User Email',
-                          prefixIcon: const Icon(Icons.search),
-                          border: const OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(25.0)),
-                          )),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: FormattedElevatedButton(
-                      text: 'Find User',
+                    child: PlatformButton(
+                      child: const Text('Find User'),
                       onPressed: () {
                         if (controller.text.isNotEmpty) {
                           setState(() {
                             userId = controller.text;
                           });
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                  '${lookupUserId ? 'User Id' : 'User Email'} must not be blank')));
+                          FToast toast = FToast();
+                          toast.context = context;
+                          toast.showToast(
+                            child: MyToast(
+                              contents: [
+                                Text(
+                                  '$lookUpMethod must not be blank',
+                                  style: TextStyle(
+                                    color: getTextColor(context),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
                         }
                       },
                     ),
@@ -153,7 +204,10 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                   FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
                       future: firestore
                           .collection('users')
-                          .where(lookupUserId ? 'userId' : 'userEmail',
+                          .where(
+                              lookUpMethod == 'User ID'
+                                  ? 'userId'
+                                  : 'userEmail',
                               isEqualTo: userId)
                           .get(),
                       builder: (BuildContext context,
@@ -161,19 +215,21 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                               snapshot) {
                         if (snapshot.data == null ||
                             snapshot.data!.docs.isEmpty) {
-                          return const Card(
-                            child: ListTile(
-                              title: Text('No User Found'),
+                          return Card(
+                            color: getBackgroundColor(context),
+                            child: PlatformListTile(
+                              title: const Text('No User Found'),
                             ),
                           );
                         }
                         switch (snapshot.connectionState) {
                           case ConnectionState.waiting:
-                            return const CircularProgressIndicator();
+                            return PlatformLoadingWidget();
                           default:
                             if (snapshot.data!.docs.first.exists) {
                               return Card(
-                                child: ListTile(
+                                color: getBackgroundColor(context),
+                                child: PlatformListTile(
                                   title: Text(
                                       '${snapshot.data!.docs.first['rank']} ${snapshot.data!.docs.first['userName']}'),
                                   subtitle: Text(
@@ -189,9 +245,10 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                                 ),
                               );
                             } else {
-                              return const Card(
-                                child: ListTile(
-                                  title: Text('No User Found'),
+                              return Card(
+                                color: getBackgroundColor(context),
+                                child: PlatformListTile(
+                                  title: const Text('No User Found'),
                                 ),
                               );
                             }

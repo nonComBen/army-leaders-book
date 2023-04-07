@@ -27,9 +27,7 @@ import '../pdf/flags_pdf.dart';
 class FlagsPage extends ConsumerStatefulWidget {
   const FlagsPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/flags-page';
 
@@ -44,6 +42,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -81,10 +80,12 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
   void initState() {
     super.initState();
 
+    userId = ref.read(authProvider).currentUser()!.uid;
+
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('flags')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -276,7 +277,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Flag$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Flag$s');
   }
 
   void _editRecord() {
@@ -302,8 +303,8 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
       MaterialPageRoute(
         builder: (context) => EditFlagPage(
           flag: Flag(
-            owner: widget.userId,
-            users: [widget.userId],
+            owner: userId,
+            users: [userId],
           ),
         ),
       ),

@@ -26,9 +26,7 @@ import '../widgets/anon_warning_banner.dart';
 class PermProfilesPage extends ConsumerStatefulWidget {
   const PermProfilesPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/permanent-profile-page';
 
@@ -43,6 +41,7 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -79,11 +78,12 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('profiles')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .where('type', isEqualTo: 'Permanent')
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
@@ -131,7 +131,7 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
       //         context,
       //         MaterialPageRoute(
       //             builder: (context) => UploadPermProfilePage(
-      //                   userId: widget.userId,
+      //                   userId: userId,
       //                   isSubscribed: isSubscribed,
       //                 )));
       //   },
@@ -311,8 +311,7 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(
-        context, _selectedDocuments, widget.userId, 'Permanent Profile$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Permanent Profile$s');
   }
 
   void _editRecord() {
@@ -336,8 +335,8 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
         MaterialPageRoute(
             builder: (context) => EditPermProfilePage(
                   profile: PermProfile(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

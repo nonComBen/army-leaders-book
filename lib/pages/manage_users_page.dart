@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../widgets/platform_widgets/platform_icon_button.dart';
@@ -199,10 +201,8 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Users'),
-      ),
+    return PlatformScaffold(
+      title: 'Manage Users',
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
@@ -213,6 +213,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
             return Column(
               children: [
                 Card(
+                  color: getBackgroundColor(context),
                   child: PlatformListTile(
                       trailing: _soldiers[index].users.length > 1
                           ? Tooltip(
@@ -250,6 +251,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                         switch (snapshot.connectionState) {
                           case ConnectionState.waiting:
                             return Card(
+                              color: getBackgroundColor(context),
                               child: PlatformLoadingWidget(),
                             );
                           default:
@@ -257,6 +259,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                               padding: const EdgeInsets.fromLTRB(
                                   16.0, 8.0, 8.0, 8.0),
                               child: Card(
+                                color: getBackgroundColor(context),
                                 child: PlatformListTile(
                                   title: Text(
                                       '${snapshot.data!['rank']} ${snapshot.data!['userName']}'),

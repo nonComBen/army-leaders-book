@@ -26,9 +26,7 @@ import '../widgets/anon_warning_banner.dart';
 class PerstatPage extends ConsumerStatefulWidget {
   const PerstatPage({
     Key? key,
-    required this.userId,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/perstat-page';
 
@@ -43,6 +41,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
+  late String userId;
 
   final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
@@ -79,11 +78,12 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('perstat')
         .where('users', isNotEqualTo: null)
-        .where('users', arrayContains: widget.userId)
+        .where('users', arrayContains: userId)
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -307,11 +307,11 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
 
   void delete() {
     for (DocumentSnapshot doc in _selectedDocuments) {
-      if (doc['owner'] == widget.userId) {
+      if (doc['owner'] == userId) {
         doc.reference.delete();
       } else {
         List<dynamic> users = doc['users'];
-        users.remove(widget.userId);
+        users.remove(userId);
         doc.reference.update({'users': users});
       }
     }
@@ -338,8 +338,8 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
         MaterialPageRoute(
             builder: (context) => EditPerstatPage(
                   perstat: Perstat(
-                    owner: widget.userId,
-                    users: [widget.userId],
+                    owner: userId,
+                    users: [userId],
                   ),
                 )));
   }

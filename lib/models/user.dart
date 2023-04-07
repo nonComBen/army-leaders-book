@@ -12,6 +12,8 @@ class UserObj {
   bool tosAgree;
   DateTime? agreeDate;
   bool updatedUserArray;
+  bool updatedPovs;
+  bool updatedAwards;
   DateTime? createdDate;
   DateTime? lastLoginDate;
 
@@ -26,6 +28,8 @@ class UserObj {
     this.tosAgree = false,
     this.agreeDate,
     this.updatedUserArray = false,
+    this.updatedPovs = false,
+    this.updatedAwards = false,
     this.createdDate,
     this.lastLoginDate,
   });
@@ -44,6 +48,8 @@ class UserObj {
     map['updatedUsersArray'] = updatedUserArray;
     map['created'] = createdDate;
     map['lastLogin'] = lastLoginDate;
+    map['updatedPovs'] = updatedPovs;
+    map['updatedAwards'] = updatedAwards;
 
     return map;
   }
@@ -53,7 +59,9 @@ class UserObj {
         createdTimestamp = Timestamp.fromDate(DateTime.now()),
         lastLoginTimestamp = Timestamp.fromDate(DateTime.now());
     String rank = '', userName = '', userUnit = '';
-    bool isUserArrayUpdated = false;
+    bool isUserArrayUpdated = false,
+        isPovsUpdated = false,
+        isAwardsUpdated = false;
 
     try {
       rank = doc['rank'];
@@ -78,6 +86,13 @@ class UserObj {
     }
 
     try {
+      isPovsUpdated = doc['updatedPovs'];
+      isAwardsUpdated = doc['updatedAwards'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'updatedPovs Does Not Exist');
+    }
+
+    try {
       createdTimestamp = doc['created'] ?? Timestamp.fromDate(DateTime.now());
       lastLoginTimestamp =
           doc['lastLogin'] ?? Timestamp.fromDate(DateTime.now());
@@ -97,6 +112,8 @@ class UserObj {
       tosAgree: doc['tosAgree'],
       agreeDate: agreeTimestamp.toDate(),
       updatedUserArray: isUserArrayUpdated,
+      updatedPovs: isPovsUpdated,
+      updatedAwards: isAwardsUpdated,
       createdDate: createdTimestamp.toDate(),
       lastLoginDate: lastLoginTimestamp.toDate(),
     );

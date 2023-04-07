@@ -3,25 +3,75 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final themeProvider = StateNotifierProvider<ThemeService, ThemeMode>((ref) {
+final themeProvider = StateNotifierProvider<ThemeService, ThemeData>((ref) {
   return ThemeService(ref.read(sharedPreferencesProvider));
 });
 
-class ThemeService extends StateNotifier<ThemeMode> {
+const int _blackPrimaryValue = 0xFF000000;
+
+const MaterialColor primaryBlack =
+    MaterialColor(_blackPrimaryValue, <int, Color>{
+  50: Color(0xFF000000),
+  100: Color(0xFF000000),
+  200: Color(0xFF000000),
+  300: Color(0xFF000000),
+  400: Color(0xFF000000),
+  500: Color(0xFF000000),
+  600: Color(0xFF000000),
+  700: Color(0xFF000000),
+  800: Color(0xFF000000),
+  900: Color(0xFF000000),
+});
+
+ThemeData darkThemeData = ThemeData(
+  primarySwatch: primaryBlack,
+  dialogBackgroundColor: Colors.grey[800],
+  colorScheme: ColorScheme.highContrastDark(
+    brightness: Brightness.dark,
+    primary: Colors.black87,
+    primaryContainer: Colors.black,
+    secondary: Colors.grey,
+    secondaryContainer: Colors.grey[900],
+    background: Colors.black45,
+    onPrimary: Colors.yellow,
+    onSecondary: Colors.yellow,
+    onError: Colors.white,
+    error: Colors.red,
+  ),
+);
+ThemeData lightThemeData = ThemeData(
+  primarySwatch: primaryBlack,
+  scaffoldBackgroundColor: Colors.grey[300],
+  dialogBackgroundColor: Colors.grey[300],
+  colorScheme: ColorScheme.highContrastLight(
+    brightness: Brightness.light,
+    primary: Colors.black87,
+    primaryContainer: Colors.black,
+    secondary: Colors.grey,
+    secondaryContainer: Colors.grey[500],
+    background: Colors.black45,
+    onPrimary: Colors.amber,
+    onSecondary: Colors.amber,
+    onError: Colors.white,
+    error: Colors.red,
+  ),
+);
+
+class ThemeService extends StateNotifier<ThemeData> {
   final SharedPreferences prefs;
 
   ThemeService(this.prefs)
       : super((prefs.getBool('darkMode') ?? true)
-            ? ThemeMode.dark
-            : ThemeMode.light);
+            ? darkThemeData
+            : lightThemeData);
 
   void darkTheme() {
-    state = ThemeMode.dark;
+    state = darkThemeData;
     prefs.setBool('darkMode', true);
   }
 
   void lightTheme() {
-    state = ThemeMode.light;
+    state = lightThemeData;
     prefs.setBool('darkMode', false);
   }
 }

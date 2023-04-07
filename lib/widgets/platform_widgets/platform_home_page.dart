@@ -45,7 +45,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
   int index = 0;
   late String userId;
   bool isSubscribed = false;
-  late List<Soldier> soldiers, selctedSoldiers;
+  late List<Soldier> soldiers, selectedSoldiers;
   late FilteredSoldiers filteredSoldiers;
   List<Widget> pages = const [
     RollupTab(),
@@ -68,23 +68,25 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
   void initState() {
     super.initState();
 
-    _rateMyApp.init().then((_) {
-      if (_rateMyApp.shouldOpenDialog) {
-        _rateMyApp.showRateDialog(
-          context,
-          title: 'Rate Army Fitness Calculator',
-          message:
-              'If you like Army Fitness Calculator, please take a minute to rate '
-              ' and review the app.  Or if you are having an issue with the app, '
-              'please email me at armynoncomtools@gmail.com.',
-          onDismissed: () =>
-              _rateMyApp.callEvent(RateMyAppEventType.laterButtonPressed),
-          rateButton: 'Rate',
-          laterButton: 'Not Now',
-          noButton: 'No Thanks',
-        );
-      }
-    });
+    if (!kIsWeb) {
+      _rateMyApp.init().then((_) {
+        if (_rateMyApp.shouldOpenDialog) {
+          _rateMyApp.showRateDialog(
+            context,
+            title: 'Rate Army Leader\'s Book',
+            message:
+                'If you like Army Leader\'s Book, please take a minute to rate '
+                ' and review the app.  Or if you are having an issue with the app, '
+                'please email me at armynoncomtools@gmail.com.',
+            onDismissed: () =>
+                _rateMyApp.callEvent(RateMyAppEventType.laterButtonPressed),
+            rateButton: 'Rate',
+            laterButton: 'Not Now',
+            noButton: 'No Thanks',
+          );
+        }
+      });
+    }
   }
 
   List<Widget> appBarMenu(BuildContext context, double width) {
@@ -131,15 +133,15 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
         message: 'Delete Record(s)',
         child: IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () => deleteSoldiers(context, selctedSoldiers, userId),
+          onPressed: () => deleteSoldiers(context, selectedSoldiers, userId),
         ),
       ),
       Tooltip(
-        message: 'View Details',
+        message: 'Edit Soldier',
         child: IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () {
-            viewDetails(context, selctedSoldiers, userId);
+            editSoldier(context, selectedSoldiers);
           },
         ),
       ),
@@ -175,7 +177,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
           child: IconButton(
             icon: const Icon(Icons.picture_as_pdf),
             onPressed: () {
-              downloadPdf(context, isSubscribed, selctedSoldiers, userId);
+              downloadPdf(context, isSubscribed, selectedSoldiers, userId);
             },
           ),
         ),
@@ -250,10 +252,10 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
             shareSoldiers(context, soldiers, userId);
           }
           if (result == 'pdf') {
-            downloadPdf(context, isSubscribed, selctedSoldiers, userId);
+            downloadPdf(context, isSubscribed, selectedSoldiers, userId);
           }
           if (result == 'transfer') {
-            transferSoldier(context, selctedSoldiers, userId);
+            transferSoldier(context, selectedSoldiers, userId);
           }
           if (result == 'manage') {
             manageUsers(context, soldiers, userId);
@@ -278,7 +280,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     soldiers = ref.watch(soldiersProvider);
-    selctedSoldiers = ref.watch(selectedSoldiersProvider);
+    selectedSoldiers = ref.watch(selectedSoldiersProvider);
     filteredSoldiers = ref.read(filteredSoldiersProvider.notifier);
     isSubscribed = ref.watch(subscriptionStateProvider);
     userId = ref.read(authProvider).currentUser()!.uid;
@@ -385,8 +387,8 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
           title: 'New Soldier',
         ),
         PullDownMenuItem(
-          onTap: () => viewDetails(context, selctedSoldiers, userId),
-          title: 'Soldier Details',
+          onTap: () => editSoldier(context, selctedSoldiers),
+          title: 'Edit Soldier',
         ),
         PullDownMenuItem(
           onTap: () => deleteSoldiers(context, selctedSoldiers, userId),
@@ -443,6 +445,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    userId = ref.read(authProvider).currentUser()!.uid;
     isSubscribed = ref.watch(subscriptionStateProvider);
     soldiers = ref.watch(soldiersProvider);
     selctedSoldiers = ref.watch(selectedSoldiersProvider);

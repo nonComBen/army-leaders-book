@@ -1,12 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 abstract class PlatformTextButton extends StatelessWidget {
   factory PlatformTextButton(
       {required Widget child, required VoidCallback onPressed}) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidTextButton(onPressed: onPressed, child: child);
     } else {
       return IOSTextButton(onPressed: onPressed, child: child);

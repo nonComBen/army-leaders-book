@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 abstract class PlatformCheckboxListTile extends Widget {
   factory PlatformCheckboxListTile({
@@ -13,7 +15,7 @@ abstract class PlatformCheckboxListTile extends Widget {
     void Function(bool?)? onChanged,
     void Function()? onIosTap,
   }) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidCheckboxListTile(
         value: value,
         title: title,
@@ -73,7 +75,10 @@ class IOSCheckboxListTile extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final cupertinoSwitch = CupertinoSwitch(
-        value: value, activeColor: activeColor, onChanged: onChanged);
+      value: value,
+      activeColor: activeColor ?? getOnPrimaryColor(context),
+      onChanged: onChanged,
+    );
     return CupertinoListTile(
       title: title,
       subtitle: subtitle,

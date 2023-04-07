@@ -21,11 +21,12 @@ dependencies:
   excel: ^2.0.4
   file_picker: ^4.6.1
   firebase_analytics: ^10.1.5
-  firebase_app_check: ^0.1.1+14
+  firebase_app_check: ^0.1.2
   firebase_auth: ^4.3.0
   firebase_core: ^2.8.0
   firebase_crashlytics: ^3.0.17
   flutter_riverpod: ^2.3.2
+  fluttertoast: ^8.2.1
   google_mobile_ads: ^2.3.0
   google_sign_in: ^6.0.2
   in_app_purchase: ^3.1.5

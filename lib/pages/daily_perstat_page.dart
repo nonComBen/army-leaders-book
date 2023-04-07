@@ -306,55 +306,51 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
           builder: (context, refresh) => CupertinoAlertDialog(
             title: title,
             content: SingleChildScrollView(
-              child: Material(
-                color: Theme.of(context).dialogBackgroundColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: <Widget>[
-                      DropdownButtonFormField(
-                          items: types.map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(type!),
-                            );
-                          }).toList(),
-                          value: type,
-                          decoration:
-                              const InputDecoration(labelText: 'Status'),
-                          onChanged: (dynamic value) {
-                            refresh(() {
-                              type = value;
-                              soldier['type'] = type;
-                              if (type == 'PDY') {
-                                soldier['typeSort'] = '0';
-                              } else if (type == 'Leave') {
-                                soldier['typeSort'] = '1';
-                              } else if (type == 'TDY') {
-                                soldier['typeSort'] = '2';
-                              } else if (type == 'FTR') {
-                                soldier['typeSort'] = '4';
-                              } else {
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: <Widget>[
+                    DropdownButtonFormField(
+                        items: types.map((type) {
+                          return DropdownMenuItem(
+                            value: type,
+                            child: Text(type!),
+                          );
+                        }).toList(),
+                        value: type,
+                        decoration: const InputDecoration(labelText: 'Status'),
+                        onChanged: (dynamic value) {
+                          refresh(() {
+                            type = value;
+                            soldier['type'] = type;
+                            if (type == 'PDY') {
+                              soldier['typeSort'] = '0';
+                            } else if (type == 'Leave') {
+                              soldier['typeSort'] = '1';
+                            } else if (type == 'TDY') {
+                              soldier['typeSort'] = '2';
+                            } else if (type == 'FTR') {
+                              soldier['typeSort'] = '4';
+                            } else {
+                              soldier['typeSort'] = '3';
+                            }
+                          });
+                        }),
+                    type == 'Other'
+                        ? TextFormField(
+                            decoration: const InputDecoration(
+                                labelText: 'Other Status'),
+                            initialValue: otherType,
+                            onChanged: (value) {
+                              refresh(() {
+                                otherType = value;
+                                soldier['type'] = value;
                                 soldier['typeSort'] = '3';
-                              }
-                            });
-                          }),
-                      type == 'Other'
-                          ? TextFormField(
-                              decoration: const InputDecoration(
-                                  labelText: 'Other Status'),
-                              initialValue: otherType,
-                              onChanged: (value) {
-                                refresh(() {
-                                  otherType = value;
-                                  soldier['type'] = value;
-                                  soldier['typeSort'] = '3';
-                                });
-                              },
-                            )
-                          : const SizedBox(),
-                    ],
-                  ),
+                              });
+                            },
+                          )
+                        : const SizedBox(),
+                  ],
                 ),
               ),
             ),

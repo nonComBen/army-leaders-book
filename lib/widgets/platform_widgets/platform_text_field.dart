@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -29,7 +30,7 @@ abstract class PlatformTextField extends Widget {
     void Function(String)? onChanged,
     void Function()? onEditingComplete,
   }) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidTextField(
         controller: controller,
         style: style,
@@ -148,7 +149,7 @@ class IOSTextField extends StatelessWidget implements PlatformTextField {
         CupertinoTextField(
           padding: const EdgeInsets.all(8.0),
           controller: controller,
-          style: style,
+          style: style ?? TextStyle(color: getTextColor(context)),
           focusNode: focusNode,
           decoration: BoxDecoration(
             border: Border.all(color: getTextColor(context)),
@@ -166,6 +167,7 @@ class IOSTextField extends StatelessWidget implements PlatformTextField {
           maxLines: maxLines,
           onChanged: onChanged,
           onEditingComplete: onEditingComplete,
+          cursorColor: getTextColor(context),
         )
       ],
     );

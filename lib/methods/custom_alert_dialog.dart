@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 import 'package:leaders_book/widgets/formatted_text_button.dart';
 
 Future<void> customAlertDialog({
@@ -51,14 +52,24 @@ Future<void> customAlertDialog({
           actions: [
             if (secondary != null)
               CupertinoDialogAction(
-                child: Text(secondaryText),
+                child: Text(
+                  secondaryText,
+                  style: TextStyle(
+                    color: getTextColor(context),
+                  ),
+                ),
                 onPressed: () {
                   secondary();
                   Navigator.pop(context2);
                 },
               ),
             CupertinoDialogAction(
-              child: Text(primaryText),
+              child: Text(
+                primaryText,
+                style: TextStyle(
+                  color: getTextColor(context),
+                ),
+              ),
               onPressed: () {
                 Navigator.pop(context2);
                 primary();

@@ -130,28 +130,25 @@ class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
     Widget content = Container(
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
-          child: Material(
-            color: Theme.of(context).dialogBackgroundColor,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                      controller: name,
-                      keyboardType: TextInputType.text,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Award Name',
-                      )),
-                  TextFormField(
-                      controller: number,
-                      keyboardType: TextInputType.number,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Number of Awards',
-                      )),
-                ],
-              ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                    controller: name,
+                    keyboardType: TextInputType.text,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Award Name',
+                    )),
+                TextFormField(
+                    controller: number,
+                    keyboardType: TextInputType.number,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Number of Awards',
+                    )),
+              ],
             ),
           ),
         ));
@@ -194,70 +191,67 @@ class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
     Widget content = Container(
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
-          child: Material(
-            color: Theme.of(context).dialogBackgroundColor,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                      controller: year,
-                      keyboardType: TextInputType.number,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Year',
-                      )),
-                  TextFormField(
-                      controller: make,
-                      keyboardType: TextInputType.text,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Make',
-                      )),
-                  TextFormField(
-                      controller: model,
-                      keyboardType: TextInputType.text,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Model',
-                      )),
-                  TextFormField(
-                      controller: plate,
-                      keyboardType: TextInputType.text,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Plates',
-                      )),
-                  TextFormField(
-                      controller: state,
-                      keyboardType: TextInputType.text,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'State',
-                      )),
-                  TextFormField(
-                      controller: regExp,
-                      keyboardType: TextInputType.datetime,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Registration Exp',
-                      )),
-                  TextFormField(
-                      controller: ins,
-                      keyboardType: TextInputType.text,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Insurance',
-                      )),
-                  TextFormField(
-                      controller: insExp,
-                      keyboardType: TextInputType.datetime,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Insurance Exp',
-                      )),
-                ],
-              ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                TextFormField(
+                    controller: year,
+                    keyboardType: TextInputType.number,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Year',
+                    )),
+                TextFormField(
+                    controller: make,
+                    keyboardType: TextInputType.text,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Make',
+                    )),
+                TextFormField(
+                    controller: model,
+                    keyboardType: TextInputType.text,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Model',
+                    )),
+                TextFormField(
+                    controller: plate,
+                    keyboardType: TextInputType.text,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Plates',
+                    )),
+                TextFormField(
+                    controller: state,
+                    keyboardType: TextInputType.text,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'State',
+                    )),
+                TextFormField(
+                    controller: regExp,
+                    keyboardType: TextInputType.datetime,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Registration Exp',
+                    )),
+                TextFormField(
+                    controller: ins,
+                    keyboardType: TextInputType.text,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Insurance',
+                    )),
+                TextFormField(
+                    controller: insExp,
+                    keyboardType: TextInputType.datetime,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Insurance Exp',
+                    )),
+              ],
             ),
           ),
         ));

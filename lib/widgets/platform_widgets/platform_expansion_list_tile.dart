@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 abstract class PlatformExpansionTile extends Widget {
@@ -15,7 +16,7 @@ abstract class PlatformExpansionTile extends Widget {
     Color? textColor,
     required List<Widget> children,
   }) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidExpansionTile(
         title: title,
         trailing: trailing,

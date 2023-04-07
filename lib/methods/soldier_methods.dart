@@ -3,13 +3,16 @@ import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/pages/editPages/edit_soldier_page.dart';
+import 'package:leaders_book/widgets/my_toast.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_text_button.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../models/soldier.dart';
 import '../pages/manage_users_page.dart';
 import '../pages/share_soldier_page.dart';
-import '../pages/soldier_details_page.dart';
 import '../pages/transfer_soldier_page.dart';
 import '../pages/uploadPages/upload_soldiers_page.dart';
 import '../pdf/soldiers_pdf.dart';
@@ -77,7 +80,7 @@ void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
     'Next of Kin',
     'Next of Kin Phone',
     'Marital Status',
-    'Comments'
+    'Comments',
   ]);
   for (Soldier soldier in soldiers) {
     List<dynamic> docs = [
@@ -148,19 +151,20 @@ void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
         File('$dir/soldiers.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Data successfully downloaded to $loc'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open('$dir/soldiers.xlsx');
-                    },
-                  )
-                : null,
-          ),
+        FToast toast = FToast();
+        toast.context = context;
+        toast.showToast(
+          toastDuration: const Duration(seconds: 5),
+          child: MyToast(contents: [
+            Text('Data successfully downloaded to $loc'),
+            if (!kIsWeb)
+              PlatformTextButton(
+                child: const Text('Open'),
+                onPressed: () {
+                  OpenFile.open('$dir/soldiers.xlsx');
+                },
+              ),
+          ]),
         );
       } catch (e) {
         // ignore: avoid_print
@@ -175,10 +179,13 @@ uploadExcel(BuildContext context, bool isSubscribed) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => const UploadSoldierPage()));
   } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content:
-            Text('Uploading Soldiers is only available for subscribed users.'),
+    FToast toast = FToast();
+    toast.context = context;
+    toast.showToast(
+      child: const MyToast(
+        contents: [
+          Text('Uploading Soldiers is only available for subscribed users.')
+        ],
       ),
     );
   }
@@ -187,10 +194,11 @@ uploadExcel(BuildContext context, bool isSubscribed) {
 void shareSoldiers(
     BuildContext context, List<Soldier> selectedSoldiers, String userId) {
   if (selectedSoldiers.isEmpty) {
-    //show snack bar requiring at least one item selected
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('You must select at least one record'),
+    FToast toast = FToast();
+    toast.context = context;
+    toast.showToast(
+      child: const MyToast(
+        contents: [Text('You must select at least one record')],
       ),
     );
     return;
@@ -209,10 +217,11 @@ void shareSoldiers(
 void transferSoldier(
     BuildContext context, List<Soldier> selectedSoldiers, String userId) {
   if (selectedSoldiers.isEmpty) {
-    //show snack bar requiring at least one item selected
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('You must select at least one record'),
+    FToast toast = FToast();
+    toast.context = context;
+    toast.showToast(
+      child: const MyToast(
+        contents: [Text('You must select at least one record')],
       ),
     );
     return;
@@ -220,9 +229,11 @@ void transferSoldier(
   List<Soldier> soldierList = [];
   for (Soldier soldier in selectedSoldiers) {
     if (soldier.owner != userId) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You can only transfer records you own'),
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          contents: [Text('You can only transfer records you own')],
         ),
       );
       return;
@@ -253,9 +264,11 @@ void downloadPdf(BuildContext context, bool isSubscribed,
     List<Soldier> selectedSoldiers, String userId) async {
   if (isSubscribed) {
     if (selectedSoldiers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must select at least one record'),
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          contents: [Text('You must select at least one record')],
         ),
       );
       return;
@@ -279,10 +292,13 @@ void downloadPdf(BuildContext context, bool isSubscribed,
       },
     );
   } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
+    FToast toast = FToast();
+    toast.context = context;
+    toast.showToast(
+      child: const MyToast(
+        contents: [
+          Text('Downloading PDF files is only available for subscribed users.')
+        ],
       ),
     );
   }
@@ -305,34 +321,38 @@ void completePdfDownload(BuildContext context, bool fullPage,
           ? 'Pdf successfully downloaded to $directory'
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 5),
-        action: location == '' || kIsWeb
-            ? null
-            : SnackBarAction(
-                label: 'Open',
-                onPressed: () {
-                  OpenFile.open('$location/soldiers.pdf');
-                },
-              ),
+    FToast toast = FToast();
+    toast.context = context;
+    toast.showToast(
+      toastDuration: const Duration(seconds: 5),
+      child: MyToast(
+        contents: [
+          Text(message),
+          if (location != '' && !kIsWeb)
+            PlatformTextButton(
+              child: const Text('Open'),
+              onPressed: () {
+                OpenFile.open('$location/soldiers.pdf');
+              },
+            ),
+        ],
       ),
     );
   });
 }
 
-void viewDetails(
-    BuildContext context, List<Soldier> selectedSoldiers, String userId) {
+void editSoldier(BuildContext context, List<Soldier> selectedSoldiers) {
   if (selectedSoldiers.length != 1) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must select exactly one record')));
+    FToast toast = FToast();
+    toast.context = context;
+    toast.showToast(
+        child: const MyToast(
+            contents: [Text('You must select exactly one record')]));
   } else {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SoldierDetailsPage(
-          userId: userId,
+        builder: (context) => EditSoldierPage(
           soldier: selectedSoldiers.first,
         ),
       ),

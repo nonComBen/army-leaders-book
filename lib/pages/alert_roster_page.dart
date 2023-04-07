@@ -149,30 +149,27 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
                 builder: (context, refresh) => CupertinoAlertDialog(
                   title: title,
                   content: SingleChildScrollView(
-                    child: Material(
-                      color: Theme.of(context).dialogBackgroundColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: <Widget>[
-                            content,
-                            DropdownButtonFormField(
-                                items: supervisors.map((supervisor) {
-                                  return DropdownMenuItem(
-                                    value: supervisor['soldierId'],
-                                    child: Text(supervisor['soldier']),
-                                  );
-                                }).toList(),
-                                value: supervisorId,
-                                decoration: const InputDecoration(
-                                    labelText: 'Supervisor'),
-                                onChanged: (dynamic value) {
-                                  refresh(() {
-                                    supervisorId = value;
-                                  });
-                                }),
-                          ],
-                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: <Widget>[
+                          content,
+                          DropdownButtonFormField(
+                              items: supervisors.map((supervisor) {
+                                return DropdownMenuItem(
+                                  value: supervisor['soldierId'],
+                                  child: Text(supervisor['soldier']),
+                                );
+                              }).toList(),
+                              value: supervisorId,
+                              decoration: const InputDecoration(
+                                  labelText: 'Supervisor'),
+                              onChanged: (dynamic value) {
+                                refresh(() {
+                                  supervisorId = value;
+                                });
+                              }),
+                        ],
                       ),
                     ),
                   ),
@@ -562,24 +559,21 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
               return CupertinoAlertDialog(
                 title: title,
                 content: SingleChildScrollView(
-                  child: Material(
-                    color: Theme.of(context).dialogBackgroundColor,
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                            padding: const EdgeInsets.all(8.0), child: content),
-                        CheckboxListTile(
-                          title: const Text('Don\'t Show Again'),
-                          value: dontShow,
-                          controlAffinity: ListTileControlAffinity.leading,
-                          onChanged: (value) {
-                            refresh(() {
-                              dontShow = value;
-                            });
-                          },
-                        )
-                      ],
-                    ),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                          padding: const EdgeInsets.all(8.0), child: content),
+                      CheckboxListTile(
+                        title: const Text('Don\'t Show Again'),
+                        value: dontShow,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        onChanged: (value) {
+                          refresh(() {
+                            dontShow = value;
+                          });
+                        },
+                      )
+                    ],
                   ),
                 ),
                 actions: <Widget>[

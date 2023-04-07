@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 
-import '../widgets/center_progress_indicator.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../widgets/platform_widgets/platform_icon_button.dart';
+import '../../widgets/platform_widgets/platform_list_tile.dart';
+import '../../widgets/platform_widgets/platform_loading_widget.dart';
 import '../models/soldier.dart';
 import '../widgets/formatted_text_button.dart';
 
@@ -100,38 +102,36 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
               builder: ((context, refresh) {
                 return CupertinoAlertDialog(
                   title: title,
-                  content: Material(
-                      color: Theme.of(context).dialogBackgroundColor,
-                      child: Column(
-                        children: [
-                          const Text(
-                              'Select the user you want to transfer ownership to.'),
-                          DropdownButtonFormField(
-                              isExpanded: true,
-                              decoration:
-                                  const InputDecoration(label: Text('User Id')),
-                              style: const TextStyle(
-                                  overflow: TextOverflow.ellipsis,
-                                  color: Colors.black),
-                              value: user,
-                              items: items
-                                  .map((e) => DropdownMenuItem(
-                                        value: e,
-                                        child: Text(
-                                          e,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                              color: Colors.black),
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: (dynamic value) {
-                                refresh(() {
-                                  user = value;
-                                });
-                              })
-                        ],
-                      )),
+                  content: Column(
+                    children: [
+                      const Text(
+                          'Select the user you want to transfer ownership to.'),
+                      DropdownButtonFormField(
+                          isExpanded: true,
+                          decoration:
+                              const InputDecoration(label: Text('User Id')),
+                          style: const TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              color: Colors.black),
+                          value: user,
+                          items: items
+                              .map((e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(
+                                      e,
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (dynamic value) {
+                            refresh(() {
+                              user = value;
+                            });
+                          })
+                    ],
+                  ),
                   actions: [
                     CupertinoDialogAction(
                       child: const Text('Cancel'),
@@ -157,7 +157,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
   }
 
   void confirmDelete(Soldier soldier, String? userId) {
-    var title = const Text('Remove Users');
+    var title = const Text('Remove Permissions');
     var content = const Text(
         'Are you sure you want to remove this user\'s access to this Soldier\'s records?');
     customAlertDialog(
@@ -213,14 +213,17 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
             return Column(
               children: [
                 Card(
-                  child: ListTile(
+                  child: PlatformListTile(
                       trailing: _soldiers[index].users.length > 1
-                          ? IconButton(
-                              icon:
-                                  const Icon(Icons.arrow_circle_right_outlined),
-                              onPressed: () {
-                                _transferOwnership(_soldiers[index]);
-                              },
+                          ? Tooltip(
+                              message: 'Transfer Ownership',
+                              child: PlatformIconButton(
+                                icon: const Icon(
+                                    Icons.arrow_circle_right_outlined),
+                                onPressed: () {
+                                  _transferOwnership(_soldiers[index]);
+                                },
+                              ),
                             )
                           : null,
                       title: Text(
@@ -246,23 +249,27 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                       builder: (context, snapshot) {
                         switch (snapshot.connectionState) {
                           case ConnectionState.waiting:
-                            return const Card(
-                              child: CenterProgressIndicator(),
+                            return Card(
+                              child: PlatformLoadingWidget(),
                             );
                           default:
                             return Padding(
                               padding: const EdgeInsets.fromLTRB(
                                   16.0, 8.0, 8.0, 8.0),
                               child: Card(
-                                child: ListTile(
+                                child: PlatformListTile(
                                   title: Text(
                                       '${snapshot.data!['rank']} ${snapshot.data!['userName']}'),
                                   subtitle: Text(users[i]),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () {
-                                      confirmDelete(_soldiers[index], users[i]);
-                                    },
+                                  trailing: Tooltip(
+                                    message: 'Remove Permissions',
+                                    child: PlatformIconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        confirmDelete(
+                                            _soldiers[index], users[i]);
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),

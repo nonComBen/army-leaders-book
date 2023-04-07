@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 abstract class PlatformIconButton extends StatelessWidget {
@@ -7,7 +8,7 @@ abstract class PlatformIconButton extends StatelessWidget {
     required Icon icon,
     required void Function()? onPressed,
   }) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidIconButton(icon: icon, onPressed: onPressed);
     } else {
       return IOSIconButton(onTap: onPressed, child: icon);

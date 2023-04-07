@@ -95,6 +95,141 @@ class HomePageState extends ConsumerState<RollupTab>
   late RootService _rootService;
   UserObj? _userObj;
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+
+    _userObj = ref.read(userProvider).user;
+    if (isInitial && _userObj != null) {
+      isInitial = false;
+      init();
+    }
+
+    isSubscribed = ref.watch(subscriptionStateProvider);
+
+    if (_adLoaded && isSubscribed) {
+      removeAds();
+    }
+    if (!kIsWeb && !_adLoaded && !isSubscribed) {
+      final trackingService = ref.read(trackingProvider);
+      bool trackingAllowed = trackingService.trackingAllowed;
+      if (trackingAllowed) {
+        trackingAllowed = await trackingService.getTrackingFromPermission();
+      }
+
+      String adUnitId = kIsWeb
+          ? ''
+          : Platform.isAndroid
+              ? androidAd
+              : iosAd;
+
+      myBanner = BannerAd(
+        adUnitId: adUnitId,
+        size: AdSize.banner,
+        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
+            _adLoaded = true;
+          },
+        ),
+      );
+
+      await myBanner!.load();
+      _adLoaded = true;
+    }
+  }
+
+  //performs initial async functions
+  void init() async {
+    PackageInfo packageInfo;
+    final prefs = ref.read(sharedPreferencesProvider);
+
+    // if old home page overwrote user profile, rewrite
+    if (_userObj!.userEmail == 'anonymous@email.com') {
+      final user = ref.read(authProvider).currentUser()!;
+      _userObj!.userEmail = user.email!;
+      _userObj!.userName = user.displayName ?? 'Anonymous User';
+      _userObj!.createdDate = user.metadata.creationTime;
+      _firestore.doc('users/${_userObj!.userId}').update(_userObj!.toMap());
+    }
+    if (!_userObj!.tosAgree) {
+      if (mounted) {
+        await showTos(context, _userObj!.userId);
+      }
+    }
+    // update users array if not updated
+    try {
+      if (!_userObj!.updatedUserArray) {
+        updateUsersArray(_userObj!.userId);
+      }
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Updated Users Array Fail');
+    }
+
+    if (!_userObj!.updatedPovs) {
+      updatePovs(_userObj!.userId!);
+    }
+    if (!_userObj!.updatedAwards) {
+      updateAwards(_userObj!.userId!);
+    }
+
+// show change log if new version
+    if (!kIsWeb) {
+      packageInfo = await PackageInfo.fromPlatform();
+      _localAuth = LocalAuthentication();
+      _localAuthSupported = await _localAuth.isDeviceSupported();
+      if (prefs.getString('Version') == null ||
+          packageInfo.version != prefs.getString('Version')) {
+        prefs.setString('Version', packageInfo.version);
+        // if (mounted) {
+        //   showChangeLog(context);
+        // }
+      }
+    }
+  }
+
+  @override
+  void dispose() async {
+    _streamSubscription?.cancel();
+    _soldierSubscription?.cancel();
+    myBanner?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  //signs out or locks user after 10 minutes of inactivity
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.paused:
+        timer = Timer.periodic(const Duration(minutes: 10), (_) {
+          _requireUnlock = true;
+          if (!_localAuthSupported) {
+            signOut();
+          }
+        });
+        break;
+      case AppLifecycleState.resumed:
+        timer?.cancel();
+        if (_requireUnlock) {
+          _rootService.localSignOut();
+        }
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
   void signOut() {
     var auth = ref.read(authProvider);
     try {
@@ -180,134 +315,6 @@ class HomePageState extends ConsumerState<RollupTab>
         ],
       ),
     );
-  }
-
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-
-    _userObj = ref.read(userProvider).user;
-    if (isInitial && _userObj != null) {
-      isInitial = false;
-      init();
-    }
-
-    isSubscribed = ref.watch(subscriptionStateProvider);
-
-    if (_adLoaded && isSubscribed) {
-      removeAds();
-    }
-    if (!kIsWeb && !_adLoaded && !isSubscribed) {
-      final trackingService = ref.read(trackingProvider);
-      bool trackingAllowed = trackingService.trackingAllowed;
-      if (trackingAllowed) {
-        trackingAllowed = await trackingService.getTrackingFromPermission();
-      }
-
-      String adUnitId = kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? androidAd
-              : iosAd;
-
-      myBanner = BannerAd(
-        adUnitId: adUnitId,
-        size: AdSize.banner,
-        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-        listener: BannerAdListener(
-          onAdLoaded: (ad) {
-            _adLoaded = true;
-          },
-        ),
-      );
-
-      await myBanner!.load();
-      _adLoaded = true;
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  //performs initial async functions
-  void init() async {
-    PackageInfo packageInfo;
-    final prefs = ref.read(sharedPreferencesProvider);
-
-    // if old home page overwrote user profile, rewrite
-    if (_userObj!.userEmail == 'anonymous@email.com') {
-      final user = ref.read(authProvider).currentUser()!;
-      _userObj!.userEmail = user.email!;
-      _userObj!.userName = user.displayName ?? 'Anonymous User';
-      _userObj!.createdDate = user.metadata.creationTime;
-      _firestore.doc('users/${_userObj!.userId}').update(_userObj!.toMap());
-    }
-    if (!_userObj!.tosAgree) {
-      if (mounted) {
-        await showTos(context, _userObj!.userId);
-      }
-    }
-    // update users array if not updated
-    try {
-      if (!_userObj!.updatedUserArray) {
-        updateUsersArray(_userObj!.userId);
-      }
-    } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Updated Users Array Fail');
-    }
-
-// show change log if new version
-    if (!kIsWeb) {
-      packageInfo = await PackageInfo.fromPlatform();
-      _localAuth = LocalAuthentication();
-      _localAuthSupported = await _localAuth.isDeviceSupported();
-      if (prefs.getString('Version') == null ||
-          packageInfo.version != prefs.getString('Version')) {
-        prefs.setString('Version', packageInfo.version);
-        // if (mounted) {
-        //   showChangeLog(context);
-        // }
-      }
-    }
-  }
-
-  @override
-  void dispose() async {
-    _streamSubscription?.cancel();
-    _soldierSubscription?.cancel();
-    myBanner?.dispose();
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  //signs out or locks user after 10 minutes of inactivity
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    switch (state) {
-      case AppLifecycleState.inactive:
-        break;
-      case AppLifecycleState.paused:
-        timer = Timer.periodic(const Duration(minutes: 10), (_) {
-          _requireUnlock = true;
-          if (!_localAuthSupported) {
-            signOut();
-          }
-        });
-        break;
-      case AppLifecycleState.resumed:
-        timer?.cancel();
-        if (_requireUnlock) {
-          _rootService.localSignOut();
-        }
-        break;
-      case AppLifecycleState.detached:
-        break;
-    }
   }
 
   showByName(String title, List<DocumentSnapshot> list, HomeCard homeCard) {

@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 Color getPrimaryColor(BuildContext context) {
-  if (Platform.isAndroid) {
+  if (kIsWeb || Platform.isAndroid) {
     return Theme.of(context).colorScheme.primary;
   } else {
     return CupertinoTheme.of(context).primaryColor;
@@ -12,7 +13,7 @@ Color getPrimaryColor(BuildContext context) {
 }
 
 Color getOnPrimaryColor(BuildContext context) {
-  if (Platform.isAndroid) {
+  if (kIsWeb || Platform.isAndroid) {
     return Theme.of(context).colorScheme.onPrimary;
   } else {
     return CupertinoTheme.of(context).primaryContrastingColor;
@@ -20,7 +21,7 @@ Color getOnPrimaryColor(BuildContext context) {
 }
 
 Color getBackgroundColor(BuildContext context) {
-  if (Platform.isAndroid) {
+  if (kIsWeb || Platform.isAndroid) {
     return Theme.of(context).scaffoldBackgroundColor;
   } else {
     return CupertinoTheme.of(context).scaffoldBackgroundColor;
@@ -28,7 +29,7 @@ Color getBackgroundColor(BuildContext context) {
 }
 
 Color getContrastingBackgroundColor(BuildContext context) {
-  if (Platform.isAndroid) {
+  if (kIsWeb || Platform.isAndroid) {
     return Theme.of(context).dialogBackgroundColor;
   } else {
     return CupertinoTheme.of(context).barBackgroundColor;
@@ -36,7 +37,7 @@ Color getContrastingBackgroundColor(BuildContext context) {
 }
 
 Brightness getThemeBrightness(BuildContext context) {
-  if (Platform.isAndroid) {
+  if (kIsWeb || Platform.isAndroid) {
     return Theme.of(context).brightness;
   } else {
     return CupertinoTheme.of(context).brightness!;
@@ -44,7 +45,7 @@ Brightness getThemeBrightness(BuildContext context) {
 }
 
 Color getTextColor(BuildContext context) {
-  if (Platform.isAndroid) {
+  if (kIsWeb || Platform.isAndroid) {
     return getThemeBrightness(context) == Brightness.light
         ? Colors.black
         : Colors.white;

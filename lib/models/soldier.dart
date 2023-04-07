@@ -47,6 +47,8 @@ class Soldier {
   String nokPhone;
   String maritalStatus;
   String comments;
+  List<dynamic> povs;
+  List<dynamic> awards;
 
   Soldier({
     this.id,
@@ -94,6 +96,8 @@ class Soldier {
     this.nokPhone = '',
     this.maritalStatus = '',
     this.comments = '',
+    this.awards = const [],
+    this.povs = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -142,12 +146,15 @@ class Soldier {
     map['nokPhone'] = nokPhone;
     map['maritalStatus'] = maritalStatus;
     map['comments'] = comments;
+    map['povs'] = povs;
+    map['awards'] = awards;
 
     return map;
   }
 
   factory Soldier.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
+    List<dynamic> newPovs = [], newAwards = [];
     String nbcSuit = '',
         nbcMask = '',
         nbcBoot = '',
@@ -212,6 +219,12 @@ class Soldier {
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Assigned Does Not Exist');
     }
+    try {
+      newPovs = doc['povs'];
+      newAwards = doc['awards'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'povs Does Not Exist');
+    }
 
     return Soldier(
       id: doc.id,
@@ -259,6 +272,8 @@ class Soldier {
       nokPhone: doc['nokPhone'],
       maritalStatus: maritalStatus,
       comments: doc['comments'],
+      povs: newPovs,
+      awards: newAwards,
     );
   }
 }

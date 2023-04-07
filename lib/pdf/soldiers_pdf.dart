@@ -3,7 +3,6 @@ import 'package:leaders_book/methods/download_methods.dart';
 import 'package:leaders_book/models/soldier.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SoldierPdf {
   SoldierPdf({required this.soldiers, required this.userId});
@@ -13,66 +12,70 @@ class SoldierPdf {
   Widget createField(String? value, String label, double inches) {
     double width = inches * 72;
     return DecoratedBox(
-        decoration: const BoxDecoration(
-            border: TableBorder(
-                left: BorderSide(),
-                top: BorderSide(),
-                right: BorderSide(),
-                bottom: BorderSide())),
-        child: SizedBox(
-            width: width,
-            child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Text('$label: $value'))));
+      decoration: const BoxDecoration(
+        border: TableBorder(
+          left: BorderSide(),
+          top: BorderSide(),
+          right: BorderSide(),
+          bottom: BorderSide(),
+        ),
+      ),
+      child: SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Text('$label: $value'),
+        ),
+      ),
+    );
   }
 
   Widget awardField(String text, double inches) {
     double width = inches * 72;
     return DecoratedBox(
-        decoration: const BoxDecoration(
-            border: TableBorder(
-                left: BorderSide(),
-                top: BorderSide(),
-                right: BorderSide(),
-                bottom: BorderSide())),
-        child: SizedBox(
-            width: width,
-            child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Text(text, textAlign: TextAlign.center))));
+      decoration: const BoxDecoration(
+        border: TableBorder(
+          left: BorderSide(),
+          top: BorderSide(),
+          right: BorderSide(),
+          bottom: BorderSide(),
+        ),
+      ),
+      child: SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Text(text, textAlign: TextAlign.center),
+        ),
+      ),
+    );
   }
 
   Widget tableField(String text, double width) {
     return SizedBox(
-        width: width * 72,
-        height: 24.0,
-        child: Padding(padding: const EdgeInsets.all(5.0), child: Text(text)));
+      width: width * 72,
+      height: 24.0,
+      child: Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Text(text),
+      ),
+    );
   }
 
   Future<String> createPdf(bool fullPage) async {
     final Document pdf = Document();
 
     for (Soldier soldier in soldiers) {
-      DocumentSnapshot? pov;
-      DocumentSnapshot? pov2;
-      QuerySnapshot povSnapshot = await FirebaseFirestore.instance
-          .collection('povs')
-          .where('owner', isEqualTo: userId)
-          .where('soldierId', isEqualTo: soldier.id)
-          .get();
-      if (povSnapshot.docs.isNotEmpty) {
-        pov = povSnapshot.docs[0];
-        if (povSnapshot.docs.length > 1) {
-          pov2 = povSnapshot.docs[1];
+      Map<String, dynamic>? pov;
+      Map<String, dynamic>? pov2;
+      if (soldier.povs.isNotEmpty) {
+        pov = soldier.povs[0];
+        if (soldier.povs.length > 1) {
+          pov2 = soldier.povs[1];
         }
       }
 
-      QuerySnapshot awardSnapshot = await FirebaseFirestore.instance
-          .collection('awards')
-          .where('owner', isEqualTo: userId)
-          .where('soldierId', isEqualTo: soldier.id)
-          .get();
-      List<DocumentSnapshot> awards = awardSnapshot.docs;
+      List<dynamic> awards = soldier.awards;
 
       if (fullPage) {
         pdf.addPage(Page(
@@ -261,7 +264,7 @@ class SoldierPdf {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           createField(pov == null ? '' : pov['plate'],
-                              "license Plate", 3.25),
+                              "License Plate", 3.25),
                           createField(
                               pov == null ? '' : pov['state'], "State", 1.0),
                           createField(
@@ -293,7 +296,7 @@ class SoldierPdf {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           createField(pov2 == null ? '' : pov2['plate'],
-                              "license Plate", 3.25),
+                              "License Plate", 3.25),
                           createField(
                               pov2 == null ? '' : pov2['state'], "State", 1.0),
                           createField(

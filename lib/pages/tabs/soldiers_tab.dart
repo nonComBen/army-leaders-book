@@ -313,60 +313,66 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
     _filteredSoldiers = ref.watch(filteredSoldiersProvider);
     soldiers = ref.watch(soldiersProvider);
 
-    for (var soldier in _selectedSoldiers) {
-      if (!soldiers.contains(soldier)) {
-        ref.read(selectedSoldiersProvider.notifier).removeSoldier(soldier);
+    if (_selectedSoldiers.isNotEmpty) {
+      for (var soldier in _selectedSoldiers) {
+        if (!soldiers.contains(soldier)) {
+          ref.read(selectedSoldiersProvider.notifier).removeSoldier(soldier);
+        }
       }
     }
-    return Scaffold(
-        body: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (_adLoaded)
-          Container(
-            alignment: Alignment.center,
-            width: myBanner!.size.width.toDouble(),
-            height: myBanner!.size.height.toDouble(),
-            constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-            child: AdWidget(
-              ad: myBanner!,
-            ),
-          ),
-        Flexible(
-          flex: 1,
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(8.0),
-            children: <Widget>[
-              if (user.isAnonymous) const AnonWarningBanner(),
-              Card(
-                child: DataTable(
-                  sortAscending: _sortAscending,
-                  sortColumnIndex: _sortColumnIndex,
-                  columns: _createColumns(MediaQuery.of(context).size.width),
-                  rows: _createRows(
-                      _filteredSoldiers, MediaQuery.of(context).size.width),
-                ),
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const <Widget>[
-                      Text(
-                        'Blue Text: Record is shared with you',
-                        style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16.0,
+        top: MediaQuery.of(context).viewPadding.top,
+        right: 16.0,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        _filteredSoldiers, MediaQuery.of(context).size.width),
                   ),
                 ),
-              )
-            ],
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const <Widget>[
+                        Text(
+                          'Blue Text: Record is shared with you',
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
-      ],
-    ));
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

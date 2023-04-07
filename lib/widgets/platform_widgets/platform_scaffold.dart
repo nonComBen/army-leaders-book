@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../methods/theme_methods.dart';
@@ -13,7 +14,7 @@ abstract class PlatformScaffold extends StatelessWidget {
     FloatingActionButtonLocation? floatingActionButtonLocation,
     required Widget body,
   }) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidScaffold(
         title: title,
         actions: actions,

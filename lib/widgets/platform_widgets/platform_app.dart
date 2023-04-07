@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 abstract class PlatformApp extends StatelessWidget {
@@ -13,7 +14,7 @@ abstract class PlatformApp extends StatelessWidget {
     Route<dynamic>? Function(RouteSettings)? onGenerateRoute,
     required Widget home,
   }) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidApp(
         title: title,
         themeData: themeData,
@@ -74,10 +75,10 @@ class AndroidApp extends StatelessWidget implements PlatformApp {
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)
       ],
-      // builder: ((context, child) => MediaQuery(
-      //       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-      //       child: child!,
-      //     )),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
       home: home,
       debugShowCheckedModeBanner: false,
     );
@@ -111,10 +112,10 @@ class IOSApp extends StatelessWidget implements PlatformApp {
       navigatorObservers: [
         FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)
       ],
-      // builder: ((context, child) => MediaQuery(
-      //       data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-      //       child: child!,
-      //     )),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
     );
   }
 }

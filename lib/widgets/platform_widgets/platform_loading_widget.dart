@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 abstract class PlatformLoadingWidget extends StatelessWidget {
   factory PlatformLoadingWidget({Color color = Colors.white}) {
-    if (Platform.isAndroid) {
+    if (kIsWeb || Platform.isAndroid) {
       return AndroidLoadingWidget(color: color);
     } else {
       return IOSLoadingWidget(color: color);

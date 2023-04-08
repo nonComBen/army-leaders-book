@@ -18,6 +18,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/rating.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_rating_page.dart';
 import 'uploadPages/upload_ratings_page.dart';
 import '../pdf/ratings_pdf.dart';
@@ -43,8 +44,6 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -627,11 +626,9 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Ratings'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Ratings',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

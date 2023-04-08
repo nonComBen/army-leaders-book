@@ -17,6 +17,7 @@ import '../../providers/subscription_state.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_equipment_page.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../models/equipment.dart';
@@ -42,8 +43,6 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -621,11 +620,9 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Equipment'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Equipment',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

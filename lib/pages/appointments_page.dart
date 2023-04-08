@@ -14,6 +14,7 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../models/appointment.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_appointment_page.dart';
 import '../pdf/appointments_pdf.dart';
 import '../../providers/subscription_state.dart';
@@ -43,8 +44,6 @@ class AptsPageState extends ConsumerState<AptsPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -656,11 +655,9 @@ class AptsPageState extends ConsumerState<AptsPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Appointments'),
-            actions: appBarMenu(context, width)),
+    return PlatformScaffold(
+        title: 'Appointments',
+        actions: appBarMenu(context, width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

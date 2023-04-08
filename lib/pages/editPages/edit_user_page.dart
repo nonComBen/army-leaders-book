@@ -14,11 +14,12 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../methods/on_back_pressed.dart';
 import '../../models/user.dart';
-import '../../widgets/formatted_elevated_button.dart';
 import '../../auth_provider.dart';
 import '../../methods/show_snackbar.dart';
 import '../../providers/root_provider.dart';
 import '../../widgets/formatted_text_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditUserPage extends ConsumerStatefulWidget {
   const EditUserPage({
@@ -37,7 +38,6 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   late UserObj user;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _rankController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
@@ -305,19 +305,15 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Edit User'),
-        actions: [
-          Tooltip(
-            message: 'Delete Account',
-            child: IconButton(
-                onPressed: confirmDeleteAccount,
-                icon: const Icon(Icons.delete)),
-          )
-        ],
-      ),
+    return PlatformScaffold(
+      title: 'Edit User',
+      actions: [
+        Tooltip(
+          message: 'Delete Account',
+          child: IconButton(
+              onPressed: confirmDeleteAccount, icon: const Icon(Icons.delete)),
+        )
+      ],
       body: Form(
           key: _formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -430,11 +426,11 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                             ),
                         ],
                       ),
-                      FormattedElevatedButton(
+                      PlatformButton(
                         onPressed: () {
                           submit(context);
                         },
-                        text: 'Update Profile',
+                        child: const Text('Update Profile'),
                       ),
                     ],
                   ),

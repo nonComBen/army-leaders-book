@@ -19,6 +19,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/medpro.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_medpros_page.dart';
 import 'uploadPages/upload_medpros_page.dart';
 import '../pdf/medpros_pdf.dart';
@@ -48,8 +49,6 @@ class MedProsPageState extends ConsumerState<MedProsPage> {
   late StreamSubscription _subscriptionUsers;
   late SharedPreferences prefs;
   BannerAd? myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -640,11 +639,9 @@ class MedProsPageState extends ConsumerState<MedProsPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('MedPros'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'MedPros',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

@@ -17,6 +17,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/profile.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_perm_profile_page.dart';
 import 'uploadPages/upload_perm_profile_page.dart';
 import '../pdf/perm_profiles_pdf.dart';
@@ -42,8 +43,6 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -622,11 +621,9 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Permanent Profiles'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Permanent Profiles',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

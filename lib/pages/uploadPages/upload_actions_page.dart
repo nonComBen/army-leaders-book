@@ -12,7 +12,8 @@ import '../../methods/upload_methods.dart';
 import '../../models/action.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadActionsPage extends ConsumerStatefulWidget {
   const UploadActionsPage({
@@ -33,8 +34,6 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
       statusDate,
       remarks,
       path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -150,11 +149,8 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Actions'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload Actions',
       body: Center(
         child: Card(
           child: Container(
@@ -172,11 +168,11 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -313,14 +309,14 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload Actions',
+                    child: const Text('Upload Actions'),
                   )
                 ],
               ),

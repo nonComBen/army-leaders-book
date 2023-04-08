@@ -13,7 +13,8 @@ import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
 import '../../models/flag.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditFlagPage extends ConsumerStatefulWidget {
   const EditFlagPage({
@@ -31,7 +32,6 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _expController = TextEditingController();
@@ -272,11 +272,8 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
+    return PlatformScaffold(
+        title: _title,
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -477,13 +474,13 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                               },
                             ),
                           ),
-                          FormattedElevatedButton(
+                          PlatformButton(
                             onPressed: () {
                               submit(context);
                             },
-                            text: widget.flag.id == null
+                            child: Text(widget.flag.id == null
                                 ? 'Add Flag'
-                                : 'Update Flag',
+                                : 'Update Flag'),
                           ),
                         ],
                       ),

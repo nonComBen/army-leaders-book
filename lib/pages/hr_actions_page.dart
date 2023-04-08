@@ -17,6 +17,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../models/hr_action.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_hr_action_page.dart';
 import 'uploadPages/upload_hr_actions_page.dart';
 import '../pdf/hr_actions_pdf.dart';
@@ -42,8 +43,6 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -580,11 +579,9 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('HR Metrics'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'HR Metrics',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

@@ -22,6 +22,7 @@ import '../models/perstat_by_name.dart';
 import '../models/soldier.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class DailyPerstatPage extends ConsumerStatefulWidget {
   const DailyPerstatPage({Key? key}) : super(key: key);
@@ -42,7 +43,6 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   bool isExpanded = true, isInitial = true;
   String? _userId;
 
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
   final GlobalKey _globalKey = GlobalKey();
 
   List<String?> types = [
@@ -636,46 +636,43 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
       }
     }
 
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('PERSTAT By Name'),
-        actions: <Widget>[
-          Tooltip(
-            message: 'Refresh',
+    return PlatformScaffold(
+      title: 'PERSTAT By Name',
+      actions: <Widget>[
+        Tooltip(
+          message: 'Refresh',
+          child: IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                dailies.clear();
+                buildNewDailies();
+              }),
+        ),
+        Tooltip(
+            message: 'Filter Records',
+            child: PopupMenuButton(
+              icon: const Icon(Icons.filter_alt),
+              onSelected: (String result) => _filterRecords(result),
+              itemBuilder: (context) {
+                return sections;
+              },
+            )),
+        Tooltip(
+            message: kIsWeb ? 'Feature Not Available' : 'Download as Image',
             child: IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  dailies.clear();
-                  buildNewDailies();
-                }),
-          ),
-          Tooltip(
-              message: 'Filter Records',
-              child: PopupMenuButton(
-                icon: const Icon(Icons.filter_alt),
-                onSelected: (String result) => _filterRecords(result),
-                itemBuilder: (context) {
-                  return sections;
-                },
-              )),
-          Tooltip(
-              message: kIsWeb ? 'Feature Not Available' : 'Download as Image',
-              child: IconButton(
-                icon: const Icon(Icons.image),
-                onPressed: kIsWeb
-                    ? null
-                    : () {
-                        _downloadPng();
-                      },
-              )),
-          Tooltip(
-              message: 'Download as Excel',
-              child: IconButton(
-                  icon: const Icon(Icons.file_download),
-                  onPressed: _downloadExcel))
-        ],
-      ),
+              icon: const Icon(Icons.image),
+              onPressed: kIsWeb
+                  ? null
+                  : () {
+                      _downloadPng();
+                    },
+            )),
+        Tooltip(
+            message: 'Download as Excel',
+            child: IconButton(
+                icon: const Icon(Icons.file_download),
+                onPressed: _downloadExcel))
+      ],
       body: WillPopScope(
         onWillPop: onWillPop,
         child: ListView(

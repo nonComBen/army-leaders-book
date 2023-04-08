@@ -8,7 +8,8 @@ import 'package:leaders_book/auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/working_award.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditWorkingAwardPage extends ConsumerStatefulWidget {
   const EditWorkingAwardPage({
@@ -26,7 +27,6 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _ach1Controller = TextEditingController();
   final TextEditingController _ach2Controller = TextEditingController();
@@ -176,229 +176,221 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: updated
-                ? () => onBackPressed(context)
-                : () => Future(() => true),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
+    return PlatformScaffold(
+      title: _title,
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width > 932 ? (width - 916) / 2 : 16),
+          child: Card(
+            child: Container(
+                padding: const EdgeInsets.all(16.0),
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      if (user.isAnonymous) const AnonWarningBanner(),
+                      GridView.count(
+                        primary: false,
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 230
+                            : width > 700
+                                ? width / 230
+                                : width / 115,
+                        shrinkWrap: true,
                         children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('owner', isEqualTo: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data!.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers!.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers!.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers!.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers!.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers![index]['rank'];
-                                                  _lastName = soldiers![index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers![index]
-                                                      ['firstName'];
-                                                  _section = soldiers![index]
-                                                      ['section'];
-                                                  _rankSort = soldiers![index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: FutureBuilder(
+                                future: firestore
+                                    .collection('soldiers')
+                                    .where('owner', isEqualTo: user.uid)
+                                    .get(),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                                  switch (snapshot.connectionState) {
+                                    case ConnectionState.waiting:
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    default:
+                                      allSoldiers = snapshot.data!.docs;
+                                      soldiers = removeSoldiers
+                                          ? lessSoldiers
+                                          : allSoldiers;
+                                      soldiers!.sort((a, b) => a['lastName']
+                                          .toString()
+                                          .compareTo(b['lastName'].toString()));
+                                      soldiers!.sort((a, b) => a['rankSort']
+                                          .toString()
+                                          .compareTo(b['rankSort'].toString()));
+                                      return DropdownButtonFormField<String>(
+                                        decoration: const InputDecoration(
+                                            labelText: 'Soldier'),
+                                        items: soldiers!.map((doc) {
+                                          return DropdownMenuItem<String>(
+                                            value: doc.id,
+                                            child: Text(
+                                                '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
                                           );
-                                      }
-                                    }),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    8.0, 16.0, 8.0, 8.0),
-                                child: CheckboxListTile(
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: removeSoldiers,
-                                  title: const Text(
-                                      'Remove Soldiers already added'),
-                                  onChanged: (checked) {
-                                    _removeSoldiers(checked, user.uid);
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: DropdownButtonFormField(
-                                  decoration: const InputDecoration(
-                                      labelText: 'Award Reason'),
-                                  items: _reasons.map((value) {
-                                    return DropdownMenuItem(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  onChanged: (dynamic value) {
-                                    if (mounted) {
-                                      setState(() {
-                                        _reason = value;
-                                        updated = true;
-                                      });
-                                    }
-                                  },
-                                  value: _reason,
-                                ),
-                              ),
-                            ],
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          int index = soldiers!.indexWhere(
+                                              (doc) => doc.id == value);
+                                          if (mounted) {
+                                            setState(() {
+                                              _soldierId = value;
+                                              _rank = soldiers![index]['rank'];
+                                              _lastName =
+                                                  soldiers![index]['lastName'];
+                                              _firstName =
+                                                  soldiers![index]['firstName'];
+                                              _section =
+                                                  soldiers![index]['section'];
+                                              _rankSort = soldiers![index]
+                                                      ['rankSort']
+                                                  .toString();
+                                              updated = true;
+                                            });
+                                          }
+                                        },
+                                        value: _soldierId,
+                                      );
+                                  }
+                                }),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _ach1Controller,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 4,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Achievement',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
+                            padding:
+                                const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                            child: CheckboxListTile(
+                              controlAffinity: ListTileControlAffinity.leading,
+                              value: removeSoldiers,
+                              title:
+                                  const Text('Remove Soldiers already added'),
+                              onChanged: (checked) {
+                                _removeSoldiers(checked, user.uid);
                               },
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _ach2Controller,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 4,
-                              enabled: true,
+                            child: DropdownButtonFormField(
                               decoration: const InputDecoration(
-                                labelText: 'Achievement',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
+                                  labelText: 'Award Reason'),
+                              items: _reasons.map((value) {
+                                return DropdownMenuItem(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (dynamic value) {
+                                if (mounted) {
+                                  setState(() {
+                                    _reason = value;
+                                    updated = true;
+                                  });
+                                }
                               },
+                              value: _reason,
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _ach3Controller,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 4,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Achievement',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _ach4Controller,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 4,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Achievement',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _citationController,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 4,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Citation',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          FormattedElevatedButton(
-                            onPressed: () {
-                              submit(context, user.uid);
-                            },
-                            text: widget.award.id == null
-                                ? 'Add Award'
-                                : 'Update Award',
                           ),
                         ],
                       ),
-                    )),
-              ),
-            )));
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _ach1Controller,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 4,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Achievement',
+                          ),
+                          onChanged: (value) {
+                            updated = true;
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _ach2Controller,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 4,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Achievement',
+                          ),
+                          onChanged: (value) {
+                            updated = true;
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _ach3Controller,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 4,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Achievement',
+                          ),
+                          onChanged: (value) {
+                            updated = true;
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _ach4Controller,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 4,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Achievement',
+                          ),
+                          onChanged: (value) {
+                            updated = true;
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _citationController,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: 4,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Citation',
+                          ),
+                          onChanged: (value) {
+                            updated = true;
+                          },
+                        ),
+                      ),
+                      PlatformButton(
+                        onPressed: () {
+                          submit(context, user.uid);
+                        },
+                        child: Text(widget.award.id == null
+                            ? 'Add Award'
+                            : 'Update Award'),
+                      ),
+                    ],
+                  ),
+                )),
+          ),
+        ),
+      ),
+    );
   }
 }

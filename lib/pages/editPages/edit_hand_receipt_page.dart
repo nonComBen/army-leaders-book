@@ -9,7 +9,8 @@ import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/hand_receipt_item.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditHandReceiptPage extends ConsumerStatefulWidget {
@@ -28,7 +29,6 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _itemController = TextEditingController();
   final TextEditingController _modelController = TextEditingController();
@@ -290,11 +290,8 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
+    return PlatformScaffold(
+        title: _title,
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -545,13 +542,13 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                               },
                             ),
                           ),
-                          FormattedElevatedButton(
+                          PlatformButton(
                             onPressed: () {
                               submit(context);
                             },
-                            text: widget.item.id == null
+                            child: Text(widget.item.id == null
                                 ? 'Add Item'
-                                : 'Update Item',
+                                : 'Update Item'),
                           ),
                         ],
                       ),

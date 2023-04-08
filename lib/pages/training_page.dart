@@ -17,6 +17,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/training.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_training_page.dart';
 import 'uploadPages/upload_trainings_page.dart';
 import '../pdf/training_pdf.dart';
@@ -42,8 +43,6 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -619,11 +618,9 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Training'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Training',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

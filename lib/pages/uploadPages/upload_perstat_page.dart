@@ -12,7 +12,8 @@ import '../../methods/upload_methods.dart';
 import '../../models/perstat.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadPerstatPage extends ConsumerStatefulWidget {
   const UploadPerstatPage({
@@ -27,8 +28,6 @@ class UploadPerstatPageState extends ConsumerState<UploadPerstatPage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, type, start, end, comments, path, location;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -141,11 +140,8 @@ class UploadPerstatPageState extends ConsumerState<UploadPerstatPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload PERSTATs'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload PERSTATs',
       body: Center(
         child: Card(
           child: Container(
@@ -163,11 +159,11 @@ class UploadPerstatPageState extends ConsumerState<UploadPerstatPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -303,14 +299,14 @@ class UploadPerstatPageState extends ConsumerState<UploadPerstatPage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload PERSTATs',
+                    child: const Text('Upload PERSTATs'),
                   )
                 ],
               ),

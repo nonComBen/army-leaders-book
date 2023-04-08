@@ -14,7 +14,8 @@ import '../../methods/validate.dart';
 import '../../models/bodyfat.dart';
 import '../../calculators/bf_calculator.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditBodyfatPage extends ConsumerStatefulWidget {
   const EditBodyfatPage({
@@ -32,7 +33,6 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
@@ -181,7 +181,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                 SizedBox(
                   width: 72,
                   height: 42,
-                  child: FormattedElevatedButton(
+                  child: PlatformButton(
                     onPressed: () {
                       if (!(heightDouble == (height.toDouble() - 0.5))) {
                         setState(() {
@@ -192,7 +192,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                         calcBf();
                       }
                     },
-                    text: '- 0.5',
+                    child: const Text('- 0.5'),
                   ),
                 ),
                 SizedBox(
@@ -212,8 +212,8 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                 SizedBox(
                   width: 72,
                   height: 42,
-                  child: FormattedElevatedButton(
-                    text: '+ 0.5',
+                  child: PlatformButton(
+                    child: const Text('+ 0.5'),
                     onPressed: () {
                       if (!(heightDouble == (height.toDouble() + 0.5))) {
                         setState(() {
@@ -479,11 +479,8 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
+    return PlatformScaffold(
+        title: _title,
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -733,13 +730,13 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                                 )
                               : const SizedBox(),
                           _buildTape(width),
-                          FormattedElevatedButton(
+                          PlatformButton(
                             onPressed: () {
                               submit(context);
                             },
-                            text: widget.bodyfat.id == null
+                            child: Text(widget.bodyfat.id == null
                                 ? 'Add Body Comp'
-                                : 'Update Body Comp',
+                                : 'Update Body Comp'),
                           ),
                         ],
                       ),

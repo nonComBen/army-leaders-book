@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/apft.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_apft_page.dart';
 import '../pdf/apfts_pdf.dart';
 import '../../providers/subscription_state.dart';
@@ -57,8 +58,6 @@ class ApftPageState extends ConsumerState<ApftPage> {
   late SharedPreferences prefs;
   QuerySnapshot? snapshot;
   BannerAd? myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -739,11 +738,9 @@ class ApftPageState extends ConsumerState<ApftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('APFT Stats'),
-            actions: appBarMenu(context, width)),
+    return PlatformScaffold(
+        title: 'APFT Stats',
+        actions: appBarMenu(context, width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

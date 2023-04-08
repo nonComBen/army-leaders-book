@@ -12,7 +12,8 @@ import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/training.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadTrainingsPage extends ConsumerStatefulWidget {
   const UploadTrainingsPage({
@@ -52,8 +53,6 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
       add5,
       add5Date,
       path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -277,11 +276,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Training'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload Training',
       body: Center(
         child: Card(
           child: Container(
@@ -299,11 +295,11 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -801,14 +797,14 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload Training',
+                    child: const Text('Upload Training'),
                   )
                 ],
               ),

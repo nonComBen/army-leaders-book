@@ -19,6 +19,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/weapon.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_weapon_page.dart';
 import 'uploadPages/upload_weapons_page.dart';
 import '../pdf/weapons_pdf.dart';
@@ -48,8 +49,6 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
   late StreamSubscription _subscriptionUsers;
   late SharedPreferences prefs;
   BannerAd? myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -655,11 +654,9 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Weapon Stats'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Weapon Stats',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

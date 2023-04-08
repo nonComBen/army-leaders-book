@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../auth_provider.dart';
 import '../providers/root_provider.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({
@@ -23,8 +24,6 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   String? _email, _password;
   bool tosAgree = false;
   final _passwordController = TextEditingController();
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   _launchURL(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
@@ -79,11 +78,8 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     final rootService = ref.read(rootProvider.notifier);
     var auth = ref.read(authProvider);
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Create Account'),
-      ),
+    return PlatformScaffold(
+      title: 'Create Account',
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width > 932 ? (width - 916) / 2 : 16),

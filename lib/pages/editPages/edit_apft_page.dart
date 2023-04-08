@@ -16,7 +16,8 @@ import '../../calculators/pu_calculator.dart';
 import '../../calculators/su_calculator.dart';
 import '../../calculators/run_calculator.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditApftPage extends ConsumerStatefulWidget {
   const EditApftPage({
@@ -34,7 +35,6 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _puController = TextEditingController();
@@ -371,11 +371,8 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: Text(_title),
-      ),
+    return PlatformScaffold(
+      title: _title,
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -775,8 +772,9 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                         },
                       ),
                     ),
-                    FormattedElevatedButton(
-                      text: widget.apft.id == null ? 'Add APFT' : 'Update APFT',
+                    PlatformButton(
+                      child: Text(
+                          widget.apft.id == null ? 'Add APFT' : 'Update APFT'),
                       onPressed: () => submit(context),
                     ),
                   ],

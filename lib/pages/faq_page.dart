@@ -7,6 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/auth_provider.dart';
 
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class FaqPage extends ConsumerStatefulWidget {
   const FaqPage({
@@ -154,10 +155,8 @@ class FaqPageState extends ConsumerState<FaqPage> {
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Frequently Asked Questions'),
-      ),
+    return PlatformScaffold(
+      title: 'Frequently Asked Questions',
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width > 932 ? (width - 916) / 2 : 16),

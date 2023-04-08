@@ -16,6 +16,7 @@ import '../apple_sign_in_available.dart';
 import '../methods/show_on_login.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/user_provider.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -42,8 +43,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
   final _rankController = TextEditingController();
   final _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void createAccount(User user) async {
     ref.read(soldiersProvider.notifier).loadSoldiers(user.uid);
@@ -194,9 +193,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
     double width = MediaQuery.of(context).size.width;
     final appleSignInAvailable =
         ref.read(appleSignInAvailableProvider).isAvailable;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(title: const Text('Login')),
+    return PlatformScaffold(
+      title: 'Login',
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width > 932 ? (width - 916) / 2 : 16),

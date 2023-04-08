@@ -8,6 +8,7 @@ import 'package:leaders_book/auth_provider.dart';
 
 import '../providers/subscription_state.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class CreedsPage extends ConsumerStatefulWidget {
   const CreedsPage({
@@ -311,10 +312,8 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
     }
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Creeds, Etc.'),
-      ),
+    return PlatformScaffold(
+      title: 'Creeds, Etc.',
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width > 932 ? (width - 916) / 2 : 16),

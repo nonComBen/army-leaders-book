@@ -7,13 +7,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
 import '../../models/action.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 
 class EditActionsTrackerPage extends ConsumerStatefulWidget {
   const EditActionsTrackerPage({
@@ -32,7 +33,6 @@ class EditActionsTrackerPageState
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _actionController = TextEditingController();
@@ -259,11 +259,8 @@ class EditActionsTrackerPageState
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
+    return PlatformScaffold(
+        title: _title,
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -471,10 +468,10 @@ class EditActionsTrackerPageState
                               },
                             ),
                           ),
-                          FormattedElevatedButton(
-                            text: widget.action.id == null
+                          PlatformButton(
+                            child: Text(widget.action.id == null
                                 ? 'Add Action'
-                                : 'Update Action',
+                                : 'Update Action'),
                             onPressed: () => submit(context),
                           ),
                         ],

@@ -11,7 +11,8 @@ import 'package:leaders_book/auth_provider.dart';
 import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/phone_number.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadPhonePage extends ConsumerStatefulWidget {
   const UploadPhonePage({
@@ -26,8 +27,6 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? title, poc, phone, loc, path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -101,11 +100,8 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Phone Numbers'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload Phone Numbers',
       body: Center(
         child: Card(
           child: Container(
@@ -123,11 +119,11 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -224,14 +220,14 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload Phone Numbers',
+                    child: const Text('Upload Phone Numbers'),
                   )
                 ],
               ),

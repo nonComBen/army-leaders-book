@@ -13,7 +13,8 @@ import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
 import '../../models/profile.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditPermProfilePage extends ConsumerStatefulWidget {
   const EditPermProfilePage({
@@ -31,7 +32,6 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
@@ -331,11 +331,8 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
+    return PlatformScaffold(
+        title: _title,
         body: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -513,13 +510,13 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
                               },
                             ),
                           ),
-                          FormattedElevatedButton(
+                          PlatformButton(
                             onPressed: () {
                               submit(context);
                             },
-                            text: widget.profile.id == null
+                            child: Text(widget.profile.id == null
                                 ? 'Add Profile'
-                                : 'Update Profile',
+                                : 'Update Profile'),
                           ),
                         ],
                       ),

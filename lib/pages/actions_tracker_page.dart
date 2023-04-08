@@ -19,6 +19,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/action.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_actions_tracker_page.dart';
 import 'uploadPages/upload_actions_page.dart';
 import '../pdf/actions_pdf.dart';
@@ -44,8 +45,6 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   QuerySnapshot? snapshot;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -599,16 +598,15 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Action Tracker'),
-            actions: appBarMenu(context, width)),
+    return PlatformScaffold(
+        title: 'Action Tracker',
+        actions: appBarMenu(context, width),
         floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          },
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

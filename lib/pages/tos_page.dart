@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/platform_widgets/platform_scaffold.dart';
+
 class TosPage extends StatelessWidget {
   const TosPage({Key? key}) : super(key: key);
 
@@ -7,11 +9,12 @@ class TosPage extends StatelessWidget {
 
   Widget headerText(String text) {
     return Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: SelectableText(
-          text,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-        ));
+      padding: const EdgeInsets.all(4.0),
+      child: SelectableText(
+        text,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+      ),
+    );
   }
 
   Widget normalText(String text) {
@@ -24,10 +27,8 @@ class TosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Terms and Conditions'),
-      ),
+    return PlatformScaffold(
+      title: 'Terms and Conditions',
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width > 916 ? (width - 900) / 2 : 16),

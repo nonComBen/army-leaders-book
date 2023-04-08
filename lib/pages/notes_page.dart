@@ -11,6 +11,7 @@ import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../../models/note.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_note_page.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
@@ -34,8 +35,6 @@ class NotesPageState extends ConsumerState<NotesPage> {
   late StreamSubscription _subscription;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -231,23 +230,19 @@ class NotesPageState extends ConsumerState<NotesPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Notes'),
-        actions: <Widget>[
-          Tooltip(
-              message: 'Delete Record(s)',
-              child: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _deleteRecord())),
-          Tooltip(
-              message: 'Edit Record',
-              child: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _editRecord())),
-        ],
-      ),
+    return PlatformScaffold(
+      title: 'Notes',
+      actions: <Widget>[
+        Tooltip(
+            message: 'Delete Record(s)',
+            child: IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _deleteRecord())),
+        Tooltip(
+            message: 'Edit Record',
+            child: IconButton(
+                icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
+      ],
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {

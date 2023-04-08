@@ -13,7 +13,8 @@ import '../../methods/rank_sort.dart';
 import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadSoldierPage extends ConsumerStatefulWidget {
   const UploadSoldierPage({
@@ -361,10 +362,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Upload Soldier'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload Soldier',
       body: Center(
         child: Card(
           child: Container(
@@ -382,11 +381,11 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -1182,14 +1181,14 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveSoldiers(context);
                     },
-                    text: 'Upload Roster',
+                    child: const Text('Upload Roster'),
                   )
                 ],
               ),

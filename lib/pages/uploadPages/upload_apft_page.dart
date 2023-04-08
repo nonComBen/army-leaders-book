@@ -12,7 +12,8 @@ import '../../methods/upload_methods.dart';
 import '../../models/apft.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadApftPage extends ConsumerStatefulWidget {
   const UploadApftPage({
@@ -38,8 +39,6 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
       runScore,
       path,
       gender;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -205,11 +204,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload APFT Stats'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload APFT Stats',
       body: Center(
         child: Card(
           child: Container(
@@ -227,11 +223,11 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -461,14 +457,14 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload APFT Stats',
+                    child: const Text('Upload APFT Stats'),
                   )
                 ],
               ),

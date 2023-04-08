@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/root_provider.dart';
 import '../auth_provider.dart';
 import '../../models/user.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class LinkAnonymousPage extends ConsumerStatefulWidget {
   const LinkAnonymousPage({
@@ -25,8 +26,6 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
   final _rankController = TextEditingController();
   final _nameController = TextEditingController();
   User? user;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   _launchURL(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
@@ -84,11 +83,8 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
     var auth = ref.read(authProvider);
     user = auth.currentUser();
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Create Account'),
-      ),
+    return PlatformScaffold(
+      title: 'Create Account',
       body: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(

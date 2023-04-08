@@ -12,7 +12,8 @@ import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/weapon.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadWeaponsPage extends ConsumerStatefulWidget {
   const UploadWeaponsPage({
@@ -27,8 +28,6 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
   List<String?>? columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, date, type, weapon, hits, max, badge, pass, path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -158,11 +157,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Weapon Stats'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload Weapon Stats',
       body: Center(
         child: Card(
           child: Container(
@@ -180,11 +176,11 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -355,14 +351,14 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload Weapon Stats',
+                    child: const Text('Upload Weapon Stats'),
                   )
                 ],
               ),

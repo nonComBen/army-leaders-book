@@ -18,6 +18,7 @@ import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_duty_roster_page.dart';
 import '../../models/duty.dart';
 import 'uploadPages/upload_duty_roster_page.dart';
@@ -42,8 +43,6 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -622,11 +621,9 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Duty Roster'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Duty Roster',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

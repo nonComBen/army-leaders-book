@@ -20,6 +20,7 @@ import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../models/flag.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_flag_page.dart';
 import 'uploadPages/upload_flags_page.dart';
 import '../pdf/flags_pdf.dart';
@@ -43,8 +44,6 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -580,11 +579,9 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Flags'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Flags',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

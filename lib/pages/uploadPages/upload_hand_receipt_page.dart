@@ -12,7 +12,8 @@ import '../../methods/upload_methods.dart';
 import '../../models/hand_receipt_item.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadHandReceiptPage extends ConsumerStatefulWidget {
   const UploadHandReceiptPage({
@@ -36,8 +37,6 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
       subComponents,
       comments,
       path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -190,11 +189,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Hand Receipt'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload Hand Receipt',
       body: Center(
         child: Card(
           child: Container(
@@ -212,11 +208,11 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -408,14 +404,14 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload Hand Receipt',
+                    child: const Text('Upload Hand Receipt'),
                   )
                 ],
               ),

@@ -18,6 +18,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../models/mil_license.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_mil_license_page.dart';
 import 'uploadPages/upload_mil_license_page.dart';
 import '../pdf/mil_lic_pdf.dart';
@@ -43,8 +44,6 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -610,11 +609,9 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Military Licenses'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Military Licenses',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

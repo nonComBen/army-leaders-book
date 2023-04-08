@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../methods/on_back_pressed.dart';
 import '../providers/theme_provider.dart';
 import '../../models/setting.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/platform_widgets/platform_text_field.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -72,7 +73,6 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   final TextEditingController hivController = TextEditingController();
 
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _editNotification(
       BuildContext context, int? index, Notification notification) {
@@ -338,11 +338,8 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
     final themeService = ref.read(themeProvider.notifier);
     double width = MediaQuery.of(context).size.width;
     final accentColor = Theme.of(context).colorScheme.onPrimary;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+    return PlatformScaffold(
+      title: 'Settings',
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width > 932 ? (width - 916) / 2 : 16),

@@ -12,7 +12,8 @@ import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/working_eval.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadWorkingEvalsPage extends ConsumerStatefulWidget {
   const UploadWorkingEvalsPage({
@@ -39,8 +40,6 @@ class UploadWorkingEvalsPageState
       achieves,
       performance,
       path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   void _openFileExplorer() async {
     try {
@@ -175,11 +174,8 @@ class UploadWorkingEvalsPageState
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Working Evals'),
-      ),
+    return PlatformScaffold(
+      title: 'Upload Working Evals',
       body: Center(
         child: Card(
           child: Container(
@@ -197,11 +193,11 @@ class UploadWorkingEvalsPageState
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       _openFileExplorer();
                     },
-                    text: 'Pick File',
+                    child: const Text('Pick File'),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -432,14 +428,14 @@ class UploadWorkingEvalsPageState
                       ),
                     ],
                   ),
-                  FormattedElevatedButton(
+                  PlatformButton(
                     onPressed: () {
                       if (path == '') {
                         showSnackbar(context, 'Please select a file to upload');
                       }
                       _saveData(context);
                     },
-                    text: 'Upload Working Evals',
+                    child: const Text('Upload Working Evals'),
                   )
                 ],
               ),

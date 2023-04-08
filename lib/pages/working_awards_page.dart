@@ -16,6 +16,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../models/working_award.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_working_award_page.dart';
 import 'uploadPages/upload_working_awads_page.dart';
 import '../providers/tracking_provider.dart';
@@ -40,8 +41,6 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   late StreamSubscription _subscription;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -488,11 +487,9 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Working Award'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Working Award',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

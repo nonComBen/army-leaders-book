@@ -13,6 +13,7 @@ import '../../providers/subscription_state.dart';
 import '../../models/award.dart';
 import '../../models/pov.dart';
 import '../../models/soldier.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_soldier_page.dart';
 import 'share_soldier_page.dart';
 import '../providers/tracking_provider.dart';
@@ -341,26 +342,26 @@ class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_soldierName),
-        actions: <Widget>[
-          Tooltip(
-            message: 'Share Soldier',
-            child: IconButton(
-                icon: const Icon(Icons.share),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ShareSoldierPage(
-                                userId: widget.userId,
-                                soldiers: [widget.soldier],
-                              )));
-                }),
-          ),
-        ],
-      ),
+    return PlatformScaffold(
+      title: _soldierName,
+      actions: <Widget>[
+        Tooltip(
+          message: 'Share Soldier',
+          child: IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ShareSoldierPage(
+                      userId: widget.userId,
+                      soldiers: [widget.soldier],
+                    ),
+                  ),
+                );
+              }),
+        ),
+      ],
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.edit),
           onPressed: () {

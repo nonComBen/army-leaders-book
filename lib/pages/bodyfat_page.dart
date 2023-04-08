@@ -21,6 +21,7 @@ import '../methods/web_download.dart';
 import '../pdf/bodyfats_pdf.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../models/bodyfat.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_bodyfat_page.dart';
 import 'uploadPages/upload_body_fat_page.dart';
 import '../providers/tracking_provider.dart';
@@ -50,8 +51,6 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
   late SharedPreferences prefs;
   QuerySnapshot? snapshot;
   BannerAd? myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -667,11 +666,9 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Body Comp Stats'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Body Comp Stats',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

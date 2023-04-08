@@ -18,6 +18,7 @@ import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/profile.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_temp_profile_page.dart';
 import 'uploadPages/upload_temp_profile_page.dart';
 import '../pdf/temp_profiles_pdf.dart';
@@ -43,8 +44,6 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -557,11 +556,9 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Temporary Profiles'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Temporary Profiles',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

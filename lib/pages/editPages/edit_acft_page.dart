@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 
 import '../../auth_provider.dart';
 import '../../calculators/twomr_calculator.dart';
@@ -15,11 +16,11 @@ import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
 import '../../models/acft.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
 import '../../calculators/hrp_calculator.dart';
 import '../../calculators/mdl_calculator.dart';
 import '../../calculators/sdc_calculator.dart';
 import '../../calculators/spt_calculator.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 
 class EditAcftPage extends ConsumerStatefulWidget {
   const EditAcftPage({
@@ -37,7 +38,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _deadliftController = TextEditingController();
@@ -490,11 +490,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: Text(_title),
-      ),
+    return PlatformScaffold(
+      title: _title,
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -1024,8 +1021,9 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                         ),
                       ],
                     ),
-                    FormattedElevatedButton(
-                      text: widget.acft.id == null ? 'Add ACFT' : 'Update ACFT',
+                    PlatformButton(
+                      child: Text(
+                          widget.acft.id == null ? 'Add ACFT' : 'Update ACFT'),
                       onPressed: () => submit(context),
                     ),
                   ],

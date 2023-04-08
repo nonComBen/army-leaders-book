@@ -17,6 +17,7 @@ import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/tasking.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_tasking_page.dart';
 import 'uploadPages/upload_taskings_page.dart';
 import '../pdf/taskings_pdf.dart';
@@ -42,8 +43,6 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   @override
   void didChangeDependencies() async {
@@ -637,11 +636,9 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Taskings'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
+    return PlatformScaffold(
+        title: 'Taskings',
+        actions: appBarMenu(context, MediaQuery.of(context).size.width),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

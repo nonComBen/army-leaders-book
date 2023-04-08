@@ -13,7 +13,8 @@ import '../../methods/validate.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/appointment.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditAppointmentPage extends ConsumerStatefulWidget {
   const EditAppointmentPage({
@@ -31,7 +32,6 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
 
   final TextEditingController _startController = TextEditingController();
   final TextEditingController _endController = TextEditingController();
@@ -332,11 +332,8 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: Text(_title),
-      ),
+    return PlatformScaffold(
+      title: _title,
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -600,10 +597,10 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                           },
                         ),
                       ),
-                      FormattedElevatedButton(
-                        text: widget.apt.id == null
+                      PlatformButton(
+                        child: Text(widget.apt.id == null
                             ? 'Add Appointment'
-                            : 'Update Appointment',
+                            : 'Update Appointment'),
                         onPressed: () {
                           if (_endController.text != '' &&
                               (_endTime!.hour < _startTime!.hour ||

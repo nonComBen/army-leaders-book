@@ -25,6 +25,7 @@ import '../../widgets/anon_warning_banner.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
 import '../widgets/alert_tile.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class AlertRosterPage extends ConsumerStatefulWidget {
   const AlertRosterPage({Key? key}) : super(key: key);
@@ -43,7 +44,6 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   bool isSubscribed = false, isInitial = true;
   String? _userId;
 
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
   final GlobalKey _globalKey = GlobalKey();
 
   void _textAll() async {
@@ -650,35 +650,33 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Alert Roster'),
-        actions: <Widget>[
-          Tooltip(
-            message:
-                kIsWeb || Platform.isIOS ? 'Feature Unavailable' : 'Text All',
-            child: IconButton(
-              icon: const Icon(
-                Icons.sms,
-              ),
-              onPressed: kIsWeb || Platform.isIOS
-                  ? null
-                  : () {
-                      _textAll();
-                    },
+    return PlatformScaffold(
+      title: 'Alert Roster',
+      actions: <Widget>[
+        Tooltip(
+          message:
+              kIsWeb || Platform.isIOS ? 'Feature Unavailable' : 'Text All',
+          child: IconButton(
+            icon: const Icon(
+              Icons.sms,
             ),
+            onPressed: kIsWeb || Platform.isIOS
+                ? null
+                : () {
+                    _textAll();
+                  },
           ),
-          Tooltip(
-              message: 'Download as PDF',
-              child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                },
-              ))
-        ],
-      ),
+        ),
+        Tooltip(
+          message: 'Download as PDF',
+          child: IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: () {
+              _downloadPdf();
+            },
+          ),
+        )
+      ],
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width < 816 ? 16 : (width - 800) / 2),

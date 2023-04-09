@@ -14,6 +14,7 @@ import '../../methods/validate.dart';
 import '../../models/flag.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditFlagPage extends ConsumerStatefulWidget {
@@ -36,14 +37,8 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _expController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
-  String? _type,
-      _soldierId,
-      _rank,
-      _lastName,
-      _firstName,
-      _section,
-      _rankSort,
-      _owner;
+  String _type = 'Adverse Action';
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   final List<String> _types = [
     'Adverse Action',
@@ -256,7 +251,7 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
     _firstName = widget.flag.firstName;
     _section = widget.flag.section;
     _rankSort = widget.flag.rankSort;
-    _type = widget.flag.type;
+    _type = widget.flag.type!;
     _owner = widget.flag.owner;
     _users = widget.flag.users;
 
@@ -330,17 +325,11 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                                             .toString()
                                             .compareTo(
                                                 b['rankSort'].toString()));
-                                        return DropdownButtonFormField<String>(
-                                          decoration: const InputDecoration(
-                                            labelText: 'Soldier',
-                                          ),
-                                          items: soldiers!.map((doc) {
-                                            return DropdownMenuItem<String>(
-                                              value: doc.id,
-                                              child: Text(
-                                                  '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                            );
-                                          }).toList(),
+                                        return PlatformItemPicker(
+                                          label: const Text('Soldier'),
+                                          items: soldiers!
+                                              .map((e) => e.id)
+                                              .toList(),
                                           onChanged: (value) {
                                             int index = soldiers!.indexWhere(
                                                 (doc) => doc.id == value);
@@ -388,18 +377,9 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: DropdownButtonFormField<String>(
-                                  decoration:
-                                      const InputDecoration(labelText: 'Type'),
-                                  items: _types.map((value) {
-                                    return DropdownMenuItem(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    );
-                                  }).toList(),
+                                child: PlatformItemPicker(
+                                  label: const Text('Type'),
+                                  items: _types,
                                   onChanged: (dynamic value) {
                                     setState(() {
                                       _type = value;
@@ -407,9 +387,6 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                                     });
                                   },
                                   value: _type,
-                                  style: const TextStyle(
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
                                 ),
                               ),
                               Padding(

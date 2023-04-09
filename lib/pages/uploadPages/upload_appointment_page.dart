@@ -14,6 +14,7 @@ import '../../models/appointment.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadAppointmentsPage extends ConsumerStatefulWidget {
@@ -27,7 +28,7 @@ class UploadAppointmentsPage extends ConsumerStatefulWidget {
 
 class UploadAppointmentsPageState
     extends ConsumerState<UploadAppointmentsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, title, date, start, end, status, comments, path, location;
 
@@ -55,14 +56,14 @@ class UploadAppointmentsPageState
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      title = columnHeaders!.contains('Title') ? 'Title' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      start = columnHeaders!.contains('Start Time') ? 'Start Time' : '';
-      end = columnHeaders!.contains('End Time') ? 'End Time' : '';
-      status = columnHeaders!.contains('Status') ? 'Status' : '';
-      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
-      location = columnHeaders!.contains('Location') ? 'Location' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      title = columnHeaders.contains('Title') ? 'Title' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      start = columnHeaders.contains('Start Time') ? 'Start Time' : '';
+      end = columnHeaders.contains('End Time') ? 'End Time' : '';
+      status = columnHeaders.contains('Status') ? 'Status' : '';
+      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
+      location = columnHeaders.contains('Location') ? 'Location' : '';
     });
   }
 
@@ -177,7 +178,7 @@ class UploadAppointmentsPageState
     comments = '';
     location = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -230,15 +231,9 @@ class UploadAppointmentsPageState
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -249,14 +244,9 @@ class UploadAppointmentsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Title'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Title'),
+                          items: columnHeaders,
                           value: title,
                           onChanged: (value) {
                             setState(() {
@@ -267,14 +257,9 @@ class UploadAppointmentsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -285,15 +270,9 @@ class UploadAppointmentsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Start Time'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Start Time'),
+                          items: columnHeaders,
                           value: start,
                           onChanged: (value) {
                             setState(() {
@@ -304,15 +283,9 @@ class UploadAppointmentsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'End Time'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('End Time'),
+                          items: columnHeaders,
                           value: end,
                           onChanged: (value) {
                             setState(() {
@@ -323,15 +296,9 @@ class UploadAppointmentsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Location'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Location'),
+                          items: columnHeaders,
                           value: location,
                           onChanged: (value) {
                             setState(() {
@@ -342,15 +309,9 @@ class UploadAppointmentsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Status'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Status'),
+                          items: columnHeaders,
                           value: status,
                           onChanged: (value) {
                             setState(() {
@@ -361,15 +322,9 @@ class UploadAppointmentsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Comments'),
+                          items: columnHeaders,
                           value: comments,
                           onChanged: (value) {
                             setState(() {

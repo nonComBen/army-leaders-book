@@ -14,6 +14,7 @@ import '../../models/counseling.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadCounselingsPage extends ConsumerStatefulWidget {
@@ -26,7 +27,7 @@ class UploadCounselingsPage extends ConsumerStatefulWidget {
 }
 
 class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       date,
@@ -62,19 +63,19 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      assessment = columnHeaders!.contains('Assessment') ? 'Assessment' : '';
-      indivRemarks = columnHeaders!.contains('Individual Remarks')
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      assessment = columnHeaders.contains('Assessment') ? 'Assessment' : '';
+      indivRemarks = columnHeaders.contains('Individual Remarks')
           ? 'Individual Remarks'
           : '';
-      keyPoints = columnHeaders!.contains('Key Points') ? 'Key Points' : '';
-      leaderResp = columnHeaders!.contains('Leader Responsibilities')
+      keyPoints = columnHeaders.contains('Key Points') ? 'Key Points' : '';
+      leaderResp = columnHeaders.contains('Leader Responsibilities')
           ? 'Leader Responsibilities'
           : '';
       planOfAction =
-          columnHeaders!.contains('Plan of Action') ? 'Plan of Action' : '';
-      purpose = columnHeaders!.contains('Purpose of Counseling')
+          columnHeaders.contains('Plan of Action') ? 'Plan of Action' : '';
+      purpose = columnHeaders.contains('Purpose of Counseling')
           ? 'Purpose of Counseling'
           : '';
     });
@@ -157,7 +158,7 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
     planOfAction = '';
     purpose = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -210,15 +211,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -229,14 +224,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -247,15 +237,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Purpose of Counseling'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Purpose of Counseling'),
+                          items: columnHeaders,
                           value: purpose,
                           onChanged: (value) {
                             setState(() {
@@ -266,15 +250,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Key Points'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Key Points'),
+                          items: columnHeaders,
                           value: keyPoints,
                           onChanged: (value) {
                             setState(() {
@@ -285,15 +263,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Plan of Action'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Plan of Action'),
+                          items: columnHeaders,
                           value: planOfAction,
                           onChanged: (value) {
                             setState(() {
@@ -304,15 +276,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Individual Remarks'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Individual Remarks'),
+                          items: columnHeaders,
                           value: indivRemarks,
                           onChanged: (value) {
                             setState(() {
@@ -323,15 +289,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Leader Responsibilities'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Leader Responsibilities'),
+                          items: columnHeaders,
                           value: leaderResp,
                           onChanged: (value) {
                             setState(() {
@@ -342,15 +302,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Assessment'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Assessment'),
+                          items: columnHeaders,
                           value: assessment,
                           onChanged: (value) {
                             setState(() {

@@ -13,6 +13,7 @@ import '../../models/hr_action.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadHrActionsPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadHrActionsPage extends ConsumerStatefulWidget {
 }
 
 class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, dd93, sglv, prr, path;
 
@@ -53,10 +54,10 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      dd93 = columnHeaders!.contains('DD93 Date') ? 'DD93 Date' : '';
-      sglv = columnHeaders!.contains('SGLV Date') ? 'SGLV Date' : '';
-      prr = columnHeaders!.contains('Record Review Date')
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      dd93 = columnHeaders.contains('DD93 Date') ? 'DD93 Date' : '';
+      sglv = columnHeaders.contains('SGLV Date') ? 'SGLV Date' : '';
+      prr = columnHeaders.contains('Record Review Date')
           ? 'Record Review Date'
           : '';
     });
@@ -128,7 +129,7 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
     sglv = '';
     prr = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -181,15 +182,9 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -200,15 +195,9 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'DD93 Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('DD93 Date'),
+                          items: columnHeaders,
                           value: dd93,
                           onChanged: (value) {
                             setState(() {
@@ -219,15 +208,9 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SGLV Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SGLV Date'),
+                          items: columnHeaders,
                           value: sglv,
                           onChanged: (value) {
                             setState(() {
@@ -238,15 +221,9 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Record Review Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Record Review Date'),
+                          items: columnHeaders,
                           value: prr,
                           onChanged: (value) {
                             setState(() {

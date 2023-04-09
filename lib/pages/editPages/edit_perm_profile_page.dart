@@ -14,6 +14,7 @@ import '../../methods/validate.dart';
 import '../../models/profile.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditPermProfilePage extends ConsumerStatefulWidget {
@@ -237,11 +238,9 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
     if (!run) {
       return Padding(
         padding: const EdgeInsets.all(8.0),
-        child: DropdownButtonFormField(
-            decoration: const InputDecoration(labelText: 'Alternative Event'),
-            items: _events.map((event) {
-              return DropdownMenuItem(value: event, child: Text(event));
-            }).toList(),
+        child: PlatformItemPicker(
+            label: const Text('Alternative Event'),
+            items: _events,
             value: _event,
             onChanged: (dynamic value) {
               if (mounted) {
@@ -389,17 +388,11 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers!.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
+                                          return PlatformItemPicker(
+                                            label: const Text('Soldier'),
+                                            items: soldiers!
+                                                .map((e) => e.id)
+                                                .toList(),
                                             onChanged: (value) {
                                               int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);

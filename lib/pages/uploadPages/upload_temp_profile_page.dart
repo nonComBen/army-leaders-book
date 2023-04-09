@@ -14,6 +14,7 @@ import '../../models/soldier.dart';
 import '../../methods/date_methods.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadTempProfilesPage extends ConsumerStatefulWidget {
@@ -27,7 +28,7 @@ class UploadTempProfilesPage extends ConsumerStatefulWidget {
 
 class UploadTempProfilesPageState
     extends ConsumerState<UploadTempProfilesPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, date, exp, rec, comments, path;
 
@@ -55,10 +56,10 @@ class UploadTempProfilesPageState
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      exp = columnHeaders!.contains('Expiration Date') ? 'Expiration Date' : '';
-      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      exp = columnHeaders.contains('Expiration Date') ? 'Expiration Date' : '';
+      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
     });
   }
 
@@ -135,7 +136,7 @@ class UploadTempProfilesPageState
     rec = '';
     comments = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -188,15 +189,9 @@ class UploadTempProfilesPageState
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -207,15 +202,9 @@ class UploadTempProfilesPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Issued Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Issued Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -226,15 +215,9 @@ class UploadTempProfilesPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Expiration Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Expiration Date'),
+                          items: columnHeaders,
                           value: exp,
                           onChanged: (value) {
                             setState(() {
@@ -245,15 +228,9 @@ class UploadTempProfilesPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Comments'),
+                          items: columnHeaders,
                           value: comments,
                           onChanged: (value) {
                             setState(() {

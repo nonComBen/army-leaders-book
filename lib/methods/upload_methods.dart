@@ -57,8 +57,8 @@ String getCellValue(List<Data?> row, List<String?>? headers, String? header) {
   }
 }
 
-List<String?> getColumnHeaders(List<Data?> row) {
-  List<String?> columnHeaders = [''];
+List<String> getColumnHeaders(List<Data?> row) {
+  List<String> columnHeaders = [''];
   for (var cell in row) {
     if (cell!.value.toString() != '') {
       columnHeaders.add(cell.value.toString());

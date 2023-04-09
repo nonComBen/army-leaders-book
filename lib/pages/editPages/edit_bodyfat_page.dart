@@ -15,6 +15,7 @@ import '../../models/bodyfat.dart';
 import '../../calculators/bf_calculator.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditBodyfatPage extends ConsumerStatefulWidget {
@@ -48,14 +49,8 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
       removeSoldiers = false,
       updated = false,
       underweight = false;
-  String? _soldierId,
-      _rank,
-      _lastName,
-      _firstName,
-      _section,
-      _rankSort,
-      _gender,
-      _owner;
+  String _gender = 'Male';
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   late int height;
   double? heightDouble;
@@ -349,7 +344,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         section: _section!,
         rankSort: _rankSort!,
         age: int.tryParse(_ageController.text.trim()) ?? 0,
-        gender: _gender!,
+        gender: _gender,
         date: _dateController.text,
         height: _heightController.text,
         heightDouble: heightDouble.toString(),
@@ -537,17 +532,11 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers!.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
+                                          return PlatformItemPicker(
+                                            label: const Text('Soldier'),
+                                            items: soldiers!
+                                                .map((e) => e.id)
+                                                .toList(),
                                             onChanged: (value) {
                                               int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);

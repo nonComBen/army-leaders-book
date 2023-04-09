@@ -13,6 +13,7 @@ import '../../models/soldier.dart';
 import '../../models/weapon.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadWeaponsPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadWeaponsPage extends ConsumerStatefulWidget {
 }
 
 class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, date, type, weapon, hits, max, badge, pass, path;
 
@@ -53,14 +54,14 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      type = columnHeaders!.contains('Qual Type') ? 'Qual Type' : '';
-      weapon = columnHeaders!.contains('Weapon') ? 'Weapon' : '';
-      hits = columnHeaders!.contains('Hits') ? 'Hits' : '';
-      max = columnHeaders!.contains('Max') ? 'Max' : '';
-      badge = columnHeaders!.contains('Qual Badge') ? 'Qual Badge' : '';
-      pass = columnHeaders!.contains('Pass') ? 'Pass' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      type = columnHeaders.contains('Qual Type') ? 'Qual Type' : '';
+      weapon = columnHeaders.contains('Weapon') ? 'Weapon' : '';
+      hits = columnHeaders.contains('Hits') ? 'Hits' : '';
+      max = columnHeaders.contains('Max') ? 'Max' : '';
+      badge = columnHeaders.contains('Qual Badge') ? 'Qual Badge' : '';
+      pass = columnHeaders.contains('Pass') ? 'Pass' : '';
     });
   }
 
@@ -150,7 +151,7 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
     badge = '';
     pass = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -203,15 +204,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -222,14 +217,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -240,15 +230,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Qualification Type'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Qualification Type'),
+                          items: columnHeaders,
                           value: type,
                           onChanged: (value) {
                             setState(() {
@@ -259,15 +243,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Weapon'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Weapon'),
+                          items: columnHeaders,
                           value: weapon,
                           onChanged: (value) {
                             setState(() {
@@ -278,14 +256,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Hits'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Hits'),
+                          items: columnHeaders,
                           value: hits,
                           onChanged: (value) {
                             setState(() {
@@ -296,15 +269,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Maximum'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Maximum'),
+                          items: columnHeaders,
                           value: max,
                           onChanged: (value) {
                             setState(() {
@@ -315,14 +282,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Badge'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Badge'),
+                          items: columnHeaders,
                           value: badge,
                           onChanged: (value) {
                             setState(() {
@@ -333,14 +295,9 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Pass'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Pass'),
+                          items: columnHeaders,
                           value: pass,
                           onChanged: (value) {
                             setState(() {

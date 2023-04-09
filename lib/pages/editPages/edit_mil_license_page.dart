@@ -15,6 +15,7 @@ import '../../methods/validate.dart';
 import '../../models/mil_license.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_text_field.dart';
 
@@ -411,17 +412,11 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                                               .toString()
                                               .compareTo(
                                                   b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers!.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
+                                          return PlatformItemPicker(
+                                            label: const Text('Soldier'),
+                                            items: soldiers!
+                                                .map((e) => e.id)
+                                                .toList(),
                                             onChanged: (value) {
                                               int index = soldiers!.indexWhere(
                                                   (doc) => doc.id == value);

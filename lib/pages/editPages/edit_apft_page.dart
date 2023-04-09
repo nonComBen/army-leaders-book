@@ -17,6 +17,7 @@ import '../../calculators/su_calculator.dart';
 import '../../calculators/run_calculator.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditApftPage extends ConsumerStatefulWidget {
@@ -44,15 +45,8 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
   final TextEditingController _suRawController = TextEditingController();
   final TextEditingController _runRawController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
-  String? _runType,
-      _soldierId,
-      _rank,
-      _lastName,
-      _firstName,
-      _section,
-      _rankSort,
-      _gender,
-      _owner;
+  String _runType = 'Run', _gender = 'Male';
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   int _total = 0, _puScore = 0, _suScore = 0, _runScore = 0;
   List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
@@ -197,7 +191,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
       if (forProPoints) {
         if (runCalculator.passAltEvent(
           ageGroupIndex: ageGroupIndex(),
-          event: _runType!,
+          event: _runType,
           male: _gender == 'Male',
           runRaw: runRaw,
         )) {
@@ -249,10 +243,10 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
         suScore: _suScore,
         runScore: _runScore,
         total: _total,
-        altEvent: _runType!,
+        altEvent: _runType,
         pass: pass,
         age: age,
-        gender: _gender!,
+        gender: _gender,
       );
 
       if (widget.apft.id == null) {
@@ -425,16 +419,10 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                                     soldiers!.sort((a, b) => a['rankSort']
                                         .toString()
                                         .compareTo(b['rankSort'].toString()));
-                                    return DropdownButtonFormField<String>(
-                                      decoration: const InputDecoration(
-                                          labelText: 'Soldier'),
-                                      items: soldiers!.map((doc) {
-                                        return DropdownMenuItem<String>(
-                                          value: doc.id,
-                                          child: Text(
-                                              '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                        );
-                                      }).toList(),
+                                    return PlatformItemPicker(
+                                      label: const Text('Soldier'),
+                                      items:
+                                          soldiers!.map((e) => e.id).toList(),
                                       onChanged: (value) {
                                         int index = soldiers!.indexWhere(
                                             (doc) => doc.id == value);
@@ -559,17 +547,9 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: DropdownButtonFormField(
-                            decoration: const InputDecoration(
-                                labelText: 'Aerobic Event'),
-                            items: _runTypes.map((type) {
-                              return DropdownMenuItem(
-                                  value: type,
-                                  child: Text(
-                                    type,
-                                    style: const TextStyle(fontSize: 18),
-                                  ));
-                            }).toList(),
+                          child: PlatformItemPicker(
+                            label: const Text('Aerobic Event'),
+                            items: _runTypes,
                             onChanged: (dynamic value) {
                               if (mounted) {
                                 setState(() {
@@ -690,12 +670,13 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                           ),
                         ),
                         Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                            child: Text(
-                              _runType!,
-                              style: const TextStyle(fontSize: 18),
-                            )),
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                          child: Text(
+                            _runType,
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(

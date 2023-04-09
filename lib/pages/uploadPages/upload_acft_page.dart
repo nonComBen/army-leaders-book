@@ -13,6 +13,7 @@ import '../../models/acft.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadAcftPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadAcftPage extends ConsumerStatefulWidget {
 }
 
 class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       date,
@@ -72,24 +73,24 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
       setState(() {
         rows = sheet.rows;
         columnHeaders = getColumnHeaders(rows.first);
-        soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-        date = columnHeaders!.contains('Date') ? 'Date' : '';
-        ageGroup = columnHeaders!.contains('Age Group') ? 'Age Group' : '';
-        gender = columnHeaders!.contains('Gender') ? 'Gender' : '';
-        mdlRaw = columnHeaders!.contains('MDL Raw') ? 'MDL Raw' : '';
-        mdlScore = columnHeaders!.contains('MDL Score') ? 'MDL Score' : '';
-        sptRaw = columnHeaders!.contains('SPT Raw') ? 'SPT Raw' : '';
-        sptScore = columnHeaders!.contains('SPT Score') ? 'SPT Score' : '';
-        puRaw = columnHeaders!.contains('HRP Raw') ? 'HRP Raw' : '';
-        puScore = columnHeaders!.contains('HRP Score') ? 'HRP Score' : '';
-        sdcRaw = columnHeaders!.contains('SDC Raw') ? 'SDC Raw' : '';
-        sdcScore = columnHeaders!.contains('SDC Score') ? 'SDC Score' : '';
-        plkRaw = columnHeaders!.contains('PLK Raw') ? 'PLK Raw' : '';
-        plkScore = columnHeaders!.contains('PLK Score') ? 'PLK Score' : '';
-        runEvent = columnHeaders!.contains('Alt Event') ? 'Alt Event' : '';
-        runRaw = columnHeaders!.contains('2MR Raw') ? '2MR Raw' : '';
-        runScore = columnHeaders!.contains('2MR Score') ? '2MR Score' : '';
-        passDropdown = columnHeaders!.contains('Pass') ? 'Pass' : '';
+        soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+        date = columnHeaders.contains('Date') ? 'Date' : '';
+        ageGroup = columnHeaders.contains('Age Group') ? 'Age Group' : '';
+        gender = columnHeaders.contains('Gender') ? 'Gender' : '';
+        mdlRaw = columnHeaders.contains('MDL Raw') ? 'MDL Raw' : '';
+        mdlScore = columnHeaders.contains('MDL Score') ? 'MDL Score' : '';
+        sptRaw = columnHeaders.contains('SPT Raw') ? 'SPT Raw' : '';
+        sptScore = columnHeaders.contains('SPT Score') ? 'SPT Score' : '';
+        puRaw = columnHeaders.contains('HRP Raw') ? 'HRP Raw' : '';
+        puScore = columnHeaders.contains('HRP Score') ? 'HRP Score' : '';
+        sdcRaw = columnHeaders.contains('SDC Raw') ? 'SDC Raw' : '';
+        sdcScore = columnHeaders.contains('SDC Score') ? 'SDC Score' : '';
+        plkRaw = columnHeaders.contains('PLK Raw') ? 'PLK Raw' : '';
+        plkScore = columnHeaders.contains('PLK Score') ? 'PLK Score' : '';
+        runEvent = columnHeaders.contains('Alt Event') ? 'Alt Event' : '';
+        runRaw = columnHeaders.contains('2MR Raw') ? '2MR Raw' : '';
+        runScore = columnHeaders.contains('2MR Score') ? '2MR Score' : '';
+        passDropdown = columnHeaders.contains('Pass') ? 'Pass' : '';
       });
     }
   }
@@ -107,8 +108,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
 
       List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
-      List<String> events = ['', 'Run', 'Row', 'Bike', 'Swim'];
-      List<String> ageGroups = [
+      List events = ['', 'Run', 'Row', 'Bike', 'Swim'];
+      List ageGroups = [
         '17-21',
         '22-26',
         '27-31',
@@ -182,7 +183,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
 
           pass = passDropdown == ''
               ? true
-              : rows[i][columnHeaders!.indexOf(passDropdown) - 1]!
+              : rows[i][columnHeaders.indexOf(passDropdown!) - 1]!
                       .value
                       .toString()
                       .toUpperCase() ==
@@ -245,7 +246,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
     runRaw = '';
     runScore = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -298,15 +299,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -317,14 +312,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -335,15 +325,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Age Group'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Age Group'),
+                          items: columnHeaders,
                           value: ageGroup,
                           onChanged: (value) {
                             setState(() {
@@ -354,15 +338,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Gender'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Gender'),
+                          items: columnHeaders,
                           value: gender,
                           onChanged: (value) {
                             setState(() {
@@ -373,15 +351,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'MDL Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('MDL Raw'),
+                          items: columnHeaders,
                           value: mdlRaw,
                           onChanged: (value) {
                             setState(() {
@@ -392,15 +364,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'MDL Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('MDL Score'),
+                          items: columnHeaders,
                           value: mdlScore,
                           onChanged: (value) {
                             setState(() {
@@ -411,15 +377,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SPT Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SPT Raw'),
+                          items: columnHeaders,
                           value: sptRaw,
                           onChanged: (value) {
                             setState(() {
@@ -430,15 +390,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SPT Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SPT Score'),
+                          items: columnHeaders,
                           value: sptScore,
                           onChanged: (value) {
                             setState(() {
@@ -449,15 +403,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'HRP Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('HRP Raw'),
+                          items: columnHeaders,
                           value: puRaw,
                           onChanged: (value) {
                             setState(() {
@@ -468,15 +416,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'HRP Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('HRP Score'),
+                          items: columnHeaders,
                           value: puScore,
                           onChanged: (value) {
                             setState(() {
@@ -487,15 +429,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SDC Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SDC Raw'),
+                          items: columnHeaders,
                           value: sdcRaw,
                           onChanged: (value) {
                             setState(() {
@@ -506,15 +442,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SDC Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SDC Score'),
+                          items: columnHeaders,
                           value: sdcScore,
                           onChanged: (value) {
                             setState(() {
@@ -525,15 +455,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'PLK Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('PLK Raw'),
+                          items: columnHeaders,
                           value: plkRaw,
                           onChanged: (value) {
                             setState(() {
@@ -544,15 +468,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'PLK Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('PLK Score'),
+                          items: columnHeaders,
                           value: plkScore,
                           onChanged: (value) {
                             setState(() {
@@ -563,15 +481,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Aerobic Event'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Aerobic Event'),
+                          items: columnHeaders,
                           value: runEvent,
                           onChanged: (value) {
                             setState(() {
@@ -582,15 +494,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Aerobic Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Aerobic Raw'),
+                          items: columnHeaders,
                           value: runRaw,
                           onChanged: (value) {
                             setState(() {
@@ -601,15 +507,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Aerobic Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Aerobic Score'),
+                          items: columnHeaders,
                           value: runScore,
                           onChanged: (value) {
                             setState(() {
@@ -620,14 +520,9 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Pass'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Pass'),
+                          items: columnHeaders,
                           value: passDropdown,
                           onChanged: (value) {
                             setState(() {

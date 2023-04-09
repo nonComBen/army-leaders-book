@@ -13,6 +13,7 @@ import '../../models/duty.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadDutyRosterPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadDutyRosterPage extends ConsumerStatefulWidget {
 }
 
 class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, start, end, title, comments, path, location;
 
@@ -53,12 +54,12 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      start = columnHeaders!.contains('Start Date') ? 'Start Date' : '';
-      end = columnHeaders!.contains('End Date') ? 'End Date' : '';
-      title = columnHeaders!.contains('Duty') ? 'Duty' : '';
-      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
-      location = columnHeaders!.contains('Location') ? 'Location' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      start = columnHeaders.contains('Start Date') ? 'Start Date' : '';
+      end = columnHeaders.contains('End Date') ? 'End Date' : '';
+      title = columnHeaders.contains('Duty') ? 'Duty' : '';
+      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
+      location = columnHeaders.contains('Location') ? 'Location' : '';
     });
   }
 
@@ -133,7 +134,7 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
     comments = '';
     location = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -186,15 +187,9 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -205,15 +200,9 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Duty Title'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Duty Title'),
+                          items: columnHeaders,
                           value: title,
                           onChanged: (value) {
                             setState(() {
@@ -224,15 +213,9 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Location'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Location'),
+                          items: columnHeaders,
                           value: location,
                           onChanged: (value) {
                             setState(() {
@@ -243,15 +226,9 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Start Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Start Date'),
+                          items: columnHeaders,
                           value: start,
                           onChanged: (value) {
                             setState(() {
@@ -262,15 +239,9 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'End Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('End Date'),
+                          items: columnHeaders,
                           value: end,
                           onChanged: (value) {
                             setState(() {
@@ -281,15 +252,9 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Comments'),
+                          items: columnHeaders,
                           value: comments,
                           onChanged: (value) {
                             setState(() {

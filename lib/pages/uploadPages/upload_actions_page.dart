@@ -13,6 +13,7 @@ import '../../models/action.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadActionsPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadActionsPage extends ConsumerStatefulWidget {
 }
 
 class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       dateSubmitted,
@@ -59,14 +60,14 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       dateSubmitted =
-          columnHeaders!.contains('Date Submitted') ? 'Date Submitted' : '';
-      action = columnHeaders!.contains('Action') ? 'Action' : '';
+          columnHeaders.contains('Date Submitted') ? 'Date Submitted' : '';
+      action = columnHeaders.contains('Action') ? 'Action' : '';
       currentStatus =
-          columnHeaders!.contains('Current Status') ? 'Current Status' : '';
-      statusDate = columnHeaders!.contains('Status Date') ? 'Status Date' : '';
-      remarks = columnHeaders!.contains('Remarks') ? 'Remarks' : '';
+          columnHeaders.contains('Current Status') ? 'Current Status' : '';
+      statusDate = columnHeaders.contains('Status Date') ? 'Status Date' : '';
+      remarks = columnHeaders.contains('Remarks') ? 'Remarks' : '';
     });
   }
 
@@ -142,7 +143,7 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
     statusDate = '';
     remarks = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -195,15 +196,9 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -214,15 +209,9 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Action'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Action'),
+                          items: columnHeaders,
                           value: action,
                           onChanged: (value) {
                             setState(() {
@@ -233,15 +222,9 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Date Submitted'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date Submitted'),
+                          items: columnHeaders,
                           value: dateSubmitted,
                           onChanged: (value) {
                             setState(() {
@@ -252,15 +235,9 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Current Status'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Current Status'),
+                          items: columnHeaders,
                           value: currentStatus,
                           onChanged: (value) {
                             setState(() {
@@ -271,15 +248,9 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Status Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Status Date'),
+                          items: columnHeaders,
                           value: statusDate,
                           onChanged: (value) {
                             setState(() {
@@ -290,15 +261,9 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Remarks'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Remarks'),
+                          items: columnHeaders,
                           value: remarks,
                           onChanged: (value) {
                             setState(() {

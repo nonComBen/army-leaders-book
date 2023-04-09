@@ -13,6 +13,7 @@ import '../../models/hand_receipt_item.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadHandReceiptPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadHandReceiptPage extends ConsumerStatefulWidget {
 }
 
 class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       item,
@@ -62,16 +63,16 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      item = columnHeaders!.contains('Item') ? 'Item' : '';
-      model = columnHeaders!.contains('Model #') ? 'Model #' : '';
-      serial = columnHeaders!.contains('Serial #') ? 'Serial #' : '';
-      nsn = columnHeaders!.contains('NSN #') ? 'NSN #' : '';
-      location = columnHeaders!.contains('Location') ? 'Location' : '';
-      value = columnHeaders!.contains('Value') ? 'Value' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      item = columnHeaders.contains('Item') ? 'Item' : '';
+      model = columnHeaders.contains('Model #') ? 'Model #' : '';
+      serial = columnHeaders.contains('Serial #') ? 'Serial #' : '';
+      nsn = columnHeaders.contains('NSN #') ? 'NSN #' : '';
+      location = columnHeaders.contains('Location') ? 'Location' : '';
+      value = columnHeaders.contains('Value') ? 'Value' : '';
       subComponents =
-          columnHeaders!.contains('Subcomponents') ? 'Subcomponents' : '';
-      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
+          columnHeaders.contains('Subcomponents') ? 'Subcomponents' : '';
+      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
     });
   }
 
@@ -182,7 +183,7 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
     subComponents = '';
     comments = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -235,15 +236,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -254,14 +249,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Item'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Item'),
+                          items: columnHeaders,
                           value: item,
                           onChanged: (value) {
                             setState(() {
@@ -272,15 +262,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Model No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Model No.'),
+                          items: columnHeaders,
                           value: model,
                           onChanged: (value) {
                             setState(() {
@@ -291,15 +275,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Serial No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Serial No.'),
+                          items: columnHeaders,
                           value: serial,
                           onChanged: (value) {
                             setState(() {
@@ -310,15 +288,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'NSN No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('NSN No.'),
+                          items: columnHeaders,
                           value: nsn,
                           onChanged: (value) {
                             setState(() {
@@ -329,15 +301,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Locataion'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Locataion'),
+                          items: columnHeaders,
                           value: location,
                           onChanged: (value) {
                             setState(() {
@@ -348,14 +314,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Value'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Value'),
+                          items: columnHeaders,
                           value: value,
                           onChanged: (value) {
                             setState(() {
@@ -366,15 +327,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Subcomponents'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Subcomponents'),
+                          items: columnHeaders,
                           value: subComponents,
                           onChanged: (value) {
                             setState(() {
@@ -385,15 +340,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Comments'),
+                          items: columnHeaders,
                           value: comments,
                           onChanged: (value) {
                             setState(() {

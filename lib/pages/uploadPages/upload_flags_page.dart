@@ -13,6 +13,7 @@ import '../../models/flag.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadFlagsPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadFlagsPage extends ConsumerStatefulWidget {
 }
 
 class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, date, type, expDate, comments, path;
 
@@ -53,12 +54,12 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
       expDate =
-          columnHeaders!.contains('Expiration Date') ? 'Expiration Date' : '';
-      type = columnHeaders!.contains('Flag Type') ? 'Flag Type' : '';
-      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
+          columnHeaders.contains('Expiration Date') ? 'Expiration Date' : '';
+      type = columnHeaders.contains('Flag Type') ? 'Flag Type' : '';
+      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
     });
   }
 
@@ -150,7 +151,7 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
     type = '';
     comments = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -203,15 +204,9 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -222,14 +217,9 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Type'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Type'),
+                          items: columnHeaders,
                           value: type,
                           onChanged: (value) {
                             setState(() {
@@ -240,14 +230,9 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -258,15 +243,9 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Expiration Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Expiration Date'),
+                          items: columnHeaders,
                           value: expDate,
                           onChanged: (value) {
                             setState(() {
@@ -277,15 +256,9 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Comments'),
+                          items: columnHeaders,
                           value: comments,
                           onChanged: (value) {
                             setState(() {

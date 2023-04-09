@@ -13,6 +13,7 @@ import '../../models/rating.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadRatingsPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadRatingsPage extends ConsumerStatefulWidget {
 }
 
 class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, rater, sr, reviewer, lastEval, nextEval, nextType, path;
 
@@ -53,14 +54,14 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      rater = columnHeaders!.contains('Rater') ? 'Rater' : '';
-      sr = columnHeaders!.contains('Senior Rater') ? 'Senior Rater' : '';
-      reviewer = columnHeaders!.contains('Reviewer') ? 'Reviewer' : '';
-      lastEval = columnHeaders!.contains('Last Eval') ? 'Last Eval' : '';
-      nextEval = columnHeaders!.contains('Next Eval') ? 'Next Eval' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      rater = columnHeaders.contains('Rater') ? 'Rater' : '';
+      sr = columnHeaders.contains('Senior Rater') ? 'Senior Rater' : '';
+      reviewer = columnHeaders.contains('Reviewer') ? 'Reviewer' : '';
+      lastEval = columnHeaders.contains('Last Eval') ? 'Last Eval' : '';
+      nextEval = columnHeaders.contains('Next Eval') ? 'Next Eval' : '';
       nextType =
-          columnHeaders!.contains('Next Eval Type') ? 'Next Eval Type' : '';
+          columnHeaders.contains('Next Eval Type') ? 'Next Eval Type' : '';
     });
   }
 
@@ -155,7 +156,7 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
     nextEval = '';
     nextType = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -208,15 +209,9 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -227,14 +222,9 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Rater'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Rater'),
+                          items: columnHeaders,
                           value: rater,
                           onChanged: (value) {
                             setState(() {
@@ -245,15 +235,9 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Senior Rater'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Senior Rater'),
+                          items: columnHeaders,
                           value: sr,
                           onChanged: (value) {
                             setState(() {
@@ -264,15 +248,9 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Reviewer'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Reviewer'),
+                          items: columnHeaders,
                           value: reviewer,
                           onChanged: (value) {
                             setState(() {
@@ -283,15 +261,9 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Last Eval'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Last Eval'),
+                          items: columnHeaders,
                           value: lastEval,
                           onChanged: (value) {
                             setState(() {
@@ -302,15 +274,9 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Next Eval Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Next Eval Date'),
+                          items: columnHeaders,
                           value: nextEval,
                           onChanged: (value) {
                             setState(() {
@@ -321,15 +287,9 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Next Eval Type'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Next Eval Type'),
+                          items: columnHeaders,
                           value: nextType,
                           onChanged: (value) {
                             setState(() {

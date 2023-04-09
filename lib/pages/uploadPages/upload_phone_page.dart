@@ -12,6 +12,7 @@ import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadPhonePage extends ConsumerStatefulWidget {
@@ -24,7 +25,7 @@ class UploadPhonePage extends ConsumerStatefulWidget {
 }
 
 class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? title, poc, phone, loc, path;
 
@@ -52,10 +53,10 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      title = columnHeaders!.contains('Title') ? 'Title' : '';
-      poc = columnHeaders!.contains('POC') ? 'POC' : '';
-      phone = columnHeaders!.contains('Phone Number') ? 'Phone Number' : '';
-      loc = columnHeaders!.contains('Location') ? 'Location' : '';
+      title = columnHeaders.contains('Title') ? 'Title' : '';
+      poc = columnHeaders.contains('POC') ? 'POC' : '';
+      phone = columnHeaders.contains('Phone Number') ? 'Phone Number' : '';
+      loc = columnHeaders.contains('Location') ? 'Location' : '';
     });
   }
 
@@ -93,7 +94,7 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
     phone = '';
     loc = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -146,14 +147,9 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Title'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Title'),
+                          items: columnHeaders,
                           value: title,
                           onChanged: (value) {
                             setState(() {
@@ -164,14 +160,9 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'POC'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('POC'),
+                          items: columnHeaders,
                           value: poc,
                           onChanged: (value) {
                             setState(() {
@@ -182,15 +173,9 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Phone Number'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Phone Number'),
+                          items: columnHeaders,
                           value: phone,
                           onChanged: (value) {
                             setState(() {
@@ -201,15 +186,9 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Location'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Location'),
+                          items: columnHeaders,
                           value: loc,
                           onChanged: (value) {
                             setState(() {

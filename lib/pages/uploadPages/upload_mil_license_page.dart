@@ -13,6 +13,7 @@ import '../../models/mil_license.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadMilLicensePage extends ConsumerStatefulWidget {
@@ -27,7 +28,7 @@ class UploadMilLicensePage extends ConsumerStatefulWidget {
 class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
   late FirebaseFirestore firestore;
 
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, date, exp, license, restrictions, vehicles, path;
 
@@ -55,13 +56,13 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      exp = columnHeaders!.contains('Expiration Date') ? 'Expiration Date' : '';
-      license = columnHeaders!.contains('License #') ? 'License #' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      exp = columnHeaders.contains('Expiration Date') ? 'Expiration Date' : '';
+      license = columnHeaders.contains('License #') ? 'License #' : '';
       restrictions =
-          columnHeaders!.contains('Restrictions') ? 'Restrictions' : '';
-      vehicles = columnHeaders!.contains('Qualified Vehicles')
+          columnHeaders.contains('Restrictions') ? 'Restrictions' : '';
+      vehicles = columnHeaders.contains('Qualified Vehicles')
           ? 'Qualified Vehicles'
           : '';
     });
@@ -148,7 +149,7 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
     restrictions = '';
     vehicles = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -201,15 +202,9 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -220,14 +215,9 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -238,15 +228,9 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Expiration Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Expiration Date'),
+                          items: columnHeaders,
                           value: exp,
                           onChanged: (value) {
                             setState(() {
@@ -257,15 +241,9 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'License No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('License No.'),
+                          items: columnHeaders,
                           value: license,
                           onChanged: (value) {
                             setState(() {
@@ -276,15 +254,9 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Restrictions'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Restrictions'),
+                          items: columnHeaders,
                           value: restrictions,
                           onChanged: (value) {
                             setState(() {
@@ -295,15 +267,9 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Qualified Vehicles'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Qualified Vehicles'),
+                          items: columnHeaders,
                           value: vehicles,
                           onChanged: (value) {
                             setState(() {

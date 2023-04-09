@@ -13,6 +13,7 @@ import '../../models/soldier.dart';
 import '../../models/working_award.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadWorkingAwardsPage extends ConsumerStatefulWidget {
@@ -26,7 +27,7 @@ class UploadWorkingAwardsPage extends ConsumerStatefulWidget {
 
 class UploadWorkingAwardsPageState
     extends ConsumerState<UploadWorkingAwardsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, reason, ach1, ach2, ach3, ach4, citation, path;
 
@@ -54,13 +55,13 @@ class UploadWorkingAwardsPageState
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      reason = columnHeaders!.contains('Award Reason') ? 'Award Reason' : '';
-      ach1 = columnHeaders!.contains('Achievement 1') ? 'Achievement 1' : '';
-      ach2 = columnHeaders!.contains('Achievement 2') ? 'Achievement 2' : '';
-      ach3 = columnHeaders!.contains('Achievement 3') ? 'Achievement 3' : '';
-      ach4 = columnHeaders!.contains('Achievement 4') ? 'Achievement 4' : '';
-      citation = columnHeaders!.contains('Citation') ? 'Citation' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      reason = columnHeaders.contains('Award Reason') ? 'Award Reason' : '';
+      ach1 = columnHeaders.contains('Achievement 1') ? 'Achievement 1' : '';
+      ach2 = columnHeaders.contains('Achievement 2') ? 'Achievement 2' : '';
+      ach3 = columnHeaders.contains('Achievement 3') ? 'Achievement 3' : '';
+      ach4 = columnHeaders.contains('Achievement 4') ? 'Achievement 4' : '';
+      citation = columnHeaders.contains('Citation') ? 'Citation' : '';
     });
   }
 
@@ -147,7 +148,7 @@ class UploadWorkingAwardsPageState
     ach4 = '';
     citation = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -200,15 +201,9 @@ class UploadWorkingAwardsPageState
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -219,15 +214,9 @@ class UploadWorkingAwardsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Award Reason'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Award Reason'),
+                          items: columnHeaders,
                           value: reason,
                           onChanged: (value) {
                             setState(() {
@@ -238,15 +227,9 @@ class UploadWorkingAwardsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #1'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Achievement #1'),
+                          items: columnHeaders,
                           value: ach1,
                           onChanged: (value) {
                             setState(() {
@@ -257,15 +240,9 @@ class UploadWorkingAwardsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #2'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Achievement #2'),
+                          items: columnHeaders,
                           value: ach2,
                           onChanged: (value) {
                             setState(() {
@@ -276,15 +253,9 @@ class UploadWorkingAwardsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #3'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Achievement #3'),
+                          items: columnHeaders,
                           value: ach3,
                           onChanged: (value) {
                             setState(() {
@@ -295,15 +266,9 @@ class UploadWorkingAwardsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #4'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Achievement #4'),
+                          items: columnHeaders,
                           value: ach4,
                           onChanged: (value) {
                             setState(() {
@@ -314,15 +279,9 @@ class UploadWorkingAwardsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Citation'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Citation'),
+                          items: columnHeaders,
                           value: citation,
                           onChanged: (value) {
                             setState(() {

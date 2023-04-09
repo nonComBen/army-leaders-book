@@ -13,6 +13,7 @@ import '../../models/profile.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadPermProfilePage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadPermProfilePage extends ConsumerStatefulWidget {
 }
 
 class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId, date, shaving, pu, su, run, altEvent, comments, path;
 
@@ -53,14 +54,14 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      shaving = columnHeaders!.contains('Shaving') ? 'Shaving' : '';
-      pu = columnHeaders!.contains('PU') ? 'PU' : '';
-      su = columnHeaders!.contains('SU') ? 'SU' : '';
-      run = columnHeaders!.contains('Run') ? 'Run' : '';
-      altEvent = columnHeaders!.contains('Alt Event') ? 'Alt Event' : '';
-      comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      shaving = columnHeaders.contains('Shaving') ? 'Shaving' : '';
+      pu = columnHeaders.contains('PU') ? 'PU' : '';
+      su = columnHeaders.contains('SU') ? 'SU' : '';
+      run = columnHeaders.contains('Run') ? 'Run' : '';
+      altEvent = columnHeaders.contains('Alt Event') ? 'Alt Event' : '';
+      comments = columnHeaders.contains('Comments') ? 'Comments' : '';
     });
   }
 
@@ -152,7 +153,7 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
     altEvent = '';
     comments = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -205,15 +206,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -224,14 +219,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -242,15 +232,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Shaving'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Shaving'),
+                          items: columnHeaders,
                           value: shaving,
                           onChanged: (value) {
                             setState(() {
@@ -261,15 +245,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Push Ups'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Push Ups'),
+                          items: columnHeaders,
                           value: pu,
                           onChanged: (value) {
                             setState(() {
@@ -280,15 +258,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Sit Ups'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Sit Ups'),
+                          items: columnHeaders,
                           value: su,
                           onChanged: (value) {
                             setState(() {
@@ -299,14 +271,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Run'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Run'),
+                          items: columnHeaders,
                           value: run,
                           onChanged: (value) {
                             setState(() {
@@ -317,15 +284,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Alternative Event'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Alternative Event'),
+                          items: columnHeaders,
                           value: altEvent,
                           onChanged: (value) {
                             setState(() {
@@ -336,15 +297,9 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Comments'),
+                          items: columnHeaders,
                           value: comments,
                           onChanged: (value) {
                             setState(() {

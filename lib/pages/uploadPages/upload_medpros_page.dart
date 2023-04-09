@@ -13,6 +13,7 @@ import '../../models/medpro.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadMedProsPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadMedProsPage extends ConsumerStatefulWidget {
 }
 
 class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       pha,
@@ -73,38 +74,38 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      pha = columnHeaders!.contains('PHA Date') ? 'PHA Date' : '';
-      dental = columnHeaders!.contains('Dental Date') ? 'Dental Date' : '';
-      vision = columnHeaders!.contains('Vision Date') ? 'Vision Date' : '';
-      hearing = columnHeaders!.contains('Hearing Date') ? 'Hearing Date' : '';
-      hiv = columnHeaders!.contains('HIV Date') ? 'HIV Date' : '';
-      flu = columnHeaders!.contains('Flu Date') ? 'Flu Date' : '';
-      mmr = columnHeaders!.contains('MMR Date') ? 'MMR Date' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      pha = columnHeaders.contains('PHA Date') ? 'PHA Date' : '';
+      dental = columnHeaders.contains('Dental Date') ? 'Dental Date' : '';
+      vision = columnHeaders.contains('Vision Date') ? 'Vision Date' : '';
+      hearing = columnHeaders.contains('Hearing Date') ? 'Hearing Date' : '';
+      hiv = columnHeaders.contains('HIV Date') ? 'HIV Date' : '';
+      flu = columnHeaders.contains('Flu Date') ? 'Flu Date' : '';
+      mmr = columnHeaders.contains('MMR Date') ? 'MMR Date' : '';
       varicella =
-          columnHeaders!.contains('Varicella Date') ? 'Varicella Date' : '';
-      polio = columnHeaders!.contains('Polio Date') ? 'Polio Date' : '';
-      tuber = columnHeaders!.contains('Tuberculosis Date')
+          columnHeaders.contains('Varicella Date') ? 'Varicella Date' : '';
+      polio = columnHeaders.contains('Polio Date') ? 'Polio Date' : '';
+      tuber = columnHeaders.contains('Tuberculosis Date')
           ? 'Tuberculosis Date'
           : '';
-      tetanus = columnHeaders!.contains('Tetanus Date') ? 'Tetanus Date' : '';
+      tetanus = columnHeaders.contains('Tetanus Date') ? 'Tetanus Date' : '';
       hepA =
-          columnHeaders!.contains('Hepatitis A Date') ? 'Hepatitis A Date' : '';
+          columnHeaders.contains('Hepatitis A Date') ? 'Hepatitis A Date' : '';
       hepB =
-          columnHeaders!.contains('Hepatitis B Date') ? 'Hepatitis B Date' : '';
-      enc = columnHeaders!.contains('Encephalitis Date')
+          columnHeaders.contains('Hepatitis B Date') ? 'Hepatitis B Date' : '';
+      enc = columnHeaders.contains('Encephalitis Date')
           ? 'Encephalitis Date'
           : '';
-      mening = columnHeaders!.contains('Meningococcal Date')
+      mening = columnHeaders.contains('Meningococcal Date')
           ? 'Meningococcal Date'
           : '';
-      typhoid = columnHeaders!.contains('Typhoid Date') ? 'Typhoid Date' : '';
-      yellow = columnHeaders!.contains('Yellow Fever Date')
+      typhoid = columnHeaders.contains('Typhoid Date') ? 'Typhoid Date' : '';
+      yellow = columnHeaders.contains('Yellow Fever Date')
           ? 'Yellow Fever Date'
           : '';
       smallPox =
-          columnHeaders!.contains('Small Pox Date') ? 'Small Pox Date' : '';
-      anthrax = columnHeaders!.contains('Anthrax Date') ? 'Anthrax Date' : '';
+          columnHeaders.contains('Small Pox Date') ? 'Small Pox Date' : '';
+      anthrax = columnHeaders.contains('Anthrax Date') ? 'Anthrax Date' : '';
     });
   }
 
@@ -239,7 +240,7 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
     smallPox = '';
     anthrax = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -292,15 +293,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -311,15 +306,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'PHA Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('PHA Date'),
+                          items: columnHeaders,
                           value: pha,
                           onChanged: (value) {
                             setState(() {
@@ -330,15 +319,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Dental Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Dental Date'),
+                          items: columnHeaders,
                           value: dental,
                           onChanged: (value) {
                             setState(() {
@@ -349,15 +332,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Vision Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Vision Date'),
+                          items: columnHeaders,
                           value: vision,
                           onChanged: (value) {
                             setState(() {
@@ -368,15 +345,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Hearing Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Hearing Date'),
+                          items: columnHeaders,
                           value: hearing,
                           onChanged: (value) {
                             setState(() {
@@ -387,15 +358,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'HIV Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('HIV Date'),
+                          items: columnHeaders,
                           value: hiv,
                           onChanged: (value) {
                             setState(() {
@@ -406,15 +371,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Influenza Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Influenza Date'),
+                          items: columnHeaders,
                           value: flu,
                           onChanged: (value) {
                             setState(() {
@@ -425,15 +384,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'MMR Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('MMR Date'),
+                          items: columnHeaders,
                           value: mmr,
                           onChanged: (value) {
                             setState(() {
@@ -444,15 +397,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Varicella Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Varicella Date'),
+                          items: columnHeaders,
                           value: varicella,
                           onChanged: (value) {
                             setState(() {
@@ -463,15 +410,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Polio Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Polio Date'),
+                          items: columnHeaders,
                           value: polio,
                           onChanged: (value) {
                             setState(() {
@@ -482,15 +423,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Tuberculin Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Tuberculin Date'),
+                          items: columnHeaders,
                           value: tuber,
                           onChanged: (value) {
                             setState(() {
@@ -501,15 +436,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Tetanus Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Tetanus Date'),
+                          items: columnHeaders,
                           value: tetanus,
                           onChanged: (value) {
                             setState(() {
@@ -520,15 +449,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Hepatitis A Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Hepatitis A Date'),
+                          items: columnHeaders,
                           value: hepA,
                           onChanged: (value) {
                             setState(() {
@@ -539,15 +462,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Hepititis B Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Hepititis B Date'),
+                          items: columnHeaders,
                           value: hepB,
                           onChanged: (value) {
                             setState(() {
@@ -558,15 +475,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Encephalitis Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Encephalitis Date'),
+                          items: columnHeaders,
                           value: enc,
                           onChanged: (value) {
                             setState(() {
@@ -577,15 +488,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Meningococcal Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Meningococcal Date'),
+                          items: columnHeaders,
                           value: mening,
                           onChanged: (value) {
                             setState(() {
@@ -596,15 +501,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Typhoid Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Typhoid Date'),
+                          items: columnHeaders,
                           value: typhoid,
                           onChanged: (value) {
                             setState(() {
@@ -615,15 +514,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Yellow Fever Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Yellow Fever Date'),
+                          items: columnHeaders,
                           value: yellow,
                           onChanged: (value) {
                             setState(() {
@@ -634,15 +527,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Small Pox Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Small Pox Date'),
+                          items: columnHeaders,
                           value: smallPox,
                           onChanged: (value) {
                             setState(() {
@@ -653,15 +540,9 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Anthrax Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Anthrax Date'),
+                          items: columnHeaders,
                           value: anthrax,
                           onChanged: (value) {
                             setState(() {

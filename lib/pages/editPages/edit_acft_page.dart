@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 
 import '../../auth_provider.dart';
@@ -53,16 +54,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   final TextEditingController _dragRawController = TextEditingController();
   final TextEditingController _plankRawController = TextEditingController();
   final TextEditingController _runRawController = TextEditingController();
-  String? _ageGroup,
-      _gender,
-      _runType,
-      _soldierId,
-      _rank,
-      _lastName,
-      _firstName,
-      _section,
-      _rankSort,
-      _owner;
+  String _ageGroup = '17-21', _gender = 'Male', _runType = 'Run';
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   int? _total,
       _mdlScore,
@@ -93,7 +86,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   final List<String> _runTypes = ['Run', 'Walk', 'Row', 'Bike', 'Swim'];
   DateTime? _dateTime;
 
-  List<String?> ageGroups = [
+  List<String> ageGroups = [
     '17-21',
     '22-26',
     '27-31',
@@ -290,8 +283,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         section: _section!,
         rankSort: _rankSort!,
         date: _dateController.text,
-        ageGroup: _ageGroup!,
-        gender: _gender!,
+        ageGroup: _ageGroup,
+        gender: _gender,
         deadliftRaw: _deadliftRawController.text,
         powerThrowRaw: _powerThrowRawController.text,
         puRaw: _puRawController.text,
@@ -305,7 +298,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         plankScore: _plkScore!,
         runScore: _runScore!,
         total: _total!,
-        altEvent: _runType!,
+        altEvent: _runType,
         pass: pass,
       );
 
@@ -544,37 +537,29 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                                     soldiers!.sort((a, b) => a['rankSort']
                                         .toString()
                                         .compareTo(b['rankSort'].toString()));
-                                    return DropdownButtonFormField<String>(
-                                      decoration: const InputDecoration(
-                                          labelText: 'Soldier'),
-                                      items: soldiers!.map((doc) {
-                                        return DropdownMenuItem<String>(
-                                          value: doc.id,
-                                          child: Text(
-                                              '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                        );
-                                      }).toList(),
+                                    return PlatformItemPicker(
+                                      label: const Text('Soldier'),
+                                      items:
+                                          soldiers!.map((e) => e.id).toList(),
                                       onChanged: (value) {
                                         int index = soldiers!.indexWhere(
                                             (doc) => doc.id == value);
-                                        if (mounted) {
-                                          setState(() {
-                                            _soldierId = value;
-                                            _rank = soldiers![index]['rank'];
-                                            _lastName =
-                                                soldiers![index]['lastName'];
-                                            _firstName =
-                                                soldiers![index]['firstName'];
-                                            _section =
-                                                soldiers![index]['section'];
-                                            _rankSort = soldiers![index]
-                                                    ['rankSort']
-                                                .toString();
-                                            _owner = soldiers![index]['owner'];
-                                            _users = soldiers![index]['users'];
-                                            updated = true;
-                                          });
-                                        }
+                                        setState(() {
+                                          _soldierId = value;
+                                          _rank = soldiers![index]['rank'];
+                                          _lastName =
+                                              soldiers![index]['lastName'];
+                                          _firstName =
+                                              soldiers![index]['firstName'];
+                                          _section =
+                                              soldiers![index]['section'];
+                                          _rankSort = soldiers![index]
+                                                  ['rankSort']
+                                              .toString();
+                                          _owner = soldiers![index]['owner'];
+                                          _users = soldiers![index]['users'];
+                                          updated = true;
+                                        });
                                       },
                                       value: _soldierId,
                                     );
@@ -670,16 +655,10 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: DropdownButtonFormField(
+                          child: PlatformItemPicker(
                             value: _ageGroup,
-                            decoration:
-                                const InputDecoration(labelText: 'Age Group'),
-                            items: ageGroups.map((age) {
-                              return DropdownMenuItem(
-                                value: age,
-                                child: Text(age!),
-                              );
-                            }).toList(),
+                            label: const Text('Age Group'),
+                            items: ageGroups,
                             onChanged: (dynamic value) {
                               setState(() {
                                 updated = true;
@@ -699,17 +678,9 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: DropdownButtonFormField(
-                            decoration: const InputDecoration(
-                                labelText: 'Aerobic Event'),
-                            items: _runTypes.map((type) {
-                              return DropdownMenuItem(
-                                  value: type,
-                                  child: Text(
-                                    type,
-                                    style: const TextStyle(fontSize: 18),
-                                  ));
-                            }).toList(),
+                          child: PlatformItemPicker(
+                            label: const Text('Aerobic Event'),
+                            items: _runTypes,
                             onChanged: (dynamic value) {
                               setState(() {
                                 _runType = value;
@@ -921,12 +892,13 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                           ),
                         ),
                         Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                            child: Text(
-                              _runType!,
-                              style: const TextStyle(fontSize: 18),
-                            )),
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                          child: Text(
+                            _runType,
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(

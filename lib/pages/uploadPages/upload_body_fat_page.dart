@@ -13,6 +13,7 @@ import '../../models/bodyfat.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadBodyFatsPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadBodyFatsPage extends ConsumerStatefulWidget {
 }
 
 class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       date,
@@ -66,19 +67,19 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      age = columnHeaders!.contains('Age') ? 'Age' : '';
-      height = columnHeaders!.contains('Height') ? 'Height' : '';
-      weight = columnHeaders!.contains('Weight') ? 'Weight' : '';
-      bmiPass = columnHeaders!.contains('BMI Pass') ? 'BMI Pass' : '';
-      neck = columnHeaders!.contains('Neck') ? 'Neck' : '';
-      waist = columnHeaders!.contains('Waist') ? 'Waist' : '';
-      hip = columnHeaders!.contains('Hip') ? 'Hip' : '';
-      percent = columnHeaders!.contains('BF Percent') ? 'BF Percent' : '';
-      bfPass = columnHeaders!.contains('BF Pass') ? 'BF Pass' : '';
-      gender = columnHeaders!.contains('Gender') ? 'Gender' : '';
-      heightDouble = columnHeaders!.contains('Height to Half Inch')
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      age = columnHeaders.contains('Age') ? 'Age' : '';
+      height = columnHeaders.contains('Height') ? 'Height' : '';
+      weight = columnHeaders.contains('Weight') ? 'Weight' : '';
+      bmiPass = columnHeaders.contains('BMI Pass') ? 'BMI Pass' : '';
+      neck = columnHeaders.contains('Neck') ? 'Neck' : '';
+      waist = columnHeaders.contains('Waist') ? 'Waist' : '';
+      hip = columnHeaders.contains('Hip') ? 'Hip' : '';
+      percent = columnHeaders.contains('BF Percent') ? 'BF Percent' : '';
+      bfPass = columnHeaders.contains('BF Pass') ? 'BF Pass' : '';
+      gender = columnHeaders.contains('Gender') ? 'Gender' : '';
+      heightDouble = columnHeaders.contains('Height to Half Inch')
           ? 'Height to Half Inch'
           : '';
     });
@@ -191,7 +192,7 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
     gender = '';
     heightDouble = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -244,15 +245,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -263,14 +258,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -281,15 +271,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Gender'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Gender'),
+                          items: columnHeaders,
                           value: gender,
                           onChanged: (value) {
                             setState(() {
@@ -300,14 +284,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Age'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Age'),
+                          items: columnHeaders,
                           value: age,
                           onChanged: (value) {
                             setState(() {
@@ -318,15 +297,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Height'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Height'),
+                          items: columnHeaders,
                           value: height,
                           onChanged: (value) {
                             setState(() {
@@ -337,15 +310,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Weight'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Weight'),
+                          items: columnHeaders,
                           value: weight,
                           onChanged: (value) {
                             setState(() {
@@ -356,15 +323,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'BMI Pass'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('BMI Pass'),
+                          items: columnHeaders,
                           value: bmiPass,
                           onChanged: (value) {
                             setState(() {
@@ -375,15 +336,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Height to Nearest Half Inch'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Height to Nearest Half Inch'),
+                          items: columnHeaders,
                           value: heightDouble,
                           onChanged: (value) {
                             setState(() {
@@ -394,14 +349,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Neck'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Neck'),
+                          items: columnHeaders,
                           value: neck,
                           onChanged: (value) {
                             setState(() {
@@ -412,14 +362,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Waist'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Waist'),
+                          items: columnHeaders,
                           value: waist,
                           onChanged: (value) {
                             setState(() {
@@ -430,14 +375,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Hip'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Hip'),
+                          items: columnHeaders,
                           value: hip,
                           onChanged: (value) {
                             setState(() {
@@ -448,15 +388,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'BF Percent'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('BF Percent'),
+                          items: columnHeaders,
                           value: percent,
                           onChanged: (value) {
                             setState(() {
@@ -467,15 +401,9 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'BF Pass'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('BF Pass'),
+                          items: columnHeaders,
                           value: bfPass,
                           onChanged: (value) {
                             setState(() {

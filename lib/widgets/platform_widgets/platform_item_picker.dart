@@ -10,7 +10,7 @@ import '../../methods/theme_methods.dart';
 abstract class PlatformItemPicker extends Widget {
   factory PlatformItemPicker({
     required Widget label,
-    required String value,
+    String? value,
     required List<String> items,
     required void Function(dynamic) onChanged,
   }) {
@@ -68,7 +68,7 @@ abstract class PlatformItemPicker extends Widget {
                   padding: const EdgeInsets.all(8.0),
                   onPressed: showMenu,
                   child: Text(
-                    value,
+                    value ?? '',
                     style: TextStyle(
                       color: getTextColor(context),
                     ),

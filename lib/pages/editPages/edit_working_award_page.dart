@@ -9,6 +9,7 @@ import '../../methods/on_back_pressed.dart';
 import '../../models/working_award.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditWorkingAwardPage extends ConsumerStatefulWidget {
@@ -230,16 +231,10 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                                       soldiers!.sort((a, b) => a['rankSort']
                                           .toString()
                                           .compareTo(b['rankSort'].toString()));
-                                      return DropdownButtonFormField<String>(
-                                        decoration: const InputDecoration(
-                                            labelText: 'Soldier'),
-                                        items: soldiers!.map((doc) {
-                                          return DropdownMenuItem<String>(
-                                            value: doc.id,
-                                            child: Text(
-                                                '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                          );
-                                        }).toList(),
+                                      return PlatformItemPicker(
+                                        label: const Text('Soldier'),
+                                        items:
+                                            soldiers!.map((e) => e.id).toList(),
                                         onChanged: (value) {
                                           int index = soldiers!.indexWhere(
                                               (doc) => doc.id == value);
@@ -280,15 +275,9 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: DropdownButtonFormField(
-                              decoration: const InputDecoration(
-                                  labelText: 'Award Reason'),
-                              items: _reasons.map((value) {
-                                return DropdownMenuItem(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
+                            child: PlatformItemPicker(
+                              label: const Text('Award Reason'),
+                              items: _reasons,
                               onChanged: (dynamic value) {
                                 if (mounted) {
                                   setState(() {

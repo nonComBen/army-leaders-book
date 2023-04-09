@@ -13,6 +13,7 @@ import '../../models/apft.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadApftPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadApftPage extends ConsumerStatefulWidget {
 }
 
 class UploadApftPageState extends ConsumerState<UploadApftPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       date,
@@ -64,17 +65,17 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      date = columnHeaders!.contains('Date') ? 'Date' : '';
-      age = columnHeaders!.contains('Age') ? 'Age' : '';
-      puRaw = columnHeaders!.contains('PU Raw') ? 'PU Raw' : '';
-      puScore = columnHeaders!.contains('PU Score') ? 'PU Score' : '';
-      suRaw = columnHeaders!.contains('SU Raw') ? 'SU Raw' : '';
-      suScore = columnHeaders!.contains('SU Score') ? 'SU Score' : '';
-      runEvent = columnHeaders!.contains('Alt Event') ? 'Alt Event' : '';
-      runRaw = columnHeaders!.contains('Run Raw') ? 'Run Raw' : '';
-      runScore = columnHeaders!.contains('Run Score') ? 'Run Score' : '';
-      gender = columnHeaders!.contains('Gender') ? 'Gender' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      date = columnHeaders.contains('Date') ? 'Date' : '';
+      age = columnHeaders.contains('Age') ? 'Age' : '';
+      puRaw = columnHeaders.contains('PU Raw') ? 'PU Raw' : '';
+      puScore = columnHeaders.contains('PU Score') ? 'PU Score' : '';
+      suRaw = columnHeaders.contains('SU Raw') ? 'SU Raw' : '';
+      suScore = columnHeaders.contains('SU Score') ? 'SU Score' : '';
+      runEvent = columnHeaders.contains('Alt Event') ? 'Alt Event' : '';
+      runRaw = columnHeaders.contains('Run Raw') ? 'Run Raw' : '';
+      runScore = columnHeaders.contains('Run Score') ? 'Run Score' : '';
+      gender = columnHeaders.contains('Gender') ? 'Gender' : '';
     });
   }
 
@@ -197,7 +198,7 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
     runScore = '';
     gender = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -250,15 +251,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -269,14 +264,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date'),
+                          items: columnHeaders,
                           value: date,
                           onChanged: (value) {
                             setState(() {
@@ -287,14 +277,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Age'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Age'),
+                          items: columnHeaders,
                           value: age,
                           onChanged: (value) {
                             setState(() {
@@ -305,15 +290,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Gender'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Gender'),
+                          items: columnHeaders,
                           value: gender,
                           onChanged: (value) {
                             setState(() {
@@ -324,15 +303,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'PU Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('PU Raw'),
+                          items: columnHeaders,
                           value: puRaw,
                           onChanged: (value) {
                             setState(() {
@@ -343,15 +316,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'PU Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('PU Score'),
+                          items: columnHeaders,
                           value: puScore,
                           onChanged: (value) {
                             setState(() {
@@ -362,15 +329,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SU Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SU Raw'),
+                          items: columnHeaders,
                           value: suRaw,
                           onChanged: (value) {
                             setState(() {
@@ -381,15 +342,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SU Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SU Score'),
+                          items: columnHeaders,
                           value: suScore,
                           onChanged: (value) {
                             setState(() {
@@ -400,15 +355,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Aerobic Event'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Aerobic Event'),
+                          items: columnHeaders,
                           value: runEvent,
                           onChanged: (value) {
                             setState(() {
@@ -419,15 +368,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Aerobic Raw'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Aerobic Raw'),
+                          items: columnHeaders,
                           value: runRaw,
                           onChanged: (value) {
                             setState(() {
@@ -438,15 +381,9 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Aerobic Score'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Aerobic Score'),
+                          items: columnHeaders,
                           value: runScore,
                           onChanged: (value) {
                             setState(() {

@@ -14,6 +14,7 @@ import '../../methods/on_back_pressed.dart';
 import '../../models/appointment.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditAppointmentPage extends ConsumerStatefulWidget {
@@ -39,14 +40,8 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _locController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
-  String? _status,
-      _soldierId,
-      _rank,
-      _lastName,
-      _firstName,
-      _section,
-      _rankSort,
-      _owner;
+  String _status = 'Scheduled';
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   final List<String> _statuses = [
     'Scheduled',
@@ -220,7 +215,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
         date: _dateController.text,
         start: _startController.text,
         end: _endController.text,
-        status: _status!,
+        status: _status,
         comments: _commentsController.text,
         owner: _owner!,
         location: _locController.text,
@@ -386,16 +381,10 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                                       soldiers.sort((a, b) => a['rankSort']
                                           .toString()
                                           .compareTo(b['rankSort'].toString()));
-                                      return DropdownButtonFormField<String>(
-                                        decoration: const InputDecoration(
-                                            labelText: 'Soldier'),
-                                        items: soldiers.map((doc) {
-                                          return DropdownMenuItem<String>(
-                                            value: doc.id,
-                                            child: Text(
-                                                '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                          );
-                                        }).toList(),
+                                      return PlatformItemPicker(
+                                        label: const Text('Soldier'),
+                                        items:
+                                            soldiers.map((e) => e.id).toList(),
                                         onChanged: (value) {
                                           int index = soldiers.indexWhere(
                                               (doc) => doc.id == value);
@@ -563,13 +552,9 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: DropdownButtonFormField(
-                              decoration:
-                                  const InputDecoration(labelText: 'Status'),
-                              items: _statuses.map((status) {
-                                return DropdownMenuItem(
-                                    value: status, child: Text(status));
-                              }).toList(),
+                            child: PlatformItemPicker(
+                              label: const Text('Status'),
+                              items: _statuses,
                               onChanged: (dynamic value) {
                                 if (mounted) {
                                   setState(() {

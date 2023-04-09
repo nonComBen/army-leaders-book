@@ -13,6 +13,7 @@ import '../../models/equipment.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadEquipmentPage extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class UploadEquipmentPage extends ConsumerStatefulWidget {
 }
 
 class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       weapon,
@@ -69,32 +70,32 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-      weapon = columnHeaders!.contains('Weapon') ? 'Weapon' : '';
-      buttStock = columnHeaders!.contains('Butt Stock') ? 'Butt Stock' : '';
-      serial = columnHeaders!.contains('Serial #') ? 'Serial #' : '';
-      optic = columnHeaders!.contains('Optics') ? 'Optics' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+      weapon = columnHeaders.contains('Weapon') ? 'Weapon' : '';
+      buttStock = columnHeaders.contains('Butt Stock') ? 'Butt Stock' : '';
+      serial = columnHeaders.contains('Serial #') ? 'Serial #' : '';
+      optic = columnHeaders.contains('Optics') ? 'Optics' : '';
       opticSerial =
-          columnHeaders!.contains('Optics Serial #') ? 'Optics Serial #' : '';
+          columnHeaders.contains('Optics Serial #') ? 'Optics Serial #' : '';
       weapon2 =
-          columnHeaders!.contains('Secondary Weapon') ? 'Secondary Weapon' : '';
-      buttStock2 = columnHeaders!.contains('Secondary Butt Stock')
+          columnHeaders.contains('Secondary Weapon') ? 'Secondary Weapon' : '';
+      buttStock2 = columnHeaders.contains('Secondary Butt Stock')
           ? 'Secondary Butt Stock'
           : '';
-      serial2 = columnHeaders!.contains('Secondary Serial #')
+      serial2 = columnHeaders.contains('Secondary Serial #')
           ? 'Secondary Serial #'
           : '';
       optic2 =
-          columnHeaders!.contains('Secondary Optics') ? 'Secondary Optics' : '';
-      opticSerial2 = columnHeaders!.contains('Secondary Optics Serial #')
+          columnHeaders.contains('Secondary Optics') ? 'Secondary Optics' : '';
+      opticSerial2 = columnHeaders.contains('Secondary Optics Serial #')
           ? 'Secondary Optics Serial #'
           : '';
-      mask = columnHeaders!.contains('Mask') ? 'Mask' : '';
-      veh = columnHeaders!.contains('Vehicle Type') ? 'Vehicle Type' : '';
+      mask = columnHeaders.contains('Mask') ? 'Mask' : '';
+      veh = columnHeaders.contains('Vehicle Type') ? 'Vehicle Type' : '';
       bumper =
-          columnHeaders!.contains('Vehicle Bumper #') ? 'Vehicle Bumper #' : '';
-      misc = columnHeaders!.contains('Miscellaneous') ? 'Miscellaneous' : '';
-      miscSerial = columnHeaders!.contains('Miscellaneous Serial #')
+          columnHeaders.contains('Vehicle Bumper #') ? 'Vehicle Bumper #' : '';
+      misc = columnHeaders.contains('Miscellaneous') ? 'Miscellaneous' : '';
+      miscSerial = columnHeaders.contains('Miscellaneous Serial #')
           ? 'Miscellaneous Serial #'
           : '';
     });
@@ -204,7 +205,7 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
     misc = '';
     miscSerial = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -257,15 +258,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -276,15 +271,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Weapon'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Weapon'),
+                          items: columnHeaders,
                           value: weapon,
                           onChanged: (value) {
                             setState(() {
@@ -295,15 +284,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Butt Stock'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Butt Stock'),
+                          items: columnHeaders,
                           value: buttStock,
                           onChanged: (value) {
                             setState(() {
@@ -314,15 +297,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Serial No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Serial No.'),
+                          items: columnHeaders,
                           value: serial,
                           onChanged: (value) {
                             setState(() {
@@ -333,15 +310,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Optics'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Optics'),
+                          items: columnHeaders,
                           value: optic,
                           onChanged: (value) {
                             setState(() {
@@ -352,15 +323,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Optics Serial No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Optics Serial No.'),
+                          items: columnHeaders,
                           value: opticSerial,
                           onChanged: (value) {
                             setState(() {
@@ -371,15 +336,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Weapon'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Secondary Weapon'),
+                          items: columnHeaders,
                           value: weapon2,
                           onChanged: (value) {
                             setState(() {
@@ -390,15 +349,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Butt Stock'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Secondary Butt Stock'),
+                          items: columnHeaders,
                           value: buttStock2,
                           onChanged: (value) {
                             setState(() {
@@ -409,15 +362,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Serial No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Secondary Serial No.'),
+                          items: columnHeaders,
                           value: serial2,
                           onChanged: (value) {
                             setState(() {
@@ -428,15 +375,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Optics'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Secondary Optics'),
+                          items: columnHeaders,
                           value: optic2,
                           onChanged: (value) {
                             setState(() {
@@ -447,15 +388,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Optics Serial No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Secondary Optics Serial No.'),
+                          items: columnHeaders,
                           value: opticSerial2,
                           onChanged: (value) {
                             setState(() {
@@ -466,14 +401,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Mask'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Mask'),
+                          items: columnHeaders,
                           value: mask,
                           onChanged: (value) {
                             setState(() {
@@ -484,15 +414,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Vehicle'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Vehicle'),
+                          items: columnHeaders,
                           value: veh,
                           onChanged: (value) {
                             setState(() {
@@ -503,15 +427,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Vehicle Bumper'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Vehicle Bumper'),
+                          items: columnHeaders,
                           value: bumper,
                           onChanged: (value) {
                             setState(() {
@@ -522,15 +440,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Other Item'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Other Item'),
+                          items: columnHeaders,
                           value: misc,
                           onChanged: (value) {
                             setState(() {
@@ -541,15 +453,9 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Other Item Serial No.'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Other Item Serial No.'),
+                          items: columnHeaders,
                           value: miscSerial,
                           onChanged: (value) {
                             setState(() {

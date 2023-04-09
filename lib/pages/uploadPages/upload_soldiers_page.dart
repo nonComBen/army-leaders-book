@@ -14,6 +14,7 @@ import '../../methods/show_snackbar.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadSoldierPage extends ConsumerStatefulWidget {
@@ -26,7 +27,7 @@ class UploadSoldierPage extends ConsumerStatefulWidget {
 }
 
 class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       rank,
@@ -94,56 +95,56 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
   _readExcel(Sheet sheet) {
     rows = sheet.rows;
     columnHeaders = getColumnHeaders(rows.first);
-    soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
-    rank = columnHeaders!.contains('Rank') ? 'Rank' : '';
-    lastName = columnHeaders!.contains('Last Name') ? 'Last Name' : '';
-    firstName = columnHeaders!.contains('First Name') ? 'First Name' : '';
-    mi = columnHeaders!.contains('Middle Initial') ? 'Middle Initial' : '';
-    assigned = columnHeaders!.contains('Assigned') ? 'Assigned' : '';
-    section = columnHeaders!.contains('Section') ? 'Section' : '';
-    supervisor = columnHeaders!.contains('Supervisor') ? 'Supervisor' : '';
-    dodId = columnHeaders!.contains('DoD ID') ? 'DoD ID' : '';
-    dor = columnHeaders!.contains('Date of Rank') ? 'Date of Rank' : '';
-    mos = columnHeaders!.contains('MOS') ? 'MOS' : '';
-    duty = columnHeaders!.contains('Duty Position') ? 'Duty Position' : '';
-    paraLn = columnHeaders!.contains('Paragraph/Line No.')
+    soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
+    rank = columnHeaders.contains('Rank') ? 'Rank' : '';
+    lastName = columnHeaders.contains('Last Name') ? 'Last Name' : '';
+    firstName = columnHeaders.contains('First Name') ? 'First Name' : '';
+    mi = columnHeaders.contains('Middle Initial') ? 'Middle Initial' : '';
+    assigned = columnHeaders.contains('Assigned') ? 'Assigned' : '';
+    section = columnHeaders.contains('Section') ? 'Section' : '';
+    supervisor = columnHeaders.contains('Supervisor') ? 'Supervisor' : '';
+    dodId = columnHeaders.contains('DoD ID') ? 'DoD ID' : '';
+    dor = columnHeaders.contains('Date of Rank') ? 'Date of Rank' : '';
+    mos = columnHeaders.contains('MOS') ? 'MOS' : '';
+    duty = columnHeaders.contains('Duty Position') ? 'Duty Position' : '';
+    paraLn = columnHeaders.contains('Paragraph/Line No.')
         ? 'Paragraph/Line No.'
         : '';
-    reqMos = columnHeaders!.contains('Duty MOS') ? 'Duty MOS' : '';
-    loss = columnHeaders!.contains('Loss Date') ? 'Loss Date' : '';
-    ets = columnHeaders!.contains('ETS') ? 'ETS' : '';
-    basd = columnHeaders!.contains('BASD') ? 'BASD' : '';
-    pebd = columnHeaders!.contains('PEBD') ? 'PEBD' : '';
-    gain = columnHeaders!.contains('Gain Date') ? 'Gain Date' : '';
-    address = columnHeaders!.contains('Address') ? 'Address' : '';
-    city = columnHeaders!.contains('City') ? 'City' : '';
-    state = columnHeaders!.contains('State') ? 'State' : '';
-    zip = columnHeaders!.contains('Zip Code') ? 'Zip Code' : '';
-    phone = columnHeaders!.contains('Phone Number') ? 'Phone Number' : '';
-    workPhone = columnHeaders!.contains('Work Phone') ? 'Work Phone' : '';
-    email = columnHeaders!.contains('Email Address') ? 'Email Address' : '';
-    workEmail = columnHeaders!.contains('Work Email') ? 'Work Email' : '';
-    nok = columnHeaders!.contains('Next of Kin') ? 'Next of Kin' : '';
+    reqMos = columnHeaders.contains('Duty MOS') ? 'Duty MOS' : '';
+    loss = columnHeaders.contains('Loss Date') ? 'Loss Date' : '';
+    ets = columnHeaders.contains('ETS') ? 'ETS' : '';
+    basd = columnHeaders.contains('BASD') ? 'BASD' : '';
+    pebd = columnHeaders.contains('PEBD') ? 'PEBD' : '';
+    gain = columnHeaders.contains('Gain Date') ? 'Gain Date' : '';
+    address = columnHeaders.contains('Address') ? 'Address' : '';
+    city = columnHeaders.contains('City') ? 'City' : '';
+    state = columnHeaders.contains('State') ? 'State' : '';
+    zip = columnHeaders.contains('Zip Code') ? 'Zip Code' : '';
+    phone = columnHeaders.contains('Phone Number') ? 'Phone Number' : '';
+    workPhone = columnHeaders.contains('Work Phone') ? 'Work Phone' : '';
+    email = columnHeaders.contains('Email Address') ? 'Email Address' : '';
+    workEmail = columnHeaders.contains('Work Email') ? 'Work Email' : '';
+    nok = columnHeaders.contains('Next of Kin') ? 'Next of Kin' : '';
     nokPhone =
-        columnHeaders!.contains('Next of Kin Phone') ? 'Next of Kin Phone' : '';
+        columnHeaders.contains('Next of Kin Phone') ? 'Next of Kin Phone' : '';
     maritalStatus =
-        columnHeaders!.contains('Marital Status') ? 'Marital Status' : '';
-    comments = columnHeaders!.contains('Comments') ? 'Comments' : '';
-    civEd = columnHeaders!.contains('Civ Ed Level') ? 'Civ Ed Level' : '';
-    milEd = columnHeaders!.contains('Mil Ed Level') ? 'Mil Ed Level' : '';
+        columnHeaders.contains('Marital Status') ? 'Marital Status' : '';
+    comments = columnHeaders.contains('Comments') ? 'Comments' : '';
+    civEd = columnHeaders.contains('Civ Ed Level') ? 'Civ Ed Level' : '';
+    milEd = columnHeaders.contains('Mil Ed Level') ? 'Mil Ed Level' : '';
     nbcBootSize =
-        columnHeaders!.contains('CBRN Boot Size') ? 'CBRN Boot Size' : '';
+        columnHeaders.contains('CBRN Boot Size') ? 'CBRN Boot Size' : '';
     nbcGloveSize =
-        columnHeaders!.contains('CBRN Glove Size') ? 'CBRN Glove Size' : '';
+        columnHeaders.contains('CBRN Glove Size') ? 'CBRN Glove Size' : '';
     nbcMaskSize =
-        columnHeaders!.contains('CBRN Mask Size') ? 'CBRN Mask Size' : '';
+        columnHeaders.contains('CBRN Mask Size') ? 'CBRN Mask Size' : '';
     nbcSuitSize =
-        columnHeaders!.contains('CBRN Suit Size') ? 'CBRN Suit Size' : '';
-    hatSize = columnHeaders!.contains('Hat Size') ? 'Hat Size' : '';
-    bootSize = columnHeaders!.contains('Boot Size') ? 'Boot Size' : '';
-    acuTopSize = columnHeaders!.contains('OCP Top Size') ? 'OCP Top Size' : '';
+        columnHeaders.contains('CBRN Suit Size') ? 'CBRN Suit Size' : '';
+    hatSize = columnHeaders.contains('Hat Size') ? 'Hat Size' : '';
+    bootSize = columnHeaders.contains('Boot Size') ? 'Boot Size' : '';
+    acuTopSize = columnHeaders.contains('OCP Top Size') ? 'OCP Top Size' : '';
     acuTrouserSize =
-        columnHeaders!.contains('OCP Trouser Size') ? 'OCP Trouser Size' : '';
+        columnHeaders.contains('OCP Trouser Size') ? 'OCP Trouser Size' : '';
     setState(() {});
   }
 
@@ -356,7 +357,7 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
     acuTopSize = '';
     acuTrouserSize = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
   }
 
   @override
@@ -408,15 +409,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Soldier Id'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Soldier Id'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -427,14 +422,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Rank'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Rank'),
+                          items: columnHeaders,
                           value: rank,
                           onChanged: (value) {
                             setState(() {
@@ -445,15 +435,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Last Name'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Last Name'),
+                          items: columnHeaders,
                           value: lastName,
                           onChanged: (value) {
                             setState(() {
@@ -464,15 +448,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'First Name'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('First Name'),
+                          items: columnHeaders,
                           value: firstName,
                           onChanged: (value) {
                             setState(() {
@@ -483,15 +461,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Middle Initial'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Middle Initial'),
+                          items: columnHeaders,
                           value: mi,
                           onChanged: (value) {
                             setState(() {
@@ -502,15 +474,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Assigned'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Assigned'),
+                          items: columnHeaders,
                           value: assigned,
                           onChanged: (value) {
                             setState(() {
@@ -521,15 +487,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Section'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Section'),
+                          items: columnHeaders,
                           value: section,
                           onChanged: (value) {
                             setState(() {
@@ -540,15 +500,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Supervisor'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Supervisor'),
+                          items: columnHeaders,
                           value: supervisor,
                           onChanged: (value) {
                             setState(() {
@@ -559,15 +513,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'DoD ID'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('DoD ID'),
+                          items: columnHeaders,
                           value: dodId,
                           onChanged: (value) {
                             setState(() {
@@ -578,15 +526,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Date of Rank'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Date of Rank'),
+                          items: columnHeaders,
                           value: dor,
                           onChanged: (value) {
                             setState(() {
@@ -597,14 +539,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'MOS'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('MOS'),
+                          items: columnHeaders,
                           value: mos,
                           onChanged: (value) {
                             setState(() {
@@ -615,15 +552,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Duty Position'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Duty Position'),
+                          items: columnHeaders,
                           value: duty,
                           onChanged: (value) {
                             setState(() {
@@ -634,15 +565,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Paragraph/Line No'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Paragraph/Line No'),
+                          items: columnHeaders,
                           value: paraLn,
                           onChanged: (value) {
                             setState(() {
@@ -653,15 +578,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Required MOS'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Required MOS'),
+                          items: columnHeaders,
                           value: reqMos,
                           onChanged: (value) {
                             setState(() {
@@ -672,15 +591,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Loss Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Loss Date'),
+                          items: columnHeaders,
                           value: loss,
                           onChanged: (value) {
                             setState(() {
@@ -691,15 +604,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'ETS Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('ETS Date'),
+                          items: columnHeaders,
                           value: ets,
                           onChanged: (value) {
                             setState(() {
@@ -710,14 +617,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'BASD'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('BASD'),
+                          items: columnHeaders,
                           value: basd,
                           onChanged: (value) {
                             setState(() {
@@ -728,14 +630,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'PEBD'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('PEBD'),
+                          items: columnHeaders,
                           value: pebd,
                           onChanged: (value) {
                             setState(() {
@@ -746,15 +643,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Gain Date'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Gain Date'),
+                          items: columnHeaders,
                           value: gain,
                           onChanged: (value) {
                             setState(() {
@@ -765,15 +656,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Civilian Education'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Civilian Education'),
+                          items: columnHeaders,
                           value: civEd,
                           onChanged: (value) {
                             setState(() {
@@ -784,15 +669,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Military Education'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Military Education'),
+                          items: columnHeaders,
                           value: milEd,
                           onChanged: (value) {
                             setState(() {
@@ -803,15 +682,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'CBRN Suit Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('CBRN Suit Size'),
+                          items: columnHeaders,
                           value: nbcSuitSize,
                           onChanged: (value) {
                             setState(() {
@@ -822,15 +695,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'CBRN Mask Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('CBRN Mask Size'),
+                          items: columnHeaders,
                           value: nbcMaskSize,
                           onChanged: (value) {
                             setState(() {
@@ -841,15 +708,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'CBRN Boot Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('CBRN Boot Size'),
+                          items: columnHeaders,
                           value: nbcBootSize,
                           onChanged: (value) {
                             setState(() {
@@ -860,15 +721,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'CBRN Glove Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('CBRN Glove Size'),
+                          items: columnHeaders,
                           value: nbcGloveSize,
                           onChanged: (value) {
                             setState(() {
@@ -879,15 +734,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Hat Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Hat Size'),
+                          items: columnHeaders,
                           value: hatSize,
                           onChanged: (value) {
                             setState(() {
@@ -898,15 +747,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Boot Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Boot Size'),
+                          items: columnHeaders,
                           value: bootSize,
                           onChanged: (value) {
                             setState(() {
@@ -917,15 +760,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'OCP Top Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('OCP Top Size'),
+                          items: columnHeaders,
                           value: acuTopSize,
                           onChanged: (value) {
                             setState(() {
@@ -936,15 +773,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'OCP Trouser Size'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('OCP Trouser Size'),
+                          items: columnHeaders,
                           value: acuTrouserSize,
                           onChanged: (value) {
                             setState(() {
@@ -955,15 +786,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Address'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Address'),
+                          items: columnHeaders,
                           value: address,
                           onChanged: (value) {
                             setState(() {
@@ -974,14 +799,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'City'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('City'),
+                          items: columnHeaders,
                           value: city,
                           onChanged: (value) {
                             setState(() {
@@ -992,14 +812,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'State'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('State'),
+                          items: columnHeaders,
                           value: state,
                           onChanged: (value) {
                             setState(() {
@@ -1010,15 +825,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Zip Code'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Zip Code'),
+                          items: columnHeaders,
                           value: zip,
                           onChanged: (value) {
                             setState(() {
@@ -1029,15 +838,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Phone Number'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Phone Number'),
+                          items: columnHeaders,
                           value: phone,
                           onChanged: (value) {
                             setState(() {
@@ -1048,15 +851,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Work Phone'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Work Phone'),
+                          items: columnHeaders,
                           value: workPhone,
                           onChanged: (value) {
                             setState(() {
@@ -1067,15 +864,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Email Address'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Email Address'),
+                          items: columnHeaders,
                           value: email,
                           onChanged: (value) {
                             setState(() {
@@ -1086,15 +877,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Work Email'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Work Email'),
+                          items: columnHeaders,
                           value: workEmail,
                           onChanged: (value) {
                             setState(() {
@@ -1105,15 +890,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Next of Kin'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Next of Kin'),
+                          items: columnHeaders,
                           value: nok,
                           onChanged: (value) {
                             setState(() {
@@ -1124,15 +903,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'NOK Phone'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('NOK Phone'),
+                          items: columnHeaders,
                           value: nokPhone,
                           onChanged: (value) {
                             setState(() {
@@ -1143,15 +916,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Marital Status'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Marital Status'),
+                          items: columnHeaders,
                           value: maritalStatus,
                           onChanged: (value) {
                             setState(() {
@@ -1162,15 +929,9 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Comments'),
+                          items: columnHeaders,
                           value: comments,
                           onChanged: (value) {
                             setState(() {

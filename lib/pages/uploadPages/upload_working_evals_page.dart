@@ -13,6 +13,7 @@ import '../../models/soldier.dart';
 import '../../models/working_eval.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class UploadWorkingEvalsPage extends ConsumerStatefulWidget {
@@ -26,7 +27,7 @@ class UploadWorkingEvalsPage extends ConsumerStatefulWidget {
 
 class UploadWorkingEvalsPageState
     extends ConsumerState<UploadWorkingEvalsPage> {
-  List<String?>? columnHeaders;
+  late List<String> columnHeaders;
   late List<List<Data?>> rows;
   String? soldierId,
       duties,
@@ -65,20 +66,20 @@ class UploadWorkingEvalsPageState
     setState(() {
       rows = sheet.rows;
       columnHeaders = getColumnHeaders(rows.first);
-      soldierId = columnHeaders!.contains('Soldier Id') ? 'Soldier Id' : '';
+      soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       duties =
-          columnHeaders!.contains('Duty Description') ? 'Duty Description' : '';
+          columnHeaders.contains('Duty Description') ? 'Duty Description' : '';
       emphasis =
-          columnHeaders!.contains('Special Emphasis') ? 'Special Emphasis' : '';
+          columnHeaders.contains('Special Emphasis') ? 'Special Emphasis' : '';
       appointed =
-          columnHeaders!.contains('Appointed Duties') ? 'Appointed Duties' : '';
-      character = columnHeaders!.contains('Character') ? 'Character' : '';
-      presence = columnHeaders!.contains('Presence') ? 'Presence' : '';
-      intellect = columnHeaders!.contains('Intellect') ? 'Intellect' : '';
-      leads = columnHeaders!.contains('Leads') ? 'Leads' : '';
-      develops = columnHeaders!.contains('Develops') ? 'Develops' : '';
-      achieves = columnHeaders!.contains('Achieves') ? 'Achieves' : '';
-      performance = columnHeaders!.contains('Performance') ? 'Performance' : '';
+          columnHeaders.contains('Appointed Duties') ? 'Appointed Duties' : '';
+      character = columnHeaders.contains('Character') ? 'Character' : '';
+      presence = columnHeaders.contains('Presence') ? 'Presence' : '';
+      intellect = columnHeaders.contains('Intellect') ? 'Intellect' : '';
+      leads = columnHeaders.contains('Leads') ? 'Leads' : '';
+      develops = columnHeaders.contains('Develops') ? 'Develops' : '';
+      achieves = columnHeaders.contains('Achieves') ? 'Achieves' : '';
+      performance = columnHeaders.contains('Performance') ? 'Performance' : '';
     });
   }
 
@@ -167,7 +168,7 @@ class UploadWorkingEvalsPageState
     achieves = '';
     performance = '';
     columnHeaders = [];
-    columnHeaders!.add('');
+    columnHeaders.add('');
     rows = [];
   }
 
@@ -220,15 +221,9 @@ class UploadWorkingEvalsPageState
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('SoldierId'),
+                          items: columnHeaders,
                           value: soldierId,
                           onChanged: (value) {
                             setState(() {
@@ -239,15 +234,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Daily Duties and Scope'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Daily Duties and Scope'),
+                          items: columnHeaders,
                           value: duties,
                           onChanged: (value) {
                             setState(() {
@@ -258,15 +247,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Areas of Special Emphasis'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Areas of Special Emphasis'),
+                          items: columnHeaders,
                           value: emphasis,
                           onChanged: (value) {
                             setState(() {
@@ -277,15 +260,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Appointed Duties'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Appointed Duties'),
+                          items: columnHeaders,
                           value: appointed,
                           onChanged: (value) {
                             setState(() {
@@ -296,15 +273,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Character'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Character'),
+                          items: columnHeaders,
                           value: character,
                           onChanged: (value) {
                             setState(() {
@@ -315,15 +286,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Presence'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Presence'),
+                          items: columnHeaders,
                           value: presence,
                           onChanged: (value) {
                             setState(() {
@@ -334,15 +299,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Intellect'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Intellect'),
+                          items: columnHeaders,
                           value: intellect,
                           onChanged: (value) {
                             setState(() {
@@ -353,14 +312,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Leads'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Leads'),
+                          items: columnHeaders,
                           value: leads,
                           onChanged: (value) {
                             setState(() {
@@ -371,15 +325,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Develops'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Develops'),
+                          items: columnHeaders,
                           value: develops,
                           onChanged: (value) {
                             setState(() {
@@ -390,15 +338,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Achieves'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Achieves'),
+                          items: columnHeaders,
                           value: achieves,
                           onChanged: (value) {
                             setState(() {
@@ -409,15 +351,9 @@ class UploadWorkingEvalsPageState
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Overall Performance'),
-                          items: columnHeaders!.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header!),
-                            );
-                          }).toList(),
+                        child: PlatformItemPicker(
+                          label: const Text('Overall Performance'),
+                          items: columnHeaders,
                           value: performance,
                           onChanged: (value) {
                             setState(() {

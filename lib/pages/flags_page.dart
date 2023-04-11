@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../methods/theme_methods.dart';
 import '../providers/tracking_provider.dart';
 import '../../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
@@ -608,6 +609,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -618,6 +620,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

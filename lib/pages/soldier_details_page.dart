@@ -13,6 +13,9 @@ import '../../providers/subscription_state.dart';
 import '../../models/award.dart';
 import '../../models/pov.dart';
 import '../../models/soldier.dart';
+import '../methods/theme_methods.dart';
+import '../widgets/platform_widgets/platform_icon_button.dart';
+import '../widgets/platform_widgets/platform_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_soldier_page.dart';
 import 'share_soldier_page.dart';
@@ -347,7 +350,7 @@ class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
       actions: <Widget>[
         Tooltip(
           message: 'Share Soldier',
-          child: IconButton(
+          child: PlatformIconButton(
               icon: const Icon(Icons.share),
               onPressed: () {
                 Navigator.push(
@@ -453,9 +456,8 @@ class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
                             enabled: true,
                             decoration: InputDecoration(
                               labelText: 'Address',
-                              suffixIcon: IconButton(
+                              suffixIcon: PlatformIconButton(
                                 icon: const Icon(Icons.map),
-                                tooltip: 'Show on Map',
                                 onPressed: (() {
                                   String address = widget.soldier.address;
                                   if (widget.soldier.address != '') {
@@ -537,12 +539,14 @@ class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
                                       return Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Card(
-                                          child: ListTile(
+                                          color: getContrastingBackgroundColor(
+                                              context),
+                                          child: PlatformListTile(
                                             title: Text(
                                                 '${povSnapshots[position]['year']} ${povSnapshots[position]['make']} ${povSnapshots[position]['model']}'),
                                             subtitle: Text(
                                                 'Registration Expires: ${povSnapshots[position]['regExp']}, Insurance Expires: ${povSnapshots[position]['insExp']}'),
-                                            trailing: IconButton(
+                                            trailing: PlatformIconButton(
                                                 icon: const Icon(Icons.delete),
                                                 onPressed: () {
                                                   deletePov(
@@ -606,10 +610,12 @@ class SoldierDetailsPageState extends ConsumerState<SoldierDetailsPage> {
                                       return Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Card(
-                                          child: ListTile(
+                                          color: getContrastingBackgroundColor(
+                                              context),
+                                          child: PlatformListTile(
                                             title: Text(
                                                 '${awardSnapshots[position]['name']}: ${awardSnapshots[position]['number']}'),
-                                            trailing: IconButton(
+                                            trailing: PlatformIconButton(
                                                 icon: const Icon(Icons.delete),
                                                 onPressed: () {
                                                   deleteAward(

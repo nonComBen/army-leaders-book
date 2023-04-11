@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
 
 import '../../methods/show_snackbar.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -105,6 +106,7 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
       title: 'Upload Phone Numbers',
       body: Center(
         child: Card(
+          color: getContrastingBackgroundColor(context),
           child: Container(
             padding: const EdgeInsets.all(16.0),
             constraints: const BoxConstraints(maxWidth: 900),

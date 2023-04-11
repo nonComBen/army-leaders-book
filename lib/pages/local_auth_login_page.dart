@@ -58,7 +58,7 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
         padding: EdgeInsets.symmetric(
             horizontal: width > 932 ? (width - 916) / 2 : 16),
         child: Card(
-          color: getBackgroundColor(context),
+          color: getContrastingBackgroundColor(context),
           child: Container(
             padding: const EdgeInsets.all(16.0),
             constraints: const BoxConstraints(maxWidth: 900),

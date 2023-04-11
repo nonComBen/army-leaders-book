@@ -14,6 +14,7 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../models/appointment.dart';
+import '../methods/theme_methods.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_appointment_page.dart';
 import '../pdf/appointments_pdf.dart';
@@ -684,6 +685,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -694,6 +696,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

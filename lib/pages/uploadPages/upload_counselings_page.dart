@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/show_snackbar.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/counseling.dart';
 import '../../models/soldier.dart';
@@ -169,6 +170,7 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
       title: 'Upload Counselings',
       body: Center(
         child: Card(
+          color: getContrastingBackgroundColor(context),
           child: Container(
             padding: const EdgeInsets.all(16.0),
             constraints: const BoxConstraints(maxWidth: 900),

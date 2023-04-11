@@ -196,7 +196,7 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                     AsyncSnapshot<DocumentSnapshot> snapshot) {
                   if (snapshot.hasError) {
                     return Card(
-                      color: getBackgroundColor(context),
+                      color: getContrastingBackgroundColor(context),
                       child: PlatformListTile(
                         title: const StandardText(
                           'No User Found',
@@ -210,7 +210,7 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                     default:
                       if (snapshot.data!.exists) {
                         return Card(
-                          color: getBackgroundColor(context),
+                          color: getContrastingBackgroundColor(context),
                           child: PlatformListTile(
                             title: StandardText(
                                 '${snapshot.data!['rank'] ?? ''} ${snapshot.data!['userName'] ?? ''}'),
@@ -227,7 +227,7 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                         );
                       } else {
                         return Card(
-                          color: getBackgroundColor(context),
+                          color: getContrastingBackgroundColor(context),
                           child: PlatformListTile(
                             title: const StandardText('No User Found'),
                           ),

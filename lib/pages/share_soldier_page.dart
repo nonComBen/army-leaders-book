@@ -86,7 +86,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
             constraints: const BoxConstraints(maxWidth: 900),
             padding: const EdgeInsets.all(16.0),
             child: Card(
-              color: getBackgroundColor(context),
+              color: getContrastingBackgroundColor(context),
               child: ListView(
                 children: <Widget>[
                   Padding(
@@ -216,7 +216,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                         if (snapshot.data == null ||
                             snapshot.data!.docs.isEmpty) {
                           return Card(
-                            color: getBackgroundColor(context),
+                            color: getContrastingBackgroundColor(context),
                             child: PlatformListTile(
                               title: const Text('No User Found'),
                             ),
@@ -228,7 +228,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                           default:
                             if (snapshot.data!.docs.first.exists) {
                               return Card(
-                                color: getBackgroundColor(context),
+                                color: getContrastingBackgroundColor(context),
                                 child: PlatformListTile(
                                   title: Text(
                                       '${snapshot.data!.docs.first['rank']} ${snapshot.data!.docs.first['userName']}'),
@@ -246,7 +246,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                               );
                             } else {
                               return Card(
-                                color: getBackgroundColor(context),
+                                color: getContrastingBackgroundColor(context),
                                 child: PlatformListTile(
                                   title: const Text('No User Found'),
                                 ),

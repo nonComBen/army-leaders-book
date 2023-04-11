@@ -16,6 +16,7 @@ import '../auth_provider.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/rating.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
@@ -655,6 +656,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -665,6 +667,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

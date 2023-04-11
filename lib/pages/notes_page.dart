@@ -11,6 +11,7 @@ import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../../models/note.dart';
+import '../methods/theme_methods.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_note_page.dart';
 import '../providers/tracking_provider.dart';
@@ -269,6 +270,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
               children: <Widget>[
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
+                  color: getContrastingBackgroundColor(context),
                   child: DataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,

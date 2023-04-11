@@ -14,6 +14,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/subscription_state.dart';
+import '../methods/theme_methods.dart';
 import '../widgets/anon_warning_banner.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
@@ -668,6 +669,7 @@ class MedProsPageState extends ConsumerState<MedProsPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,

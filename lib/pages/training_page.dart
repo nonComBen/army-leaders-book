@@ -15,6 +15,7 @@ import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/training.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
@@ -647,6 +648,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,

@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/auth_provider.dart';
 
+import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/note.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
@@ -101,64 +102,54 @@ class EditNotePageState extends ConsumerState<EditNotePage> {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
-        title: _title,
-        body: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Card(
-            child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                onWillPop: updated
-                    ? () => onBackPressed(context)
-                    : () => Future(() => true),
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _titleController,
-                              keyboardType: TextInputType.text,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Title',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 20,
-                              controller: _commentsController,
-                              enabled: true,
-                              decoration:
-                                  const InputDecoration(labelText: 'Comments'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          PlatformButton(
-                            onPressed: () {
-                              submit(context, user.uid);
-                            },
-                            child: Text(widget.note.id == null
-                                ? 'Add Note'
-                                : 'Update Note'),
-                          ),
-                        ],
-                      ),
-                    ))),
+      title: _title,
+      body: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: width > 932 ? (width - 916) / 2 : 16),
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          onWillPop:
+              updated ? () => onBackPressed(context) : () => Future(() => true),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                PaddedTextField(
+                  controller: _titleController,
+                  keyboardType: TextInputType.text,
+                  enabled: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Title',
+                  ),
+                  onChanged: (value) {
+                    updated = true;
+                  },
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 20,
+                  controller: _commentsController,
+                  enabled: true,
+                  decoration: const InputDecoration(labelText: 'Comments'),
+                  onChanged: (value) {
+                    updated = true;
+                  },
+                ),
+                PlatformButton(
+                  onPressed: () {
+                    submit(context, user.uid);
+                  },
+                  child:
+                      Text(widget.note.id == null ? 'Add Note' : 'Update Note'),
+                ),
+              ],
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

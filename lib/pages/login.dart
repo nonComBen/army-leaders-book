@@ -14,6 +14,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../apple_sign_in_available.dart';
 import '../methods/show_on_login.dart';
+import '../methods/theme_methods.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/user_provider.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
@@ -207,6 +208,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
                   key: formKey,
                   autovalidateMode: AutovalidateMode.always,
                   child: Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ListView(

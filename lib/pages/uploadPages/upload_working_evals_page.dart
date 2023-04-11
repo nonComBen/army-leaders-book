@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../methods/show_snackbar.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/working_eval.dart';
@@ -179,6 +180,7 @@ class UploadWorkingEvalsPageState
       title: 'Upload Working Evals',
       body: Center(
         child: Card(
+          color: getContrastingBackgroundColor(context),
           child: Container(
             padding: const EdgeInsets.all(16.0),
             constraints: const BoxConstraints(maxWidth: 900),

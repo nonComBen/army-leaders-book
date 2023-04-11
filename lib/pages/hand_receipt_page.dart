@@ -13,6 +13,7 @@ import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../methods/theme_methods.dart';
 import '../providers/subscription_state.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
@@ -647,6 +648,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,

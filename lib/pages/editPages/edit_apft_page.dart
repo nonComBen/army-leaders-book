@@ -1,16 +1,16 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
+import '../../methods/theme_methods.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_selection_widget.dart';
+import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/validate.dart';
 import '../../models/apft.dart';
 import '../../calculators/pu_calculator.dart';
 import '../../calculators/su_calculator.dart';
@@ -19,6 +19,7 @@ import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditApftPage extends ConsumerStatefulWidget {
   const EditApftPage({
@@ -63,45 +64,6 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
   PuCalculator puCalculator = PuCalculator();
   SuCalculator suCalculator = SuCalculator();
   RunCalculator runCalculator = RunCalculator();
-
-  Future<void> _pickDate(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _dateTime!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _dateController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _dateTime,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _dateTime = value;
-                  _dateController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
 
   int ageGroupIndex() {
     int age = int.tryParse(_ageController.text) ?? 17;
@@ -376,390 +338,381 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
           padding: EdgeInsets.symmetric(
               horizontal: width > 932 ? (width - 916) / 2 : 16),
           child: Card(
+            color: getContrastingBackgroundColor(context),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 900),
               padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    if (user.isAnonymous) const AnonWarningBanner(),
-                    GridView.count(
-                      primary: false,
-                      crossAxisCount: width > 700 ? 2 : 1,
-                      mainAxisSpacing: 1.0,
-                      crossAxisSpacing: 1.0,
-                      childAspectRatio: width > 900
-                          ? 900 / 230
-                          : width > 700
-                              ? width / 230
-                              : width / 115,
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: FutureBuilder(
-                              future: firestore
-                                  .collection('soldiers')
-                                  .where('users', arrayContains: user.uid)
-                                  .get(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                                switch (snapshot.connectionState) {
-                                  case ConnectionState.waiting:
-                                    return const Center(
-                                        child: CircularProgressIndicator());
-                                  default:
-                                    allSoldiers = snapshot.data!.docs;
-                                    soldiers = removeSoldiers
-                                        ? lessSoldiers
-                                        : allSoldiers;
-                                    soldiers!.sort((a, b) => a['lastName']
-                                        .toString()
-                                        .compareTo(b['lastName'].toString()));
-                                    soldiers!.sort((a, b) => a['rankSort']
-                                        .toString()
-                                        .compareTo(b['rankSort'].toString()));
-                                    return PlatformItemPicker(
-                                      label: const Text('Soldier'),
-                                      items:
-                                          soldiers!.map((e) => e.id).toList(),
-                                      onChanged: (value) {
-                                        int index = soldiers!.indexWhere(
-                                            (doc) => doc.id == value);
-                                        if (mounted) {
-                                          setState(() {
-                                            _soldierId = value;
-                                            _rank = soldiers![index]['rank'];
-                                            _lastName =
-                                                soldiers![index]['lastName'];
-                                            _firstName =
-                                                soldiers![index]['firstName'];
-                                            _section =
-                                                soldiers![index]['section'];
-                                            _rankSort = soldiers![index]
-                                                    ['rankSort']
-                                                .toString();
-                                            _owner = soldiers![index]['owner'];
-                                            _users = soldiers![index]['users'];
-                                            updated = true;
-                                          });
-                                        }
-                                      },
-                                      value: _soldierId,
-                                    );
-                                }
-                              }),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CheckboxListTile(
-                            controlAffinity: ListTileControlAffinity.leading,
-                            value: removeSoldiers,
-                            title: const Text('Remove Soldiers already added'),
-                            onChanged: (checked) {
-                              _removeSoldiers(checked, user.uid);
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _dateController,
-                            keyboardType: TextInputType.datetime,
-                            enabled: true,
-                            validator: (value) =>
-                                isValidDate(value!) || value.isEmpty
-                                    ? null
-                                    : 'Date must be in yyyy-MM-dd format',
-                            decoration: InputDecoration(
-                                labelText: 'Date',
-                                suffixIcon: IconButton(
-                                    icon: const Icon(Icons.date_range),
-                                    onPressed: () {
-                                      _pickDate(context);
-                                    })),
-                            onChanged: (value) {
-                              _dateTime = DateTime.tryParse(value) ?? _dateTime;
-                              updated = true;
-                            },
-                          ),
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            SizedBox(
-                              width: 150,
-                              child: RadioListTile(
-                                title: const Text('M'),
-                                value: 'Male',
-                                groupValue: _gender,
-                                onChanged: (dynamic gender) {
-                                  setState(() {
-                                    _gender = gender;
-                                    calcPu();
-                                    calcSu();
-                                    calcRun();
-                                    calcTotal();
-                                  });
-                                },
-                              ),
-                            ),
-                            SizedBox(
-                              width: 150,
-                              child: RadioListTile(
-                                title: const Text('F'),
-                                value: 'Female',
-                                groupValue: _gender,
-                                onChanged: (dynamic gender) {
-                                  setState(() {
-                                    _gender = gender;
-                                    calcPu();
-                                    calcSu();
-                                    calcRun();
-                                    calcTotal();
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
-                          child: TextFormField(
-                            controller: _ageController,
-                            keyboardType: TextInputType.number,
-                            enabled: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Age',
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                updated = true;
-                                calcPu();
-                                calcSu();
-                                calcRun();
-                                calcTotal();
-                              });
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: PlatformItemPicker(
-                            label: const Text('Aerobic Event'),
-                            items: _runTypes,
-                            onChanged: (dynamic value) {
-                              if (mounted) {
-                                setState(() {
-                                  _runType = value;
-                                  updated = true;
-                                  calcRun();
-                                  calcTotal();
-                                });
+              child: ListView(
+                children: <Widget>[
+                  if (user.isAnonymous) const AnonWarningBanner(),
+                  GridView.count(
+                    primary: false,
+                    crossAxisCount: width > 700 ? 2 : 1,
+                    mainAxisSpacing: 1.0,
+                    crossAxisSpacing: 1.0,
+                    childAspectRatio: width > 900
+                        ? 900 / 230
+                        : width > 700
+                            ? width / 230
+                            : width / 115,
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FutureBuilder(
+                            future: firestore
+                                .collection('soldiers')
+                                .where('users', arrayContains: user.uid)
+                                .get(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<QuerySnapshot> snapshot) {
+                              switch (snapshot.connectionState) {
+                                case ConnectionState.waiting:
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                default:
+                                  allSoldiers = snapshot.data!.docs;
+                                  soldiers = removeSoldiers
+                                      ? lessSoldiers
+                                      : allSoldiers;
+                                  soldiers!.sort((a, b) => a['lastName']
+                                      .toString()
+                                      .compareTo(b['lastName'].toString()));
+                                  soldiers!.sort((a, b) => a['rankSort']
+                                      .toString()
+                                      .compareTo(b['rankSort'].toString()));
+                                  return PlatformItemPicker(
+                                    label: const Text('Soldier'),
+                                    items: soldiers!.map((e) => e.id).toList(),
+                                    onChanged: (value) {
+                                      int index = soldiers!
+                                          .indexWhere((doc) => doc.id == value);
+                                      if (mounted) {
+                                        setState(() {
+                                          _soldierId = value;
+                                          _rank = soldiers![index]['rank'];
+                                          _lastName =
+                                              soldiers![index]['lastName'];
+                                          _firstName =
+                                              soldiers![index]['firstName'];
+                                          _section =
+                                              soldiers![index]['section'];
+                                          _rankSort = soldiers![index]
+                                                  ['rankSort']
+                                              .toString();
+                                          _owner = soldiers![index]['owner'];
+                                          _users = soldiers![index]['users'];
+                                          updated = true;
+                                        });
+                                      }
+                                    },
+                                    value: _soldierId,
+                                  );
                               }
-                            },
-                            value: _runType,
-                          ),
+                            }),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformCheckboxListTile(
+                          controlAffinity: ListTileControlAffinity.leading,
+                          value: removeSoldiers,
+                          title: const Text('Remove Soldiers already added'),
+                          onChanged: (checked) {
+                            _removeSoldiers(checked, user.uid);
+                          },
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CheckboxListTile(
-                            value: forProPoints,
-                            title: const Text('For Promotion Points'),
-                            subtitle:
-                                const Text('Type "00" in PU/SU Raw if Profile'),
-                            controlAffinity: ListTileControlAffinity.leading,
-                            onChanged: (forPoints) {
-                              setState(() {
-                                updated = true;
-                                forProPoints = forPoints!;
-                                calcPu();
-                                calcSu();
-                                calcRun();
-                                calcTotal();
-                              });
-                            },
-                          ),
-                        )
-                      ],
-                    ),
-                    GridView.count(
-                      primary: false,
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 1.0,
-                      crossAxisSpacing: 1.0,
-                      childAspectRatio: width > 900 ? 900 / 300 : width / 300.0,
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        const Padding(
-                            padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                            child: Text(
-                              'Pushup',
-                              style: TextStyle(fontSize: 18),
-                            )),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _puRawController,
-                            keyboardType: TextInputType.number,
-                            enabled: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Raw',
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                updated = true;
-                                calcPu();
-                                if (forProPoints) {
-                                  calcRun();
-                                }
-                                calcTotal();
-                              });
-                            },
-                          ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DateTextField(
+                          controller: _dateController,
+                          label: 'Date',
+                          date: _dateTime,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _puController,
-                            keyboardType: TextInputType.number,
-                            enabled: false,
-                            decoration: const InputDecoration(
-                              labelText: 'Score',
-                            ),
-                          ),
-                        ),
-                        const Padding(
-                            padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                            child: Text(
-                              'Situp',
-                              style: TextStyle(fontSize: 18),
-                            )),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _suRawController,
-                            keyboardType: TextInputType.number,
-                            enabled: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Raw',
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                updated = true;
-                                calcSu();
-                                if (forProPoints) {
-                                  calcRun();
-                                }
-                                calcTotal();
-                              });
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _suController,
-                            keyboardType: TextInputType.number,
-                            enabled: false,
-                            decoration: const InputDecoration(
-                              labelText: 'Score',
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                          child: Text(
-                            _runType,
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _runRawController,
-                            keyboardType: TextInputType.text,
-                            enabled: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Raw',
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                updated = true;
-                                calcRun();
-                                calcTotal();
-                              });
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextFormField(
-                            controller: _runController,
-                            keyboardType: TextInputType.number,
-                            enabled: false,
-                            decoration: const InputDecoration(
-                              labelText: 'Score',
-                            ),
-                          ),
-                        ),
-                        const Padding(
-                            padding: EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
-                            child: Text(
-                              'Total',
-                              style: TextStyle(fontSize: 18),
-                            )),
-                        const Padding(
-                            padding: EdgeInsets.all(8.0), child: SizedBox()),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                  width: 2.0,
-                                  style: BorderStyle.solid,
-                                ),
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(20.0))),
-                            child: Center(
-                              child: Text(
-                                _total.toString(),
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CheckboxListTile(
-                        title: const Text('Pass'),
-                        value: pass,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        onChanged: (value) {
+                      ),
+                      PlatformSelectionWidget(
+                        titles: const [Text('M'), Text('F')],
+                        values: const ['Male', 'Female'],
+                        groupValue: _gender,
+                        onChanged: (dynamic gender) {
                           setState(() {
-                            updated = true;
-                            pass = value!;
+                            _gender = gender;
+                            calcPu();
+                            calcSu();
+                            calcRun();
+                            calcTotal();
                           });
                         },
                       ),
+                      // Row(
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      //   children: <Widget>[
+                      //     SizedBox(
+                      //       width: 150,
+                      //       child: RadioListTile(
+                      //         title: const Text('M'),
+                      //         value: 'Male',
+                      //         groupValue: _gender,
+                      //         onChanged: (dynamic gender) {
+                      //           setState(() {
+                      //             _gender = gender;
+                      //             calcPu();
+                      //             calcSu();
+                      //             calcRun();
+                      //             calcTotal();
+                      //           });
+                      //         },
+                      //       ),
+                      //     ),
+                      //     SizedBox(
+                      //       width: 150,
+                      //       child: RadioListTile(
+                      //         title: const Text('F'),
+                      //         value: 'Female',
+                      //         groupValue: _gender,
+                      //         onChanged: (dynamic gender) {
+                      //           setState(() {
+                      //             _gender = gender;
+                      //             calcPu();
+                      //             calcSu();
+                      //             calcRun();
+                      //             calcTotal();
+                      //           });
+                      //         },
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
+                        child: PlatformTextField(
+                          controller: _ageController,
+                          keyboardType: TextInputType.number,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Age',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              updated = true;
+                              calcPu();
+                              calcSu();
+                              calcRun();
+                              calcTotal();
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformItemPicker(
+                          label: const Text('Aerobic Event'),
+                          items: _runTypes,
+                          onChanged: (dynamic value) {
+                            if (mounted) {
+                              setState(() {
+                                _runType = value;
+                                updated = true;
+                                calcRun();
+                                calcTotal();
+                              });
+                            }
+                          },
+                          value: _runType,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformCheckboxListTile(
+                          value: forProPoints,
+                          title: const Text('For Promotion Points'),
+                          subtitle:
+                              const Text('Type "00" in PU/SU Raw if Profile'),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          onChanged: (forPoints) {
+                            setState(() {
+                              updated = true;
+                              forProPoints = forPoints!;
+                              calcPu();
+                              calcSu();
+                              calcRun();
+                              calcTotal();
+                            });
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                  GridView.count(
+                    primary: false,
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 1.0,
+                    crossAxisSpacing: 1.0,
+                    childAspectRatio: width > 900 ? 900 / 300 : width / 300.0,
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      const Padding(
+                          padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                          child: HeaderText(
+                            'Pushup',
+                            textAlign: TextAlign.start,
+                          )),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformTextField(
+                          controller: _puRawController,
+                          keyboardType: TextInputType.number,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Raw',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              updated = true;
+                              calcPu();
+                              if (forProPoints) {
+                                calcRun();
+                              }
+                              calcTotal();
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformTextField(
+                          controller: _puController,
+                          keyboardType: TextInputType.number,
+                          enabled: false,
+                          decoration: const InputDecoration(
+                            labelText: 'Score',
+                          ),
+                        ),
+                      ),
+                      const Padding(
+                          padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                          child: HeaderText(
+                            'Situp',
+                            textAlign: TextAlign.start,
+                          )),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformTextField(
+                          controller: _suRawController,
+                          keyboardType: TextInputType.number,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Raw',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              updated = true;
+                              calcSu();
+                              if (forProPoints) {
+                                calcRun();
+                              }
+                              calcTotal();
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformTextField(
+                          controller: _suController,
+                          keyboardType: TextInputType.number,
+                          enabled: false,
+                          decoration: const InputDecoration(
+                            labelText: 'Score',
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                        child: HeaderText(
+                          _runType,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformTextField(
+                          controller: _runRawController,
+                          keyboardType: TextInputType.text,
+                          enabled: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Raw',
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              updated = true;
+                              calcRun();
+                              calcTotal();
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformTextField(
+                          controller: _runController,
+                          keyboardType: TextInputType.number,
+                          enabled: false,
+                          decoration: const InputDecoration(
+                            labelText: 'Score',
+                          ),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
+                        child: HeaderText(
+                          'Total',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      const Padding(
+                          padding: EdgeInsets.all(8.0), child: SizedBox()),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Theme.of(context).primaryColor,
+                                width: 2.0,
+                                style: BorderStyle.solid,
+                              ),
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(20.0))),
+                          child: Center(
+                            child: HeaderText(
+                              _total.toString(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformCheckboxListTile(
+                      title: const Text('Pass'),
+                      value: pass,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      onChanged: (value) {
+                        setState(() {
+                          updated = true;
+                          pass = value!;
+                        });
+                      },
                     ),
-                    PlatformButton(
-                      child: Text(
-                          widget.apft.id == null ? 'Add APFT' : 'Update APFT'),
-                      onPressed: () => submit(context),
-                    ),
-                  ],
-                ),
+                  ),
+                  PlatformButton(
+                    child: Text(
+                        widget.apft.id == null ? 'Add APFT' : 'Update APFT'),
+                    onPressed: () => submit(context),
+                  ),
+                ],
               ),
             ),
           ),

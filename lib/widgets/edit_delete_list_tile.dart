@@ -21,7 +21,7 @@ class EditDeleteListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: getPrimaryColor(context),
+      color: getContrastingBackgroundColor(context),
       child: Padding(
         padding: kIsWeb || Platform.isAndroid
             ? const EdgeInsets.all(0.0)

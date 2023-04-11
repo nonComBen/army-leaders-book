@@ -17,6 +17,7 @@ import '../auth_provider.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../pdf/bodyfats_pdf.dart';
 import '../../widgets/anon_warning_banner.dart';
@@ -695,6 +696,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -705,6 +707,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

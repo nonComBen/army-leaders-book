@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 class RollupCard extends StatelessWidget {
   const RollupCard({
@@ -48,30 +49,31 @@ class RollupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+        color: getContrastingBackgroundColor(context),
         child: Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
-              child: Text(
-                title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 18.0),
-                textAlign: TextAlign.center,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18.0),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-            ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
+                  child: _row1(),
+                ),
+              ),
+              Expanded(child: _buttonBar())
+            ],
           ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
-              child: _row1(),
-            ),
-          ),
-          Expanded(child: _buttonBar())
-        ],
-      ),
-    ));
+        ));
   }
 }

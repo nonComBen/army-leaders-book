@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 import '../../providers/filtered_soldiers_provider.dart';
 import '../../providers/selected_soldiers_provider.dart';
@@ -335,6 +336,7 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
               children: <Widget>[
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
+                  color: getContrastingBackgroundColor(context),
                   child: DataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
@@ -344,6 +346,7 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
                   ),
                 ),
                 Card(
+                  color: getContrastingBackgroundColor(context),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../methods/theme_methods.dart';
 import '../providers/root_provider.dart';
 import '../auth_provider.dart';
 import '../../models/user.dart';
@@ -96,6 +97,7 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
                 key: formKey,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Card(
+                  color: getContrastingBackgroundColor(context),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ListView(

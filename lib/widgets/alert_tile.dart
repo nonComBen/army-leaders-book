@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../methods/theme_methods.dart';
+
 class AlertTile extends StatelessWidget {
   const AlertTile(
       {Key? key,
@@ -16,7 +18,7 @@ class AlertTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Card(
-        color: Theme.of(context).colorScheme.primary,
+        color: getContrastingBackgroundColor(context),
         child: Container(
           padding: const EdgeInsets.all(4.0),
           constraints: const BoxConstraints(maxWidth: 900),

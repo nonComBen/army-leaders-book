@@ -7,6 +7,7 @@ import 'package:leaders_book/models/user.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../auth_provider.dart';
+import '../methods/theme_methods.dart';
 import '../providers/root_provider.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
@@ -90,6 +91,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
             key: formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Card(
+              color: getContrastingBackgroundColor(context),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ListView(

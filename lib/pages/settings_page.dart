@@ -8,9 +8,17 @@ import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../methods/on_back_pressed.dart';
+import '../methods/theme_methods.dart';
 import '../providers/theme_provider.dart';
 import '../../models/setting.dart';
+import '../widgets/header_text.dart';
+import '../widgets/padded_text_field.dart';
+import '../widgets/platform_widgets/platform_button.dart';
+import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../widgets/platform_widgets/platform_icon_button.dart';
+import '../widgets/platform_widgets/platform_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/platform_widgets/platform_selection_widget.dart';
 import '../widgets/platform_widgets/platform_text_field.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -57,10 +65,9 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       training = false,
       isInitial = true;
   String? userId;
+  String _brightness = 'Dark';
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   late Setting setting;
-  ThemeData _theme = ThemeData(brightness: Brightness.light);
-  // ThemeBloc _themeBloc;
   late SharedPreferences prefs;
 
   final TextEditingController acftController = TextEditingController();
@@ -73,6 +80,107 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   final TextEditingController hivController = TextEditingController();
 
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    final theme = ref.read(themeProvider);
+    _brightness = theme.brightness == Brightness.light ? 'Light' : 'Dark';
+  }
+
+  @override
+  void dispose() {
+    acftController.dispose();
+    bfController.dispose();
+    weaponsController.dispose();
+    phaController.dispose();
+    dentalController.dispose();
+    visionController.dispose();
+    hearingController.dispose();
+    hivController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    userId = ref.read(authProvider).currentUser()!.uid;
+    if (isInitial) {
+      initialize();
+      isInitial = false;
+    }
+  }
+
+  void initialize() async {
+    QuerySnapshot snapshot = await firestore
+        .collection('settings')
+        .where('owner', isEqualTo: userId)
+        .get();
+    DocumentSnapshot? doc;
+    if (snapshot.docs.isNotEmpty) {
+      doc = snapshot.docs.firstWhere((doc) => doc.id == userId);
+    }
+    prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      if (doc != null) {
+        setting = Setting.fromMap(doc.data() as Map<String, dynamic>);
+        updated = false;
+      } else {
+        setting = Setting(
+          owner: userId,
+          hearingNotifications: [0, 30],
+          weaponsNotifications: [0, 30],
+          acftNotifications: [0, 30],
+          dentalNotifications: [0, 30],
+          visionNotifications: [0, 30],
+          bfNotifications: [0, 30],
+          hivNotifications: [0, 30],
+          phaNotifications: [0, 30],
+        );
+        updated = true;
+      }
+
+      perstat = setting.perstat;
+      apts = setting.apts;
+      apft = setting.apft;
+      acft = setting.acft;
+      profiles = setting.profiles;
+      bf = setting.bf;
+      weapons = setting.weapons;
+      flags = setting.flags;
+      medpros = setting.medpros;
+      training = setting.training;
+      addNotification = setting.addNotifications;
+      acftMos = setting.acftMonths;
+      bfMos = setting.bfMonths;
+      weaponMos = setting.weaponsMonths;
+      phaMos = setting.phaMonths;
+      dentalMos = setting.dentalMonths;
+      visionMos = setting.visionMonths;
+      hearingMos = setting.hearingMonths;
+      hivMos = setting.hivMonths;
+
+      acftController.text = acftMos.toString();
+      bfController.text = bfMos.toString();
+      weaponsController.text = weaponMos.toString();
+      phaController.text = phaMos.toString();
+      dentalController.text = dentalMos.toString();
+      visionController.text = visionMos.toString();
+      hearingController.text = hearingMos.toString();
+      hivController.text = hivMos.toString();
+
+      bfNotifications = setting.bfNotifications.toList(growable: true);
+      weaponNotifications = setting.weaponsNotifications.toList(growable: true);
+      phaNotifications = setting.phaNotifications.toList(growable: true);
+      dentalNotifications = setting.dentalNotifications.toList(growable: true);
+      visionNotifications = setting.visionNotifications.toList(growable: true);
+      hearingNotifications =
+          setting.hearingNotifications.toList(growable: true);
+      hivNotifications = setting.hivNotifications.toList(growable: true);
+      acftNotifications = setting.acftNotifications.toList(growable: true);
+    });
+  }
 
   void _editNotification(
       BuildContext context, int? index, Notification notification) {
@@ -238,773 +346,673 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   @override
-  void dispose() {
-    acftController.dispose();
-    bfController.dispose();
-    weaponsController.dispose();
-    phaController.dispose();
-    dentalController.dispose();
-    visionController.dispose();
-    hearingController.dispose();
-    hivController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    userId = ref.read(authProvider).currentUser()!.uid;
-    if (isInitial) {
-      initialize();
-      isInitial = false;
-    }
-  }
-
-  void initialize() async {
-    QuerySnapshot snapshot = await firestore
-        .collection('settings')
-        .where('owner', isEqualTo: userId)
-        .get();
-    DocumentSnapshot? doc;
-    if (snapshot.docs.isNotEmpty) {
-      doc = snapshot.docs.firstWhere((doc) => doc.id == userId);
-    }
-    prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      if (doc != null) {
-        setting = Setting.fromMap(doc.data() as Map<String, dynamic>);
-        updated = false;
-      } else {
-        setting = Setting(
-          owner: userId,
-          hearingNotifications: [0, 30],
-          weaponsNotifications: [0, 30],
-          acftNotifications: [0, 30],
-          dentalNotifications: [0, 30],
-          visionNotifications: [0, 30],
-          bfNotifications: [0, 30],
-          hivNotifications: [0, 30],
-          phaNotifications: [0, 30],
-        );
-        updated = true;
-      }
-
-      perstat = setting.perstat;
-      apts = setting.apts;
-      apft = setting.apft;
-      acft = setting.acft;
-      profiles = setting.profiles;
-      bf = setting.bf;
-      weapons = setting.weapons;
-      flags = setting.flags;
-      medpros = setting.medpros;
-      training = setting.training;
-      addNotification = setting.addNotifications;
-      acftMos = setting.acftMonths;
-      bfMos = setting.bfMonths;
-      weaponMos = setting.weaponsMonths;
-      phaMos = setting.phaMonths;
-      dentalMos = setting.dentalMonths;
-      visionMos = setting.visionMonths;
-      hearingMos = setting.hearingMonths;
-      hivMos = setting.hivMonths;
-
-      acftController.text = acftMos.toString();
-      bfController.text = bfMos.toString();
-      weaponsController.text = weaponMos.toString();
-      phaController.text = phaMos.toString();
-      dentalController.text = dentalMos.toString();
-      visionController.text = visionMos.toString();
-      hearingController.text = hearingMos.toString();
-      hivController.text = hivMos.toString();
-
-      bfNotifications = setting.bfNotifications.toList(growable: true);
-      weaponNotifications = setting.weaponsNotifications.toList(growable: true);
-      phaNotifications = setting.phaNotifications.toList(growable: true);
-      dentalNotifications = setting.dentalNotifications.toList(growable: true);
-      visionNotifications = setting.visionNotifications.toList(growable: true);
-      hearingNotifications =
-          setting.hearingNotifications.toList(growable: true);
-      hivNotifications = setting.hivNotifications.toList(growable: true);
-      acftNotifications = setting.acftNotifications.toList(growable: true);
-
-      _theme = Theme.of(context);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final themeService = ref.read(themeProvider.notifier);
-    double width = MediaQuery.of(context).size.width;
-    final accentColor = Theme.of(context).colorScheme.onPrimary;
+    final accentColor = getOnPrimaryColor(context);
+    final width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Settings',
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: width > 932 ? (width - 916) / 2 : 16),
-        child: Card(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formState,
-                onWillPop: updated
-                    ? () => onBackPressed(context)
-                    : () => Future(() => true),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  children: <Widget>[
-                    const Text(
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: 16.0,
+            top: 76.0,
+          ),
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formState,
+              onWillPop: updated
+                  ? () => onBackPressed(context)
+                  : () => Future(() => true),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: <Widget>[
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: HeaderText(
                       'Theme',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        RadioListTile(
-                          value: Brightness.light,
-                          groupValue: _theme.brightness,
-                          title: const Text('Light'),
-                          onChanged: (Brightness? value) {
-                            setState(() {
-                              _theme = ThemeData(brightness: value);
-                              themeService.lightTheme();
-                              prefs.setBool('darkMode', false);
-                            });
-                          },
-                        ),
-                        RadioListTile(
-                          value: Brightness.dark,
-                          groupValue: _theme.brightness,
-                          title: const Text('Dark'),
-                          onChanged: (Brightness? value) {
-                            setState(() {
-                              _theme = ThemeData(brightness: value);
-                              themeService.darkTheme();
-                              prefs.setBool('darkMode', true);
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'Home Screen Cards',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SwitchListTile(
-                      title: const Text('PERSTAT'),
-                      onChanged: (value) {
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformSelectionWidget(
+                      titles: const [Text('Light'), Text('Dark')],
+                      values: const ['Light', 'Dark'],
+                      groupValue: _brightness,
+                      onChanged: (dynamic value) {
                         setState(() {
-                          perstat = value;
-                        });
-                      },
-                      value: perstat,
-                    ),
-                    SwitchListTile(
-                      title: const Text('Appointments'),
-                      onChanged: (value) {
-                        setState(() {
-                          apts = value;
-                        });
-                      },
-                      value: apts,
-                    ),
-                    SwitchListTile(
-                      title: const Text('APFT Stats'),
-                      onChanged: (value) {
-                        setState(() {
-                          apft = value;
-                        });
-                      },
-                      value: apft,
-                    ),
-                    SwitchListTile(
-                      title: const Text('ACFT Stats'),
-                      onChanged: (value) {
-                        setState(() {
-                          acft = value;
-                        });
-                      },
-                      value: acft,
-                    ),
-                    SwitchListTile(
-                      title: const Text('Profiles'),
-                      onChanged: (value) {
-                        setState(() {
-                          profiles = value;
-                        });
-                      },
-                      value: profiles,
-                    ),
-                    SwitchListTile(
-                      title: const Text('Body Composition Stats'),
-                      onChanged: (value) {
-                        setState(() {
-                          bf = value;
-                        });
-                      },
-                      value: bf,
-                    ),
-                    SwitchListTile(
-                      title: const Text('Weapon Stats'),
-                      onChanged: (value) {
-                        setState(() {
-                          weapons = value;
-                        });
-                      },
-                      value: weapons,
-                    ),
-                    SwitchListTile(
-                      title: const Text('Flags'),
-                      onChanged: (value) {
-                        setState(() {
-                          flags = value;
-                        });
-                      },
-                      value: flags,
-                    ),
-                    SwitchListTile(
-                      title: const Text('MedPros'),
-                      onChanged: (value) {
-                        setState(() {
-                          medpros = value;
-                        });
-                      },
-                      value: medpros,
-                    ),
-                    SwitchListTile(
-                      title: const Text('Training'),
-                      onChanged: (value) {
-                        setState(() {
-                          training = value;
-                        });
-                      },
-                      value: training,
-                    ),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'Notifications',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SwitchListTile(
-                      title: const Text('Receive Notifications'),
-                      onChanged: (value) {
-                        setState(() {
-                          addNotification = value;
-                        });
-                      },
-                      value: addNotification,
-                    ),
-                    const Text(
-                      'APFT/ACFT',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: acftController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          acftMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notifications'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(
-                                  context, null, Notification.acft);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: acftNotifications == null
-                            ? 0
-                            : acftNotifications!.length,
-                        itemBuilder: (context, index) {
-                          acftNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${acftNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      acftNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.acft);
-                              },
-                            ),
-                          );
-                        }),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'Body Composition',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: bfController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          bfMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notificatons'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(context, null, Notification.bf);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: bfNotifications == null
-                            ? 0
-                            : bfNotifications!.length,
-                        itemBuilder: (context, index) {
-                          bfNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${bfNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      bfNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.bf);
-                              },
-                            ),
-                          );
-                        }),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'Weapons Qualification',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: weaponsController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          weaponMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notifications'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(
-                                  context, null, Notification.weapon);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: weaponNotifications == null
-                            ? 0
-                            : weaponNotifications!.length,
-                        itemBuilder: (context, index) {
-                          weaponNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${weaponNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      weaponNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.weapon);
-                              },
-                            ),
-                          );
-                        }),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'PHA',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: phaController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          phaMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notifications'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(
-                                  context, null, Notification.pha);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: phaNotifications == null
-                            ? 0
-                            : phaNotifications!.length,
-                        itemBuilder: (context, index) {
-                          phaNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${phaNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      phaNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.pha);
-                              },
-                            ),
-                          );
-                        }),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'Dental',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: dentalController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          dentalMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notifications'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(
-                                  context, null, Notification.dental);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: dentalNotifications == null
-                            ? 0
-                            : dentalNotifications!.length,
-                        itemBuilder: (context, index) {
-                          dentalNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${dentalNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      dentalNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.dental);
-                              },
-                            ),
-                          );
-                        }),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'Vision',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: visionController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          visionMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notifications'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(
-                                  context, null, Notification.vision);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: visionNotifications == null
-                            ? 0
-                            : visionNotifications!.length,
-                        itemBuilder: (context, index) {
-                          visionNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${visionNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      visionNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.vision);
-                              },
-                            ),
-                          );
-                        }),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'Hearing',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: hearingController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          hearingMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notifications'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(
-                                  context, null, Notification.hearing);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: hearingNotifications == null
-                            ? 0
-                            : hearingNotifications!.length,
-                        itemBuilder: (context, index) {
-                          hearingNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${hearingNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      hearingNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.hearing);
-                              },
-                            ),
-                          );
-                        }),
-                    Divider(
-                      color: accentColor,
-                    ),
-                    const Text(
-                      'HIV',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.number,
-                      controller: hivController,
-                      enabled: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Due after X months',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          hivMos = int.tryParse(value);
-                          updated = true;
-                        });
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        const Text('Notifications'),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              _editNotification(
-                                  context, null, Notification.hiv);
-                            })
-                      ],
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: hivNotifications == null
-                            ? 0
-                            : hivNotifications!.length,
-                        itemBuilder: (context, index) {
-                          hivNotifications!.sort();
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${hivNotifications![index].toString()} Days Before'),
-                              trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      hivNotifications!.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.hiv);
-                              },
-                            ),
-                          );
-                        }),
-                    ElevatedButton(
-                        child: const Text('Save'),
-                        onPressed: () {
-                          if (_formState.currentState!.validate()) {
-                            submit();
+                          _brightness = value;
+                          prefs.setBool('darkMode', value == 'Dark');
+                          if (value == 'Light') {
+                            themeService.lightTheme();
                           } else {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              content: Text(
-                                  'Form is invalid, text fields must not be blank'),
-                            ));
+                            themeService.darkTheme();
                           }
-                        })
-                  ],
-                ),
+                        });
+                      },
+                    ),
+                  ),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: HeaderText(
+                      'Home Screen Cards',
+                    ),
+                  ),
+                  GridView.count(
+                    padding: const EdgeInsets.all(8.0),
+                    crossAxisCount: width > 700 ? 2 : 1,
+                    childAspectRatio: width > 700 ? width / 150 : width / 75,
+                    primary: false,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformCheckboxListTile(
+                          title: const Text('PERSTAT'),
+                          onChanged: (value) {
+                            setState(() {
+                              perstat = value!;
+                            });
+                          },
+                          value: perstat,
+                        ),
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('Appointments'),
+                        onChanged: (value) {
+                          setState(() {
+                            apts = value!;
+                          });
+                        },
+                        value: apts,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('APFT Stats'),
+                        onChanged: (value) {
+                          setState(() {
+                            apft = value!;
+                          });
+                        },
+                        value: apft,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('ACFT Stats'),
+                        onChanged: (value) {
+                          setState(() {
+                            acft = value!;
+                          });
+                        },
+                        value: acft,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('Profiles'),
+                        onChanged: (value) {
+                          setState(() {
+                            profiles = value!;
+                          });
+                        },
+                        value: profiles,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('Body Composition Stats'),
+                        onChanged: (value) {
+                          setState(() {
+                            bf = value!;
+                          });
+                        },
+                        value: bf,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('Weapon Stats'),
+                        onChanged: (value) {
+                          setState(() {
+                            weapons = value!;
+                          });
+                        },
+                        value: weapons,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('Flags'),
+                        onChanged: (value) {
+                          setState(() {
+                            flags = value!;
+                          });
+                        },
+                        value: flags,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('MedPros'),
+                        onChanged: (value) {
+                          setState(() {
+                            medpros = value!;
+                          });
+                        },
+                        value: medpros,
+                      ),
+                      PlatformCheckboxListTile(
+                        title: const Text('Training'),
+                        onChanged: (value) {
+                          setState(() {
+                            training = value!;
+                          });
+                        },
+                        value: training,
+                      ),
+                    ],
+                  ),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const HeaderText(
+                    'Notifications',
+                  ),
+                  PlatformCheckboxListTile(
+                    title: const Text('Receive Notifications'),
+                    onChanged: (value) {
+                      setState(() {
+                        addNotification = value!;
+                      });
+                    },
+                    value: addNotification,
+                  ),
+                  const Text(
+                    'APFT/ACFT',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: acftController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        acftMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notifications'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(context, null, Notification.acft);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount: acftNotifications == null
+                          ? 0
+                          : acftNotifications!.length,
+                      itemBuilder: (context, index) {
+                        acftNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${acftNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    acftNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.acft);
+                            },
+                          ),
+                        );
+                      }),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const HeaderText(
+                    'Body Composition',
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: bfController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        bfMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notificatons'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(context, null, Notification.bf);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount:
+                          bfNotifications == null ? 0 : bfNotifications!.length,
+                      itemBuilder: (context, index) {
+                        bfNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${bfNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    bfNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.bf);
+                            },
+                          ),
+                        );
+                      }),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const Text(
+                    'Weapons Qualification',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: weaponsController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        weaponMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notifications'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(
+                                context, null, Notification.weapon);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount: weaponNotifications == null
+                          ? 0
+                          : weaponNotifications!.length,
+                      itemBuilder: (context, index) {
+                        weaponNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${weaponNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    weaponNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.weapon);
+                            },
+                          ),
+                        );
+                      }),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const Text(
+                    'PHA',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: phaController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        phaMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notifications'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(context, null, Notification.pha);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount: phaNotifications == null
+                          ? 0
+                          : phaNotifications!.length,
+                      itemBuilder: (context, index) {
+                        phaNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${phaNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    phaNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.pha);
+                            },
+                          ),
+                        );
+                      }),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const Text(
+                    'Dental',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: dentalController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        dentalMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notifications'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(
+                                context, null, Notification.dental);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount: dentalNotifications == null
+                          ? 0
+                          : dentalNotifications!.length,
+                      itemBuilder: (context, index) {
+                        dentalNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${dentalNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    dentalNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.dental);
+                            },
+                          ),
+                        );
+                      }),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const Text(
+                    'Vision',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: visionController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        visionMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notifications'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(
+                                context, null, Notification.vision);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount: visionNotifications == null
+                          ? 0
+                          : visionNotifications!.length,
+                      itemBuilder: (context, index) {
+                        visionNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${visionNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    visionNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.vision);
+                            },
+                          ),
+                        );
+                      }),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const Text(
+                    'Hearing',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: hearingController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        hearingMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notifications'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(
+                                context, null, Notification.hearing);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount: hearingNotifications == null
+                          ? 0
+                          : hearingNotifications!.length,
+                      itemBuilder: (context, index) {
+                        hearingNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${hearingNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    hearingNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.hearing);
+                            },
+                          ),
+                        );
+                      }),
+                  Divider(
+                    color: accentColor,
+                  ),
+                  const Text(
+                    'HIV',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.start,
+                  ),
+                  PaddedTextField(
+                    keyboardType: TextInputType.number,
+                    controller: hivController,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Due after X months',
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        hivMos = int.tryParse(value);
+                        updated = true;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text('Notifications'),
+                      PlatformIconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            _editNotification(context, null, Notification.hiv);
+                          })
+                    ],
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      primary: false,
+                      itemCount: hivNotifications == null
+                          ? 0
+                          : hivNotifications!.length,
+                      itemBuilder: (context, index) {
+                        hivNotifications!.sort();
+                        return Card(
+                          color: getContrastingBackgroundColor(context),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${hivNotifications![index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    hivNotifications!.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.hiv);
+                            },
+                          ),
+                        );
+                      }),
+                  PlatformButton(
+                      child: const Text('Save'),
+                      onPressed: () {
+                        if (_formState.currentState!.validate()) {
+                          submit();
+                        } else {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text(
+                                'Form is invalid, text fields must not be blank'),
+                          ));
+                        }
+                      })
+                ],
               ),
             ),
           ),

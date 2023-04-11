@@ -11,6 +11,7 @@ import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/models/user.dart';
 import 'package:leaders_book/providers/root_provider.dart';
 import 'package:leaders_book/providers/shared_prefs_provider.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_loading_widget.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -18,6 +19,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../../providers/subscription_state.dart';
 import '../../methods/date_methods.dart';
+import '../../methods/theme_methods.dart';
 import '../../providers/tracking_provider.dart';
 import '../../methods/show_on_login.dart';
 import '../../methods/update_methods.dart';
@@ -27,7 +29,6 @@ import '../../widgets/platform_widgets/platform_button.dart';
 import '../acft_page.dart';
 import '../daily_perstat_page.dart';
 import '../../../widgets/anon_warning_banner.dart';
-import '../../../widgets/center_progress_indicator.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/perstat_rollup_card.dart';
 import '../../widgets/rollup_card.dart';
@@ -305,7 +306,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int leave = 0;
                   int tdy = 0;
@@ -366,7 +370,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int aptsToday = 0;
                   int aptsFuture = 0;
@@ -438,7 +445,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int apftOverdue = 0;
                   int apftFail = 0;
@@ -499,7 +509,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int acftOverdue = 0;
                   int acftFail = 0;
@@ -562,7 +575,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
@@ -627,7 +643,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int bfOverdue = 0;
                   int bfFail = 0;
@@ -693,7 +712,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int weaponsOverdue = 0;
                   int weaponsFail = 0;
@@ -759,7 +781,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int flags = snapshot.data!.docs.length;
                   int flagsOverdue = 0;
@@ -813,7 +838,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int medpros = snapshot.data!.docs.length;
                   int medprosOverdue = 0;
@@ -874,7 +902,10 @@ class HomePageState extends ConsumerState<RollupTab>
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int training = snapshot.data!.docs.length;
                   int trainingOverdue = 0;
@@ -940,7 +971,7 @@ class HomePageState extends ConsumerState<RollupTab>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Flexible(
+          Expanded(
             flex: 1,
             child: ListView(
               primary: true,
@@ -955,7 +986,10 @@ class HomePageState extends ConsumerState<RollupTab>
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
                         case ConnectionState.waiting:
-                          return const Card(child: CenterProgressIndicator());
+                          return Card(
+                            color: getContrastingBackgroundColor(context),
+                            child: PlatformLoadingWidget(),
+                          );
                         default:
                           if (snapshot.hasData) {
                             setting = Setting.fromMap(

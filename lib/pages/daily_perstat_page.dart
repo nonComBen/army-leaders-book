@@ -16,12 +16,14 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/perstat.dart';
 import '../models/perstat_by_name.dart';
 import '../models/soldier.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
+import '../widgets/platform_widgets/platform_icon_button.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class DailyPerstatPage extends ConsumerStatefulWidget {
@@ -196,11 +198,12 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+        color: getContrastingBackgroundColor(context),
         child: ListTile(
           title: Text(soldier['soldier']),
           subtitle:
               soldier['end'] == '' ? null : Text('Returns: ${soldier['end']}'),
-          trailing: IconButton(
+          trailing: PlatformIconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
                 editRecord(index, soldier);
@@ -683,8 +686,8 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                 padding: EdgeInsets.symmetric(
                     horizontal: width > 932 ? (width - 916) / 2 : 16),
                 child: Card(
+                  color: getContrastingBackgroundColor(context),
                   child: Container(
-                    color: Theme.of(context).scaffoldBackgroundColor,
                     padding: const EdgeInsets.all(16.0),
                     constraints: const BoxConstraints(maxWidth: 900),
                     child: Column(

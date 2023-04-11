@@ -18,6 +18,7 @@ import '../../auth_provider.dart';
 import '../../methods/show_snackbar.dart';
 import '../../providers/root_provider.dart';
 import '../../widgets/formatted_text_button.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
@@ -45,14 +46,12 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   final TextEditingController _emailController = TextEditingController();
 
   Future<void> deleteAccount(BuildContext context) async {
-    // var rootBloc = BlocProvider.of<RootBloc>(context);
     final rootService = ref.read(rootProvider.notifier);
     var auth = ref.read(authProvider);
     User user = auth.currentUser()!;
     try {
       user.delete();
       showSnackbar(context, 'Your account and data has been deleted.');
-      // rootBloc.onSignOut();
       rootService.signOut();
     } on Exception catch (e) {
       if (e is FirebaseAuthException) {
@@ -76,7 +75,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
               'Please verify your authentication in order to delete your account.',
             ),
           ),
-          TextFormField(
+          PaddedTextField(
             decoration: const InputDecoration(
                 labelText: 'Email', icon: Icon(Icons.mail)),
             controller: emailController,
@@ -84,7 +83,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
             validator: (value) =>
                 value!.isEmpty ? 'Email can\'t be empty' : null,
           ),
-          TextFormField(
+          PaddedTextField(
             controller: passwordController,
             decoration: const InputDecoration(
                 labelText: 'Password', icon: Icon(Icons.lock)),
@@ -94,16 +93,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-                style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                        const EdgeInsets.all(4.0)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        Theme.of(context).primaryColor),
-                    shape: MaterialStateProperty.all<OutlinedBorder>(
-                        const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(24.0))))),
+            child: PlatformButton(
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
@@ -315,129 +305,109 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
         )
       ],
       body: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          onWillPop:
-              updated ? () => onBackPressed(context) : () => Future(() => true),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: width > 932 ? (width - 916) / 2 : 16),
-            child: Card(
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                constraints: const BoxConstraints(maxWidth: 900),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      GridView.count(
-                        primary: false,
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 230
-                            : width > 700
-                                ? width / 230
-                                : width / 115,
-                        shrinkWrap: true,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              initialValue: widget.userId,
-                              enabled: true,
-                              decoration: InputDecoration(
-                                  labelText: 'User Id',
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(Icons.content_copy),
-                                    onPressed: () {
-                                      Clipboard.setData(
-                                          ClipboardData(text: widget.userId));
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                        content:
-                                            Text('User ID copied to clipboard'),
-                                      ));
-                                    },
-                                  )),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _rankController,
-                              keyboardType: TextInputType.text,
-                              textCapitalization: TextCapitalization.characters,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Rank',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _nameController,
-                              keyboardType: TextInputType.text,
-                              textCapitalization: TextCapitalization.words,
-                              validator: (value) => value!.isEmpty
-                                  ? 'Name can\'t be empty'
-                                  : null,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Name',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _unitController,
-                              keyboardType: TextInputType.text,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Unit',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          if (_emailController.text == 'applesignin@apple.com')
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: TextFormField(
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                enabled: true,
-                                decoration: const InputDecoration(
-                                  labelText: 'Email',
-                                ),
-                                onChanged: (value) {
-                                  updated = true;
-                                },
-                              ),
-                            ),
-                        ],
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width > 932 ? (width - 916) / 2 : 16),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: ListView(
+              children: <Widget>[
+                GridView.count(
+                  primary: false,
+                  crossAxisCount: width > 700 ? 2 : 1,
+                  mainAxisSpacing: 1.0,
+                  crossAxisSpacing: 1.0,
+                  childAspectRatio: width > 900
+                      ? 900 / 230
+                      : width > 700
+                          ? width / 230
+                          : width / 115,
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    PaddedTextField(
+                      controller: TextEditingController(text: widget.userId),
+                      enabled: false,
+                      decoration: InputDecoration(
+                          labelText: 'User Id',
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.content_copy),
+                            onPressed: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: widget.userId));
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                content: Text('User ID copied to clipboard'),
+                              ));
+                            },
+                          )),
+                    ),
+                    PaddedTextField(
+                      controller: _rankController,
+                      keyboardType: TextInputType.text,
+                      textCapitalization: TextCapitalization.characters,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Rank',
                       ),
-                      PlatformButton(
-                        onPressed: () {
-                          submit(context);
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _nameController,
+                      keyboardType: TextInputType.text,
+                      textCapitalization: TextCapitalization.words,
+                      validator: (value) =>
+                          value!.isEmpty ? 'Name can\'t be empty' : null,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _unitController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Unit',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    if (_emailController.text == 'applesignin@apple.com')
+                      PaddedTextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        enabled: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                        ),
+                        onChanged: (value) {
+                          updated = true;
                         },
-                        child: const Text('Update Profile'),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-              ),
+                PlatformButton(
+                  onPressed: () {
+                    submit(context);
+                  },
+                  child: const Text('Update Profile'),
+                ),
+              ],
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

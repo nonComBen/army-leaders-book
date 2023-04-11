@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 import '../providers/soldiers_provider.dart';
 
@@ -22,6 +23,7 @@ class PerstatRollupCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var soldiers = ref.read(soldiersProvider);
     return Card(
+      color: getContrastingBackgroundColor(context),
       child: Container(
         padding: const EdgeInsets.all(8.0),
         child: Column(

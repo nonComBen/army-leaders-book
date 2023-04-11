@@ -16,6 +16,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../methods/theme_methods.dart';
 import '../pdf/alert_roster_pdf.dart';
 import '../../providers/subscription_state.dart';
 import '../methods/download_methods.dart';
@@ -681,6 +682,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
         padding: EdgeInsets.symmetric(
             horizontal: width < 816 ? 16 : (width - 800) / 2),
         child: Card(
+          color: getContrastingBackgroundColor(context),
           child: Container(
             constraints: const BoxConstraints(maxWidth: 800),
             child: WillPopScope(

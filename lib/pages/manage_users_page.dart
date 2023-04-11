@@ -213,7 +213,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
             return Column(
               children: [
                 Card(
-                  color: getBackgroundColor(context),
+                  color: getContrastingBackgroundColor(context),
                   child: PlatformListTile(
                       trailing: _soldiers[index].users.length > 1
                           ? Tooltip(
@@ -251,7 +251,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                         switch (snapshot.connectionState) {
                           case ConnectionState.waiting:
                             return Card(
-                              color: getBackgroundColor(context),
+                              color: getContrastingBackgroundColor(context),
                               child: PlatformLoadingWidget(),
                             );
                           default:
@@ -259,7 +259,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                               padding: const EdgeInsets.fromLTRB(
                                   16.0, 8.0, 8.0, 8.0),
                               child: Card(
-                                color: getBackgroundColor(context),
+                                color: getContrastingBackgroundColor(context),
                                 child: PlatformListTile(
                                   title: Text(
                                       '${snapshot.data!['rank']} ${snapshot.data!['userName']}'),

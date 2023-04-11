@@ -17,6 +17,7 @@ import '../auth_provider.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/weapon.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
@@ -683,6 +684,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -693,6 +695,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

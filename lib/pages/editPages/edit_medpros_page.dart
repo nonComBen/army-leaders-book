@@ -1,23 +1,24 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 
+import '../../methods/theme_methods.dart';
+import '../../auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/validate.dart';
 import '../../models/medpro.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_icon_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../../widgets/platform_widgets/platform_text_field.dart';
+import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditMedprosPage extends ConsumerStatefulWidget {
   const EditMedprosPage({
@@ -80,767 +81,6 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       _yellowDate,
       _smallPoxDate,
       _anthraxDate;
-
-  Future<void> _pickPha(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _phaDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _phaDate = picked;
-            _phaController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _phaDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _phaDate = value;
-                  _phaController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickDental(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _dentalDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _dentalDate = picked;
-            _dentalController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _dentalDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _dentalDate = value;
-                  _dentalController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickHearing(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _hearingDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        var formatter = DateFormat('yyyy-MM-dd');
-        if (mounted) {
-          setState(() {
-            _hearingDate = picked;
-            _hearingController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _hearingDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _hearingDate = value;
-                  _hearingController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickHiv(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _hivDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _hivDate = picked;
-            _hivController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _hivDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _hivDate = value;
-                  _hivController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickVision(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _visionDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _visionDate = picked;
-            _visionController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _visionDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _visionDate = value;
-                  _visionController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickFlu(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _fluDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _fluDate = picked;
-            _fluController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _fluDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _fluDate = value;
-                  _fluController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickMmr(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _mmrDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _mmrDate = picked;
-            _mmrController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _mmrDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _mmrDate = value;
-                  _mmrController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickVaricella(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _varicellaDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _varicellaDate = picked;
-            _varicellaController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _varicellaDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _varicellaDate = value;
-                  _varicellaController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickPolio(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _polioDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _polioDate = picked;
-            _polioController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _polioDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _polioDate = value;
-                  _polioController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickTuberculin(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _tuberDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _tuberDate = picked;
-            _tuberculinController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _tuberDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _tuberDate = value;
-                  _tuberculinController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickTetanus(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _tetanusDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _tetanusDate = picked;
-            _tetanusController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _tetanusDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _tetanusDate = value;
-                  _tetanusController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickHepA(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _hepADate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _hepADate = picked;
-            _hepAController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _hepADate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _hepADate = value;
-                  _hepAController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickHepB(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _hepBDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _hepBDate = picked;
-            _hepBController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _hepBDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _hepBDate = value;
-                  _hepBController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickEncephalitis(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _encephalitisDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _encephalitisDate = picked;
-            _encephalitisController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _encephalitisDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _encephalitisDate = value;
-                  _encephalitisController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickMening(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _meningDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _meningDate = picked;
-            _meningController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _meningDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _meningDate = value;
-                  _meningController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickTyphoid(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _typhoidDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _typhoidDate = picked;
-            _typhoidController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _typhoidDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _typhoidDate = value;
-                  _typhoidController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickYellow(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _yellowDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _yellowDate = picked;
-            _yellowController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _yellowDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _yellowDate = value;
-                  _yellowController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickSmallPox(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _smallPoxDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _smallPoxDate = picked;
-            _smallPoxController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _smallPoxDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _smallPoxDate = value;
-                  _smallPoxController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickAnthrax(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _anthraxDate!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _anthraxDate = picked;
-            _anthraxController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _anthraxDate,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _anthraxDate = value;
-                  _anthraxController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -917,396 +157,8 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
 
   Widget moreImmunizations(double width) {
     if (expanded) {
-      return Column(children: [
-        GridView.count(
-          primary: false,
-          crossAxisCount: width > 700 ? 2 : 1,
-          mainAxisSpacing: 1.0,
-          crossAxisSpacing: 1.0,
-          childAspectRatio: width > 900
-              ? 900 / 200
-              : width > 700
-                  ? width / 200
-                  : width / 100,
-          shrinkWrap: true,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _mmrController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'MMR Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _mmrController.text == 'Exempt'
-                                  ? _mmrController.text = ''
-                                  : _mmrController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickMmr(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _varicellaController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Varicella Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _varicellaController.text == 'Exempt'
-                                  ? _varicellaController.text = ''
-                                  : _varicellaController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickVaricella(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _polioController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Polio Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _polioController.text == 'Exempt'
-                                  ? _polioController.text = ''
-                                  : _polioController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickPolio(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _tuberculinController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Tuberculin Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _tuberculinController.text == 'Exempt'
-                                  ? _tuberculinController.text = ''
-                                  : _tuberculinController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickTuberculin(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _tetanusController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Tetanus Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _tetanusController.text == 'Exempt'
-                                  ? _tetanusController.text = ''
-                                  : _tetanusController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickTetanus(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _hepAController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Hepatitis A Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _hepAController.text == 'Exempt'
-                                  ? _hepAController.text = ''
-                                  : _hepAController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickHepA(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _hepBController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Hepatitis B Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _hepBController.text == 'Exempt'
-                                  ? _hepBController.text = ''
-                                  : _hepBController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickHepB(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _encephalitisController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Encephalitis Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _encephalitisController.text == 'Exempt'
-                                  ? _encephalitisController.text = ''
-                                  : _encephalitisController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickEncephalitis(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _meningController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Meningococcal Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _meningController.text == 'Exempt'
-                                  ? _meningController.text = ''
-                                  : _meningController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickMening(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _typhoidController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Typhoid Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _typhoidController.text == 'Exempt'
-                                  ? _typhoidController.text = ''
-                                  : _typhoidController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickTyphoid(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _yellowController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Yellow Fever Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _yellowController.text == 'Exempt'
-                                  ? _yellowController.text = ''
-                                  : _yellowController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickYellow(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _smallPoxController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Small Pox Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _smallPoxController.text == 'Exempt'
-                                  ? _smallPoxController.text = ''
-                                  : _smallPoxController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickSmallPox(context);
-                          }))),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextFormField(
-                  controller: _anthraxController,
-                  keyboardType: TextInputType.datetime,
-                  enabled: true,
-                  validator: (value) =>
-                      isValidDate(value!) || value.isEmpty || value == 'Exempt'
-                          ? null
-                          : 'Date must be in yyyy-MM-dd format',
-                  decoration: InputDecoration(
-                      labelText: 'Anthrax Date',
-                      prefixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              _anthraxController.text == 'Exempt'
-                                  ? _anthraxController.text = ''
-                                  : _anthraxController.text = 'Exempt';
-                            });
-                          }),
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.date_range),
-                          onPressed: () {
-                            _pickAnthrax(context);
-                          }))),
-            ),
-          ],
-        ),
-        const Divider(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Other Immunizations',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  _editImm(context, null);
-                },
-              ),
-            )
-          ],
-        ),
-        if (_otherImms!.isNotEmpty)
+      return Column(
+        children: [
           GridView.count(
             primary: false,
             crossAxisCount: width > 700 ? 2 : 1,
@@ -1318,29 +170,174 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                     ? width / 200
                     : width / 100,
             shrinkWrap: true,
-            children: _otherImms!
-                .map((imm) => Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Card(
-                      child: ListTile(
-                        title: Text(imm['title']),
-                        subtitle: Text(imm['date']),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            setState(() {
-                              _otherImms!.removeAt(_otherImms!.indexOf(imm));
-                            });
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _mmrController,
+                  label: 'MMR Date',
+                  date: _mmrDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _varicellaController,
+                  label: 'Varicella Date',
+                  date: _varicellaDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _polioController,
+                  label: 'Polio Date',
+                  date: _polioDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _tuberculinController,
+                  label: 'Tuberculin Date',
+                  date: _tuberDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _tetanusController,
+                  label: 'Tetanus Date',
+                  date: _tetanusDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _hepAController,
+                  label: 'Hepatitis A Date',
+                  date: _hepADate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _hepBController,
+                  label: 'Hepatitis B Date',
+                  date: _hepBDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _encephalitisController,
+                  label: 'Encephalitis Date',
+                  date: _encephalitisDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _meningController,
+                  label: 'Meningococcal Date',
+                  date: _meningDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _typhoidController,
+                  label: 'Typhoid Date',
+                  date: _typhoidDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _yellowController,
+                  label: 'Yellow Fever Date',
+                  date: _yellowDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _smallPoxController,
+                  label: 'Small Pox Date',
+                  date: _smallPoxDate,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DateTextField(
+                  controller: _anthraxController,
+                  label: 'Anthrax Date',
+                  date: _anthraxDate,
+                ),
+              ),
+            ],
+          ),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: HeaderText(
+                  'Other Immunizations',
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformIconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () {
+                    _editImm(context, null);
+                  },
+                ),
+              )
+            ],
+          ),
+          if (_otherImms!.isNotEmpty)
+            GridView.count(
+              primary: false,
+              crossAxisCount: width > 700 ? 2 : 1,
+              mainAxisSpacing: 1.0,
+              crossAxisSpacing: 1.0,
+              childAspectRatio: width > 900
+                  ? 900 / 200
+                  : width > 700
+                      ? width / 200
+                      : width / 100,
+              shrinkWrap: true,
+              children: _otherImms!
+                  .map(
+                    (imm) => Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: PlatformListTile(
+                          title: Text(imm['title']),
+                          subtitle: Text(imm['date']),
+                          trailing: PlatformIconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                _otherImms!.removeAt(_otherImms!.indexOf(imm));
+                              });
+                            },
+                          ),
+                          onTap: () {
+                            _editImm(context, _otherImms!.indexOf(imm));
                           },
                         ),
-                        onTap: () {
-                          _editImm(context, _otherImms!.indexOf(imm));
-                        },
                       ),
-                    )))
-                .toList(),
-          ),
-      ]);
+                    ),
+                  )
+                  .toList(),
+            ),
+        ],
+      );
     } else {
       return const SizedBox(
         height: 0,
@@ -1358,21 +355,15 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
     Widget content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformTextField(
-            controller: titleController,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(labelText: 'Immunization'),
-          ),
+        PaddedTextField(
+          controller: titleController,
+          keyboardType: TextInputType.text,
+          decoration: const InputDecoration(labelText: 'Immunization'),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformTextField(
-            controller: dateController,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(labelText: 'Date'),
-          ),
+        PaddedTextField(
+          controller: dateController,
+          keyboardType: TextInputType.text,
+          decoration: const InputDecoration(labelText: 'Date'),
         ),
       ],
     );
@@ -1551,287 +542,166 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         child: Padding(
           padding: EdgeInsets.symmetric(
               horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Card(
-            child: Container(
-                padding: const EdgeInsets.all(16.0),
-                constraints: const BoxConstraints(maxWidth: 900),
-                child: SingleChildScrollView(
-                  child: Column(
+          child: Container(
+              padding: const EdgeInsets.all(16.0),
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView(
+                children: <Widget>[
+                  if (user.isAnonymous) const AnonWarningBanner(),
+                  GridView.count(
+                    primary: false,
+                    crossAxisCount: width > 700 ? 2 : 1,
+                    mainAxisSpacing: 1.0,
+                    crossAxisSpacing: 1.0,
+                    childAspectRatio: width > 900
+                        ? 900 / 230
+                        : width > 700
+                            ? width / 230
+                            : width / 115,
+                    shrinkWrap: true,
                     children: <Widget>[
-                      if (user.isAnonymous) const AnonWarningBanner(),
-                      GridView.count(
-                        primary: false,
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 230
-                            : width > 700
-                                ? width / 230
-                                : width / 115,
-                        shrinkWrap: true,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: FutureBuilder(
-                                future: firestore
-                                    .collection('soldiers')
-                                    .where('users', arrayContains: user.uid)
-                                    .get(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  switch (snapshot.connectionState) {
-                                    case ConnectionState.waiting:
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    default:
-                                      allSoldiers = snapshot.data!.docs;
-                                      soldiers = removeSoldiers
-                                          ? lessSoldiers
-                                          : allSoldiers;
-                                      soldiers!.sort((a, b) => a['lastName']
-                                          .toString()
-                                          .compareTo(b['lastName'].toString()));
-                                      soldiers!.sort((a, b) => a['rankSort']
-                                          .toString()
-                                          .compareTo(b['rankSort'].toString()));
-                                      return PlatformItemPicker(
-                                        label: const Text('Soldier'),
-                                        items:
-                                            soldiers!.map((e) => e.id).toList(),
-                                        onChanged: (value) {
-                                          int index = soldiers!.indexWhere(
-                                              (doc) => doc.id == value);
-                                          if (mounted) {
-                                            setState(() {
-                                              _soldierId = value;
-                                              _rank = soldiers![index]['rank'];
-                                              _lastName =
-                                                  soldiers![index]['lastName'];
-                                              _firstName =
-                                                  soldiers![index]['firstName'];
-                                              _section =
-                                                  soldiers![index]['section'];
-                                              _rankSort = soldiers![index]
-                                                      ['rankSort']
-                                                  .toString();
-                                              _owner =
-                                                  soldiers![index]['owner'];
-                                              _users =
-                                                  soldiers![index]['users'];
-                                              updated = true;
-                                            });
-                                          }
-                                        },
-                                        value: _soldierId,
-                                      );
-                                  }
-                                }),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
-                            child: CheckboxListTile(
-                              controlAffinity: ListTileControlAffinity.leading,
-                              value: removeSoldiers,
-                              title:
-                                  const Text('Remove Soldiers already added'),
-                              onChanged: (checked) {
-                                _removeSoldiers(checked, user.uid);
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _phaController,
-                              keyboardType: TextInputType.datetime,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidDate(value!) || value.isEmpty
-                                      ? null
-                                      : 'Date must be in yyyy-MM-dd format',
-                              decoration: InputDecoration(
-                                  labelText: 'PHA Date',
-                                  suffixIcon: IconButton(
-                                      icon: const Icon(Icons.date_range),
-                                      onPressed: () {
-                                        _pickPha(context);
-                                      })),
-                              onChanged: (value) {
-                                _phaDate = DateTime.tryParse(value) ?? _phaDate;
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _dentalController,
-                              keyboardType: TextInputType.datetime,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidDate(value!) || value.isEmpty
-                                      ? null
-                                      : 'Date must be in yyyy-MM-dd format',
-                              decoration: InputDecoration(
-                                  labelText: 'Dental Date',
-                                  suffixIcon: IconButton(
-                                      icon: const Icon(Icons.date_range),
-                                      onPressed: () {
-                                        _pickDental(context);
-                                      })),
-                              onChanged: (value) {
-                                _dentalDate =
-                                    DateTime.tryParse(value) ?? _dentalDate;
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _visionController,
-                              keyboardType: TextInputType.datetime,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidDate(value!) || value.isEmpty
-                                      ? null
-                                      : 'Date must be in yyyy-MM-dd format',
-                              decoration: InputDecoration(
-                                  labelText: 'Vision Date',
-                                  suffixIcon: IconButton(
-                                      icon: const Icon(Icons.date_range),
-                                      onPressed: () {
-                                        _pickVision(context);
-                                      })),
-                              onChanged: (value) {
-                                _visionDate =
-                                    DateTime.tryParse(value) ?? _visionDate;
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _hearingController,
-                              keyboardType: TextInputType.datetime,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidDate(value!) || value.isEmpty
-                                      ? null
-                                      : 'Date must be in yyyy-MM-dd format',
-                              decoration: InputDecoration(
-                                  labelText: 'Hearing Date',
-                                  suffixIcon: IconButton(
-                                      icon: const Icon(Icons.date_range),
-                                      onPressed: () {
-                                        _pickHearing(context);
-                                      })),
-                              onChanged: (value) {
-                                _hearingDate =
-                                    DateTime.tryParse(value) ?? _hearingDate;
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _hivController,
-                              keyboardType: TextInputType.datetime,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidDate(value!) || value.isEmpty
-                                      ? null
-                                      : 'Date must be in yyyy-MM-dd format',
-                              decoration: InputDecoration(
-                                  labelText: 'HIV Date',
-                                  suffixIcon: IconButton(
-                                      icon: const Icon(Icons.date_range),
-                                      onPressed: () {
-                                        _pickHiv(context);
-                                      })),
-                              onChanged: (value) {
-                                _hivDate = DateTime.tryParse(value) ?? _hivDate;
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _fluController,
-                              keyboardType: TextInputType.datetime,
-                              enabled: true,
-                              validator: (value) => isValidDate(value!) ||
-                                      value.isEmpty ||
-                                      value == 'Exempt'
-                                  ? null
-                                  : 'Date must be in yyyy-MM-dd format',
-                              decoration: InputDecoration(
-                                  labelText: 'Influenza Date',
-                                  prefixIcon: IconButton(
-                                      icon: const Icon(Icons.clear),
-                                      onPressed: () {
-                                        if (mounted) {
-                                          setState(() {
-                                            _fluController.text == 'Exempt'
-                                                ? _fluController.text = ''
-                                                : _fluController.text =
-                                                    'Exempt';
-                                          });
-                                        }
-                                      }),
-                                  suffixIcon: IconButton(
-                                      icon: const Icon(Icons.date_range),
-                                      onPressed: () {
-                                        _pickFlu(context);
-                                      })),
-                              onChanged: (value) {
-                                _fluDate = DateTime.tryParse(value) ?? _fluDate;
-                                updated = true;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context).primaryColor),
-                          ),
-                          onPressed: () {
-                            if (mounted) {
-                              setState(() {
-                                expanded = !expanded;
-                              });
-                            }
+                        child: FutureBuilder(
+                            future: firestore
+                                .collection('soldiers')
+                                .where('users', arrayContains: user.uid)
+                                .get(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<QuerySnapshot> snapshot) {
+                              switch (snapshot.connectionState) {
+                                case ConnectionState.waiting:
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                default:
+                                  allSoldiers = snapshot.data!.docs;
+                                  soldiers = removeSoldiers
+                                      ? lessSoldiers
+                                      : allSoldiers;
+                                  soldiers!.sort((a, b) => a['lastName']
+                                      .toString()
+                                      .compareTo(b['lastName'].toString()));
+                                  soldiers!.sort((a, b) => a['rankSort']
+                                      .toString()
+                                      .compareTo(b['rankSort'].toString()));
+                                  return PlatformItemPicker(
+                                    label: const Text('Soldier'),
+                                    items: soldiers!.map((e) => e.id).toList(),
+                                    onChanged: (value) {
+                                      int index = soldiers!
+                                          .indexWhere((doc) => doc.id == value);
+                                      if (mounted) {
+                                        setState(() {
+                                          _soldierId = value;
+                                          _rank = soldiers![index]['rank'];
+                                          _lastName =
+                                              soldiers![index]['lastName'];
+                                          _firstName =
+                                              soldiers![index]['firstName'];
+                                          _section =
+                                              soldiers![index]['section'];
+                                          _rankSort = soldiers![index]
+                                                  ['rankSort']
+                                              .toString();
+                                          _owner = soldiers![index]['owner'];
+                                          _users = soldiers![index]['users'];
+                                          updated = true;
+                                        });
+                                      }
+                                    },
+                                    value: _soldierId,
+                                  );
+                              }
+                            }),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                        child: PlatformCheckboxListTile(
+                          controlAffinity: ListTileControlAffinity.leading,
+                          value: removeSoldiers,
+                          title: const Text('Remove Soldiers already added'),
+                          onChanged: (checked) {
+                            _removeSoldiers(checked, user.uid);
                           },
-                          child: expanded
-                              ? const Text('Less Immunizations')
-                              : const Text('More Immunizations'),
                         ),
                       ),
-                      moreImmunizations(width),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: PlatformButton(
-                          onPressed: () {
-                            submit(context);
-                          },
-                          child: Text(widget.medpro.id == null
-                              ? 'Add MedPros'
-                              : 'Update MedPros'),
+                        child: DateTextField(
+                          controller: _phaController,
+                          label: 'PHA Date',
+                          date: _phaDate,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DateTextField(
+                          controller: _dentalController,
+                          label: 'Dental Date',
+                          date: _dentalDate,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DateTextField(
+                          controller: _visionController,
+                          label: 'Vision Date',
+                          date: _visionDate,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DateTextField(
+                          controller: _hearingController,
+                          label: 'Hearing Date',
+                          date: _hearingDate,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DateTextField(
+                          controller: _hivController,
+                          label: 'HIV Date',
+                          date: _hivDate,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: DateTextField(
+                          controller: _fluController,
+                          label: 'Influenza Date',
+                          date: _fluDate,
                         ),
                       ),
                     ],
                   ),
-                )),
-          ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformButton(
+                      onPressed: () {
+                        setState(() {
+                          expanded = !expanded;
+                        });
+                      },
+                      child: expanded
+                          ? const Text('Less Immunizations')
+                          : const Text('More Immunizations'),
+                    ),
+                  ),
+                  moreImmunizations(width),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformButton(
+                      onPressed: () {
+                        submit(context);
+                      },
+                      child: Text(widget.medpro.id == null
+                          ? 'Add MedPros'
+                          : 'Update MedPros'),
+                    ),
+                  ),
+                ],
+              )),
         ),
       ),
     );

@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/apft.dart';
+import '../methods/theme_methods.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_apft_page.dart';
 import '../pdf/apfts_pdf.dart';
@@ -767,6 +768,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -779,6 +781,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 850.0),
                     child: Card(
+                      color: getContrastingBackgroundColor(context),
                       child: Column(
                         children: <Widget>[
                           const Padding(
@@ -823,6 +826,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/auth_provider.dart';
 
+import '../../auth_provider.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/equipment.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 
@@ -137,7 +140,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
+                child: PaddedTextField(
                     controller: _weapon2Controller,
                     keyboardType: TextInputType.text,
                     enabled: true,
@@ -147,7 +150,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
+                child: PaddedTextField(
                     controller: _buttStock2Controller,
                     keyboardType: TextInputType.number,
                     enabled: true,
@@ -157,7 +160,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
+                child: PaddedTextField(
                     controller: _serial2Controller,
                     keyboardType: TextInputType.text,
                     enabled: true,
@@ -167,7 +170,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
+                child: PaddedTextField(
                     controller: _optic2Controller,
                     keyboardType: TextInputType.text,
                     enabled: true,
@@ -177,7 +180,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
+                child: PaddedTextField(
                     controller: _opticSerial2Controller,
                     keyboardType: TextInputType.text,
                     enabled: true,
@@ -293,295 +296,246 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
-        title: _title,
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: updated
-                ? () => onBackPressed(context)
-                : () => Future(() => true),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('users', arrayContains: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data!.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers!.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers!.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return PlatformItemPicker(
-                                            label: const Text('Soldier'),
-                                            items: soldiers!
-                                                .map((e) => e.id)
-                                                .toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers!.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers![index]['rank'];
-                                                  _lastName = soldiers![index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers![index]
-                                                      ['firstName'];
-                                                  _section = soldiers![index]
-                                                      ['section'];
-                                                  _rankSort = soldiers![index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  _owner =
-                                                      soldiers![index]['owner'];
-                                                  _users =
-                                                      soldiers![index]['users'];
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
-                                          );
-                                      }
-                                    }),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    8.0, 16.0, 8.0, 8.0),
-                                child: CheckboxListTile(
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: removeSoldiers,
-                                  title: const Text(
-                                      'Remove Soldiers already added'),
-                                  onChanged: (checked) {
-                                    _removeSoldiers(checked, user.uid);
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _weaponController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Weapon',
-                                  ),
+      title: _title,
+      body: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: width > 932 ? (width - 916) / 2 : 16),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                GridView.count(
+                  primary: false,
+                  crossAxisCount: width > 700 ? 2 : 1,
+                  mainAxisSpacing: 1.0,
+                  crossAxisSpacing: 1.0,
+                  childAspectRatio: width > 900
+                      ? 900 / 230
+                      : width > 700
+                          ? width / 230
+                          : width / 115,
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: FutureBuilder(
+                          future: firestore
+                              .collection('soldiers')
+                              .where('users', arrayContains: user.uid)
+                              .get(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.waiting:
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              default:
+                                allSoldiers = snapshot.data!.docs;
+                                soldiers =
+                                    removeSoldiers ? lessSoldiers : allSoldiers;
+                                soldiers!.sort((a, b) => a['lastName']
+                                    .toString()
+                                    .compareTo(b['lastName'].toString()));
+                                soldiers!.sort((a, b) => a['rankSort']
+                                    .toString()
+                                    .compareTo(b['rankSort'].toString()));
+                                return PlatformItemPicker(
+                                  label: const Text('Soldier'),
+                                  items: soldiers!.map((e) => e.id).toList(),
                                   onChanged: (value) {
-                                    updated = true;
+                                    int index = soldiers!
+                                        .indexWhere((doc) => doc.id == value);
+                                    if (mounted) {
+                                      setState(() {
+                                        _soldierId = value;
+                                        _rank = soldiers![index]['rank'];
+                                        _lastName =
+                                            soldiers![index]['lastName'];
+                                        _firstName =
+                                            soldiers![index]['firstName'];
+                                        _section = soldiers![index]['section'];
+                                        _rankSort = soldiers![index]['rankSort']
+                                            .toString();
+                                        _owner = soldiers![index]['owner'];
+                                        _users = soldiers![index]['users'];
+                                        updated = true;
+                                      });
+                                    }
                                   },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _buttStockController,
-                                  keyboardType: TextInputType.number,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Butt Stock #',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _serialController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Serial #',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _opticController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Optics',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _opticSerialController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Optics Serial #',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          secondaryTextFields(width),
-                          if (!secondaryExpanded)
-                            ElevatedButton(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Theme.of(context).primaryColor),
-                                ),
-                                child: const Text('Add Secondary Weapon'),
-                                onPressed: () {
-                                  setState(() {
-                                    secondaryExpanded = true;
-                                  });
-                                }),
-                          const Divider(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 200
-                                : width > 700
-                                    ? width / 200
-                                    : width / 100,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _maskController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Mask',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _vehicleController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Vehicle',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _bumperController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Bumper #',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _otherController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Other Item',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _otherSerialController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Other Item Serial #',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          PlatformButton(
-                            onPressed: () {
-                              submit(context);
-                            },
-                            child: Text(widget.equipment.id == null
-                                ? 'Add Equipment'
-                                : 'Update Equipment'),
-                          ),
-                        ],
+                                  value: _soldierId,
+                                );
+                            }
+                          }),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                      child: PlatformCheckboxListTile(
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: removeSoldiers,
+                        title: const Text('Remove Soldiers already added'),
+                        onChanged: (checked) {
+                          _removeSoldiers(checked, user.uid);
+                        },
                       ),
-                    )),
-              ),
-            )));
+                    ),
+                    PaddedTextField(
+                      controller: _weaponController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Weapon',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _buttStockController,
+                      keyboardType: TextInputType.number,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Butt Stock #',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _serialController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Serial #',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _opticController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Optics',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _opticSerialController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Optics Serial #',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                  ],
+                ),
+                secondaryTextFields(width),
+                if (!secondaryExpanded)
+                  PlatformButton(
+                      child: const Text('Add Secondary Weapon'),
+                      onPressed: () {
+                        setState(() {
+                          secondaryExpanded = true;
+                        });
+                      }),
+                Divider(
+                  color: getOnPrimaryColor(context),
+                ),
+                GridView.count(
+                  primary: false,
+                  crossAxisCount: width > 700 ? 2 : 1,
+                  mainAxisSpacing: 1.0,
+                  crossAxisSpacing: 1.0,
+                  childAspectRatio: width > 900
+                      ? 900 / 200
+                      : width > 700
+                          ? width / 200
+                          : width / 100,
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    PaddedTextField(
+                      controller: _maskController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Mask',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _vehicleController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Vehicle',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _bumperController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Bumper #',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _otherController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Other Item',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                    PaddedTextField(
+                      controller: _otherSerialController,
+                      keyboardType: TextInputType.text,
+                      enabled: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Other Item Serial #',
+                      ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
+                    ),
+                  ],
+                ),
+                PlatformButton(
+                  onPressed: () {
+                    submit(context);
+                  },
+                  child: Text(widget.equipment.id == null
+                      ? 'Add Equipment'
+                      : 'Update Equipment'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

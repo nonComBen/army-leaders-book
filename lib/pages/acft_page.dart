@@ -1018,6 +1018,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -1030,7 +1031,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 850.0),
                     child: Card(
-                      color: getBackgroundColor(context),
+                      color: getContrastingBackgroundColor(context),
                       child: Column(
                         children: <Widget>[
                           const Padding(
@@ -1131,6 +1132,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

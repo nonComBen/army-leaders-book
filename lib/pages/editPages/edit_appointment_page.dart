@@ -1,21 +1,19 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:leaders_book/auth_provider.dart';
 
-import '../../methods/validate.dart';
+import '../../auth_provider.dart';
+import '../../widgets/stateful_widgets/date_text_field.dart';
+import '../../widgets/stateful_widgets/time_text_field.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/appointment.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditAppointmentPage extends ConsumerStatefulWidget {
   const EditAppointmentPage({
@@ -54,139 +52,6 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   bool removeSoldiers = false, updated = false;
   DateTime? _dateTime;
   TimeOfDay? _startTime, _endTime;
-
-  Future<void> _pickDate(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime? picked = await showDatePicker(
-          context: context,
-          initialDate: _dateTime!,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        var formatter = DateFormat('yyyy-MM-dd');
-        if (mounted) {
-          setState(() {
-            _dateTime = picked;
-            _dateController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _dateTime,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _dateTime = value;
-                  _dateController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
-  }
-
-  Future<void> _pickStart(BuildContext context) async {
-    DateTime start = DateTime(_dateTime!.year, _dateTime!.month, _dateTime!.day,
-        _startTime!.hour, _startTime!.minute);
-    var formatter = DateFormat('HHmm');
-    if (kIsWeb || Platform.isAndroid) {
-      final TimeOfDay picked = (await showTimePicker(
-        context: context,
-        initialTime: _startTime!,
-      ))!;
-
-      String hour = picked.hour.toString().length == 2
-          ? picked.hour.toString()
-          : '0${picked.hour.toString()}';
-      String min = picked.minute.toString().length == 2
-          ? picked.minute.toString()
-          : '0${picked.minute.toString()}';
-
-      if (mounted) {
-        setState(() {
-          _startTime = picked;
-          _startController.text = '$hour$min';
-          updated = true;
-        });
-      }
-    } else {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height / 4,
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.time,
-              use24hFormat: true,
-              initialDateTime: start,
-              onDateTimeChanged: (time) {
-                _startTime = TimeOfDay(hour: time.hour, minute: time.minute);
-                _startController.text = formatter.format(time);
-                updated = true;
-              },
-            ),
-          );
-        },
-      );
-    }
-  }
-
-  Future<void> _pickEnd(BuildContext context) async {
-    DateTime end = DateTime(_dateTime!.year, _dateTime!.month, _dateTime!.day,
-        _endTime!.hour, _endTime!.minute);
-    var formatter = DateFormat('HHmm');
-    if (kIsWeb || Platform.isAndroid) {
-      final TimeOfDay picked = (await showTimePicker(
-        context: context,
-        initialTime: _endTime!,
-      ))!;
-
-      String hour = picked.hour.toString().length == 2
-          ? picked.hour.toString()
-          : '0${picked.hour.toString()}';
-      String min = picked.minute.toString().length == 2
-          ? picked.minute.toString()
-          : '0${picked.minute.toString()}';
-
-      if (mounted) {
-        setState(() {
-          _endTime = picked;
-          _endController.text = '$hour$min';
-          updated = true;
-        });
-      }
-    } else {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height / 4,
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.time,
-              use24hFormat: true,
-              initialDateTime: end,
-              onDateTimeChanged: (time) {
-                _endTime = TimeOfDay(hour: time.hour, minute: time.minute);
-                _endController.text = formatter.format(time);
-                updated = true;
-              },
-            ),
-          );
-        },
-      );
-    }
-  }
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -337,275 +202,199 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
         child: Padding(
           padding: EdgeInsets.symmetric(
               horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Card(
-            child: Container(
-                padding: const EdgeInsets.all(16.0),
-                constraints: const BoxConstraints(maxWidth: 900),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      if (user.isAnonymous) const AnonWarningBanner(),
-                      GridView.count(
-                        primary: false,
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 230
-                            : width > 700
-                                ? width / 230
-                                : width / 115,
-                        shrinkWrap: true,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: FutureBuilder(
-                                future: firestore
-                                    .collection('soldiers')
-                                    .where('users', arrayContains: user.uid)
-                                    .get(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                                  switch (snapshot.connectionState) {
-                                    case ConnectionState.waiting:
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    default:
-                                      allSoldiers = snapshot.data!.docs;
-                                      soldiers = removeSoldiers
-                                          ? lessSoldiers
-                                          : allSoldiers;
-                                      soldiers.sort((a, b) => a['lastName']
-                                          .toString()
-                                          .compareTo(b['lastName'].toString()));
-                                      soldiers.sort((a, b) => a['rankSort']
-                                          .toString()
-                                          .compareTo(b['rankSort'].toString()));
-                                      return PlatformItemPicker(
-                                        label: const Text('Soldier'),
-                                        items:
-                                            soldiers.map((e) => e.id).toList(),
-                                        onChanged: (value) {
-                                          int index = soldiers.indexWhere(
-                                              (doc) => doc.id == value);
-                                          if (mounted) {
-                                            setState(() {
-                                              _soldierId = value;
-                                              _rank = soldiers[index]['rank'];
-                                              _lastName =
-                                                  soldiers[index]['lastName'];
-                                              _firstName =
-                                                  soldiers[index]['firstName'];
-                                              _section =
-                                                  soldiers[index]['section'];
-                                              _rankSort = soldiers[index]
-                                                      ['rankSort']
-                                                  .toString();
-                                              _owner = soldiers[index]['owner'];
-                                              _users = soldiers[index]['users'];
-                                              updated = true;
-                                            });
-                                          }
-                                        },
-                                        value: _soldierId,
-                                      );
-                                  }
-                                }),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
-                            child: CheckboxListTile(
-                              controlAffinity: ListTileControlAffinity.leading,
-                              value: removeSoldiers,
-                              title:
-                                  const Text('Remove Soldiers already added'),
-                              onChanged: (checked) {
-                                _removeSoldiers(checked, user.uid);
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _titleController,
-                              keyboardType: TextInputType.text,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Apt Title',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _dateController,
-                              keyboardType: TextInputType.datetime,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidDate(value!) || value.isEmpty
-                                      ? null
-                                      : 'Date must be in yyyy-MM-dd format',
-                              decoration: InputDecoration(
-                                  labelText: 'Apt Date',
-                                  suffixIcon: IconButton(
-                                      icon: const Icon(Icons.date_range),
-                                      onPressed: () {
-                                        _pickDate(context);
-                                      })),
-                              onChanged: (value) {
-                                if (isValidDate(value)) {
-                                  _dateTime = DateTime.tryParse(value) ??
-                                      DateTime.now();
+          child: Container(
+              padding: const EdgeInsets.all(16.0),
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    if (user.isAnonymous) const AnonWarningBanner(),
+                    GridView.count(
+                      primary: false,
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 230
+                          : width > 700
+                              ? width / 230
+                              : width / 115,
+                      shrinkWrap: true,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FutureBuilder(
+                              future: firestore
+                                  .collection('soldiers')
+                                  .where('users', arrayContains: user.uid)
+                                  .get(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.waiting:
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  default:
+                                    allSoldiers = snapshot.data!.docs;
+                                    soldiers = removeSoldiers
+                                        ? lessSoldiers
+                                        : allSoldiers;
+                                    soldiers.sort((a, b) => a['lastName']
+                                        .toString()
+                                        .compareTo(b['lastName'].toString()));
+                                    soldiers.sort((a, b) => a['rankSort']
+                                        .toString()
+                                        .compareTo(b['rankSort'].toString()));
+                                    return PlatformItemPicker(
+                                      label: const Text('Soldier'),
+                                      items: soldiers.map((e) => e.id).toList(),
+                                      onChanged: (value) {
+                                        int index = soldiers.indexWhere(
+                                            (doc) => doc.id == value);
+                                        if (mounted) {
+                                          setState(() {
+                                            _soldierId = value;
+                                            _rank = soldiers[index]['rank'];
+                                            _lastName =
+                                                soldiers[index]['lastName'];
+                                            _firstName =
+                                                soldiers[index]['firstName'];
+                                            _section =
+                                                soldiers[index]['section'];
+                                            _rankSort = soldiers[index]
+                                                    ['rankSort']
+                                                .toString();
+                                            _owner = soldiers[index]['owner'];
+                                            _users = soldiers[index]['users'];
+                                            updated = true;
+                                          });
+                                        }
+                                      },
+                                      value: _soldierId,
+                                    );
                                 }
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _startController,
-                              keyboardType: TextInputType.number,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidTime(value!) || value.isEmpty
-                                      ? null
-                                      : 'Time must be in hhmm format',
-                              decoration: InputDecoration(
-                                labelText: 'Start Time',
-                                suffixIcon: IconButton(
-                                  icon: const Icon(Icons.access_time),
-                                  onPressed: () {
-                                    _pickStart(context);
-                                  },
-                                ),
-                              ),
-                              onChanged: (value) {
-                                if (isValidTime(value)) {
-                                  _startTime = TimeOfDay(
-                                      hour: int.tryParse(
-                                            value.substring(0, 2),
-                                          ) ??
-                                          9,
-                                      minute: int.tryParse(
-                                            value.substring(2),
-                                          ) ??
-                                          0);
-                                }
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _endController,
-                              keyboardType: TextInputType.number,
-                              enabled: true,
-                              validator: (value) =>
-                                  isValidTime(value!) || value.isEmpty
-                                      ? null
-                                      : 'Time must be in hhmm format',
-                              decoration: InputDecoration(
-                                labelText: 'End Time',
-                                suffixIcon: IconButton(
-                                  icon: const Icon(Icons.access_time),
-                                  onPressed: () {
-                                    _pickEnd(context);
-                                  },
-                                ),
-                              ),
-                              onChanged: (value) {
-                                if (isValidTime(value)) {
-                                  _endTime = TimeOfDay(
-                                      hour: int.tryParse(
-                                            value.substring(0, 2),
-                                          ) ??
-                                          10,
-                                      minute: int.tryParse(
-                                            value.substring(2),
-                                          ) ??
-                                          0);
-                                }
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
-                            child: TextFormField(
-                              controller: _locController,
-                              keyboardType: TextInputType.text,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Location',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformItemPicker(
-                              label: const Text('Status'),
-                              items: _statuses,
-                              onChanged: (dynamic value) {
-                                if (mounted) {
-                                  setState(() {
-                                    _status = value;
-                                    updated = true;
-                                  });
-                                }
-                              },
-                              value: _status,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 2,
-                          controller: _commentsController,
-                          enabled: true,
-                          decoration:
-                              const InputDecoration(labelText: 'Comments'),
-                          onChanged: (value) {
-                            updated = true;
-                          },
+                              }),
                         ),
-                      ),
-                      PlatformButton(
-                        child: Text(widget.apt.id == null
-                            ? 'Add Appointment'
-                            : 'Update Appointment'),
-                        onPressed: () {
-                          if (_endController.text != '' &&
-                              (_endTime!.hour < _startTime!.hour ||
-                                  (_endTime!.hour == _startTime!.hour &&
-                                      _endTime!.minute < _startTime!.minute))) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Start Time must be before End Time'),
-                              ),
-                            );
-                          } else {
-                            submit(context);
-                          }
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                          child: CheckboxListTile(
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: removeSoldiers,
+                            title: const Text('Remove Soldiers already added'),
+                            onChanged: (checked) {
+                              _removeSoldiers(checked, user.uid);
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformTextField(
+                            controller: _titleController,
+                            keyboardType: TextInputType.text,
+                            enabled: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Apt Title',
+                            ),
+                            onChanged: (value) {
+                              updated = true;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DateTextField(
+                            controller: _dateController,
+                            label: 'Apt Date',
+                            date: _dateTime,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TimeTextField(
+                            controller: _startController,
+                            label: 'Start Time',
+                            time: _startTime,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TimeTextField(
+                            controller: _endController,
+                            label: 'End Time',
+                            time: _endTime,
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
+                          child: PlatformTextField(
+                            controller: _locController,
+                            keyboardType: TextInputType.text,
+                            enabled: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Location',
+                            ),
+                            onChanged: (value) {
+                              updated = true;
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformItemPicker(
+                            label: const Text('Status'),
+                            items: _statuses,
+                            onChanged: (dynamic value) {
+                              if (mounted) {
+                                setState(() {
+                                  _status = value;
+                                  updated = true;
+                                });
+                              }
+                            },
+                            value: _status,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: PlatformTextField(
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 2,
+                        controller: _commentsController,
+                        enabled: true,
+                        decoration:
+                            const InputDecoration(labelText: 'Comments'),
+                        onChanged: (value) {
+                          updated = true;
                         },
                       ),
-                    ],
-                  ),
-                )),
-          ),
+                    ),
+                    PlatformButton(
+                      child: Text(widget.apt.id == null
+                          ? 'Add Appointment'
+                          : 'Update Appointment'),
+                      onPressed: () {
+                        if (_endController.text != '' &&
+                            (_endTime!.hour < _startTime!.hour ||
+                                (_endTime!.hour == _startTime!.hour &&
+                                    _endTime!.minute < _startTime!.minute))) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Start Time must be before End Time'),
+                            ),
+                          );
+                        } else {
+                          submit(context);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              )),
         ),
       ),
     );

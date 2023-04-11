@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../methods/theme_methods.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
@@ -41,6 +42,7 @@ class PrivacyPolicyPage extends StatelessWidget {
         padding: EdgeInsets.symmetric(
             horizontal: width > 916 ? (width - 900) / 2 : 16),
         child: Card(
+          color: getContrastingBackgroundColor(context),
           child: Container(
             padding: const EdgeInsets.all(8.0),
             constraints: const BoxConstraints(maxWidth: 900),

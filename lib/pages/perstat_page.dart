@@ -8,6 +8,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -17,6 +18,7 @@ import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/perstat.dart';
+import '../widgets/platform_widgets/platform_icon_button.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_perstat_page.dart';
 import 'uploadPages/upload_perstat_page.dart';
@@ -542,7 +544,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
           )),
       Tooltip(
           message: 'Edit Record',
-          child: IconButton(
+          child: PlatformIconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => _editRecord(context))),
     ];
@@ -553,7 +555,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
       buttons.add(
         Tooltip(
             message: 'Download as Excel',
-            child: IconButton(
+            child: PlatformIconButton(
                 icon: const Icon(Icons.file_download),
                 onPressed: () {
                   _downloadExcel();
@@ -562,7 +564,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
       buttons.add(
         Tooltip(
             message: 'Upload Data',
-            child: IconButton(
+            child: PlatformIconButton(
                 icon: const Icon(Icons.file_upload),
                 onPressed: () {
                   _uploadExcel(context);
@@ -571,7 +573,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
       buttons.add(
         Tooltip(
             message: 'Download as PDF',
-            child: IconButton(
+            child: PlatformIconButton(
                 icon: const Icon(Icons.picture_as_pdf),
                 onPressed: () {
                   _downloadPdf();
@@ -595,7 +597,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
       buttons.add(
         Tooltip(
             message: 'Delete Record(s)',
-            child: IconButton(
+            child: PlatformIconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () => _deleteRecord())),
       );
@@ -641,62 +643,63 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
-        title: 'PERSTAT',
-        actions: appBarMenu(context, MediaQuery.of(context).size.width),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              ),
-            Flexible(
-              flex: 1,
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).size.width),
-                      rows: _createRows(
-                          filteredDocs, MediaQuery.of(context).size.width),
-                    ),
-                  ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Red Text: Past Thru Date',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                  )
-                ],
+      title: 'PERSTAT',
+      actions: appBarMenu(context, MediaQuery.of(context).size.width),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
             ),
-          ],
-        ));
+          Expanded(
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(8.0),
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        filteredDocs, MediaQuery.of(context).size.width),
+                  ),
+                ),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const <Widget>[
+                        Text(
+                          'Red Text: Past Thru Date',
+                          style: TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

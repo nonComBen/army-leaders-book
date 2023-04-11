@@ -11,6 +11,7 @@ import 'package:leaders_book/providers/soldiers_provider.dart';
 
 import '../../methods/rank_sort.dart';
 import '../../methods/show_snackbar.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -367,6 +368,7 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
       title: 'Upload Soldier',
       body: Center(
         child: Card(
+          color: getContrastingBackgroundColor(context),
           child: Container(
             padding: const EdgeInsets.all(16.0),
             constraints: const BoxConstraints(maxWidth: 900),

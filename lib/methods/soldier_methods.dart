@@ -4,9 +4,6 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/pages/editPages/edit_soldier_page.dart';
-import 'package:leaders_book/widgets/my_toast.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_text_button.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -16,22 +13,65 @@ import '../pages/share_soldier_page.dart';
 import '../pages/transfer_soldier_page.dart';
 import '../pages/uploadPages/upload_soldiers_page.dart';
 import '../pdf/soldiers_pdf.dart';
+import '../widgets/platform_widgets/platform_button.dart';
+import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import 'custom_alert_dialog.dart';
+import 'custom_modal_bottom_sheet.dart';
 import 'download_methods.dart';
 import 'web_download.dart';
+import '../../pages/editPages/edit_soldier_page.dart';
+import '../../providers/filtered_soldiers_provider.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/platform_widgets/platform_text_button.dart';
 
 List<String> getSections(List<Soldier> soldiers) {
-  List<String> sections = ['All'];
   soldiers.sort(
     (a, b) => a.section.compareTo(b.section),
   );
-  sections.addAll(soldiers.map((e) => e.section).toList());
-  for (int i = 1; i < sections.length; i++) {
-    if (sections[i] == sections[i - 1]) {
-      sections.remove(sections[i]);
-    }
-  }
-  return sections;
+  return soldiers.map((e) => e.section).toList().toSet().toList();
+}
+
+void selectFilters(BuildContext context, List<String> sections,
+    FilteredSoldiers filteredSoldiers) {
+  List<String> filterSections = [];
+  Widget content = ListView(
+    children: [
+      const HeaderText('Select Sections to Filter By'),
+      ...sections.map(
+        (e) {
+          bool isChecked = false;
+          return StatefulBuilder(builder: (context, refresh) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: PlatformCheckboxListTile(
+                title: Text(e),
+                onChanged: (value) {
+                  value! ? filterSections.add(e) : filterSections.remove(e);
+                  refresh(
+                    () {
+                      isChecked = value;
+                    },
+                  );
+                },
+                value: isChecked,
+              ),
+            );
+          });
+        },
+      ).toList(),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: PlatformButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              filteredSoldiers.filter(filterSections);
+            },
+            child: const Text('Apply Filter')),
+      )
+    ],
+  );
+  customModalBottomSheet(context, content);
 }
 
 void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
@@ -155,16 +195,17 @@ void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
         toast.context = context;
         toast.showToast(
           toastDuration: const Duration(seconds: 5),
-          child: MyToast(contents: [
-            Text('Data successfully downloaded to $loc'),
-            if (!kIsWeb)
-              PlatformTextButton(
-                child: const Text('Open'),
-                onPressed: () {
-                  OpenFile.open('$dir/soldiers.xlsx');
-                },
-              ),
-          ]),
+          child: MyToast(
+            message: 'Data successfully downloaded to $loc',
+            textButton: !kIsWeb
+                ? PlatformTextButton(
+                    child: const Text('Open'),
+                    onPressed: () {
+                      OpenFile.open('$dir/soldiers.xlsx');
+                    },
+                  )
+                : null,
+          ),
         );
       } catch (e) {
         // ignore: avoid_print
@@ -183,10 +224,8 @@ uploadExcel(BuildContext context, bool isSubscribed) {
     toast.context = context;
     toast.showToast(
       child: const MyToast(
-        contents: [
-          Text('Uploading Soldiers is only available for subscribed users.')
-        ],
-      ),
+          message:
+              'Uploading Soldiers is only available for subscribed users.'),
     );
   }
 }
@@ -198,7 +237,7 @@ void shareSoldiers(
     toast.context = context;
     toast.showToast(
       child: const MyToast(
-        contents: [Text('You must select at least one record')],
+        message: 'You must select at least one record',
       ),
     );
     return;
@@ -221,7 +260,7 @@ void transferSoldier(
     toast.context = context;
     toast.showToast(
       child: const MyToast(
-        contents: [Text('You must select at least one record')],
+        message: 'You must select at least one record',
       ),
     );
     return;
@@ -233,7 +272,7 @@ void transferSoldier(
       toast.context = context;
       toast.showToast(
         child: const MyToast(
-          contents: [Text('You can only transfer records you own')],
+          message: 'You can only transfer records you own',
         ),
       );
       return;
@@ -268,7 +307,7 @@ void downloadPdf(BuildContext context, bool isSubscribed,
       toast.context = context;
       toast.showToast(
         child: const MyToast(
-          contents: [Text('You must select at least one record')],
+          message: 'You must select at least one record',
         ),
       );
       return;
@@ -296,10 +335,8 @@ void downloadPdf(BuildContext context, bool isSubscribed,
     toast.context = context;
     toast.showToast(
       child: const MyToast(
-        contents: [
-          Text('Downloading PDF files is only available for subscribed users.')
-        ],
-      ),
+          message:
+              'Downloading PDF files is only available for subscribed users.'),
     );
   }
 }
@@ -326,16 +363,15 @@ void completePdfDownload(BuildContext context, bool fullPage,
     toast.showToast(
       toastDuration: const Duration(seconds: 5),
       child: MyToast(
-        contents: [
-          Text(message),
-          if (location != '' && !kIsWeb)
-            PlatformTextButton(
-              child: const Text('Open'),
-              onPressed: () {
-                OpenFile.open('$location/soldiers.pdf');
-              },
-            ),
-        ],
+        message: message,
+        textButton: !kIsWeb
+            ? PlatformTextButton(
+                child: const Text('Open'),
+                onPressed: () {
+                  OpenFile.open('$location/soldiers.pdf');
+                },
+              )
+            : null,
       ),
     );
   });
@@ -346,8 +382,7 @@ void editSoldier(BuildContext context, List<Soldier> selectedSoldiers) {
     FToast toast = FToast();
     toast.context = context;
     toast.showToast(
-        child: const MyToast(
-            contents: [Text('You must select exactly one record')]));
+        child: const MyToast(message: 'You must select exactly one record'));
   } else {
     Navigator.push(
       context,

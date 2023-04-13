@@ -10,6 +10,7 @@ import 'package:local_auth/local_auth.dart';
 import '../auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../providers/user_provider.dart';
+import '../widgets/platform_widgets/platform_text_button.dart';
 
 class LocalAuthLoginPage extends ConsumerStatefulWidget {
   const LocalAuthLoginPage({Key? key}) : super(key: key);
@@ -88,11 +89,14 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: TextButton(
+                  child: PlatformTextButton(
                     onPressed: () => onSignOut(context),
                     child: const Text(
                       'Back to Login Page',
-                      style: TextStyle(fontSize: 18.0),
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.blue,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),

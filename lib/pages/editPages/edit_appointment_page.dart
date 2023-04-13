@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth_provider.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../widgets/stateful_widgets/time_text_field.dart';
 import '../../methods/on_back_pressed.dart';
@@ -278,7 +279,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                         Padding(
                           padding:
                               const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
-                          child: CheckboxListTile(
+                          child: PlatformCheckboxListTile(
                             controlAffinity: ListTileControlAffinity.leading,
                             value: removeSoldiers,
                             title: const Text('Remove Soldiers already added'),

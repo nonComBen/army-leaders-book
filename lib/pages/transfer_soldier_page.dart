@@ -166,12 +166,7 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
                             toast.context = context;
                             toast.showToast(
                               child: const MyToast(
-                                contents: [
-                                  StandardText(
-                                    'User Id must not be blank',
-                                  ),
-                                ],
-                              ),
+                                  message: 'User Id must not be blank'),
                             );
                           }
                         },

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,9 +10,11 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
 import '../../models/note.dart';
 import '../methods/theme_methods.dart';
+import '../models/app_bar_option.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_note_page.dart';
 import '../providers/tracking_provider.dart';
@@ -231,19 +234,41 @@ class NotesPageState extends ConsumerState<NotesPage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
+    final width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Notes',
-      actions: <Widget>[
-        Tooltip(
-            message: 'Delete Record(s)',
-            child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteRecord())),
-        Tooltip(
-            message: 'Edit Record',
-            child: IconButton(
-                icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
-      ],
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isIOS)
+            AppBarOption(
+              title: 'New Note',
+              icon: Icon(
+                CupertinoIcons.add,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _newRecord(context),
+            ),
+          AppBarOption(
+            title: 'Edit Note',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _editRecord(),
+          ),
+          AppBarOption(
+            title: 'Delete Note',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _deleteRecord(),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
@@ -262,8 +287,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
                 ad: myBanner!,
               ),
             ),
-          Flexible(
-            flex: 1,
+          Expanded(
             child: ListView(
               shrinkWrap: true,
               padding: const EdgeInsets.all(8.0),

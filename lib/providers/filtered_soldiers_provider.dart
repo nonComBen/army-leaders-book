@@ -13,12 +13,9 @@ class FilteredSoldiers extends StateNotifier<List<Soldier>> {
 
   get soldiers => state;
 
-  void filter(String section) {
-    if (section == "All") {
-      state = allSoldiers;
-    } else {
-      state =
-          allSoldiers.where((element) => element.section == section).toList();
-    }
+  void filter(List<String> sections) {
+    state = allSoldiers
+        .where((element) => sections.contains(element.section))
+        .toList();
   }
 }

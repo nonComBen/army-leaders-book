@@ -9,19 +9,18 @@ import 'package:leaders_book/providers/filtered_soldiers_provider.dart';
 import 'package:leaders_book/providers/selected_soldiers_provider.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
 import 'package:leaders_book/providers/subscription_state.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_text_button.dart';
-import 'package:pull_down_button/pull_down_button.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 
+import '../../methods/create_app_bar_actions.dart';
 import '../../methods/delete_methods.dart';
 import '../../methods/soldier_methods.dart';
 import '../../methods/theme_methods.dart';
+import '../../models/app_bar_option.dart';
 import '../../models/soldier.dart';
 import '../../pages/editPages/edit_soldier_page.dart';
 import '../../pages/tabs/rollup_tab.dart';
 import '../../pages/tabs/overflow_tab.dart';
 import '../../pages/tabs/soldiers_tab.dart';
-import 'platform_icon_button.dart';
 
 abstract class PlatformHomePage extends StatefulWidget {
   factory PlatformHomePage() {
@@ -89,191 +88,97 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
     }
   }
 
-  List<Widget> appBarMenu(BuildContext context, double width) {
-    List<Widget> buttons = <Widget>[];
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    soldiers.sort((a, b) => a.section.compareTo(b.section));
-    for (int i = 0; i < soldiers.length; i++) {
-      if (i == 0) {
-        sections.add(
-          PopupMenuItem(
-            value: soldiers[i].section,
-            child: Text(soldiers[i].section),
+  List<AppBarOption> getOptions() {
+    return [
+      AppBarOption(
+        title: 'New Soldier',
+        icon: Icon(
+          Icons.add,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => EditSoldierPage(
+              soldier: Soldier(owner: userId, users: [userId]),
+            ),
           ),
-        );
-      } else if (soldiers[i].section != soldiers[i - 1].section) {
-        sections.add(
-          PopupMenuItem(
-            value: soldiers[i].section,
-            child: Text(soldiers[i].section),
-          ),
-        );
-      }
-    }
-
-    List<Widget> editButton = <Widget>[
-      Tooltip(
-        message: 'Filter Records',
-        child: PopupMenuButton(
-          icon: const Icon(Icons.filter_alt),
-          onSelected: (String result) {
-            filteredSoldiers.filter(result);
-          },
-          itemBuilder: (context) {
-            return sections;
-          },
         ),
       ),
-      Tooltip(
-        message: 'Delete Record(s)',
-        child: IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () => deleteSoldiers(context, selectedSoldiers, userId),
+      AppBarOption(
+        title: 'Edit Soldier',
+        icon: Icon(
+          Icons.edit,
+          color: getOnPrimaryColor(context),
         ),
+        onPressed: () => editSoldier(context, selectedSoldiers),
       ),
-      Tooltip(
-        message: 'Edit Soldier',
-        child: IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () {
-            editSoldier(context, selectedSoldiers);
-          },
+      AppBarOption(
+        title: 'Delete Soldier(s)',
+        icon: Icon(
+          Icons.delete,
+          color: getOnPrimaryColor(context),
         ),
+        onPressed: () => deleteSoldiers(context, selectedSoldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Filter Soldiers',
+        icon: Icon(
+          Icons.filter_alt,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () =>
+            selectFilters(context, getSections(soldiers), filteredSoldiers),
+      ),
+      AppBarOption(
+        title: 'Share Soldier(s)',
+        icon: Icon(
+          Icons.share,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => shareSoldiers(context, soldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Download Excel',
+        icon: Icon(
+          Icons.download,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => downloadExcel(context, soldiers),
+      ),
+      AppBarOption(
+        title: 'Upload Excel',
+        icon: Icon(
+          Icons.upload,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => uploadExcel(context, isSubscribed),
+      ),
+      AppBarOption(
+        title: 'Download PDF',
+        icon: Icon(
+          Icons.picture_as_pdf,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () =>
+            downloadPdf(context, isSubscribed, selectedSoldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Transfer Soldier',
+        icon: Icon(
+          Icons.arrow_circle_right,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => transferSoldier(context, selectedSoldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Manage Users',
+        icon: Icon(
+          Icons.people,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => manageUsers(context, soldiers, userId),
       ),
     ];
-
-    List<PopupMenuEntry<String>> popupItems = [];
-
-    if (width > 600) {
-      buttons.add(
-        Tooltip(
-          message: 'Download as Excel',
-          child: IconButton(
-            icon: const Icon(Icons.file_download),
-            onPressed: () {
-              downloadExcel(context, soldiers);
-            },
-          ),
-        ),
-      );
-      buttons.add(
-        Tooltip(
-          message: 'Upload Data',
-          child: IconButton(
-              icon: const Icon(Icons.file_upload),
-              onPressed: () {
-                uploadExcel(context, isSubscribed);
-              }),
-        ),
-      );
-      buttons.add(
-        Tooltip(
-          message: 'Download as PDF',
-          child: IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () {
-              downloadPdf(context, isSubscribed, selectedSoldiers, userId);
-            },
-          ),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'share',
-          child: Text('Share Record(s)'),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'transfer',
-          child: Text('Transfer Ownership'),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'manage',
-          child: Text('Manage Users'),
-        ),
-      );
-    } else {
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'share',
-          child: Text('Share Record(s)'),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'download',
-          child: Text('Download as Excel'),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'upload',
-          child: Text('Upload Data'),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'pdf',
-          child: Text('Download as PDF'),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'transfer',
-          child: Text('Transfer Ownership'),
-        ),
-      );
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'manage',
-          child: Text('Manage Users'),
-        ),
-      );
-    }
-
-    List<Widget> overflowButton = <Widget>[
-      PopupMenuButton<String>(
-        onSelected: (String result) {
-          if (result == 'upload') {
-            uploadExcel(context, isSubscribed);
-          }
-          if (result == 'download') {
-            downloadExcel(context, soldiers);
-          }
-          if (result == 'share') {
-            shareSoldiers(context, soldiers, userId);
-          }
-          if (result == 'pdf') {
-            downloadPdf(context, isSubscribed, selectedSoldiers, userId);
-          }
-          if (result == 'transfer') {
-            transferSoldier(context, selectedSoldiers, userId);
-          }
-          if (result == 'manage') {
-            manageUsers(context, soldiers, userId);
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return popupItems;
-        },
-      )
-    ];
-
-    if (width > 600) {
-      return buttons + editButton + overflowButton;
-    } else if (width <= 400) {
-      return editButton + overflowButton;
-    } else {
-      return buttons + editButton + overflowButton;
-    }
   }
 
   @override
@@ -287,7 +192,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
     return Scaffold(
       appBar: AppBar(
           title: Text(titles[index]),
-          actions: index != 1 ? [] : appBarMenu(context, width)),
+          actions: index != 1 ? [] : createAppBarActions(width, getOptions())),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
@@ -373,78 +278,102 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
     });
   }
 
-  Widget menuPullDownButton() {
-    return PullDownButton(
-      itemBuilder: (context) => [
-        PullDownMenuItem(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => EditSoldierPage(
-                soldier: Soldier(owner: userId, users: [userId]),
-              ),
-            ),
-          ),
-          title: 'New Soldier',
-        ),
-        PullDownMenuItem(
-          onTap: () => editSoldier(context, selctedSoldiers),
-          title: 'Edit Soldier',
-        ),
-        PullDownMenuItem(
-          onTap: () => deleteSoldiers(context, selctedSoldiers, userId),
-          title: 'Delete Soldier(s)',
-        ),
-        PullDownMenuItem(
-          onTap: () => PullDownButton(
-            itemBuilder: (context) => getSections(soldiers)
-                .map((e) => PullDownMenuItem(
-                    onTap: () => filteredSoldiers.filter(e), title: e))
-                .toList(),
-            buttonBuilder: (context, showFilterMenu) => PlatformTextButton(
-              onPressed: showFilterMenu,
-              child: const Text('Filter'),
-            ),
-          ),
-          title: 'Filter Soldiers',
-        ),
-        PullDownMenuItem(
-          onTap: () => shareSoldiers(context, soldiers, userId),
-          title: 'Share Soldier(s)',
-        ),
-        PullDownMenuItem(
-          onTap: () => downloadExcel(context, soldiers),
-          title: 'Download Excel',
-        ),
-        PullDownMenuItem(
-          onTap: () => uploadExcel(context, isSubscribed),
-          title: 'Upload Soldiers',
-        ),
-        PullDownMenuItem(
-          onTap: () =>
-              downloadPdf(context, isSubscribed, selctedSoldiers, userId),
-          title: 'Download PDF',
-        ),
-        PullDownMenuItem(
-          onTap: () => transferSoldier(context, selctedSoldiers, userId),
-          title: 'Transfer Ownership',
-        ),
-        PullDownMenuItem(
-          onTap: () => manageUsers(context, soldiers, userId),
-          title: 'Manage Users',
-        ),
-      ],
-      buttonBuilder: (context, showMenu) => PlatformIconButton(
+  List<AppBarOption> getOptions() {
+    return [
+      AppBarOption(
+        title: 'New Soldier',
         icon: Icon(
-          CupertinoIcons.ellipsis_vertical,
+          CupertinoIcons.add,
           color: getOnPrimaryColor(context),
         ),
-        onPressed: showMenu,
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => EditSoldierPage(
+              soldier: Soldier(owner: userId, users: [userId]),
+            ),
+          ),
+        ),
       ),
-    );
+      AppBarOption(
+        title: 'Edit Soldier',
+        icon: Icon(
+          CupertinoIcons.pencil,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => editSoldier(context, selctedSoldiers),
+      ),
+      AppBarOption(
+        title: 'Delete Soldier(s)',
+        icon: Icon(
+          CupertinoIcons.delete,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => deleteSoldiers(context, selctedSoldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Filter Soldiers',
+        icon: Icon(
+          Icons.filter_alt,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () =>
+            selectFilters(context, getSections(soldiers), filteredSoldiers),
+      ),
+      AppBarOption(
+        title: 'Share Soldier(s)',
+        icon: Icon(
+          CupertinoIcons.share,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => shareSoldiers(context, soldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Download Excel',
+        icon: Icon(
+          CupertinoIcons.cloud_download,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => downloadExcel(context, soldiers),
+      ),
+      AppBarOption(
+        title: 'Upload Excel',
+        icon: Icon(
+          CupertinoIcons.cloud_upload,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => uploadExcel(context, isSubscribed),
+      ),
+      AppBarOption(
+        title: 'Download PDF',
+        icon: Icon(
+          CupertinoIcons.doc,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () =>
+            downloadPdf(context, isSubscribed, selctedSoldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Transfer Soldier',
+        icon: Icon(
+          CupertinoIcons.arrow_right_circle,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => transferSoldier(context, selctedSoldiers, userId),
+      ),
+      AppBarOption(
+        title: 'Manage Users',
+        icon: Icon(
+          CupertinoIcons.person_3_fill,
+          color: getOnPrimaryColor(context),
+        ),
+        onPressed: () => manageUsers(context, soldiers, userId),
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
     userId = ref.read(authProvider).currentUser()!.uid;
     isSubscribed = ref.watch(subscriptionStateProvider);
     soldiers = ref.watch(soldiersProvider);
@@ -484,7 +413,15 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
           builder: (context) => CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
               backgroundColor: getPrimaryColor(context),
-              trailing: index == 1 ? menuPullDownButton() : null,
+              trailing: SizedBox(
+                width: width / 4,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    if (index == 1) ...createAppBarActions(width, getOptions()),
+                  ],
+                ),
+              ),
             ),
             child: tabs[index],
           ),

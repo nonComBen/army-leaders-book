@@ -187,15 +187,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                           toast.context = context;
                           toast.showToast(
                             child: MyToast(
-                              contents: [
-                                Text(
-                                  '$lookUpMethod must not be blank',
-                                  style: TextStyle(
-                                    color: getTextColor(context),
-                                  ),
-                                )
-                              ],
-                            ),
+                                message: '$lookUpMethod must not be blank'),
                           );
                         }
                       },

@@ -3,25 +3,22 @@ import 'dart:io';
 
 import 'package:excel/excel.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/methods/theme_methods.dart';
-import 'package:leaders_book/widgets/header_text.dart';
-import 'package:leaders_book/widgets/my_toast.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_text_button.dart';
-import 'package:leaders_book/widgets/standard_text.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth_provider.dart';
+import '../methods/create_app_bar_actions.dart';
+import '../methods/filter_documents.dart';
 import '../models/acft.dart';
+import '../models/app_bar_option.dart';
 import 'editPages/edit_acft_page.dart';
 import '../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
@@ -32,6 +29,12 @@ import 'uploadPages/upload_acft_page.dart';
 import '../pdf/acft_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../../methods/theme_methods.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_text_button.dart';
+import '../../methods/custom_alert_dialog.dart';
 
 class AcftPage extends ConsumerStatefulWidget {
   const AcftPage({
@@ -167,10 +170,8 @@ class AcftPageState extends ConsumerState<AcftPage> {
       toast.context = context;
       toast.showToast(
           child: const MyToast(
-        contents: [
-          StandardText('Uploading data is only available for subscribed users.')
-        ],
-      ));
+              message:
+                  'Uploading data is only available for subscribed users.'));
     }
   }
 
@@ -260,14 +261,13 @@ class AcftPageState extends ConsumerState<AcftPage> {
           toast.showToast(
             toastDuration: const Duration(seconds: 5),
             child: MyToast(
-              contents: [
-                StandardText('Data successfully downloaded to $location'),
-                if (!kIsWeb)
-                  PlatformTextButton(
-                    child: const Text('Open'),
-                    onPressed: () => OpenFile.open('$path/acftStats.xlsx'),
-                  ),
-              ],
+              message: 'Data successfully downloaded to $location',
+              textButton: kIsWeb
+                  ? null
+                  : PlatformTextButton(
+                      child: const Text('Open'),
+                      onPressed: () => OpenFile.open('$path/acftStats.xlsx'),
+                    ),
             ),
           );
         }
@@ -298,12 +298,10 @@ class AcftPageState extends ConsumerState<AcftPage> {
       FToast toast = FToast();
       toast.context = context;
       toast.showToast(
-          child: const MyToast(
-        contents: [
-          StandardText(
-              'Downloading PDF files is only available for subscribed users.')
-        ],
-      ));
+        child: const MyToast(
+            message:
+                'Downloading PDF files is only available for subscribed users.'),
+      );
     }
   }
 
@@ -338,25 +336,22 @@ class AcftPageState extends ConsumerState<AcftPage> {
       toast.showToast(
         toastDuration: const Duration(seconds: 5),
         child: MyToast(
-          contents: [
-            StandardText(message),
-            PlatformTextButton(
-              child: const Text('Open'),
-              onPressed: () => OpenFile.open('$location/acftStats.pdf'),
-            ),
-          ],
+          message: message,
+          textButton: kIsWeb
+              ? null
+              : PlatformTextButton(
+                  child: const Text('Open'),
+                  onPressed: () => OpenFile.open('$location/acftStats.pdf'),
+                ),
         ),
       );
     }
   }
 
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDocs = List.from(documents);
-    } else {
-      filteredDocs =
-          documents.where((element) => element['section'] == section).toList();
-    }
+  void _filterRecords(List<String> sections) {
+    filteredDocs = documents
+        .where((element) => sections.contains(element['section']))
+        .toList();
     _calcAves();
     setState(() {});
   }
@@ -366,11 +361,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       FToast toast = FToast();
       toast.context = context;
       toast.showToast(
-        child: const MyToast(
-          contents: [
-            StandardText('You must select at least one record'),
-          ],
-        ),
+        child: const MyToast(message: 'You must select at least one record'),
       );
       return;
     }
@@ -384,11 +375,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       FToast toast = FToast();
       toast.context = context;
       toast.showToast(
-        child: const MyToast(
-          contents: [
-            StandardText('You must select exactly one record'),
-          ],
-        ),
+        child: const MyToast(message: 'You must select exactly one record'),
       );
       return;
     }
@@ -835,164 +822,88 @@ class AcftPageState extends ConsumerState<AcftPage> {
     });
   }
 
-  List<Widget> appBarMenu(BuildContext context, double width) {
-    List<Widget> buttons = <Widget>[];
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    documents.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < documents.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      } else if (documents[i]['section'] != documents[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      }
-    }
-
-    List<Widget> editButton = <Widget>[
-      Tooltip(
-          message: 'Filter Records',
-          child: PopupMenuButton(
-            icon: const Icon(Icons.filter_alt),
-            onSelected: (String result) => _filterRecords(result),
-            itemBuilder: (context) {
-              return sections;
-            },
-          )),
-      Tooltip(
-        message: 'Edit Record',
-        child: IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () => _editRecord(),
-        ),
-      ),
-    ];
-
-    List<PopupMenuEntry<String>> popupItems = [];
-
-    if (width > 600) {
-      buttons.add(
-        Tooltip(
-          message: 'Download as Excel',
-          child: IconButton(
-            icon: const Icon(Icons.file_download),
-            onPressed: () {
-              _downloadExcel();
-            },
-          ),
-        ),
-      );
-      buttons.add(
-        Tooltip(
-          message: 'Upload Data',
-          child: IconButton(
-            icon: const Icon(Icons.file_upload),
-            onPressed: () {
-              _uploadExcel(context);
-            },
-          ),
-        ),
-      );
-      buttons.add(
-        Tooltip(
-          message: 'Download as PDF',
-          child: IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () {
-              _downloadPdf();
-            },
-          ),
-        ),
-      );
-    } else {
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'download',
-          child: Text('Download as Excel'),
-        ),
-      );
-      if (!kIsWeb) {
-        popupItems.add(
-          const PopupMenuItem(
-            value: 'upload',
-            child: Text('Upload Data'),
-          ),
-        );
-      }
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'pdf',
-          child: Text('Download as PDF'),
-        ),
-      );
-    }
-    if (width > 400) {
-      buttons.add(
-        Tooltip(
-          message: 'Delete Record(s)',
-          child: IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => _deleteRecord(),
-          ),
-        ),
-      );
-    } else {
-      popupItems.add(
-        const PopupMenuItem(
-          value: 'delete',
-          child: Text('Delete Record(s)'),
-        ),
-      );
-    }
-
-    List<Widget> overflowButton = <Widget>[
-      PopupMenuButton<String>(
-        onSelected: (String result) {
-          if (result == 'upload') {
-            _uploadExcel(context);
-          }
-          if (result == 'download') {
-            _downloadExcel();
-          }
-          if (result == 'delete') {
-            _deleteRecord();
-          }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return popupItems;
-        },
-      )
-    ];
-
-    if (width > 600) {
-      return buttons + editButton;
-    } else if (width <= 400) {
-      return editButton + overflowButton;
-    } else {
-      return buttons + editButton + overflowButton;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
         title: 'ACFT Stats',
-        actions: appBarMenu(context, width),
+        actions: createAppBarActions(
+          width,
+          [
+            if (!kIsWeb && Platform.isIOS)
+              if (!kIsWeb && Platform.isIOS)
+                AppBarOption(
+                  title: 'New ACFT',
+                  icon: Icon(
+                    kIsWeb || Platform.isAndroid
+                        ? Icons.add
+                        : CupertinoIcons.add,
+                    color: getOnPrimaryColor(context),
+                  ),
+                  onPressed: () => _newRecord(context),
+                ),
+            AppBarOption(
+              title: 'Edit ACFT',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.edit
+                    : CupertinoIcons.pencil,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _editRecord(),
+            ),
+            AppBarOption(
+              title: 'Delete ACFT(s)',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.delete
+                    : CupertinoIcons.delete,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _deleteRecord(),
+            ),
+            AppBarOption(
+              title: 'Filter ACFTs',
+              icon: Icon(
+                Icons.filter,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => showFilterOptions(
+                  context, getSections(documents), _filterRecords),
+            ),
+            AppBarOption(
+              title: 'Download Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.download
+                    : CupertinoIcons.cloud_download,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _downloadExcel(),
+            ),
+            AppBarOption(
+              title: 'Upload Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.upload
+                    : CupertinoIcons.cloud_upload,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _uploadExcel(context),
+            ),
+            AppBarOption(
+              title: 'Download PDF',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.picture_as_pdf
+                    : CupertinoIcons.doc,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _downloadPdf(),
+            ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {

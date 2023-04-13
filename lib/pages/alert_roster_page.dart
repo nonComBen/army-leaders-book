@@ -16,7 +16,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../methods/theme_methods.dart';
+import '../methods/create_app_bar_actions.dart';
+import '../models/app_bar_option.dart';
 import '../pdf/alert_roster_pdf.dart';
 import '../../providers/subscription_state.dart';
 import '../methods/download_methods.dart';
@@ -606,13 +607,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userId = ref.read(authProvider).currentUser()!.uid;
-    isSubscribed = ref.read(subscriptionStateProvider);
-    prefs = ref.read(sharedPreferencesProvider);
-    bool dontShow = prefs.getBool('dontShowHelpAlert') ?? false;
-    if (!dontShow) {
-      _showHelp();
-    }
+
     if (isInitial) {
       isInitial = false;
       initialize();
@@ -622,6 +617,14 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   @override
   void initState() {
     super.initState();
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
+    prefs = ref.read(sharedPreferencesProvider);
+
+    bool dontShow = prefs.getBool('dontShowHelpAlert') ?? false;
+    if (!dontShow) {
+      _showHelp();
+    }
   }
 
   initialize() async {
@@ -653,56 +656,46 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
       title: 'Alert Roster',
-      actions: <Widget>[
-        Tooltip(
-          message:
-              kIsWeb || Platform.isIOS ? 'Feature Unavailable' : 'Text All',
-          child: IconButton(
-            icon: const Icon(
-              Icons.sms,
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isAndroid)
+            AppBarOption(
+              title: 'Text All',
+              icon: const Icon(Icons.sms),
+              onPressed: _textAll,
             ),
-            onPressed: kIsWeb || Platform.isIOS
-                ? null
-                : () {
-                    _textAll();
-                  },
+          AppBarOption(
+            title: 'Download PDF',
+            icon: Icon(kIsWeb || Platform.isAndroid
+                ? Icons.picture_as_pdf
+                : CupertinoIcons.doc),
+            onPressed: _downloadPdf,
           ),
-        ),
-        Tooltip(
-          message: 'Download as PDF',
-          child: IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
-            onPressed: () {
-              _downloadPdf();
-            },
-          ),
-        )
-      ],
+        ],
+      ),
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: width < 816 ? 16 : (width - 800) / 2),
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: WillPopScope(
-              onWillPop: onWillPop,
-              child: ListView(
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  RepaintBoundary(
-                    key: _globalKey,
-                    child: Column(
-                      children: _allSoldiers.isEmpty
-                          ? _addSoldiersWarning()
-                          : _soldiers.isEmpty
-                              ? [const CircularProgressIndicator()]
-                              : buildRoster(),
-                    ),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: WillPopScope(
+            onWillPop: onWillPop,
+            child: ListView(
+              padding: const EdgeInsets.all(8.0),
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                RepaintBoundary(
+                  key: _globalKey,
+                  child: Column(
+                    children: _allSoldiers.isEmpty
+                        ? _addSoldiersWarning()
+                        : _soldiers.isEmpty
+                            ? [const CircularProgressIndicator()]
+                            : buildRoster(),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

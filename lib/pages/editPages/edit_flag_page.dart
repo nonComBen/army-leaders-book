@@ -10,6 +10,7 @@ import '../../models/flag.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
@@ -34,7 +35,7 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _expController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
-  String _type = 'Adverse Action';
+  String? _type;
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   final List<String> _types = [
@@ -169,7 +170,7 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
     _firstName = widget.flag.firstName;
     _section = widget.flag.section;
     _rankSort = widget.flag.rankSort;
-    _type = widget.flag.type!;
+    _type = widget.flag.type;
     _owner = widget.flag.owner;
     _users = widget.flag.users;
 
@@ -266,7 +267,7 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
-                      child: CheckboxListTile(
+                      child: PlatformCheckboxListTile(
                         controlAffinity: ListTileControlAffinity.leading,
                         value: removeSoldiers,
                         title: const Text('Remove Soldiers already added'),

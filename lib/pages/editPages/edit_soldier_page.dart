@@ -116,13 +116,6 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
   DateTime? _dorDate, _lossDate, _etsDate, _basdDate, _pebdDate, _gainDate;
   DateFormat formatter = DateFormat('yyyy-MM-dd');
 
-  late DateTextField _dorField;
-  late DateTextField _lossField;
-  late DateTextField _etsField;
-  late DateTextField _basdField;
-  late DateTextField _pebdField;
-  late DateTextField _gainField;
-
   @override
   void initState() {
     super.initState();
@@ -183,19 +176,6 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _gainDate = DateTime.tryParse(widget.soldier.gainDate) ?? DateTime.now();
     _basdDate = DateTime.tryParse(widget.soldier.basd) ?? DateTime.now();
     _pebdDate = DateTime.tryParse(widget.soldier.pebd) ?? DateTime.now();
-
-    _dorField = DateTextField(
-        label: 'Date of Rank', date: _dorDate, controller: _dorController);
-    _lossField = DateTextField(
-        label: 'Loss Date', date: _lossDate, controller: _lossController);
-    _etsField = DateTextField(
-        label: 'ETS Date', date: _etsDate, controller: _etsController);
-    _gainField = DateTextField(
-        label: 'Gain Date', date: _gainDate, controller: _gainController);
-    _basdField = DateTextField(
-        label: 'BASD', date: _basdDate, controller: _basdController);
-    _pebdField = DateTextField(
-        label: 'PEBD', date: _pebdDate, controller: _pebdController);
   }
 
   @override
@@ -564,10 +544,8 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
       }
     } else {
       MyToast myToast = const MyToast(
-        contents: [
-          Text(
-              'Form is invalid - rank and last name must not be blank and dates must be in yyyy-MM-dd format')
-        ],
+        message:
+            'Form is invalid - rank and last name must not be blank and dates must be in yyyy-MM-dd format',
       );
       FToast toast = FToast();
       toast.showToast(child: myToast);
@@ -706,7 +684,10 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                       keyboardType: TextInputType.number,
                       onChanged: (_) => updated = true,
                     ),
-                    _dorField,
+                    DateTextField(
+                        label: 'Date of Rank',
+                        date: _dorDate,
+                        controller: _dorController),
                     PaddedTextField(
                       label: 'MOS',
                       decoration: const InputDecoration(
@@ -743,11 +724,26 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                       keyboardType: TextInputType.text,
                       onChanged: (_) => updated = true,
                     ),
-                    _lossField,
-                    _etsField,
-                    _basdField,
-                    _pebdField,
-                    _gainField,
+                    DateTextField(
+                        label: 'Loss Date',
+                        date: _lossDate,
+                        controller: _lossController),
+                    DateTextField(
+                        label: 'ETS Date',
+                        date: _etsDate,
+                        controller: _etsController),
+                    DateTextField(
+                        label: 'BASD',
+                        date: _basdDate,
+                        controller: _basdController),
+                    DateTextField(
+                        label: 'PEBD',
+                        date: _pebdDate,
+                        controller: _pebdController),
+                    DateTextField(
+                        label: 'Gain Date',
+                        date: _gainDate,
+                        controller: _gainController),
                   ],
                 ),
                 Divider(

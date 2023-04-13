@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -12,10 +13,13 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../providers/subscription_state.dart';
+import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/filter_documents.dart';
 import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
+import '../models/app_bar_option.dart';
 import '../models/working_eval.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_working_eval_page.dart';
@@ -197,13 +201,11 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
     }
   }
 
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDocs = List.from(documents);
-    } else {
-      filteredDocs =
-          documents.where((element) => element['section'] == section).toList();
-    }
+  void _filterRecords(List<String> sections) {
+    filteredDocs = documents
+        .where((element) => sections.contains(element['section']))
+        .toList();
+
     setState(() {});
   }
 
@@ -334,126 +336,75 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
     });
   }
 
-  List<Widget> appBarMenu(BuildContext context, double width) {
-    List<Widget> buttons = <Widget>[];
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    documents.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < documents.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      } else if (documents[i]['section'] != documents[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      }
-    }
-
-    List<Widget> editButton = <Widget>[
-      Tooltip(
-          message: 'Filter Records',
-          child: PopupMenuButton(
-            icon: const Icon(Icons.filter_alt),
-            onSelected: (String result) => _filterRecords(result),
-            itemBuilder: (context) {
-              return sections;
-            },
-          )),
-      Tooltip(
-          message: 'Edit Record',
-          child: IconButton(
-              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
-    ];
-
-    List<PopupMenuEntry<String>> popupItems = [];
-
-    if (width > 500) {
-      buttons.add(
-        Tooltip(
-            message: 'Download as Excel',
-            child: IconButton(
-                icon: const Icon(Icons.file_download),
-                onPressed: () {
-                  _downloadExcel();
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Upload Data',
-            child: IconButton(
-                icon: const Icon(Icons.file_upload),
-                onPressed: () {
-                  _uploadExcel(context);
-                })),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'download',
-        child: Text('Download as Excel'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'upload',
-        child: Text('Upload Data'),
-      ));
-    }
-    if (width > 400) {
-      buttons.add(
-        Tooltip(
-            message: 'Delete Record(s)',
-            child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteRecord())),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'delete',
-        child: Text('Delete Record(s)'),
-      ));
-    }
-
-    List<Widget> overflowButton = <Widget>[
-      PopupMenuButton<String>(
-        onSelected: (String result) {
-          if (result == 'upload') {
-            _uploadExcel(context);
-          }
-          if (result == 'download') {
-            _downloadExcel();
-          }
-          if (result == 'delete') {
-            _deleteRecord();
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return popupItems;
-        },
-      )
-    ];
-
-    if (width > 600) {
-      return buttons + editButton;
-    } else if (width <= 400) {
-      return editButton + overflowButton;
-    } else {
-      return buttons + editButton + overflowButton;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
+    final width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
         title: 'Working Evals',
-        actions: appBarMenu(context, MediaQuery.of(context).size.width),
+        actions: createAppBarActions(
+          width,
+          [
+            if (!kIsWeb && Platform.isIOS)
+              AppBarOption(
+                title: 'New Eval',
+                icon: Icon(
+                  CupertinoIcons.add,
+                  color: getOnPrimaryColor(context),
+                ),
+                onPressed: () => _newRecord(context),
+              ),
+            AppBarOption(
+              title: 'Edit Eval',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.edit
+                    : CupertinoIcons.pencil,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _editRecord(),
+            ),
+            AppBarOption(
+              title: 'Delete Eval',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.delete
+                    : CupertinoIcons.delete,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _deleteRecord(),
+            ),
+            AppBarOption(
+              title: 'Filter Evals',
+              icon: Icon(
+                Icons.filter_alt,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => showFilterOptions(
+                  context, getSections(documents), _filterRecords),
+            ),
+            AppBarOption(
+              title: 'Download Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.download
+                    : CupertinoIcons.cloud_download,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _downloadExcel(),
+            ),
+            AppBarOption(
+              title: 'Upload Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.upload
+                    : CupertinoIcons.cloud_upload,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _uploadExcel(context),
+            ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {
@@ -472,8 +423,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
                   ad: myBanner!,
                 ),
               ),
-            Flexible(
-              flex: 1,
+            Expanded(
               child: ListView(
                 shrinkWrap: true,
                 padding: const EdgeInsets.all(8.0),

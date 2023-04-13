@@ -86,8 +86,15 @@ class IOSScaffold extends StatelessWidget implements PlatformScaffold {
                   ? SizedBox(
                       width: MediaQuery.of(context).size.width / 4,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: actions,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: actions
+                            .map(
+                              (e) => Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: e,
+                              ),
+                            )
+                            .toList(),
                       ),
                     )
                   : null,

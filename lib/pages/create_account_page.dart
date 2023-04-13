@@ -9,7 +9,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../auth_provider.dart';
 import '../methods/theme_methods.dart';
 import '../providers/root_provider.dart';
+import '../widgets/padded_text_field.dart';
+import '../widgets/platform_widgets/platform_button.dart';
+import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/platform_widgets/platform_text_button.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({
@@ -22,8 +26,8 @@ class CreateAccountPage extends ConsumerStatefulWidget {
 
 class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   final formKey = GlobalKey<FormState>();
-  String? _email, _password;
   bool tosAgree = false;
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   _launchURL(String url) async {
@@ -52,8 +56,8 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   void validateAndCreate(AuthService auth) async {
     if (validateAndSave()) {
       try {
-        User user =
-            (await auth.createUserWithEmailAndPassword(_email!, _password!))!;
+        User user = (await auth.createUserWithEmailAndPassword(
+            _emailController.text, _passwordController.text))!;
         final userObj = UserObj(
           userId: user.uid,
           userEmail: user.email!,
@@ -97,33 +101,33 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                 child: ListView(
                   children: <Widget>[
                     const SizedBox(height: 32.0),
-                    Hero(
-                      tag: 'hero',
-                      child: CircleAvatar(
-                        backgroundColor: Colors.transparent,
-                        radius: 96.0,
-                        child: Image.asset('assets/icon-512.png'),
-                      ),
+                    CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      radius: 96.0,
+                      child: Image.asset('assets/icon-512.png'),
                     ),
                     const SizedBox(height: 32.0),
-                    TextFormField(
+                    PaddedTextField(
+                      controller: TextEditingController(),
+                      label: 'Email',
                       decoration: const InputDecoration(
                           labelText: 'Email', icon: Icon(Icons.mail)),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) =>
                           value!.isEmpty ? 'Email can\'t be empty' : null,
-                      onSaved: (value) => _email = value!.trim(),
                     ),
-                    TextFormField(
+                    PaddedTextField(
+                      label: 'Password',
                       decoration: const InputDecoration(
                           labelText: 'Password', icon: Icon(Icons.lock)),
                       controller: _passwordController,
                       validator: (value) =>
                           value!.isEmpty ? 'Password can\'t be empty' : null,
-                      onSaved: (value) => _password = value,
                       obscureText: true,
                     ),
-                    TextFormField(
+                    PaddedTextField(
+                      controller: TextEditingController(),
+                      label: 'Confirm Password',
                       decoration: const InputDecoration(
                           labelText: 'Confirm Password',
                           icon: Icon(Icons.lock)),
@@ -132,8 +136,8 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                           : null,
                       obscureText: true,
                     ),
-                    CheckboxListTile(
-                        title: TextButton(
+                    PlatformCheckboxListTile(
+                        title: PlatformTextButton(
                           child: const Text(
                             'I agree to Terms and Conditions',
                             style: TextStyle(
@@ -152,12 +156,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                         }),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                          style: ButtonStyle(
-                              shape: MaterialStateProperty.all<OutlinedBorder>(
-                                  const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(24.0))))),
+                      child: PlatformButton(
                           child: const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: Text('Create Account',
@@ -169,26 +168,17 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                          style: ButtonStyle(
-                            shape: MaterialStateProperty.all<OutlinedBorder>(
-                              const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(24.0),
-                                ),
-                              ),
-                            ),
-                          ),
+                      child: PlatformTextButton(
                           child: const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: Text(
                               'Have an account? Login',
-                              style: TextStyle(fontSize: 20.0),
+                              style:
+                                  TextStyle(fontSize: 20.0, color: Colors.blue),
                               textAlign: TextAlign.center,
                             ),
                           ),
                           onPressed: () {
-                            // _rootBloc.onSignOut();
                             rootService.signOut();
                           }),
                     ),

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
+import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../methods/on_back_pressed.dart';
@@ -35,22 +36,22 @@ class SettingsPage extends ConsumerStatefulWidget {
 enum Notification { acft, bf, weapon, pha, dental, vision, hearing, hiv }
 
 class SettingsPageState extends ConsumerState<SettingsPage> {
-  int? acftMos,
-      bfMos,
-      weaponMos,
-      phaMos,
-      dentalMos,
-      visionMos,
-      hearingMos,
-      hivMos;
-  List<dynamic>? acftNotifications,
-      bfNotifications,
-      weaponNotifications,
-      phaNotifications,
-      dentalNotifications,
-      visionNotifications,
-      hearingNotifications,
-      hivNotifications;
+  int acftMos = 6,
+      bfMos = 6,
+      weaponMos = 6,
+      phaMos = 12,
+      dentalMos = 12,
+      visionMos = 12,
+      hearingMos = 12,
+      hivMos = 24;
+  List<dynamic> acftNotifications = [],
+      bfNotifications = [],
+      weaponNotifications = [],
+      phaNotifications = [],
+      dentalNotifications = [],
+      visionNotifications = [],
+      hearingNotifications = [],
+      hivNotifications = [];
   bool updated = false,
       addNotification = true,
       perstat = true,
@@ -64,7 +65,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       medpros = false,
       training = false,
       isInitial = true;
-  String? userId;
+  late String userId;
   String _brightness = 'Dark';
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   late Setting setting;
@@ -84,7 +85,9 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
     final theme = ref.read(themeProvider);
+    prefs = ref.read(sharedPreferencesProvider);
     _brightness = theme.brightness == Brightness.light ? 'Light' : 'Dark';
   }
 
@@ -104,7 +107,6 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    userId = ref.read(authProvider).currentUser()!.uid;
     if (isInitial) {
       initialize();
       isInitial = false;
@@ -120,7 +122,6 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
     if (snapshot.docs.isNotEmpty) {
       doc = snapshot.docs.firstWhere((doc) => doc.id == userId);
     }
-    prefs = await SharedPreferences.getInstance();
 
     setState(() {
       if (doc != null) {
@@ -190,28 +191,28 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
     if (index != null) {
       switch (notification) {
         case Notification.acft:
-          number = acftNotifications![index];
+          number = acftNotifications[index];
           break;
         case Notification.bf:
-          number = bfNotifications![index];
+          number = bfNotifications[index];
           break;
         case Notification.weapon:
-          number = weaponNotifications![index];
+          number = weaponNotifications[index];
           break;
         case Notification.pha:
-          number = phaNotifications![index];
+          number = phaNotifications[index];
           break;
         case Notification.dental:
-          number = dentalNotifications![index];
+          number = dentalNotifications[index];
           break;
         case Notification.vision:
-          number = visionNotifications![index];
+          number = visionNotifications[index];
           break;
         case Notification.hearing:
-          number = hearingNotifications![index];
+          number = hearingNotifications[index];
           break;
         case Notification.hiv:
-          number = hivNotifications![index];
+          number = hivNotifications[index];
           break;
       }
       numController.text = number.toString();
@@ -245,28 +246,28 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
           setState(() {
             switch (notification) {
               case Notification.acft:
-                acftNotifications![index] = number;
+                acftNotifications[index] = number;
                 break;
               case Notification.bf:
-                bfNotifications![index] = number;
+                bfNotifications[index] = number;
                 break;
               case Notification.weapon:
-                weaponNotifications![index] = number;
+                weaponNotifications[index] = number;
                 break;
               case Notification.pha:
-                phaNotifications![index] = number;
+                phaNotifications[index] = number;
                 break;
               case Notification.dental:
-                dentalNotifications![index] = number;
+                dentalNotifications[index] = number;
                 break;
               case Notification.vision:
-                visionNotifications![index] = number;
+                visionNotifications[index] = number;
                 break;
               case Notification.hearing:
-                hearingNotifications![index] = number;
+                hearingNotifications[index] = number;
                 break;
               case Notification.hiv:
-                hivNotifications![index] = number;
+                hivNotifications[index] = number;
                 break;
             }
           });
@@ -274,28 +275,28 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
           setState(() {
             switch (notification) {
               case Notification.acft:
-                acftNotifications!.add(number);
+                acftNotifications.add(number);
                 break;
               case Notification.bf:
-                bfNotifications!.add(number);
+                bfNotifications.add(number);
                 break;
               case Notification.weapon:
-                weaponNotifications!.add(number);
+                weaponNotifications.add(number);
                 break;
               case Notification.pha:
-                phaNotifications!.add(number);
+                phaNotifications.add(number);
                 break;
               case Notification.dental:
-                dentalNotifications!.add(number);
+                dentalNotifications.add(number);
                 break;
               case Notification.vision:
-                visionNotifications!.add(number);
+                visionNotifications.add(number);
                 break;
               case Notification.hearing:
-                hearingNotifications!.add(number);
+                hearingNotifications.add(number);
                 break;
               case Notification.hiv:
-                hivNotifications!.add(number);
+                hivNotifications.add(number);
                 break;
             }
           });
@@ -318,22 +319,22 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       medpros: medpros,
       training: training,
       addNotifications: addNotification,
-      acftMonths: acftMos!,
-      bfMonths: bfMos!,
-      weaponsMonths: weaponMos!,
-      phaMonths: phaMos!,
-      dentalMonths: dentalMos!,
-      visionMonths: visionMos!,
-      hearingMonths: hearingMos!,
-      hivMonths: hivMos!,
-      acftNotifications: acftNotifications!,
-      bfNotifications: bfNotifications!,
-      weaponsNotifications: weaponNotifications!,
-      phaNotifications: phaNotifications!,
-      dentalNotifications: dentalNotifications!,
-      visionNotifications: visionNotifications!,
-      hearingNotifications: hearingNotifications!,
-      hivNotifications: hivNotifications!,
+      acftMonths: acftMos,
+      bfMonths: bfMos,
+      weaponsMonths: weaponMos,
+      phaMonths: phaMos,
+      dentalMonths: dentalMos,
+      visionMonths: visionMos,
+      hearingMonths: hearingMos,
+      hivMonths: hivMos,
+      acftNotifications: acftNotifications,
+      bfNotifications: bfNotifications,
+      weaponsNotifications: weaponNotifications,
+      phaNotifications: phaNotifications,
+      dentalNotifications: dentalNotifications,
+      visionNotifications: visionNotifications,
+      hearingNotifications: hearingNotifications,
+      hivNotifications: hivNotifications,
       owner: userId,
     );
 
@@ -361,13 +362,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
             top: 76.0,
           ),
           constraints: const BoxConstraints(maxWidth: 900),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formState,
-              onWillPop: updated
-                  ? () => onBackPressed(context)
-                  : () => Future(() => true),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Form(
+            key: _formState,
+            onWillPop: updated
+                ? () => onBackPressed(context)
+                : () => Future(() => true),
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
                   const Padding(
@@ -407,22 +408,28 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   GridView.count(
                     padding: const EdgeInsets.all(8.0),
                     crossAxisCount: width > 700 ? 2 : 1,
-                    childAspectRatio: width > 700 ? width / 150 : width / 75,
+                    mainAxisSpacing: 1.0,
+                    crossAxisSpacing: 1.0,
+                    shrinkWrap: true,
+                    childAspectRatio: width > 900
+                        ? 900 / 150
+                        : width > 700
+                            ? width / 150
+                            : width / 75,
                     primary: false,
                     children: [
-                      Padding(
+                      PlatformCheckboxListTile(
                         padding: const EdgeInsets.all(8.0),
-                        child: PlatformCheckboxListTile(
-                          title: const Text('PERSTAT'),
-                          onChanged: (value) {
-                            setState(() {
-                              perstat = value!;
-                            });
-                          },
-                          value: perstat,
-                        ),
+                        title: const Text('PERSTAT'),
+                        onChanged: (value) {
+                          setState(() {
+                            perstat = value!;
+                          });
+                        },
+                        value: perstat,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('Appointments'),
                         onChanged: (value) {
                           setState(() {
@@ -432,6 +439,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: apts,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('APFT Stats'),
                         onChanged: (value) {
                           setState(() {
@@ -441,6 +449,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: apft,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('ACFT Stats'),
                         onChanged: (value) {
                           setState(() {
@@ -450,6 +459,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: acft,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('Profiles'),
                         onChanged: (value) {
                           setState(() {
@@ -459,6 +469,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: profiles,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('Body Composition Stats'),
                         onChanged: (value) {
                           setState(() {
@@ -468,6 +479,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: bf,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('Weapon Stats'),
                         onChanged: (value) {
                           setState(() {
@@ -477,6 +489,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: weapons,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('Flags'),
                         onChanged: (value) {
                           setState(() {
@@ -486,6 +499,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: flags,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('MedPros'),
                         onChanged: (value) {
                           setState(() {
@@ -495,6 +509,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         value: medpros,
                       ),
                       PlatformCheckboxListTile(
+                        padding: const EdgeInsets.all(8.0),
                         title: const Text('Training'),
                         onChanged: (value) {
                           setState(() {
@@ -508,10 +523,14 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Divider(
                     color: accentColor,
                   ),
-                  const HeaderText(
-                    'Notifications',
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: HeaderText(
+                      'Notifications',
+                    ),
                   ),
                   PlatformCheckboxListTile(
+                    padding: const EdgeInsets.all(8.0),
                     title: const Text('Receive Notifications'),
                     onChanged: (value) {
                       setState(() {
@@ -529,12 +548,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: acftController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        acftMos = int.tryParse(value);
+                        acftMos = int.tryParse(value) ?? 6;
                         updated = true;
                       });
                     },
@@ -542,38 +562,60 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notifications'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
                             _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: acftNotifications == null
-                          ? 0
-                          : acftNotifications!.length,
+                      itemCount: acftNotifications.length,
                       itemBuilder: (context, index) {
-                        acftNotifications!.sort();
+                        acftNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${acftNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    acftNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.acft);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${acftNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      acftNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.acft);
+                              },
+                            ),
                           ),
                         );
                       }),
@@ -588,12 +630,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: bfController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        bfMos = int.tryParse(value);
+                        bfMos = int.tryParse(value) ?? 6;
                         updated = true;
                       });
                     },
@@ -601,37 +644,60 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notificatons'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
-                            _editNotification(context, null, Notification.bf);
+                            _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount:
-                          bfNotifications == null ? 0 : bfNotifications!.length,
+                      itemCount: bfNotifications.length,
                       itemBuilder: (context, index) {
-                        bfNotifications!.sort();
+                        bfNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${bfNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    bfNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.bf);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${bfNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      bfNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.bf);
+                              },
+                            ),
                           ),
                         );
                       }),
@@ -647,12 +713,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: weaponsController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        weaponMos = int.tryParse(value);
+                        weaponMos = int.tryParse(value) ?? 6;
                         updated = true;
                       });
                     },
@@ -660,39 +727,60 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notifications'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
-                            _editNotification(
-                                context, null, Notification.weapon);
+                            _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: weaponNotifications == null
-                          ? 0
-                          : weaponNotifications!.length,
+                      itemCount: weaponNotifications.length,
                       itemBuilder: (context, index) {
-                        weaponNotifications!.sort();
+                        weaponNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${weaponNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    weaponNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.weapon);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${weaponNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      weaponNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.weapon);
+                              },
+                            ),
                           ),
                         );
                       }),
@@ -708,12 +796,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: phaController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        phaMos = int.tryParse(value);
+                        phaMos = int.tryParse(value) ?? 12;
                         updated = true;
                       });
                     },
@@ -721,38 +810,60 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notifications'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
-                            _editNotification(context, null, Notification.pha);
+                            _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: phaNotifications == null
-                          ? 0
-                          : phaNotifications!.length,
+                      itemCount: phaNotifications.length,
                       itemBuilder: (context, index) {
-                        phaNotifications!.sort();
+                        phaNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${phaNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    phaNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.pha);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${phaNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      phaNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.pha);
+                              },
+                            ),
                           ),
                         );
                       }),
@@ -768,12 +879,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: dentalController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        dentalMos = int.tryParse(value);
+                        dentalMos = int.tryParse(value) ?? 12;
                         updated = true;
                       });
                     },
@@ -781,39 +893,60 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notifications'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
-                            _editNotification(
-                                context, null, Notification.dental);
+                            _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: dentalNotifications == null
-                          ? 0
-                          : dentalNotifications!.length,
+                      itemCount: dentalNotifications.length,
                       itemBuilder: (context, index) {
-                        dentalNotifications!.sort();
+                        dentalNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${dentalNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    dentalNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.dental);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${dentalNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      dentalNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.dental);
+                              },
+                            ),
                           ),
                         );
                       }),
@@ -829,12 +962,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: visionController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        visionMos = int.tryParse(value);
+                        visionMos = int.tryParse(value) ?? 12;
                         updated = true;
                       });
                     },
@@ -842,39 +976,60 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notifications'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
-                            _editNotification(
-                                context, null, Notification.vision);
+                            _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: visionNotifications == null
-                          ? 0
-                          : visionNotifications!.length,
+                      itemCount: visionNotifications.length,
                       itemBuilder: (context, index) {
-                        visionNotifications!.sort();
+                        visionNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${visionNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    visionNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.vision);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${visionNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      visionNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.vision);
+                              },
+                            ),
                           ),
                         );
                       }),
@@ -890,12 +1045,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: hearingController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        hearingMos = int.tryParse(value);
+                        hearingMos = int.tryParse(value) ?? 12;
                         updated = true;
                       });
                     },
@@ -903,39 +1059,60 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notifications'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
-                            _editNotification(
-                                context, null, Notification.hearing);
+                            _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: hearingNotifications == null
-                          ? 0
-                          : hearingNotifications!.length,
+                      itemCount: hearingNotifications.length,
                       itemBuilder: (context, index) {
-                        hearingNotifications!.sort();
+                        hearingNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${hearingNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    hearingNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.hearing);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${hearingNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      hearingNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.hearing);
+                              },
+                            ),
                           ),
                         );
                       }),
@@ -951,12 +1128,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     keyboardType: TextInputType.number,
                     controller: hivController,
                     enabled: true,
+                    label: 'Due after X months',
                     decoration: const InputDecoration(
                       labelText: 'Due after X months',
                     ),
                     onChanged: (value) {
                       setState(() {
-                        hivMos = int.tryParse(value);
+                        hivMos = int.tryParse(value) ?? 24;
                         updated = true;
                       });
                     },
@@ -964,42 +1142,66 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      const Text('Notifications'),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: HeaderText(
+                          'Notifications',
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
                       PlatformIconButton(
-                          icon: const Icon(Icons.add),
+                          icon: Icon(
+                            Icons.add,
+                            size: 32,
+                            color: getTextColor(context),
+                          ),
                           onPressed: () {
-                            _editNotification(context, null, Notification.hiv);
+                            _editNotification(context, null, Notification.acft);
                           })
                     ],
                   ),
-                  ListView.builder(
+                  GridView.builder(
+                      padding: const EdgeInsets.all(0.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: width > 700 ? 2 : 1,
+                        mainAxisSpacing: 1.0,
+                        crossAxisSpacing: 1.0,
+                        childAspectRatio: width > 900
+                            ? 900 / 150
+                            : width > 700
+                                ? width / 150
+                                : width / 75,
+                      ),
                       shrinkWrap: true,
                       primary: false,
-                      itemCount: hivNotifications == null
-                          ? 0
-                          : hivNotifications!.length,
+                      itemCount: hivNotifications.length,
                       itemBuilder: (context, index) {
-                        hivNotifications!.sort();
+                        hivNotifications.sort();
                         return Card(
                           color: getContrastingBackgroundColor(context),
-                          child: PlatformListTile(
-                            title: Text(
-                                '${hivNotifications![index].toString()} Days Before'),
-                            trailing: PlatformIconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    hivNotifications!.removeAt(index);
-                                  });
-                                }),
-                            onTap: () {
-                              _editNotification(
-                                  context, index, Notification.hiv);
-                            },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformListTile(
+                              title: Text(
+                                  '${hivNotifications[index].toString()} Days Before'),
+                              trailing: PlatformIconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      hivNotifications.removeAt(index);
+                                    });
+                                  }),
+                              onTap: () {
+                                _editNotification(
+                                    context, index, Notification.hiv);
+                              },
+                            ),
                           ),
                         );
                       }),
-                  PlatformButton(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformButton(
                       child: const Text('Save'),
                       onPressed: () {
                         if (_formState.currentState!.validate()) {
@@ -1011,7 +1213,9 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                                 'Form is invalid, text fields must not be blank'),
                           ));
                         }
-                      })
+                      },
+                    ),
+                  )
                 ],
               ),
             ),

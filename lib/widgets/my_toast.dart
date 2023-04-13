@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../methods/theme_methods.dart';
+import 'platform_widgets/platform_text_button.dart';
 
 class MyToast extends StatelessWidget {
-  const MyToast({
-    super.key,
-    required this.contents,
-  });
-  final List<Widget> contents;
+  const MyToast({super.key, required this.message, this.textButton});
+  final String message;
+  final PlatformTextButton? textButton;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,15 @@ class MyToast extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: contents,
+        children: [
+          Text(
+            message,
+            style: TextStyle(
+              color: getOnPrimaryColor(context),
+            ),
+          ),
+          if (textButton != null) textButton!,
+        ],
       ),
     );
   }

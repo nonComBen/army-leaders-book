@@ -9,6 +9,7 @@ abstract class PlatformCheckboxListTile extends Widget {
   factory PlatformCheckboxListTile({
     required Widget title,
     required bool value,
+    EdgeInsets? padding,
     Widget? subtitle,
     Color? activeColor,
     ListTileControlAffinity controlAffinity = ListTileControlAffinity.leading,
@@ -20,6 +21,7 @@ abstract class PlatformCheckboxListTile extends Widget {
         value: value,
         title: title,
         subtitle: subtitle,
+        contentPadding: padding,
         activeColor: activeColor,
         controlAffinity: controlAffinity,
         onChanged: onChanged,
@@ -29,6 +31,7 @@ abstract class PlatformCheckboxListTile extends Widget {
         title: title,
         subtitle: subtitle,
         value: value,
+        padding: padding,
         activeColor: activeColor,
         controlAffinity: controlAffinity,
         onChanged: onChanged,
@@ -42,8 +45,9 @@ class AndroidCheckboxListTile extends CheckboxListTile
     implements PlatformCheckboxListTile {
   const AndroidCheckboxListTile({
     super.key,
-    super.value,
-    super.title,
+    super.contentPadding,
+    required super.value,
+    required super.title,
     super.subtitle,
     super.activeColor,
     super.controlAffinity,
@@ -57,6 +61,7 @@ class IOSCheckboxListTile extends StatelessWidget
     super.key,
     required this.title,
     required this.value,
+    this.padding,
     this.subtitle,
     this.activeColor,
     this.controlAffinity = ListTileControlAffinity.leading,
@@ -67,6 +72,7 @@ class IOSCheckboxListTile extends StatelessWidget
   final Widget title;
   final Widget? subtitle;
   final bool value;
+  final EdgeInsets? padding;
   final Color? activeColor;
   final ListTileControlAffinity? controlAffinity;
   final void Function(bool?)? onChanged;
@@ -80,6 +86,7 @@ class IOSCheckboxListTile extends StatelessWidget
       onChanged: onChanged,
     );
     return CupertinoListTile(
+      padding: padding,
       title: title,
       subtitle: subtitle,
       leading: controlAffinity == ListTileControlAffinity.leading

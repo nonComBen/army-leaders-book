@@ -17,7 +17,10 @@ import '../methods/show_on_login.dart';
 import '../methods/theme_methods.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/user_provider.dart';
+import '../widgets/padded_text_field.dart';
+import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/platform_widgets/platform_text_button.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -31,8 +34,6 @@ enum FormType { login, register, forgotPassword }
 class LoginPageState extends ConsumerState<LoginPage> {
   final formKey = GlobalKey<FormState>();
 
-  String? _email;
-  String? _password;
   FormType _formType = FormType.login;
   SharedPreferences? prefs;
   late PackageInfo pInfo;
@@ -43,7 +44,50 @@ class LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
   final _rankController = TextEditingController();
   final _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _rankController.dispose();
+    _nameController.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    rootService = ref.read(rootProvider.notifier);
+    init();
+  }
+
+  void init() async {
+    prefs = await SharedPreferences.getInstance();
+    if (!kIsWeb) {
+      pInfo = await PackageInfo.fromPlatform();
+      localAuthAvail = await localAuth.isDeviceSupported();
+    } else {
+      bool showNipr = prefs!.getBool('niprWarning') == null
+          ? true
+          : !prefs!.getBool('niprWarning')!;
+      localAuthAvail = false;
+      if (mounted && showNipr) {
+        showNiprWarning(context, prefs);
+      }
+    }
+    if (prefs!.getBool("Agree") == null || !prefs!.getBool('Agree')!) {
+      prefs!.setBool('Agree', true);
+      if (!kIsWeb) {
+        prefs!.setString('Version', pInfo.version);
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _emailController.text = prefs!.getString('email') ?? '';
+      });
+    }
+  }
 
   void createAccount(User user) async {
     ref.read(soldiersProvider.notifier).loadSoldiers(user.uid);
@@ -94,7 +138,8 @@ class LoginPageState extends ConsumerState<LoginPage> {
         });
         if (loginType == 'email' && validateAndSave()) {
           prefs!.setString('email', _emailController.text);
-          user = await auth.signInWithEmailAndPassword(_email, _password);
+          user = await auth.signInWithEmailAndPassword(
+              _emailController.text, _passwordController.text);
           createAccount(user!);
         } else if (loginType == 'google') {
           user = await auth.signInWithGoogle();
@@ -105,7 +150,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
         }
         rootService.signIn();
       } else {
-        await auth.resetPassword(_email).then((result) {
+        await auth.resetPassword(_emailController.text).then((result) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Check email to reset password'),
           ));
@@ -155,40 +200,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    rootService = ref.read(rootProvider.notifier);
-    init();
-  }
-
-  void init() async {
-    prefs = await SharedPreferences.getInstance();
-    if (!kIsWeb) {
-      pInfo = await PackageInfo.fromPlatform();
-      localAuthAvail = await localAuth.isDeviceSupported();
-    } else {
-      bool showNipr = prefs!.getBool('niprWarning') == null
-          ? true
-          : !prefs!.getBool('niprWarning')!;
-      localAuthAvail = false;
-      if (mounted && showNipr) {
-        showNiprWarning(context, prefs);
-      }
-    }
-    if (prefs!.getBool("Agree") == null || !prefs!.getBool('Agree')!) {
-      prefs!.setBool('Agree', true);
-      if (!kIsWeb) {
-        prefs!.setString('Version', pInfo.version);
-      }
-    }
-    if (mounted) {
-      setState(() {
-        _emailController.text = prefs!.getString('email') ?? '';
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final rootService = ref.read(rootProvider.notifier);
     double width = MediaQuery.of(context).size.width;
@@ -229,13 +240,10 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   List<Widget> logo() {
     return [
-      Hero(
-        tag: 'hero',
-        child: CircleAvatar(
-          backgroundColor: Colors.transparent,
-          radius: 96.0,
-          child: Image.asset('assets/icon-512.png'),
-        ),
+      CircleAvatar(
+        backgroundColor: Colors.transparent,
+        radius: 96.0,
+        child: Image.asset('assets/icon-512.png'),
       )
     ];
   }
@@ -254,26 +262,26 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   List<Widget> emailFormField() {
     return [
-      TextFormField(
+      PaddedTextField(
+        label: 'Email',
         decoration:
             const InputDecoration(labelText: 'Email', icon: Icon(Icons.mail)),
         controller: _emailController,
         keyboardType: TextInputType.emailAddress,
         validator: (value) => value!.isEmpty ? 'Email can\'t be empty' : null,
-        onSaved: (value) => _email = value,
       ),
     ];
   }
 
   List<Widget> passwordFormField() {
     return [
-      TextFormField(
+      PaddedTextField(
         controller: _passwordController,
+        label: 'Password',
         decoration: const InputDecoration(
             labelText: 'Password', icon: Icon(Icons.lock)),
         validator: (value) =>
             value!.isEmpty ? 'Password can\'t be empty' : null,
-        onSaved: (value) => _password = value,
         obscureText: true,
       ),
     ];
@@ -281,8 +289,9 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   List<Widget> rankFormField() {
     return [
-      TextFormField(
+      PaddedTextField(
         controller: _rankController,
+        label: 'Rank (Optional)',
         decoration: const InputDecoration(
           labelText: 'Rank (Optional)',
         ),
@@ -292,8 +301,9 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   List<Widget> nameFormField() {
     return [
-      TextFormField(
+      PaddedTextField(
         controller: _nameController,
+        label: 'Name',
         validator: (value) => value!.isEmpty ? 'Name can\'t be empty' : null,
         decoration: const InputDecoration(
           labelText: 'Name',
@@ -304,13 +314,14 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   List<Widget> confirmPasswordField() {
     return [
-      TextFormField(
+      PaddedTextField(
+        controller: TextEditingController(),
+        label: 'Confirm Password',
         decoration: const InputDecoration(
             labelText: 'Confirm Password', icon: Icon(Icons.lock)),
         validator: (value) => value != _passwordController.text
             ? 'Password fields must match'
             : null,
-        onSaved: (value) => _password = value,
         obscureText: true,
       ),
     ];
@@ -322,14 +333,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       List<Widget> list = [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-              style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.all(4.0)),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                      const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(24.0))))),
+          child: PlatformButton(
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
@@ -346,14 +350,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       if (localAuthAvail || kIsWeb) {
         list.add(Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-              style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.all(4.0)),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                      const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(24.0))))),
+          child: PlatformButton(
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
@@ -381,14 +378,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       }
       list.add(Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ElevatedButton(
-            style: ButtonStyle(
-                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                    const EdgeInsets.all(4.0)),
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                    const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.all(Radius.circular(24.0))))),
+        child: PlatformButton(
             onPressed: signInAnonymously,
             child: const Padding(
               padding: EdgeInsets.all(8.0),
@@ -401,10 +391,10 @@ class LoginPageState extends ConsumerState<LoginPage> {
       ));
       list.add(Padding(
         padding: const EdgeInsets.all(8.0),
-        child: TextButton(
+        child: PlatformTextButton(
           child: const Text(
             'Create an account',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 18.0, color: Colors.blue),
             textAlign: TextAlign.center,
           ),
           onPressed: () {
@@ -414,11 +404,11 @@ class LoginPageState extends ConsumerState<LoginPage> {
       ));
       list.add(Padding(
         padding: const EdgeInsets.all(8.0),
-        child: TextButton(
+        child: PlatformTextButton(
           onPressed: moveToForgotPassword,
           child: const Text(
             'Forgot password',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 18.0, color: Colors.blue),
             textAlign: TextAlign.center,
           ),
         ),
@@ -427,14 +417,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       return list;
     } else if (_formType == FormType.register) {
       return [
-        ElevatedButton(
-            style: ButtonStyle(
-                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                    const EdgeInsets.all(4.0)),
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                    const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.all(Radius.circular(24.0))))),
+        PlatformButton(
             child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
@@ -446,19 +429,19 @@ class LoginPageState extends ConsumerState<LoginPage> {
             onPressed: () {
               validateAndSubmit('register');
             }),
-        TextButton(
+        PlatformTextButton(
           onPressed: moveToLogin,
           child: const Text(
             'Have an account? Login',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 18.0, color: Colors.blue),
             textAlign: TextAlign.center,
           ),
         ),
-        TextButton(
+        PlatformTextButton(
           onPressed: moveToForgotPassword,
           child: const Text(
             'Forgot password',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 18.0, color: Colors.blue),
             textAlign: TextAlign.center,
           ),
         ),
@@ -467,14 +450,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       return [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-              style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.all(4.0)),
-                  shape: MaterialStateProperty.all<OutlinedBorder>(
-                      const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(24.0))))),
+          child: PlatformButton(
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
@@ -489,21 +465,21 @@ class LoginPageState extends ConsumerState<LoginPage> {
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextButton(
+          child: PlatformTextButton(
             onPressed: moveToLogin,
             child: const Text(
               'Remember password? Login',
-              style: TextStyle(fontSize: 18.0),
+              style: TextStyle(fontSize: 18.0, color: Colors.blue),
               textAlign: TextAlign.center,
             ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: TextButton(
+          child: PlatformTextButton(
             child: const Text(
               'Create an account',
-              style: TextStyle(fontSize: 18.0),
+              style: TextStyle(fontSize: 18.0, color: Colors.blue),
               textAlign: TextAlign.center,
             ),
             onPressed: () {
@@ -514,13 +490,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       ];
     } else {
       return [
-        ElevatedButton(
-          style: ButtonStyle(
-              padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                  const EdgeInsets.all(4.0)),
-              shape: MaterialStateProperty.all<OutlinedBorder>(
-                  const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(24.0))))),
+        PlatformButton(
           child: const Text(
             'Sign in with Google',
             style: TextStyle(fontSize: 18.0),
@@ -530,18 +500,18 @@ class LoginPageState extends ConsumerState<LoginPage> {
             validateAndSubmit('google');
           },
         ),
-        TextButton(
+        PlatformTextButton(
           onPressed: moveToLogin,
           child: const Text(
             'Back to Login Page',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 18.0, color: Colors.blue),
             textAlign: TextAlign.center,
           ),
         ),
-        TextButton(
+        PlatformTextButton(
           child: const Text(
             'Create an account',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 18.0, color: Colors.blue),
             textAlign: TextAlign.center,
           ),
           onPressed: () {

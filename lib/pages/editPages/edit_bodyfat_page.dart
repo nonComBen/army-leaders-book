@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
@@ -57,6 +59,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
   List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
   DateTime? _dateTime;
   BfCalculator bfCalculator = BfCalculator();
+  FToast toast = FToast();
 
   int ageGroupIndex() {
     int age = int.tryParse(_ageController.text) ?? 0;
@@ -329,9 +332,11 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -351,8 +356,11 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -425,6 +433,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(

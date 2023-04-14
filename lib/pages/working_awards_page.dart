@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../models/working_award.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_working_award_page.dart';
 import 'uploadPages/upload_working_awads_page.dart';
@@ -46,6 +48,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   late StreamSubscription _subscription;
   BannerAd? myBanner;
   late String userId;
+  FToast toast = FToast();
 
   @override
   void didChangeDependencies() async {
@@ -108,37 +111,12 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
           context,
           MaterialPageRoute(
               builder: (context) => const UploadWorkingAwardsPage()));
-      // Widget title = const Text('Upload Working Awards');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your Working Awards, the file must be in .csv format. Also, there needs to be a Soldier Id column and the '
-      //       'Soldier Id has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers '
-      //       'page. If Excel gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'.',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadWorkingAwardsPage(
-      //                   userId: userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -198,18 +176,13 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/workingAwards.xlsx');
-                      },
-                    )
-                  : null,
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed: kIsWeb
+                  ? null
+                  : () => OpenFile.open('$dir/workingAwards.xlsx'),
             ),
           );
         }
@@ -230,9 +203,11 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -241,9 +216,11 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
       return;
     }
     Navigator.push(
@@ -378,6 +355,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
     final width = MediaQuery.of(context).size.width;
+    toast.context = context;
     return PlatformScaffold(
         title: 'Working Award',
         actions: createAppBarActions(

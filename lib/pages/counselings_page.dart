@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../models/counseling.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_counseling_page.dart';
 import 'uploadPages/upload_counselings_page.dart';
@@ -110,9 +112,13 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
         MaterialPageRoute(builder: (context) => const UploadCounselingsPage()),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -174,18 +180,14 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/counselings.xlsx');
-                      },
-                    )
-                  : null,
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$dir/counselings.xlsx'),
             ),
           );
         }
@@ -206,9 +208,13 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -217,9 +223,13 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
       return;
     }
     Navigator.push(

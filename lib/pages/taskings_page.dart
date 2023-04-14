@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
@@ -22,6 +23,7 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/tasking.dart';
 import '../models/app_bar_option.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_tasking_page.dart';
 import 'uploadPages/upload_taskings_page.dart';
@@ -48,6 +50,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
+  FToast toast = FToast();
 
   @override
   void didChangeDependencies() async {
@@ -110,9 +113,11 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const UploadTaskingsPage()));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -175,18 +180,12 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/taskings.xlsx');
-                      },
-                    )
-                  : null,
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$dir/taskings.xlsx'),
             ),
           );
         }
@@ -218,10 +217,12 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message:
+              'Downloading PDF files is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -251,25 +252,24 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/taskings.pdf');
-                  },
-                )));
+      toast.showToast(
+        child: MyToast(
+          message: message,
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/taskings.pdf'),
+        ),
+      );
     }
   }
 
   void _deleteRecord() async {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -318,9 +318,11 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
       return;
     }
     Navigator.push(
@@ -510,6 +512,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
     final width = MediaQuery.of(context).size.width;
+    toast.context = context;
     return PlatformScaffold(
         title: 'Taskings',
         actions: createAppBarActions(

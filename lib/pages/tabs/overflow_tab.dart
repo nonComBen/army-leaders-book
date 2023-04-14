@@ -4,9 +4,11 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
 import 'package:launch_review/launch_review.dart';
+import 'package:leaders_book/methods/toast_messages.dart/show_toast.dart';
 
 import '../../auth_provider.dart';
 import '../../auth_service.dart';
@@ -19,7 +21,6 @@ import '../../providers/subscription_purchases.dart';
 import '../../methods/home_page_methods.dart';
 import '../../models/purchasable_product.dart';
 import '../../providers/subscription_state.dart';
-import '../../methods/show_snackbar.dart';
 import '../../pages/acft_page.dart';
 import '../../pages/actions_tracker_page.dart';
 import '../../pages/alert_roster_page.dart';
@@ -50,6 +51,7 @@ import '../../pages/working_evals_page.dart';
 import '../../pages/phone_page.dart';
 import '../../pages/notes_page.dart';
 import '../../widgets/custom_drawer_header.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_list_tile.dart';
 
 class OverflowTab extends ConsumerWidget {
@@ -90,7 +92,7 @@ class OverflowTab extends ConsumerWidget {
             }
             await sp.buy(product);
           } else {
-            showSnackbar(context, 'Store is not available');
+            showToast(context, 'Store is not available');
           }
         });
       },
@@ -363,7 +365,7 @@ class OverflowTab extends ConsumerWidget {
               if (!isSubscribedAdFree) {
                 subscriptionMessage(context, sp);
               } else {
-                showSnackbar(context, 'You are already subscribed to Premium.');
+                showToast(context, 'You are already subscribed to Premium.');
               }
             },
           ),
@@ -430,10 +432,12 @@ class OverflowTab extends ConsumerWidget {
                   ),
                 );
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                        'You need to create an account before you can edit profile.'),
+                FToast toast = FToast();
+                toast.context = context;
+                toast.showToast(
+                  child: const MyToast(
+                    message:
+                        'You need to create an account before you can edit profile.',
                   ),
                 );
               }

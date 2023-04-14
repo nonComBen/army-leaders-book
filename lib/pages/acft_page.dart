@@ -33,7 +33,6 @@ import '../../methods/theme_methods.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../../widgets/platform_widgets/platform_text_button.dart';
 import '../../methods/custom_alert_dialog.dart';
 
 class AcftPage extends ConsumerStatefulWidget {
@@ -262,12 +261,9 @@ class AcftPageState extends ConsumerState<AcftPage> {
             toastDuration: const Duration(seconds: 5),
             child: MyToast(
               message: 'Data successfully downloaded to $location',
-              textButton: kIsWeb
-                  ? null
-                  : PlatformTextButton(
-                      child: const Text('Open'),
-                      onPressed: () => OpenFile.open('$path/acftStats.xlsx'),
-                    ),
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$path/acftStats.xlsx'),
             ),
           );
         }
@@ -337,12 +333,9 @@ class AcftPageState extends ConsumerState<AcftPage> {
         toastDuration: const Duration(seconds: 5),
         child: MyToast(
           message: message,
-          textButton: kIsWeb
-              ? null
-              : PlatformTextButton(
-                  child: const Text('Open'),
-                  onPressed: () => OpenFile.open('$location/acftStats.pdf'),
-                ),
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/acftStats.pdf'),
         ),
       );
     }

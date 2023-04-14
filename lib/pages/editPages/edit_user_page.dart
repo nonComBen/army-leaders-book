@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/auth_service.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -15,9 +16,9 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/user.dart';
 import '../../auth_provider.dart';
-import '../../methods/show_snackbar.dart';
 import '../../providers/root_provider.dart';
 import '../../widgets/formatted_text_button.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
@@ -37,6 +38,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   bool updated = false;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   late UserObj user;
+  FToast toast = FToast();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -51,7 +53,11 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
     User user = auth.currentUser()!;
     try {
       user.delete();
-      showSnackbar(context, 'Your account and data has been deleted.');
+      toast.showToast(
+        child: const MyToast(
+          message: 'Your account and data has been deleted.',
+        ),
+      );
       rootService.signOut();
     } on Exception catch (e) {
       if (e is FirebaseAuthException) {
@@ -108,12 +114,19 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                   if (!mounted) return;
                   if (user != null) {
                     user!.delete();
-                    showSnackbar(
-                        context, 'Your account and data has been deleted.');
+                    toast.showToast(
+                      child: const MyToast(
+                        message: 'Your account and data has been deleted.',
+                      ),
+                    );
                     rootProvider.signOut();
                   } else {
-                    showSnackbar(context,
-                        'Failed to reauthenticate account. Account could not be deleted.');
+                    toast.showToast(
+                      child: const MyToast(
+                        message:
+                            'Failed to reauthenticate account. Account could not be deleted.',
+                      ),
+                    );
                   }
                 }),
           ),
@@ -128,12 +141,19 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                 if (!mounted) return;
                 if (user != null) {
                   user!.delete();
-                  showSnackbar(
-                      context, 'Your account and data has been deleted.');
+                  toast.showToast(
+                    child: const MyToast(
+                      message: 'Your account and data has been deleted.',
+                    ),
+                  );
                   rootProvider.signOut();
                 } else {
-                  showSnackbar(context,
-                      'Failed to reauthenticate account. Account could not be deleted.');
+                  toast.showToast(
+                    child: const MyToast(
+                      message:
+                          'Failed to reauthenticate account. Account could not be deleted.',
+                    ),
+                  );
                 }
               },
             ),
@@ -154,7 +174,11 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                   label: 'Cancel',
                   onPressed: () {
                     Navigator.of(context).pop();
-                    showSnackbar(context, 'Account was not deleted.');
+                    toast.showToast(
+                      child: const MyToast(
+                        message: 'Account was not deleted.',
+                      ),
+                    );
                   },
                 ),
                 FormattedTextButton(
@@ -166,12 +190,19 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                     if (!mounted) return;
                     if (user != null) {
                       user!.delete();
-                      showSnackbar(
-                          context, 'Your account and data has been deleted.');
+                      toast.showToast(
+                        child: const MyToast(
+                          message: 'Your account and data has been deleted.',
+                        ),
+                      );
                       rootProvider.signOut();
                     } else {
-                      showSnackbar(context,
-                          'Failed to reauthenticate account. Account could not be deleted.');
+                      toast.showToast(
+                        child: const MyToast(
+                          message:
+                              'Failed to reauthenticate account. Account could not be deleted.',
+                        ),
+                      );
                     }
                   },
                 )
@@ -189,7 +220,11 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                     child: const Text('Cancel'),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      showSnackbar(context, 'Account was not deleted.');
+                      toast.showToast(
+                        child: const MyToast(
+                          message: 'Account was not deleted.',
+                        ),
+                      );
                     },
                   ),
                   CupertinoDialogAction(
@@ -207,12 +242,19 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                       if (!mounted) return;
                       if (user != null) {
                         user!.delete();
-                        showSnackbar(
-                            context, 'Your account and data has been deleted.');
+                        toast.showToast(
+                          child: const MyToast(
+                            message: 'Your account and data has been deleted.',
+                          ),
+                        );
                         rootProvider.signOut();
                       } else {
-                        showSnackbar(context,
-                            'Failed to reauthenticate account. Account could not be deleted.');
+                        toast.showToast(
+                          child: const MyToast(
+                            message:
+                                'Failed to reauthenticate account. Account could not be deleted.',
+                          ),
+                        );
                       }
                     },
                   )
@@ -249,8 +291,11 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
           .set(saveUser.toMap(), SetOptions(merge: true));
       Navigator.pop(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Form is invalid - name must not be empty')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - name must not be empty',
+        ),
+      );
     }
   }
 
@@ -295,6 +340,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    toast.context = context;
     return PlatformScaffold(
       title: 'Edit User',
       actions: [
@@ -339,10 +385,11 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                             onPressed: () {
                               Clipboard.setData(
                                   ClipboardData(text: widget.userId));
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text('User ID copied to clipboard'),
-                              ));
+                              toast.showToast(
+                                child: const MyToast(
+                                  message: 'User ID copied to clipboard',
+                                ),
+                              );
                             },
                           )),
                     ),

@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,6 +24,7 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/profile.dart';
 import '../models/app_bar_option.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_temp_profile_page.dart';
 import 'uploadPages/upload_temp_profile_page.dart';
@@ -49,6 +51,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
   late StreamSubscription _subscriptionUsers;
   BannerAd? myBanner;
   late String userId;
+  FToast toast = FToast();
 
   @override
   void didChangeDependencies() async {
@@ -114,9 +117,11 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
           MaterialPageRoute(
               builder: (context) => const UploadTempProfilesPage()));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -171,18 +176,12 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/tempProfiles.xlsx');
-                      },
-                    )
-                  : null,
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$dir/tempProfiles.xlsx'),
             ),
           );
         }
@@ -214,10 +213,12 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message:
+              'Downloading PDF files is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -247,17 +248,14 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/tempProfiles.pdf');
-                  },
-                )));
+      toast.showToast(
+        child: MyToast(
+          message: message,
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/tempProfiles.pdf'),
+        ),
+      );
     }
   }
 
@@ -271,9 +269,11 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -282,9 +282,11 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
       return;
     }
     Navigator.push(
@@ -430,6 +432,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
     final width = MediaQuery.of(context).size.width;
+    toast.context = context;
     return PlatformScaffold(
         title: 'Temporary Profiles',
         actions: createAppBarActions(

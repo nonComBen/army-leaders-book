@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/auth_service.dart';
 import 'package:leaders_book/models/user.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../auth_provider.dart';
 import '../methods/theme_methods.dart';
 import '../providers/root_provider.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/padded_text_field.dart';
 import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
@@ -40,9 +42,15 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
 
   bool validateAndSave() {
     if (!tosAgree) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'You must agree to the Terms and Conditions to create an account.')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message:
+              'You must agree to the Terms and Conditions to create an account.',
+        ),
+      );
+
       return false;
     }
     final form = formKey.currentState!;
@@ -72,8 +80,13 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
             .set(userObj.toMap());
         ref.read(rootProvider.notifier).signIn();
       } catch (e) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.toString())));
+        FToast toast = FToast();
+        toast.context = context;
+        toast.showToast(
+          child: MyToast(
+            message: e.toString(),
+          ),
+        );
       }
     }
   }

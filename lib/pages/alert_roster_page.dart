@@ -7,9 +7,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:leaders_book/methods/show_snackbar.dart';
 import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -27,6 +27,7 @@ import '../../widgets/anon_warning_banner.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
 import '../widgets/alert_tile.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class AlertRosterPage extends ConsumerStatefulWidget {
@@ -49,14 +50,6 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   final GlobalKey _globalKey = GlobalKey();
 
   void _textAll() async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    if (Platform.isIOS) {
-      showSnackbar(
-        context,
-        'Unfortunately, mass texting all subordinates is not available on iOS at this time.',
-      );
-      return;
-    }
     String recipients = 'sms:';
     for (var soldier in _soldiers) {
       if (soldier['phone'] != '') {
@@ -67,8 +60,13 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     if (await canLaunchUrl(Uri.parse(recipients))) {
       await launchUrl(Uri.parse(recipients));
     } else {
-      scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Failed to initiate text message')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'Failed to initiate text message',
+        ),
+      );
     }
   }
 
@@ -420,8 +418,14 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     if (isSubscribed) {
       Map<String, dynamic>? top = _soldiers.firstWhere(
           (doc) => doc['supervisorId'] == 'Top of Hierarchy', orElse: () {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Hierarchy must be set before downloading to Pdf.')));
+        FToast toast = FToast();
+        toast.context = context;
+        toast.showToast(
+          child: const MyToast(
+            message: 'Hierarchy must be set before downloading to Pdf.',
+          ),
+        );
+
         return null;
       });
       if (top == null) return;
@@ -444,10 +448,14 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message:
+              'Downloading PDF files is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -474,17 +482,16 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/alertRoster.pdf');
-                  },
-                )));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: MyToast(
+          message: message,
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/alertRoster.pdf'),
+        ),
+      );
     }
   }
 

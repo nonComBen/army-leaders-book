@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
@@ -76,9 +78,13 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 

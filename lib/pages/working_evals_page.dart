@@ -5,6 +5,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../models/working_eval.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_working_eval_page.dart';
 import 'uploadPages/upload_working_evals_page.dart';
@@ -46,6 +48,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
   late StreamSubscription _subscription;
   BannerAd? myBanner;
   late String userId;
+  FToast toast = FToast();
 
   @override
   void didChangeDependencies() async {
@@ -109,9 +112,11 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
         MaterialPageRoute(builder: (context) => const UploadWorkingEvalsPage()),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -179,18 +184,12 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/workingEvals.xlsx');
-                      },
-                    )
-                  : null,
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$dir/workingEvals.xlsx'),
             ),
           );
         }
@@ -211,9 +210,11 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -222,9 +223,11 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
       return;
     }
     Navigator.push(
@@ -340,6 +343,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
     final width = MediaQuery.of(context).size.width;
+    toast.context = context;
     return PlatformScaffold(
         title: 'Working Evals',
         actions: createAppBarActions(

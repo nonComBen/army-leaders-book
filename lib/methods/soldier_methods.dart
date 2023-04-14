@@ -23,7 +23,6 @@ import '../../pages/editPages/edit_soldier_page.dart';
 import '../../providers/filtered_soldiers_provider.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
-import '../../widgets/platform_widgets/platform_text_button.dart';
 
 List<String> getSections(List<Soldier> soldiers) {
   soldiers.sort(
@@ -197,14 +196,9 @@ void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
           toastDuration: const Duration(seconds: 5),
           child: MyToast(
             message: 'Data successfully downloaded to $loc',
-            textButton: !kIsWeb
-                ? PlatformTextButton(
-                    child: const Text('Open'),
-                    onPressed: () {
-                      OpenFile.open('$dir/soldiers.xlsx');
-                    },
-                  )
-                : null,
+            onPressed:
+                kIsWeb ? null : () => OpenFile.open('$dir/soldiers.xlsx'),
+            buttonText: kIsWeb ? null : 'Open',
           ),
         );
       } catch (e) {
@@ -364,14 +358,9 @@ void completePdfDownload(BuildContext context, bool fullPage,
       toastDuration: const Duration(seconds: 5),
       child: MyToast(
         message: message,
-        textButton: !kIsWeb
-            ? PlatformTextButton(
-                child: const Text('Open'),
-                onPressed: () {
-                  OpenFile.open('$location/soldiers.pdf');
-                },
-              )
-            : null,
+        onPressed:
+            kIsWeb ? null : () => OpenFile.open('$location/soldiers.pdf'),
+        buttonText: kIsWeb ? null : 'Open',
       ),
     );
   });

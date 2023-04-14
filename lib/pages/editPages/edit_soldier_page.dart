@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/methods/custom_modal_bottom_sheet.dart';
 
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../methods/platform_show_modal_bottom_sheet.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -264,67 +264,52 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
       {required BuildContext context, required Award award, int? index}) {
     TextEditingController name = TextEditingController(text: award.name);
     TextEditingController number = TextEditingController(text: award.number);
-    showPlatformModalBottomSheet(
-      context: context,
-      builder: (ctx) => Container(
-        color: getBackgroundColor(context),
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 2 / 3,
-          maxWidth: 900,
-        ),
-        padding: EdgeInsets.only(
-          top: 8,
-          left: 8,
-          right: 8,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom == 0
-              ? MediaQuery.of(ctx).padding.bottom
-              : MediaQuery.of(ctx).viewInsets.bottom,
-        ),
-        child: ListView(
-          children: [
-            HeaderText(
-              index == null ? 'Add Award' : 'Edit Award',
+    customModalBottomSheet(
+      context,
+      ListView(
+        children: [
+          HeaderText(
+            index == null ? 'Add Award' : 'Edit Award',
+          ),
+          PaddedTextField(
+            controller: name,
+            keyboardType: TextInputType.text,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Award Name',
             ),
-            PaddedTextField(
-              controller: name,
-              keyboardType: TextInputType.text,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Award Name',
-              ),
-              label: 'Award Name',
+            label: 'Award Name',
+          ),
+          PaddedTextField(
+            controller: number,
+            keyboardType: TextInputType.number,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Number of Awards',
             ),
-            PaddedTextField(
-              controller: number,
-              keyboardType: TextInputType.number,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Number of Awards',
-              ),
-              label: 'Number of Awards',
-            ),
-            PlatformButton(
-              onPressed: () {
-                Award saveAward = Award(
-                    id: award.id,
-                    owner: award.owner,
-                    users: award.users,
-                    soldierId: award.soldierId,
-                    name: name.text,
-                    number: number.text);
-                setState(() {
-                  if (index != null) {
-                    _awards[index] = saveAward;
-                  } else {
-                    _awards.add(saveAward);
-                  }
-                });
-                Navigator.of(ctx).pop();
-              },
-              child: Text(index == null ? 'Add Award' : 'Edit Award'),
-            )
-          ],
-        ),
+            label: 'Number of Awards',
+          ),
+          PlatformButton(
+            onPressed: () {
+              Award saveAward = Award(
+                  id: award.id,
+                  owner: award.owner,
+                  users: award.users,
+                  soldierId: award.soldierId,
+                  name: name.text,
+                  number: number.text);
+              setState(() {
+                if (index != null) {
+                  _awards[index] = saveAward;
+                } else {
+                  _awards.add(saveAward);
+                }
+              });
+              Navigator.of(context).pop();
+            },
+            child: Text(index == null ? 'Add Award' : 'Edit Award'),
+          )
+        ],
       ),
     );
   }
@@ -339,129 +324,114 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     TextEditingController ins = TextEditingController(text: pov.ins);
     TextEditingController insExp = TextEditingController(text: pov.insExp);
 
-    showPlatformModalBottomSheet(
-      context: context,
-      builder: (ctx) => Container(
-        color: getBackgroundColor(context),
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 2 / 3,
-          maxWidth: 900,
-        ),
-        padding: EdgeInsets.only(
-          top: 8,
-          left: 8,
-          right: 8,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom == 0
-              ? MediaQuery.of(ctx).padding.bottom
-              : MediaQuery.of(ctx).viewInsets.bottom,
-        ),
-        child: ListView(
-          children: [
-            HeaderText(index == null ? 'Add POV' : 'Edit POV'),
-            PaddedTextField(
-              controller: year,
-              keyboardType: TextInputType.number,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Year',
-              ),
-              label: 'Year',
+    customModalBottomSheet(
+      context,
+      ListView(
+        children: [
+          HeaderText(index == null ? 'Add POV' : 'Edit POV'),
+          PaddedTextField(
+            controller: year,
+            keyboardType: TextInputType.number,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Year',
             ),
-            PaddedTextField(
-              controller: make,
-              keyboardType: TextInputType.text,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Make',
-              ),
-              label: 'Make',
+            label: 'Year',
+          ),
+          PaddedTextField(
+            controller: make,
+            keyboardType: TextInputType.text,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Make',
             ),
-            PaddedTextField(
-              controller: model,
-              keyboardType: TextInputType.text,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Model',
-              ),
-              label: 'Model',
+            label: 'Make',
+          ),
+          PaddedTextField(
+            controller: model,
+            keyboardType: TextInputType.text,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Model',
             ),
-            PaddedTextField(
-              controller: plate,
-              keyboardType: TextInputType.text,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Plates',
-              ),
-              label: 'Plates',
+            label: 'Model',
+          ),
+          PaddedTextField(
+            controller: plate,
+            keyboardType: TextInputType.text,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Plates',
             ),
-            PaddedTextField(
-              controller: state,
-              keyboardType: TextInputType.text,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'State',
-              ),
-              label: 'State',
+            label: 'Plates',
+          ),
+          PaddedTextField(
+            controller: state,
+            keyboardType: TextInputType.text,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'State',
             ),
-            PaddedTextField(
-              controller: regExp,
-              keyboardType: TextInputType.datetime,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Registration Exp',
-              ),
-              label: 'Registration Exp',
+            label: 'State',
+          ),
+          PaddedTextField(
+            controller: regExp,
+            keyboardType: TextInputType.datetime,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Registration Exp',
             ),
-            PaddedTextField(
-              controller: ins,
-              keyboardType: TextInputType.text,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Insurance',
-              ),
-              label: 'Insurance',
+            label: 'Registration Exp',
+          ),
+          PaddedTextField(
+            controller: ins,
+            keyboardType: TextInputType.text,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Insurance',
             ),
-            PaddedTextField(
-              controller: insExp,
-              keyboardType: TextInputType.datetime,
-              enabled: true,
-              decoration: const InputDecoration(
-                labelText: 'Insurance Exp',
-              ),
-              label: 'Insurance Exp',
+            label: 'Insurance',
+          ),
+          PaddedTextField(
+            controller: insExp,
+            keyboardType: TextInputType.datetime,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Insurance Exp',
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: PlatformButton(
-                onPressed: () {
-                  POV savePov = POV(
-                    id: pov.id,
-                    owner: pov.owner,
-                    users: pov.users,
-                    soldierId: pov.soldierId,
-                    year: year.text,
-                    make: make.text,
-                    model: model.text,
-                    plate: plate.text,
-                    state: state.text,
-                    regExp: regExp.text,
-                    ins: ins.text,
-                    insExp: insExp.text,
-                  );
-                  setState(() {
-                    if (index == null) {
-                      _povs.add(savePov);
-                    } else {
-                      _povs[index] = savePov;
-                    }
-                  });
-                  Navigator.of(ctx).pop();
-                },
-                child: Text(index == null ? 'Add POV' : 'Edit POV'),
-              ),
-            )
-          ],
-        ),
+            label: 'Insurance Exp',
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: PlatformButton(
+              onPressed: () {
+                POV savePov = POV(
+                  id: pov.id,
+                  owner: pov.owner,
+                  users: pov.users,
+                  soldierId: pov.soldierId,
+                  year: year.text,
+                  make: make.text,
+                  model: model.text,
+                  plate: plate.text,
+                  state: state.text,
+                  regExp: regExp.text,
+                  ins: ins.text,
+                  insExp: insExp.text,
+                );
+                setState(() {
+                  if (index == null) {
+                    _povs.add(savePov);
+                  } else {
+                    _povs[index] = savePov;
+                  }
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text(index == null ? 'Add POV' : 'Edit POV'),
+            ),
+          )
+        ],
       ),
     );
   }

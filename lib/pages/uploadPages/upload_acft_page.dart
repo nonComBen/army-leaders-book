@@ -6,9 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/methods/show_snackbar.dart';
+import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 
 import '../../methods/theme_methods.dart';
+import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/acft.dart';
 import '../../models/soldier.dart';
@@ -98,9 +99,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
 
   void _saveData(BuildContext context) {
     if (soldierId == '') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Soldier Id must not be blank. To get your Soldiers\' Ids, download their data from the Soldiers page.')));
+      soldierIdIsBlankMessage(context);
       return;
     }
     if (rows.length > 1) {
@@ -538,9 +537,10 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                   PlatformButton(
                     onPressed: () {
                       if (path == '') {
-                        showSnackbar(context, 'Please select a file to upload');
+                        fileIsBlankMessage(context);
+                      } else {
+                        _saveData(context);
                       }
-                      _saveData(context);
                     },
                     child: const Text('Upload ACFT Stats'),
                   )

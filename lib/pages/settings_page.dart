@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:leaders_book/providers/shared_prefs_provider.dart';
@@ -13,6 +14,7 @@ import '../methods/theme_methods.dart';
 import '../providers/theme_provider.dart';
 import '../../models/setting.dart';
 import '../widgets/header_text.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/padded_text_field.dart';
 import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
@@ -1207,11 +1209,14 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                         if (_formState.currentState!.validate()) {
                           submit();
                         } else {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            content: Text(
-                                'Form is invalid, text fields must not be blank'),
-                          ));
+                          FToast toast = FToast();
+                          toast.context = context;
+                          toast.showToast(
+                            child: const MyToast(
+                              message:
+                                  'Form is invalid, text fields must not be blank',
+                            ),
+                          );
                         }
                       },
                     ),

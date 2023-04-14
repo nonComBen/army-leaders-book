@@ -10,10 +10,17 @@ void customModalBottomSheet(BuildContext context, Widget content) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.only(
+          top: 8,
+          left: 8,
+          right: 8,
+          bottom: MediaQuery.of(context).viewInsets.bottom == 0
+              ? MediaQuery.of(context).padding.bottom
+              : MediaQuery.of(context).viewInsets.bottom,
+        ),
         constraints: BoxConstraints(
           maxWidth: 900,
-          maxHeight: MediaQuery.of(context).size.height / 4,
+          maxHeight: MediaQuery.of(context).size.height * 2 / 3,
         ),
         decoration: BoxDecoration(
           color: getBackgroundColor(context),

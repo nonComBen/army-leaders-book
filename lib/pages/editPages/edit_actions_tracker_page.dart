@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
@@ -43,6 +45,7 @@ class EditActionsTrackerPageState
   List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _dateTime, _statusDateTime;
+  FToast toast = FToast();
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -96,9 +99,11 @@ class EditActionsTrackerPageState
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -118,8 +123,11 @@ class EditActionsTrackerPageState
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -177,6 +185,7 @@ class EditActionsTrackerPageState
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(

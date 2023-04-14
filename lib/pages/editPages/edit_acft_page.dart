@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
@@ -85,6 +87,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       runPass = true;
   final List<String> _runTypes = ['Run', 'Walk', 'Row', 'Bike', 'Swim'];
   DateTime? _dateTime;
+  FToast toast = FToast();
 
   List<String> ageGroups = [
     '17-21',
@@ -280,9 +283,11 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -302,8 +307,11 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -442,6 +450,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(

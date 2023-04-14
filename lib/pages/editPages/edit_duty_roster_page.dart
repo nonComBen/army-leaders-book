@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../widgets/my_toast.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
@@ -42,6 +44,7 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
   List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _start, _end;
+  FToast toast = FToast();
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -85,9 +88,11 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
         Navigator.pop(context);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -107,8 +112,11 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -163,6 +171,7 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(
@@ -306,9 +315,11 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                 PlatformButton(
                   onPressed: () {
                     if (_endController.text != '' && _end!.isBefore(_start!)) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('End Date must be after Start Date'),
-                      ));
+                      toast.showToast(
+                        child: const MyToast(
+                          message: 'End Date must be after Start Date',
+                        ),
+                      );
                     } else {
                       submit(context);
                     }

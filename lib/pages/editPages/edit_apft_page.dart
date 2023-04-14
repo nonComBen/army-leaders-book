@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../methods/theme_methods.dart';
 import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
@@ -60,6 +62,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
       runPass = true;
   final List<String> _runTypes = ['Run', 'Walk', 'Bike', 'Swim'];
   DateTime? _dateTime;
+  FToast toast = FToast();
 
   PuCalculator puCalculator = PuCalculator();
   SuCalculator suCalculator = SuCalculator();
@@ -232,9 +235,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -254,8 +259,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -327,6 +335,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(

@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/perstat.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
@@ -63,6 +65,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
   List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _start, _end;
+  FToast toast = FToast();
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -111,9 +114,11 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
         Navigator.pop(context);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -133,8 +138,11 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -204,6 +212,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(
@@ -366,9 +375,11 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
                 PlatformButton(
                   onPressed: () {
                     if (_endController.text != '' && _end!.isBefore(_start!)) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('End Date must be after Start Date'),
-                      ));
+                      toast.showToast(
+                        child: const MyToast(
+                          message: 'End Date must be after Start Date',
+                        ),
+                      );
                     } else {
                       submit(context);
                     }

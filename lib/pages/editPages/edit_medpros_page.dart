@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../methods/theme_methods.dart';
 import '../../auth_provider.dart';
@@ -11,6 +12,7 @@ import '../../methods/on_back_pressed.dart';
 import '../../models/medpro.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
@@ -81,6 +83,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       _yellowDate,
       _smallPoxDate,
       _anthraxDate;
+  FToast toast = FToast();
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -149,9 +152,11 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -408,8 +413,11 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -532,6 +540,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(

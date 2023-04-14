@@ -4,9 +4,15 @@ import '../methods/theme_methods.dart';
 import 'platform_widgets/platform_text_button.dart';
 
 class MyToast extends StatelessWidget {
-  const MyToast({super.key, required this.message, this.textButton});
+  const MyToast({
+    super.key,
+    required this.message,
+    this.buttonText,
+    this.onPressed,
+  });
   final String message;
-  final PlatformTextButton? textButton;
+  final String? buttonText;
+  final void Function()? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +31,14 @@ class MyToast extends StatelessWidget {
               color: getOnPrimaryColor(context),
             ),
           ),
-          if (textButton != null) textButton!,
+          if (buttonText != null && onPressed != null)
+            PlatformTextButton(
+              onPressed: onPressed!,
+              child: Text(
+                buttonText!,
+                style: TextStyle(color: getOnPrimaryColor(context)),
+              ),
+            ),
         ],
       ),
     );

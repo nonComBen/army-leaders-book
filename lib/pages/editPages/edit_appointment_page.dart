@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../widgets/stateful_widgets/time_text_field.dart';
@@ -53,6 +55,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   bool removeSoldiers = false, updated = false;
   DateTime? _dateTime;
   TimeOfDay? _startTime, _endTime;
+  FToast toast = FToast();
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -99,9 +102,11 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
         Navigator.pop(context);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -120,8 +125,11 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
 
     if (lessSoldiers.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -193,6 +201,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(
@@ -382,10 +391,9 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                             (_endTime!.hour < _startTime!.hour ||
                                 (_endTime!.hour == _startTime!.hour &&
                                     _endTime!.minute < _startTime!.minute))) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Start Time must be before End Time'),
+                          toast.showToast(
+                            child: const MyToast(
+                              message: 'Start Time must be before End Time',
                             ),
                           );
                         } else {

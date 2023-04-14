@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/models/user.dart';
 import 'package:leaders_book/providers/root_provider.dart';
@@ -17,6 +18,7 @@ import '../methods/show_on_login.dart';
 import '../methods/theme_methods.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/user_provider.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/padded_text_field.dart';
 import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
@@ -40,6 +42,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
   late RootService rootService;
   bool localAuthAvail = false, isLoggingIn = false;
   final LocalAuthentication localAuth = LocalAuthentication();
+  FToast toast = FToast();
 
   final _passwordController = TextEditingController();
   final _rankController = TextEditingController();
@@ -151,14 +154,18 @@ class LoginPageState extends ConsumerState<LoginPage> {
         rootService.signIn();
       } else {
         await auth.resetPassword(_emailController.text).then((result) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Check email to reset password'),
-          ));
+          toast.showToast(
+            child: const MyToast(
+              message: 'Check email to reset password',
+            ),
+          );
         }).catchError((error) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text(
-                'Failed to send reset email. Did you enter your correct address?'),
-          ));
+          toast.showToast(
+            child: const MyToast(
+              message:
+                  'Failed to send reset email. Did you enter your correct address?',
+            ),
+          );
         });
       }
     } catch (e) {
@@ -166,8 +173,11 @@ class LoginPageState extends ConsumerState<LoginPage> {
       setState(() {
         isLoggingIn = false;
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString())));
+      toast.showToast(
+        child: MyToast(
+          message: e.toString(),
+        ),
+      );
     }
   }
 
@@ -201,6 +211,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    toast.context = context;
     final rootService = ref.read(rootProvider.notifier);
     double width = MediaQuery.of(context).size.width;
     final appleSignInAvailable =

@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/working_eval.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
@@ -48,6 +50,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
   List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
   bool removeSoldiers = false, updated = false;
+  FToast toast = FToast();
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -102,9 +105,11 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
   }
 
@@ -124,8 +129,11 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
     }
     if (lessSoldiers!.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
+        toast.showToast(
+          child: const MyToast(
+            message: 'All Soldiers have been added',
+          ),
+        );
       }
     }
 
@@ -186,6 +194,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
     return PlatformScaffold(
       title: _title,
       body: Form(

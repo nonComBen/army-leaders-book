@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:open_file/open_file.dart';
@@ -23,6 +24,7 @@ import '../models/perstat_by_name.dart';
 import '../models/soldier.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
+import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_icon_button.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
@@ -85,18 +87,14 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
         file.writeAsBytesSync(pngBytes!.buffer.asUint8List());
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('PERSTAT By Name Downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$path/PERSTAT.png');
-                      },
-                    )
-                  : null,
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            child: MyToast(
+              message: 'PERSTAT By Name Downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$path/PERSTAT.png'),
             ),
           );
         }
@@ -151,19 +149,18 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Data successfully downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open(
-                          '$dir/PERSTAT (${dateFormat.format(DateTime.now())}).xlsx');
-                    },
-                  )
-                : null,
-          ));
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed: kIsWeb
+                  ? null
+                  : () => OpenFile.open(
+                      '$dir/PERSTAT (${dateFormat.format(DateTime.now())}).xlsx'),
+            ),
+          );
         }
       } catch (e) {
         // ignore: avoid_print

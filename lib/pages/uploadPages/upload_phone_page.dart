@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
+import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 
-import '../../methods/show_snackbar.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/phone_number.dart';
@@ -204,7 +204,7 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                   PlatformButton(
                     onPressed: () {
                       if (path == '') {
-                        showSnackbar(context, 'Please select a file to upload');
+                        fileIsBlankMessage(context);
                       }
                       _saveData(context);
                     },

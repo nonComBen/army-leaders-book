@@ -314,69 +314,66 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
       title: 'Creeds, Etc.',
-      body: Padding(
+      body: Container(
         padding: EdgeInsets.symmetric(
-            horizontal: width > 932 ? (width - 916) / 2 : 16),
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (!isSubscribed && !kIsWeb)
-                Container(
-                  alignment: Alignment.center,
-                  width: myBanner!.size.width.toDouble(),
-                  height: myBanner!.size.height.toDouble(),
-                  constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                  child: AdWidget(
-                    ad: myBanner!,
-                  ),
-                ),
-              Flexible(
-                flex: 1,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    if (user.isAnonymous) const AnonWarningBanner(),
-                    ExpansionPanelList(
-                      expansionCallback: (int index, bool isExpanded) {
-                        setState(() {
-                          for (int i = 0; i < _creeds.length; i++) {
-                            if (i == index) {
-                              _creeds[index].isExpanded =
-                                  !_creeds[index].isExpanded;
-                            } else {
-                              _creeds[i].isExpanded = false;
-                            }
+          horizontal: width > 932 ? (width - 916) / 2 : 16,
+          vertical: 16.0,
+        ),
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  if (user.isAnonymous) const AnonWarningBanner(),
+                  ExpansionPanelList(
+                    expansionCallback: (int index, bool isExpanded) {
+                      setState(() {
+                        for (int i = 0; i < _creeds.length; i++) {
+                          if (i == index) {
+                            _creeds[index].isExpanded =
+                                !_creeds[index].isExpanded;
+                          } else {
+                            _creeds[i].isExpanded = false;
                           }
-                        });
-                      },
-                      children: _creeds.map((Creed creed) {
-                        return ExpansionPanel(
-                          headerBuilder:
-                              (BuildContext context, bool isExpanded) {
-                            return ListTile(
-                              title: SelectableText(
-                                creed.header,
-                                textAlign: TextAlign.start,
-                                style: const TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w400,
-                                ),
+                        }
+                      });
+                    },
+                    children: _creeds.map((Creed creed) {
+                      return ExpansionPanel(
+                        headerBuilder: (BuildContext context, bool isExpanded) {
+                          return ListTile(
+                            title: SelectableText(
+                              creed.header,
+                              textAlign: TextAlign.start,
+                              style: const TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w400,
                               ),
-                            );
-                          },
-                          isExpanded: creed.isExpanded,
-                          body: creed.body,
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                            ),
+                          );
+                        },
+                        isExpanded: creed.isExpanded,
+                        body: creed.body,
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            if (!isSubscribed && !kIsWeb)
+              Container(
+                alignment: Alignment.center,
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
+                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                child: AdWidget(
+                  ad: myBanner!,
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );

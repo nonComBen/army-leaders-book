@@ -9,6 +9,7 @@ import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -117,89 +118,77 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
       title: _title,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+      body: FormFrame(
+        formKey: _formKey,
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: ListView(
-              children: <Widget>[
-                if (user.isAnonymous) const AnonWarningBanner(),
-                GridView.count(
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    PaddedTextField(
-                      controller: _titleController,
-                      keyboardType: TextInputType.text,
-                      label: 'Title',
-                      decoration: const InputDecoration(
-                        labelText: 'Title',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    PaddedTextField(
-                      controller: _nameController,
-                      keyboardType: TextInputType.text,
-                      label: 'POC',
-                      decoration: const InputDecoration(
-                        labelText: 'POC',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    PaddedTextField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      label: 'Phone Number',
-                      decoration: const InputDecoration(
-                        labelText: 'Phone Number',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    PaddedTextField(
-                      controller: _locationController,
-                      keyboardType: TextInputType.text,
-                      label: 'Location',
-                      decoration: const InputDecoration(
-                        labelText: 'Location',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                  ],
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              PaddedTextField(
+                controller: _titleController,
+                keyboardType: TextInputType.text,
+                label: 'Title',
+                decoration: const InputDecoration(
+                  labelText: 'Title',
                 ),
-                PlatformButton(
-                  onPressed: () {
-                    submit(context, user.uid);
-                  },
-                  child: Text(
-                      widget.phone.id == null ? 'Add Phone' : 'Update Phone'),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                controller: _nameController,
+                keyboardType: TextInputType.text,
+                label: 'POC',
+                decoration: const InputDecoration(
+                  labelText: 'POC',
                 ),
-              ],
-            ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                label: 'Phone Number',
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                controller: _locationController,
+                keyboardType: TextInputType.text,
+                label: 'Location',
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+            ],
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              submit(context, user.uid);
+            },
+            child: Text(widget.phone.id == null ? 'Add Phone' : 'Update Phone'),
+          ),
+        ],
       ),
     );
   }

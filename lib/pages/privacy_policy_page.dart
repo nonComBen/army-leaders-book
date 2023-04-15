@@ -35,17 +35,15 @@ class PrivacyPolicyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Privacy Policy',
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: width > 916 ? (width - 900) / 2 : 16),
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            constraints: const BoxConstraints(maxWidth: 900),
+      body: Center(
+        heightFactor: 1,
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: Card(
+            color: getContrastingBackgroundColor(context),
             child: ListView(
               shrinkWrap: true,
               children: <Widget>[

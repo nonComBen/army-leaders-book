@@ -322,12 +322,7 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
       }
     }
     return Container(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        top: MediaQuery.of(context).viewPadding.top,
-        right: 16.0,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
-      ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

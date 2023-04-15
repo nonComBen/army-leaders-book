@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
-import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/action.dart';
 import '../../models/soldier.dart';
@@ -17,6 +16,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
 class UploadActionsPage extends ConsumerStatefulWidget {
   const UploadActionsPage({
@@ -152,143 +152,132 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Upload Actions',
-      body: Center(
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    child: const Text('Pick File'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path!,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SoldierId'),
-                          items: columnHeaders,
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Action'),
-                          items: columnHeaders,
-                          value: action,
-                          onChanged: (value) {
-                            setState(() {
-                              action = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Date Submitted'),
-                          items: columnHeaders,
-                          value: dateSubmitted,
-                          onChanged: (value) {
-                            setState(() {
-                              dateSubmitted = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Current Status'),
-                          items: columnHeaders,
-                          value: currentStatus,
-                          onChanged: (value) {
-                            setState(() {
-                              currentStatus = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Status Date'),
-                          items: columnHeaders,
-                          value: statusDate,
-                          onChanged: (value) {
-                            setState(() {
-                              statusDate = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Remarks'),
-                          items: columnHeaders,
-                          value: remarks,
-                          onChanged: (value) {
-                            setState(() {
-                              remarks = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      if (path == '') {
-                        fileIsBlankMessage(context);
-                      }
-                      _saveData(context);
-                    },
-                    child: const Text('Upload Actions'),
-                  )
-                ],
-              ),
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Action'),
+                  items: columnHeaders,
+                  value: action,
+                  onChanged: (value) {
+                    setState(() {
+                      action = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Date Submitted'),
+                  items: columnHeaders,
+                  value: dateSubmitted,
+                  onChanged: (value) {
+                    setState(() {
+                      dateSubmitted = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Current Status'),
+                  items: columnHeaders,
+                  value: currentStatus,
+                  onChanged: (value) {
+                    setState(() {
+                      currentStatus = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Status Date'),
+                  items: columnHeaders,
+                  value: statusDate,
+                  onChanged: (value) {
+                    setState(() {
+                      statusDate = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Remarks'),
+                  items: columnHeaders,
+                  value: remarks,
+                  onChanged: (value) {
+                    setState(() {
+                      remarks = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Actions'),
+          )
+        ],
       ),
     );
   }

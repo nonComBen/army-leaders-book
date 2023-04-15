@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
-import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/equipment.dart';
 import '../../models/soldier.dart';
@@ -17,6 +16,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
 class UploadEquipmentPage extends ConsumerStatefulWidget {
   const UploadEquipmentPage({
@@ -214,273 +214,262 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Upload Equipment',
-      body: Center(
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    child: const Text('Pick File'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path!,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SoldierId'),
-                          items: columnHeaders,
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Weapon'),
-                          items: columnHeaders,
-                          value: weapon,
-                          onChanged: (value) {
-                            setState(() {
-                              weapon = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Butt Stock'),
-                          items: columnHeaders,
-                          value: buttStock,
-                          onChanged: (value) {
-                            setState(() {
-                              buttStock = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Serial No.'),
-                          items: columnHeaders,
-                          value: serial,
-                          onChanged: (value) {
-                            setState(() {
-                              serial = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Optics'),
-                          items: columnHeaders,
-                          value: optic,
-                          onChanged: (value) {
-                            setState(() {
-                              optic = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Optics Serial No.'),
-                          items: columnHeaders,
-                          value: opticSerial,
-                          onChanged: (value) {
-                            setState(() {
-                              opticSerial = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Secondary Weapon'),
-                          items: columnHeaders,
-                          value: weapon2,
-                          onChanged: (value) {
-                            setState(() {
-                              weapon2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Secondary Butt Stock'),
-                          items: columnHeaders,
-                          value: buttStock2,
-                          onChanged: (value) {
-                            setState(() {
-                              buttStock2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Secondary Serial No.'),
-                          items: columnHeaders,
-                          value: serial2,
-                          onChanged: (value) {
-                            setState(() {
-                              serial2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Secondary Optics'),
-                          items: columnHeaders,
-                          value: optic2,
-                          onChanged: (value) {
-                            setState(() {
-                              optic2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Secondary Optics Serial No.'),
-                          items: columnHeaders,
-                          value: opticSerial2,
-                          onChanged: (value) {
-                            setState(() {
-                              opticSerial2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Mask'),
-                          items: columnHeaders,
-                          value: mask,
-                          onChanged: (value) {
-                            setState(() {
-                              mask = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Vehicle'),
-                          items: columnHeaders,
-                          value: veh,
-                          onChanged: (value) {
-                            setState(() {
-                              veh = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Vehicle Bumper'),
-                          items: columnHeaders,
-                          value: bumper,
-                          onChanged: (value) {
-                            setState(() {
-                              bumper = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Other Item'),
-                          items: columnHeaders,
-                          value: misc,
-                          onChanged: (value) {
-                            setState(() {
-                              misc = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Other Item Serial No.'),
-                          items: columnHeaders,
-                          value: miscSerial,
-                          onChanged: (value) {
-                            setState(() {
-                              miscSerial = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      if (path == '') {
-                        fileIsBlankMessage(context);
-                      }
-                      _saveData(context);
-                    },
-                    child: const Text('Upload Equipment'),
-                  )
-                ],
-              ),
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Weapon'),
+                  items: columnHeaders,
+                  value: weapon,
+                  onChanged: (value) {
+                    setState(() {
+                      weapon = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Butt Stock'),
+                  items: columnHeaders,
+                  value: buttStock,
+                  onChanged: (value) {
+                    setState(() {
+                      buttStock = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Serial No.'),
+                  items: columnHeaders,
+                  value: serial,
+                  onChanged: (value) {
+                    setState(() {
+                      serial = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Optics'),
+                  items: columnHeaders,
+                  value: optic,
+                  onChanged: (value) {
+                    setState(() {
+                      optic = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Optics Serial No.'),
+                  items: columnHeaders,
+                  value: opticSerial,
+                  onChanged: (value) {
+                    setState(() {
+                      opticSerial = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Weapon'),
+                  items: columnHeaders,
+                  value: weapon2,
+                  onChanged: (value) {
+                    setState(() {
+                      weapon2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Butt Stock'),
+                  items: columnHeaders,
+                  value: buttStock2,
+                  onChanged: (value) {
+                    setState(() {
+                      buttStock2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Serial No.'),
+                  items: columnHeaders,
+                  value: serial2,
+                  onChanged: (value) {
+                    setState(() {
+                      serial2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Optics'),
+                  items: columnHeaders,
+                  value: optic2,
+                  onChanged: (value) {
+                    setState(() {
+                      optic2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Optics Serial No.'),
+                  items: columnHeaders,
+                  value: opticSerial2,
+                  onChanged: (value) {
+                    setState(() {
+                      opticSerial2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Mask'),
+                  items: columnHeaders,
+                  value: mask,
+                  onChanged: (value) {
+                    setState(() {
+                      mask = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Vehicle'),
+                  items: columnHeaders,
+                  value: veh,
+                  onChanged: (value) {
+                    setState(() {
+                      veh = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Vehicle Bumper'),
+                  items: columnHeaders,
+                  value: bumper,
+                  onChanged: (value) {
+                    setState(() {
+                      bumper = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Other Item'),
+                  items: columnHeaders,
+                  value: misc,
+                  onChanged: (value) {
+                    setState(() {
+                      misc = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Other Item Serial No.'),
+                  items: columnHeaders,
+                  value: miscSerial,
+                  onChanged: (value) {
+                    setState(() {
+                      miscSerial = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Equipment'),
+          )
+        ],
       ),
     );
   }

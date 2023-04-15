@@ -52,56 +52,57 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
   Widget build(BuildContext context) {
     _auth = ref.read(authProvider);
     ref.read(userProvider).loadUser(_auth!.currentUser()!.uid);
-    double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Lock Screen',
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: width > 932 ? (width - 916) / 2 : 16),
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: ListView(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.transparent,
-                    radius: 96.0,
-                    child: Image.asset('assets/icon-512.png'),
+      body: Center(
+        heightFactor: 1,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            color: getContrastingBackgroundColor(context),
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      radius: 96.0,
+                      child: Image.asset('assets/icon-512.png'),
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PlatformButton(
-                    onPressed: () => onUnlockApp(context),
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'Unlock App',
-                        style: TextStyle(fontSize: 18.0),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformButton(
+                      onPressed: () => onUnlockApp(context),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'Unlock App',
+                          style: TextStyle(fontSize: 18.0),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformTextButton(
+                      onPressed: () => onSignOut(context),
+                      child: const Text(
+                        'Back to Login Page',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.blue,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PlatformTextButton(
-                    onPressed: () => onSignOut(context),
-                    child: const Text(
-                      'Back to Login Page',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        color: Colors.blue,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

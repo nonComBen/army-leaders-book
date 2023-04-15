@@ -25,6 +25,7 @@ import '../../models/perstat.dart';
 import '../models/app_bar_option.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_perstat_page.dart';
 import 'uploadPages/upload_perstat_page.dart';
 import '../pdf/perstats_pdf.dart';
@@ -594,23 +595,10 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
           onPressed: () {
             _newRecord(context);
           }),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: TableFrame(
         children: [
-          if (_adLoaded)
-            Container(
-              alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
-              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-              child: AdWidget(
-                ad: myBanner!,
-              ),
-            ),
           Expanded(
             child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(8.0),
               children: <Widget>[
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
@@ -642,6 +630,16 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
               ],
             ),
           ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
+              ),
+            ),
         ],
       ),
     );

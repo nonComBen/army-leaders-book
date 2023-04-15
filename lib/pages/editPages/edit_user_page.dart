@@ -17,6 +17,7 @@ import '../../methods/on_back_pressed.dart';
 import '../../models/user.dart';
 import '../../auth_provider.dart';
 import '../../providers/root_provider.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/formatted_text_button.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -352,111 +353,99 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
               onPressed: confirmDeleteAccount, icon: const Icon(Icons.delete)),
         )
       ],
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+      body: FormFrame(
+        formKey: _formKey,
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: ListView(
-              children: <Widget>[
-                GridView.count(
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    PaddedTextField(
-                      controller: TextEditingController(text: widget.userId),
-                      enabled: false,
-                      label: 'User Id',
-                      decoration: InputDecoration(
-                          labelText: 'User Id',
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.content_copy),
-                            onPressed: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: widget.userId));
-                              toast.showToast(
-                                child: const MyToast(
-                                  message: 'User ID copied to clipboard',
-                                ),
-                              );
-                            },
-                          )),
-                    ),
-                    PaddedTextField(
-                      controller: _rankController,
-                      keyboardType: TextInputType.text,
-                      textCapitalization: TextCapitalization.characters,
-                      label: 'Rank',
-                      decoration: const InputDecoration(
-                        labelText: 'Rank',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
+        children: <Widget>[
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              PaddedTextField(
+                controller: TextEditingController(text: widget.userId),
+                enabled: false,
+                label: 'User Id',
+                decoration: InputDecoration(
+                    labelText: 'User Id',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.content_copy),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: widget.userId));
+                        toast.showToast(
+                          child: const MyToast(
+                            message: 'User ID copied to clipboard',
+                          ),
+                        );
                       },
-                    ),
-                    PaddedTextField(
-                      controller: _nameController,
-                      keyboardType: TextInputType.text,
-                      textCapitalization: TextCapitalization.words,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Name can\'t be empty' : null,
-                      label: 'Name',
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    PaddedTextField(
-                      controller: _unitController,
-                      keyboardType: TextInputType.text,
-                      label: 'Unit',
-                      decoration: const InputDecoration(
-                        labelText: 'Unit',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    if (_emailController.text == 'applesignin@apple.com')
-                      PaddedTextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        label: 'Email',
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                        ),
-                        onChanged: (value) {
-                          updated = true;
-                        },
-                      ),
-                  ],
+                    )),
+              ),
+              PaddedTextField(
+                controller: _rankController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.characters,
+                label: 'Rank',
+                decoration: const InputDecoration(
+                  labelText: 'Rank',
                 ),
-                PlatformButton(
-                  onPressed: () {
-                    submit(context);
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                controller: _nameController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                validator: (value) =>
+                    value!.isEmpty ? 'Name can\'t be empty' : null,
+                label: 'Name',
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                controller: _unitController,
+                keyboardType: TextInputType.text,
+                label: 'Unit',
+                decoration: const InputDecoration(
+                  labelText: 'Unit',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              if (_emailController.text == 'applesignin@apple.com')
+                PaddedTextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  label: 'Email',
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                  ),
+                  onChanged: (value) {
+                    updated = true;
                   },
-                  child: const Text('Update Profile'),
                 ),
-              ],
-            ),
+            ],
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              submit(context);
+            },
+            child: const Text('Update Profile'),
+          ),
+        ],
       ),
     );
   }

@@ -608,28 +608,6 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    dailies.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < dailies.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: dailies[i]['section'],
-          child: Text(dailies[i]['section']),
-        ));
-      } else if (dailies[i]['section'] != dailies[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: dailies[i]['section'],
-          child: Text(dailies[i]['section']),
-        ));
-      }
-    }
-
     return PlatformScaffold(
       title: 'PERSTAT By Name',
       actions: createAppBarActions(

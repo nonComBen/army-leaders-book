@@ -11,12 +11,12 @@ import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.d
 import 'package:leaders_book/providers/soldiers_provider.dart';
 
 import '../../methods/rank_sort.dart';
-import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
 class UploadSoldierPage extends ConsumerStatefulWidget {
   const UploadSoldierPage({
@@ -366,598 +366,587 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Upload Soldier',
-      body: Center(
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field. Supervisor will '
-                      'have to be added manually once each record is created.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    child: const Text('Pick File'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path!,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Soldier Id'),
-                          items: columnHeaders,
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Rank'),
-                          items: columnHeaders,
-                          value: rank,
-                          onChanged: (value) {
-                            setState(() {
-                              rank = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Last Name'),
-                          items: columnHeaders,
-                          value: lastName,
-                          onChanged: (value) {
-                            setState(() {
-                              lastName = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('First Name'),
-                          items: columnHeaders,
-                          value: firstName,
-                          onChanged: (value) {
-                            setState(() {
-                              firstName = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Middle Initial'),
-                          items: columnHeaders,
-                          value: mi,
-                          onChanged: (value) {
-                            setState(() {
-                              mi = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Assigned'),
-                          items: columnHeaders,
-                          value: assigned,
-                          onChanged: (value) {
-                            setState(() {
-                              assigned = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Section'),
-                          items: columnHeaders,
-                          value: section,
-                          onChanged: (value) {
-                            setState(() {
-                              section = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Supervisor'),
-                          items: columnHeaders,
-                          value: supervisor,
-                          onChanged: (value) {
-                            setState(() {
-                              supervisor = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('DoD ID'),
-                          items: columnHeaders,
-                          value: dodId,
-                          onChanged: (value) {
-                            setState(() {
-                              dodId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Date of Rank'),
-                          items: columnHeaders,
-                          value: dor,
-                          onChanged: (value) {
-                            setState(() {
-                              dor = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('MOS'),
-                          items: columnHeaders,
-                          value: mos,
-                          onChanged: (value) {
-                            setState(() {
-                              mos = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Duty Position'),
-                          items: columnHeaders,
-                          value: duty,
-                          onChanged: (value) {
-                            setState(() {
-                              duty = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Paragraph/Line No'),
-                          items: columnHeaders,
-                          value: paraLn,
-                          onChanged: (value) {
-                            setState(() {
-                              paraLn = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Required MOS'),
-                          items: columnHeaders,
-                          value: reqMos,
-                          onChanged: (value) {
-                            setState(() {
-                              reqMos = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Loss Date'),
-                          items: columnHeaders,
-                          value: loss,
-                          onChanged: (value) {
-                            setState(() {
-                              loss = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('ETS Date'),
-                          items: columnHeaders,
-                          value: ets,
-                          onChanged: (value) {
-                            setState(() {
-                              ets = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('BASD'),
-                          items: columnHeaders,
-                          value: basd,
-                          onChanged: (value) {
-                            setState(() {
-                              basd = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('PEBD'),
-                          items: columnHeaders,
-                          value: pebd,
-                          onChanged: (value) {
-                            setState(() {
-                              pebd = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Gain Date'),
-                          items: columnHeaders,
-                          value: gain,
-                          onChanged: (value) {
-                            setState(() {
-                              gain = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Civilian Education'),
-                          items: columnHeaders,
-                          value: civEd,
-                          onChanged: (value) {
-                            setState(() {
-                              civEd = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Military Education'),
-                          items: columnHeaders,
-                          value: milEd,
-                          onChanged: (value) {
-                            setState(() {
-                              milEd = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('CBRN Suit Size'),
-                          items: columnHeaders,
-                          value: nbcSuitSize,
-                          onChanged: (value) {
-                            setState(() {
-                              nbcSuitSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('CBRN Mask Size'),
-                          items: columnHeaders,
-                          value: nbcMaskSize,
-                          onChanged: (value) {
-                            setState(() {
-                              nbcMaskSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('CBRN Boot Size'),
-                          items: columnHeaders,
-                          value: nbcBootSize,
-                          onChanged: (value) {
-                            setState(() {
-                              nbcBootSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('CBRN Glove Size'),
-                          items: columnHeaders,
-                          value: nbcGloveSize,
-                          onChanged: (value) {
-                            setState(() {
-                              nbcGloveSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Hat Size'),
-                          items: columnHeaders,
-                          value: hatSize,
-                          onChanged: (value) {
-                            setState(() {
-                              hatSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Boot Size'),
-                          items: columnHeaders,
-                          value: bootSize,
-                          onChanged: (value) {
-                            setState(() {
-                              bootSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('OCP Top Size'),
-                          items: columnHeaders,
-                          value: acuTopSize,
-                          onChanged: (value) {
-                            setState(() {
-                              acuTopSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('OCP Trouser Size'),
-                          items: columnHeaders,
-                          value: acuTrouserSize,
-                          onChanged: (value) {
-                            setState(() {
-                              acuTrouserSize = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Address'),
-                          items: columnHeaders,
-                          value: address,
-                          onChanged: (value) {
-                            setState(() {
-                              address = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('City'),
-                          items: columnHeaders,
-                          value: city,
-                          onChanged: (value) {
-                            setState(() {
-                              city = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('State'),
-                          items: columnHeaders,
-                          value: state,
-                          onChanged: (value) {
-                            setState(() {
-                              state = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Zip Code'),
-                          items: columnHeaders,
-                          value: zip,
-                          onChanged: (value) {
-                            setState(() {
-                              zip = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Phone Number'),
-                          items: columnHeaders,
-                          value: phone,
-                          onChanged: (value) {
-                            setState(() {
-                              phone = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Work Phone'),
-                          items: columnHeaders,
-                          value: workPhone,
-                          onChanged: (value) {
-                            setState(() {
-                              workPhone = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Email Address'),
-                          items: columnHeaders,
-                          value: email,
-                          onChanged: (value) {
-                            setState(() {
-                              email = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Work Email'),
-                          items: columnHeaders,
-                          value: workEmail,
-                          onChanged: (value) {
-                            setState(() {
-                              workEmail = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Next of Kin'),
-                          items: columnHeaders,
-                          value: nok,
-                          onChanged: (value) {
-                            setState(() {
-                              nok = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('NOK Phone'),
-                          items: columnHeaders,
-                          value: nokPhone,
-                          onChanged: (value) {
-                            setState(() {
-                              nokPhone = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Marital Status'),
-                          items: columnHeaders,
-                          value: maritalStatus,
-                          onChanged: (value) {
-                            setState(() {
-                              maritalStatus = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Comments'),
-                          items: columnHeaders,
-                          value: comments,
-                          onChanged: (value) {
-                            setState(() {
-                              comments = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      if (path == '') {
-                        fileIsBlankMessage(context);
-                      }
-                      _saveSoldiers(context);
-                    },
-                    child: const Text('Upload Roster'),
-                  )
-                ],
-              ),
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field. Supervisor will '
+              'have to be added manually once each record is created.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Soldier Id'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Rank'),
+                  items: columnHeaders,
+                  value: rank,
+                  onChanged: (value) {
+                    setState(() {
+                      rank = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Last Name'),
+                  items: columnHeaders,
+                  value: lastName,
+                  onChanged: (value) {
+                    setState(() {
+                      lastName = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('First Name'),
+                  items: columnHeaders,
+                  value: firstName,
+                  onChanged: (value) {
+                    setState(() {
+                      firstName = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Middle Initial'),
+                  items: columnHeaders,
+                  value: mi,
+                  onChanged: (value) {
+                    setState(() {
+                      mi = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Assigned'),
+                  items: columnHeaders,
+                  value: assigned,
+                  onChanged: (value) {
+                    setState(() {
+                      assigned = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Section'),
+                  items: columnHeaders,
+                  value: section,
+                  onChanged: (value) {
+                    setState(() {
+                      section = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Supervisor'),
+                  items: columnHeaders,
+                  value: supervisor,
+                  onChanged: (value) {
+                    setState(() {
+                      supervisor = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('DoD ID'),
+                  items: columnHeaders,
+                  value: dodId,
+                  onChanged: (value) {
+                    setState(() {
+                      dodId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Date of Rank'),
+                  items: columnHeaders,
+                  value: dor,
+                  onChanged: (value) {
+                    setState(() {
+                      dor = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('MOS'),
+                  items: columnHeaders,
+                  value: mos,
+                  onChanged: (value) {
+                    setState(() {
+                      mos = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Duty Position'),
+                  items: columnHeaders,
+                  value: duty,
+                  onChanged: (value) {
+                    setState(() {
+                      duty = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Paragraph/Line No'),
+                  items: columnHeaders,
+                  value: paraLn,
+                  onChanged: (value) {
+                    setState(() {
+                      paraLn = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Required MOS'),
+                  items: columnHeaders,
+                  value: reqMos,
+                  onChanged: (value) {
+                    setState(() {
+                      reqMos = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Loss Date'),
+                  items: columnHeaders,
+                  value: loss,
+                  onChanged: (value) {
+                    setState(() {
+                      loss = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('ETS Date'),
+                  items: columnHeaders,
+                  value: ets,
+                  onChanged: (value) {
+                    setState(() {
+                      ets = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('BASD'),
+                  items: columnHeaders,
+                  value: basd,
+                  onChanged: (value) {
+                    setState(() {
+                      basd = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('PEBD'),
+                  items: columnHeaders,
+                  value: pebd,
+                  onChanged: (value) {
+                    setState(() {
+                      pebd = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Gain Date'),
+                  items: columnHeaders,
+                  value: gain,
+                  onChanged: (value) {
+                    setState(() {
+                      gain = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Civilian Education'),
+                  items: columnHeaders,
+                  value: civEd,
+                  onChanged: (value) {
+                    setState(() {
+                      civEd = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Military Education'),
+                  items: columnHeaders,
+                  value: milEd,
+                  onChanged: (value) {
+                    setState(() {
+                      milEd = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('CBRN Suit Size'),
+                  items: columnHeaders,
+                  value: nbcSuitSize,
+                  onChanged: (value) {
+                    setState(() {
+                      nbcSuitSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('CBRN Mask Size'),
+                  items: columnHeaders,
+                  value: nbcMaskSize,
+                  onChanged: (value) {
+                    setState(() {
+                      nbcMaskSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('CBRN Boot Size'),
+                  items: columnHeaders,
+                  value: nbcBootSize,
+                  onChanged: (value) {
+                    setState(() {
+                      nbcBootSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('CBRN Glove Size'),
+                  items: columnHeaders,
+                  value: nbcGloveSize,
+                  onChanged: (value) {
+                    setState(() {
+                      nbcGloveSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Hat Size'),
+                  items: columnHeaders,
+                  value: hatSize,
+                  onChanged: (value) {
+                    setState(() {
+                      hatSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Boot Size'),
+                  items: columnHeaders,
+                  value: bootSize,
+                  onChanged: (value) {
+                    setState(() {
+                      bootSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('OCP Top Size'),
+                  items: columnHeaders,
+                  value: acuTopSize,
+                  onChanged: (value) {
+                    setState(() {
+                      acuTopSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('OCP Trouser Size'),
+                  items: columnHeaders,
+                  value: acuTrouserSize,
+                  onChanged: (value) {
+                    setState(() {
+                      acuTrouserSize = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Address'),
+                  items: columnHeaders,
+                  value: address,
+                  onChanged: (value) {
+                    setState(() {
+                      address = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('City'),
+                  items: columnHeaders,
+                  value: city,
+                  onChanged: (value) {
+                    setState(() {
+                      city = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('State'),
+                  items: columnHeaders,
+                  value: state,
+                  onChanged: (value) {
+                    setState(() {
+                      state = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Zip Code'),
+                  items: columnHeaders,
+                  value: zip,
+                  onChanged: (value) {
+                    setState(() {
+                      zip = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Phone Number'),
+                  items: columnHeaders,
+                  value: phone,
+                  onChanged: (value) {
+                    setState(() {
+                      phone = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Work Phone'),
+                  items: columnHeaders,
+                  value: workPhone,
+                  onChanged: (value) {
+                    setState(() {
+                      workPhone = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Email Address'),
+                  items: columnHeaders,
+                  value: email,
+                  onChanged: (value) {
+                    setState(() {
+                      email = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Work Email'),
+                  items: columnHeaders,
+                  value: workEmail,
+                  onChanged: (value) {
+                    setState(() {
+                      workEmail = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Next of Kin'),
+                  items: columnHeaders,
+                  value: nok,
+                  onChanged: (value) {
+                    setState(() {
+                      nok = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('NOK Phone'),
+                  items: columnHeaders,
+                  value: nokPhone,
+                  onChanged: (value) {
+                    setState(() {
+                      nokPhone = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Marital Status'),
+                  items: columnHeaders,
+                  value: maritalStatus,
+                  onChanged: (value) {
+                    setState(() {
+                      maritalStatus = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Comments'),
+                  items: columnHeaders,
+                  value: comments,
+                  onChanged: (value) {
+                    setState(() {
+                      comments = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveSoldiers(context);
+            },
+            child: const Text('Upload Roster'),
+          )
+        ],
       ),
     );
   }

@@ -7,6 +7,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/methods/custom_modal_bottom_sheet.dart';
 
+import '../../methods/validate.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
@@ -436,17 +438,18 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     );
   }
 
-  bool validateAndSave() {
-    final form = _formKey.currentState!;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
-  }
-
   void submit(BuildContext context) async {
-    if (validateAndSave()) {
+    if (validateAndSave(
+      _formKey,
+      [
+        _dorController.text,
+        _lossController.text,
+        _gainController.text,
+        _etsController.text,
+        _basdController.text,
+        _pebdController.text,
+      ],
+    )) {
       Soldier saveSoldier = Soldier(
         id: widget.soldier.id,
         owner: widget.soldier.owner,
@@ -528,569 +531,552 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
       title: _title,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+      body: FormFrame(
+        formKey: _formKey,
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: ListView(
-              children: <Widget>[
-                if (user.isAnonymous) const AnonWarningBanner(),
-                GridView.count(
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    PaddedTextField(
-                      controller: _rankController,
-                      enabled: true,
-                      textCapitalization: TextCapitalization.characters,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Rank can\'t be empty' : null,
-                      decoration: const InputDecoration(
-                        labelText: 'Rank',
-                      ),
-                      label: 'Rank',
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformCheckboxListTile(
-                        title: const Text('Promotable'),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: _promotable,
-                        onChanged: (checked) {
-                          setState(() {
-                            _promotable = checked!;
-                            updated = true;
-                          });
-                        },
-                      ),
-                    ),
-                    PaddedTextField(
-                      controller: _lastNameController,
-                      textCapitalization: TextCapitalization.words,
-                      enabled: true,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Last Name can\'t be empty' : null,
-                      decoration: const InputDecoration(
-                        labelText: 'Last Name',
-                      ),
-                      label: 'Last Name',
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    PaddedTextField(
-                      label: 'First Name',
-                      decoration: const InputDecoration(
-                        labelText: 'First Name',
-                      ),
-                      controller: _firstNameController,
-                      keyboardType: TextInputType.text,
-                      textCapitalization: TextCapitalization.words,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      controller: _miController,
-                      textCapitalization: TextCapitalization.characters,
-                      decoration:
-                          const InputDecoration(labelText: 'Middle Initial'),
-                      label: 'Middle Initial',
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformCheckboxListTile(
-                          title: Text(_assigned ? 'Assigned' : 'Attached'),
-                          value: _assigned,
-                          onChanged: (value) {
-                            setState(() {
-                              _assigned = value!;
-                            });
-                          }),
-                    ),
-                    PaddedTextField(
-                      label: 'Supervisor',
-                      decoration: const InputDecoration(
-                        labelText: 'Supervisor',
-                      ),
-                      controller: _supervisorController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Section',
-                      decoration: const InputDecoration(
-                        labelText: 'Section',
-                      ),
-                      controller: _sectionController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'DoD ID',
-                      decoration: const InputDecoration(
-                        labelText: 'DoD ID',
-                      ),
-                      controller: _dodIdController,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => updated = true,
-                    ),
-                    DateTextField(
-                        label: 'Date of Rank',
-                        date: _dorDate,
-                        controller: _dorController),
-                    PaddedTextField(
-                      label: 'MOS',
-                      decoration: const InputDecoration(
-                        labelText: 'MOS',
-                      ),
-                      controller: _mosController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Duty Position',
-                      decoration: const InputDecoration(
-                        labelText: 'Duty Position',
-                      ),
-                      controller: _dutyController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Paragraph/Line',
-                      decoration: const InputDecoration(
-                        labelText: 'Paragraph/Line',
-                      ),
-                      controller: _paraLnController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Duty MOS',
-                      decoration: const InputDecoration(
-                        labelText: 'Duty MOS',
-                      ),
-                      controller: _reqMosController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    DateTextField(
-                        label: 'Loss Date',
-                        date: _lossDate,
-                        controller: _lossController),
-                    DateTextField(
-                        label: 'ETS Date',
-                        date: _etsDate,
-                        controller: _etsController),
-                    DateTextField(
-                        label: 'BASD',
-                        date: _basdDate,
-                        controller: _basdController),
-                    DateTextField(
-                        label: 'PEBD',
-                        date: _pebdDate,
-                        controller: _pebdController),
-                    DateTextField(
-                        label: 'Gain Date',
-                        date: _gainDate,
-                        controller: _gainController),
-                  ],
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              PaddedTextField(
+                controller: _rankController,
+                enabled: true,
+                textCapitalization: TextCapitalization.characters,
+                validator: (value) =>
+                    value!.isEmpty ? 'Rank can\'t be empty' : null,
+                decoration: const InputDecoration(
+                  labelText: 'Rank',
                 ),
-                Divider(
-                  color: getOnPrimaryColor(context),
-                ),
-                GridView.count(
-                  padding: const EdgeInsets.all(0.0),
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    PaddedTextField(
-                      label: 'CBRN Suit Size',
-                      decoration: const InputDecoration(
-                        labelText: 'CBRN Suit Size',
-                      ),
-                      controller: _nbcSuitController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'CBRN Mask Size',
-                      decoration: const InputDecoration(
-                        labelText: 'CBRN Mask Size',
-                      ),
-                      controller: _nbcMaskController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'CBRN Boot Size',
-                      decoration: const InputDecoration(
-                        labelText: 'CBRN Boot Size',
-                      ),
-                      controller: _nbcBootController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'CBRN Glove Size',
-                      decoration: const InputDecoration(
-                        labelText: 'CBRN Glove Size',
-                      ),
-                      controller: _nbcGloveController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Hat Size',
-                      decoration: const InputDecoration(
-                        labelText: 'Hit Size',
-                      ),
-                      controller: _hatController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Boot Size',
-                      decoration: const InputDecoration(
-                        labelText: 'Boot Size',
-                      ),
-                      controller: _bootController,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'OCP Top Size',
-                      decoration: const InputDecoration(
-                        labelText: 'OCP Top Size',
-                      ),
-                      controller: _acuTopController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'OCP Trouser Size',
-                      decoration: const InputDecoration(
-                        labelText: 'OCP Trouser Size',
-                      ),
-                      controller: _acuTrouserController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                  ],
-                ),
-                Divider(
-                  color: getOnPrimaryColor(context),
-                ),
-                GridView.count(
-                  padding: const EdgeInsets.all(0.0),
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformItemPicker(
-                        label: const Text('Civilian Education'),
-                        items: _civEds,
-                        onChanged: (dynamic value) {
-                          setState(() {
-                            _civEd = value;
-                            updated = true;
-                          });
-                        },
-                        value: _civEd,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformItemPicker(
-                        label: const Text('Military Education'),
-                        items: _milEds,
-                        onChanged: (dynamic value) {
-                          setState(() {
-                            _milEd = value;
-                            updated = true;
-                          });
-                        },
-                        value: _milEd,
-                      ),
-                    ),
-                    PaddedTextField(
-                      label: 'Address',
-                      decoration: const InputDecoration(
-                        labelText: 'Address',
-                      ),
-                      controller: _addressController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'City',
-                      decoration: const InputDecoration(
-                        labelText: 'Cty',
-                      ),
-                      controller: _cityController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'State',
-                      decoration: const InputDecoration(
-                        labelText: 'State',
-                      ),
-                      controller: _stateController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Zip Code',
-                      decoration: const InputDecoration(
-                        labelText: 'Zip Code',
-                      ),
-                      controller: _zipController,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Personal Phone',
-                      decoration: const InputDecoration(
-                        labelText: 'Personal Phone',
-                      ),
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Work Phone',
-                      decoration: const InputDecoration(
-                        labelText: 'Work Phone',
-                      ),
-                      controller: _workPhoneController,
-                      keyboardType: TextInputType.phone,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Email',
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                      ),
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Work Email',
-                      decoration: const InputDecoration(
-                        labelText: 'Work Email',
-                      ),
-                      controller: _workEmailController,
-                      keyboardType: TextInputType.emailAddress,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Next of Kin',
-                      decoration: const InputDecoration(
-                        labelText: 'Next of Kin',
-                      ),
-                      controller: _nokController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'NOK Phone',
-                      decoration: const InputDecoration(
-                        labelText: 'NOK Phone',
-                      ),
-                      controller: _nokPhoneController,
-                      keyboardType: TextInputType.phone,
-                      onChanged: (_) => updated = true,
-                    ),
-                    PaddedTextField(
-                      label: 'Marital Status',
-                      decoration: const InputDecoration(
-                        labelText: 'Marital Status',
-                      ),
-                      controller: _maritalStatusController,
-                      keyboardType: TextInputType.text,
-                      onChanged: (_) => updated = true,
-                    ),
-                  ],
-                ),
-                PaddedTextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 2,
-                  controller: _commentsController,
-                  enabled: true,
-                  label: 'Comments',
-                  decoration: const InputDecoration(labelText: 'Comments'),
-                  onChanged: (value) {
-                    updated = true;
+                label: 'Rank',
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformCheckboxListTile(
+                  title: const Text('Promotable'),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: _promotable,
+                  onChanged: (checked) {
+                    setState(() {
+                      _promotable = checked!;
+                      updated = true;
+                    });
                   },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PlatformListTile(
-                    title: Text(
-                      'POVs',
-                      style: TextStyle(color: getOnPrimaryColor(context)),
-                    ),
-                    color: getPrimaryColor(context),
-                    trailing: PlatformIconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: getOnPrimaryColor(context),
-                      ),
-                      onPressed: () => editPov(
-                        context: context,
-                        pov: POV(
-                          owner: user.uid,
-                          users: [user.uid],
-                          soldierId: widget.soldier.id!,
-                        ),
-                      ),
-                    ),
-                  ),
+              ),
+              PaddedTextField(
+                controller: _lastNameController,
+                textCapitalization: TextCapitalization.words,
+                enabled: true,
+                validator: (value) =>
+                    value!.isEmpty ? 'Last Name can\'t be empty' : null,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(0.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75),
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: _povs.length,
-                    itemBuilder: (ibContext, position) {
-                      return EditDeleteListTile(
-                        title:
-                            '${_povs[position].year} ${_povs[position].make} ${_povs[position].model}',
-                        subTitle: Text(
-                            'Reg Exp: ${_povs[position].regExp}, Ins Exp: ${_povs[position].insExp}'),
-                        onIconPressed: () {
-                          deletePov(context, position);
-                        },
-                        onTap: () {
-                          editPov(
-                            context: context,
-                            pov: _povs[position],
-                            index: position,
-                          );
-                        },
-                      );
-                    },
-                  ),
+                label: 'Last Name',
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                label: 'First Name',
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PlatformListTile(
-                    title: Text(
-                      'Awards',
-                      style: TextStyle(color: getOnPrimaryColor(context)),
-                    ),
-                    color: getPrimaryColor(context),
-                    trailing: PlatformIconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: getOnPrimaryColor(context),
-                      ),
-                      onPressed: () => editAward(
-                        context: context,
-                        award: Award(
-                          owner: user.uid,
-                          users: [user.uid],
-                          soldierId: widget.soldier.id!,
-                        ),
-                      ),
-                    ),
-                  ),
+                controller: _firstNameController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                controller: _miController,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(labelText: 'Middle Initial'),
+                label: 'Middle Initial',
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformCheckboxListTile(
+                    title: Text(_assigned ? 'Assigned' : 'Attached'),
+                    value: _assigned,
+                    onChanged: (value) {
+                      setState(() {
+                        _assigned = value!;
+                      });
+                    }),
+              ),
+              PaddedTextField(
+                label: 'Supervisor',
+                decoration: const InputDecoration(
+                  labelText: 'Supervisor',
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(0.0),
-                    primary: false,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: width > 700 ? 2 : 1,
-                      childAspectRatio: width > 900
-                          ? 900 / 150
-                          : width > 700
-                              ? width / 150
-                              : width / 75,
-                    ),
-                    shrinkWrap: true,
-                    itemCount: _awards.length,
-                    itemBuilder: (ctx, position) {
-                      return EditDeleteListTile(
-                        title:
-                            '${_awards[position].name}: ${_awards[position].number}',
-                        onIconPressed: () {
-                          deleteAward(
-                            context,
-                            position,
-                          );
-                        },
-                        onTap: () {
-                          editAward(
-                              context: context,
-                              award: _awards[position],
-                              index: position);
-                        },
-                      );
-                    },
-                  ),
+                controller: _supervisorController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Section',
+                decoration: const InputDecoration(
+                  labelText: 'Section',
                 ),
-                PlatformButton(
-                  onPressed: () {
-                    submit(context);
+                controller: _sectionController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'DoD ID',
+                decoration: const InputDecoration(
+                  labelText: 'DoD ID',
+                ),
+                controller: _dodIdController,
+                keyboardType: TextInputType.number,
+                onChanged: (_) => updated = true,
+              ),
+              DateTextField(
+                  label: 'Date of Rank',
+                  date: _dorDate,
+                  controller: _dorController),
+              PaddedTextField(
+                label: 'MOS',
+                decoration: const InputDecoration(
+                  labelText: 'MOS',
+                ),
+                controller: _mosController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Duty Position',
+                decoration: const InputDecoration(
+                  labelText: 'Duty Position',
+                ),
+                controller: _dutyController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Paragraph/Line',
+                decoration: const InputDecoration(
+                  labelText: 'Paragraph/Line',
+                ),
+                controller: _paraLnController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Duty MOS',
+                decoration: const InputDecoration(
+                  labelText: 'Duty MOS',
+                ),
+                controller: _reqMosController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              DateTextField(
+                  label: 'Loss Date',
+                  date: _lossDate,
+                  controller: _lossController),
+              DateTextField(
+                  label: 'ETS Date',
+                  date: _etsDate,
+                  controller: _etsController),
+              DateTextField(
+                  label: 'BASD', date: _basdDate, controller: _basdController),
+              DateTextField(
+                  label: 'PEBD', date: _pebdDate, controller: _pebdController),
+              DateTextField(
+                  label: 'Gain Date',
+                  date: _gainDate,
+                  controller: _gainController),
+            ],
+          ),
+          Divider(
+            color: getOnPrimaryColor(context),
+          ),
+          GridView.count(
+            padding: const EdgeInsets.all(0.0),
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              PaddedTextField(
+                label: 'CBRN Suit Size',
+                decoration: const InputDecoration(
+                  labelText: 'CBRN Suit Size',
+                ),
+                controller: _nbcSuitController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'CBRN Mask Size',
+                decoration: const InputDecoration(
+                  labelText: 'CBRN Mask Size',
+                ),
+                controller: _nbcMaskController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'CBRN Boot Size',
+                decoration: const InputDecoration(
+                  labelText: 'CBRN Boot Size',
+                ),
+                controller: _nbcBootController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'CBRN Glove Size',
+                decoration: const InputDecoration(
+                  labelText: 'CBRN Glove Size',
+                ),
+                controller: _nbcGloveController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Hat Size',
+                decoration: const InputDecoration(
+                  labelText: 'Hit Size',
+                ),
+                controller: _hatController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Boot Size',
+                decoration: const InputDecoration(
+                  labelText: 'Boot Size',
+                ),
+                controller: _bootController,
+                keyboardType: TextInputType.number,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'OCP Top Size',
+                decoration: const InputDecoration(
+                  labelText: 'OCP Top Size',
+                ),
+                controller: _acuTopController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'OCP Trouser Size',
+                decoration: const InputDecoration(
+                  labelText: 'OCP Trouser Size',
+                ),
+                controller: _acuTrouserController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+            ],
+          ),
+          Divider(
+            color: getOnPrimaryColor(context),
+          ),
+          GridView.count(
+            padding: const EdgeInsets.all(0.0),
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Civilian Education'),
+                  items: _civEds,
+                  onChanged: (dynamic value) {
+                    setState(() {
+                      _civEd = value;
+                      updated = true;
+                    });
                   },
-                  child: Text(widget.soldier.id == null
-                      ? 'Add Soldier'
-                      : 'Update Soldier'),
+                  value: _civEd,
                 ),
-              ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Military Education'),
+                  items: _milEds,
+                  onChanged: (dynamic value) {
+                    setState(() {
+                      _milEd = value;
+                      updated = true;
+                    });
+                  },
+                  value: _milEd,
+                ),
+              ),
+              PaddedTextField(
+                label: 'Address',
+                decoration: const InputDecoration(
+                  labelText: 'Address',
+                ),
+                controller: _addressController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'City',
+                decoration: const InputDecoration(
+                  labelText: 'Cty',
+                ),
+                controller: _cityController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'State',
+                decoration: const InputDecoration(
+                  labelText: 'State',
+                ),
+                controller: _stateController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Zip Code',
+                decoration: const InputDecoration(
+                  labelText: 'Zip Code',
+                ),
+                controller: _zipController,
+                keyboardType: TextInputType.number,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Personal Phone',
+                decoration: const InputDecoration(
+                  labelText: 'Personal Phone',
+                ),
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Work Phone',
+                decoration: const InputDecoration(
+                  labelText: 'Work Phone',
+                ),
+                controller: _workPhoneController,
+                keyboardType: TextInputType.phone,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Email',
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                ),
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Work Email',
+                decoration: const InputDecoration(
+                  labelText: 'Work Email',
+                ),
+                controller: _workEmailController,
+                keyboardType: TextInputType.emailAddress,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Next of Kin',
+                decoration: const InputDecoration(
+                  labelText: 'Next of Kin',
+                ),
+                controller: _nokController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'NOK Phone',
+                decoration: const InputDecoration(
+                  labelText: 'NOK Phone',
+                ),
+                controller: _nokPhoneController,
+                keyboardType: TextInputType.phone,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Marital Status',
+                decoration: const InputDecoration(
+                  labelText: 'Marital Status',
+                ),
+                controller: _maritalStatusController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+            ],
+          ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 2,
+            controller: _commentsController,
+            enabled: true,
+            label: 'Comments',
+            decoration: const InputDecoration(labelText: 'Comments'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: PlatformListTile(
+              title: Text(
+                'POVs',
+                style: TextStyle(color: getOnPrimaryColor(context)),
+              ),
+              color: getPrimaryColor(context),
+              trailing: PlatformIconButton(
+                icon: Icon(
+                  Icons.add,
+                  color: getOnPrimaryColor(context),
+                ),
+                onPressed: () => editPov(
+                  context: context,
+                  pov: POV(
+                    owner: user.uid,
+                    users: [user.uid],
+                    soldierId: widget.soldier.id!,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GridView.builder(
+              padding: const EdgeInsets.all(0.0),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: width > 700 ? 2 : 1,
+                  childAspectRatio: width > 900
+                      ? 900 / 150
+                      : width > 700
+                          ? width / 150
+                          : width / 75),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: _povs.length,
+              itemBuilder: (ibContext, position) {
+                return EditDeleteListTile(
+                  title:
+                      '${_povs[position].year} ${_povs[position].make} ${_povs[position].model}',
+                  subTitle: Text(
+                      'Reg Exp: ${_povs[position].regExp}, Ins Exp: ${_povs[position].insExp}'),
+                  onIconPressed: () {
+                    deletePov(context, position);
+                  },
+                  onTap: () {
+                    editPov(
+                      context: context,
+                      pov: _povs[position],
+                      index: position,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: PlatformListTile(
+              title: Text(
+                'Awards',
+                style: TextStyle(color: getOnPrimaryColor(context)),
+              ),
+              color: getPrimaryColor(context),
+              trailing: PlatformIconButton(
+                icon: Icon(
+                  Icons.add,
+                  color: getOnPrimaryColor(context),
+                ),
+                onPressed: () => editAward(
+                  context: context,
+                  award: Award(
+                    owner: user.uid,
+                    users: [user.uid],
+                    soldierId: widget.soldier.id!,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GridView.builder(
+              padding: const EdgeInsets.all(0.0),
+              primary: false,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: width > 700 ? 2 : 1,
+                childAspectRatio: width > 900
+                    ? 900 / 150
+                    : width > 700
+                        ? width / 150
+                        : width / 75,
+              ),
+              shrinkWrap: true,
+              itemCount: _awards.length,
+              itemBuilder: (ctx, position) {
+                return EditDeleteListTile(
+                  title:
+                      '${_awards[position].name}: ${_awards[position].number}',
+                  onIconPressed: () {
+                    deleteAward(
+                      context,
+                      position,
+                    );
+                  },
+                  onTap: () {
+                    editAward(
+                        context: context,
+                        award: _awards[position],
+                        index: position);
+                  },
+                );
+              },
+            ),
+          ),
+          PlatformButton(
+            onPressed: () {
+              submit(context);
+            },
+            child: Text(
+                widget.soldier.id == null ? 'Add Soldier' : 'Update Soldier'),
+          ),
+        ],
       ),
     );
   }

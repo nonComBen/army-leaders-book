@@ -213,14 +213,12 @@ class LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     toast.context = context;
     final rootService = ref.read(rootProvider.notifier);
-    double width = MediaQuery.of(context).size.width;
     final appleSignInAvailable =
         ref.read(appleSignInAvailableProvider).isAvailable;
     return PlatformScaffold(
       title: 'Login',
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: width > 932 ? (width - 916) / 2 : 16),
+      body: Center(
+        heightFactor: 1,
         child: Container(
           padding: const EdgeInsets.all(16.0),
           constraints: const BoxConstraints(maxWidth: 900.0),

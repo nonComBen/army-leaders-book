@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
-import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/training.dart';
@@ -17,6 +16,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
 class UploadTrainingsPage extends ConsumerStatefulWidget {
   const UploadTrainingsPage({
@@ -279,390 +279,379 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Upload Training',
-      body: Center(
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    child: const Text('Pick File'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path!,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SoldierId'),
-                          items: columnHeaders,
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Cyber Awareness Date'),
-                          items: columnHeaders,
-                          value: cyber,
-                          onChanged: (value) {
-                            setState(() {
-                              cyber = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('OPSEC Date'),
-                          items: columnHeaders,
-                          value: opsec,
-                          onChanged: (value) {
-                            setState(() {
-                              opsec = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Anti-Terror Date'),
-                          items: columnHeaders,
-                          value: antiTerror,
-                          onChanged: (value) {
-                            setState(() {
-                              antiTerror = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Law of War Date'),
-                          items: columnHeaders,
-                          value: law,
-                          onChanged: (value) {
-                            setState(() {
-                              law = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Personnel Recovery Date'),
-                          items: columnHeaders,
-                          value: persRec,
-                          onChanged: (value) {
-                            setState(() {
-                              persRec = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Info Security Date'),
-                          items: columnHeaders,
-                          value: infoSec,
-                          onChanged: (value) {
-                            setState(() {
-                              infoSec = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('CTIP Date'),
-                          items: columnHeaders,
-                          value: ctip,
-                          onChanged: (value) {
-                            setState(() {
-                              ctip = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('GAT Date'),
-                          items: columnHeaders,
-                          value: gat,
-                          onChanged: (value) {
-                            setState(() {
-                              gat = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SERE Date'),
-                          items: columnHeaders,
-                          value: sere,
-                          onChanged: (value) {
-                            setState(() {
-                              sere = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('TARP Date'),
-                          items: columnHeaders,
-                          value: tarp,
-                          onChanged: (value) {
-                            setState(() {
-                              tarp = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('EO Date'),
-                          items: columnHeaders,
-                          value: eo,
-                          onChanged: (value) {
-                            setState(() {
-                              eo = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('ASAP Date'),
-                          items: columnHeaders,
-                          value: asap,
-                          onChanged: (value) {
-                            setState(() {
-                              asap = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Suicide Prev Date'),
-                          items: columnHeaders,
-                          value: suicide,
-                          onChanged: (value) {
-                            setState(() {
-                              suicide = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SHARP Date'),
-                          items: columnHeaders,
-                          value: sharp,
-                          onChanged: (value) {
-                            setState(() {
-                              sharp = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 1'),
-                          items: columnHeaders,
-                          value: add1,
-                          onChanged: (value) {
-                            setState(() {
-                              add1 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 1 Date'),
-                          items: columnHeaders,
-                          value: add1Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add1Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 2'),
-                          items: columnHeaders,
-                          value: add2,
-                          onChanged: (value) {
-                            setState(() {
-                              add2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 2 Date'),
-                          items: columnHeaders,
-                          value: add2Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add2Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 3'),
-                          items: columnHeaders,
-                          value: add3,
-                          onChanged: (value) {
-                            setState(() {
-                              add3 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 3 Date'),
-                          items: columnHeaders,
-                          value: add3Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add3Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 4'),
-                          items: columnHeaders,
-                          value: add4,
-                          onChanged: (value) {
-                            setState(() {
-                              add4 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 4 Date'),
-                          items: columnHeaders,
-                          value: add4Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add4Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 5'),
-                          items: columnHeaders,
-                          value: add5,
-                          onChanged: (value) {
-                            setState(() {
-                              add5 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Additional Training 5 Date'),
-                          items: columnHeaders,
-                          value: add5Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add5Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      if (path == '') {
-                        fileIsBlankMessage(context);
-                      }
-                      _saveData(context);
-                    },
-                    child: const Text('Upload Training'),
-                  )
-                ],
-              ),
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Cyber Awareness Date'),
+                  items: columnHeaders,
+                  value: cyber,
+                  onChanged: (value) {
+                    setState(() {
+                      cyber = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('OPSEC Date'),
+                  items: columnHeaders,
+                  value: opsec,
+                  onChanged: (value) {
+                    setState(() {
+                      opsec = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Anti-Terror Date'),
+                  items: columnHeaders,
+                  value: antiTerror,
+                  onChanged: (value) {
+                    setState(() {
+                      antiTerror = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Law of War Date'),
+                  items: columnHeaders,
+                  value: law,
+                  onChanged: (value) {
+                    setState(() {
+                      law = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Personnel Recovery Date'),
+                  items: columnHeaders,
+                  value: persRec,
+                  onChanged: (value) {
+                    setState(() {
+                      persRec = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Info Security Date'),
+                  items: columnHeaders,
+                  value: infoSec,
+                  onChanged: (value) {
+                    setState(() {
+                      infoSec = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('CTIP Date'),
+                  items: columnHeaders,
+                  value: ctip,
+                  onChanged: (value) {
+                    setState(() {
+                      ctip = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('GAT Date'),
+                  items: columnHeaders,
+                  value: gat,
+                  onChanged: (value) {
+                    setState(() {
+                      gat = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SERE Date'),
+                  items: columnHeaders,
+                  value: sere,
+                  onChanged: (value) {
+                    setState(() {
+                      sere = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('TARP Date'),
+                  items: columnHeaders,
+                  value: tarp,
+                  onChanged: (value) {
+                    setState(() {
+                      tarp = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('EO Date'),
+                  items: columnHeaders,
+                  value: eo,
+                  onChanged: (value) {
+                    setState(() {
+                      eo = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('ASAP Date'),
+                  items: columnHeaders,
+                  value: asap,
+                  onChanged: (value) {
+                    setState(() {
+                      asap = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Suicide Prev Date'),
+                  items: columnHeaders,
+                  value: suicide,
+                  onChanged: (value) {
+                    setState(() {
+                      suicide = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SHARP Date'),
+                  items: columnHeaders,
+                  value: sharp,
+                  onChanged: (value) {
+                    setState(() {
+                      sharp = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 1'),
+                  items: columnHeaders,
+                  value: add1,
+                  onChanged: (value) {
+                    setState(() {
+                      add1 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 1 Date'),
+                  items: columnHeaders,
+                  value: add1Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add1Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 2'),
+                  items: columnHeaders,
+                  value: add2,
+                  onChanged: (value) {
+                    setState(() {
+                      add2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 2 Date'),
+                  items: columnHeaders,
+                  value: add2Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add2Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 3'),
+                  items: columnHeaders,
+                  value: add3,
+                  onChanged: (value) {
+                    setState(() {
+                      add3 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 3 Date'),
+                  items: columnHeaders,
+                  value: add3Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add3Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 4'),
+                  items: columnHeaders,
+                  value: add4,
+                  onChanged: (value) {
+                    setState(() {
+                      add4 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 4 Date'),
+                  items: columnHeaders,
+                  value: add4Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add4Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 5'),
+                  items: columnHeaders,
+                  value: add5,
+                  onChanged: (value) {
+                    setState(() {
+                      add5 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 5 Date'),
+                  items: columnHeaders,
+                  value: add5Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add5Date = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Training'),
+          )
+        ],
       ),
     );
   }

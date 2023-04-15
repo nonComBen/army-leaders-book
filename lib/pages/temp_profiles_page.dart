@@ -10,6 +10,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/widgets/table_frame.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -434,136 +435,130 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
     final width = MediaQuery.of(context).size.width;
     toast.context = context;
     return PlatformScaffold(
-        title: 'Temporary Profiles',
-        actions: createAppBarActions(
-          width,
-          [
-            if (!kIsWeb && Platform.isIOS)
-              AppBarOption(
-                title: 'New Profile',
-                icon: Icon(
-                  CupertinoIcons.add,
-                  color: getOnPrimaryColor(context),
+      title: 'Temporary Profiles',
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isIOS)
+            AppBarOption(
+              title: 'New Profile',
+              icon: Icon(
+                CupertinoIcons.add,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _newRecord(context),
+            ),
+          AppBarOption(
+            title: 'Edit Profile',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _editRecord(),
+          ),
+          AppBarOption(
+            title: 'Delete Profile',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _deleteRecord(),
+          ),
+          AppBarOption(
+            title: 'Filter Profiles',
+            icon: Icon(
+              Icons.filter_alt,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => showFilterOptions(
+                context, getSections(documents), _filterRecords),
+          ),
+          AppBarOption(
+            title: 'Download Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadExcel(),
+          ),
+          AppBarOption(
+            title: 'Upload Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.upload
+                  : CupertinoIcons.cloud_upload,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _uploadExcel(context),
+          ),
+          AppBarOption(
+            title: 'Download PDF',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.picture_as_pdf
+                  : CupertinoIcons.doc,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadPdf(),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: TableFrame(
+        children: [
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        filteredDocs, MediaQuery.of(context).size.width),
+                  ),
                 ),
-                onPressed: () => _newRecord(context),
-              ),
-            AppBarOption(
-              title: 'Edit Profile',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.edit
-                    : CupertinoIcons.pencil,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _editRecord(),
-            ),
-            AppBarOption(
-              title: 'Delete Profile',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.delete
-                    : CupertinoIcons.delete,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _deleteRecord(),
-            ),
-            AppBarOption(
-              title: 'Filter Profiles',
-              icon: Icon(
-                Icons.filter_alt,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => showFilterOptions(
-                  context, getSections(documents), _filterRecords),
-            ),
-            AppBarOption(
-              title: 'Download Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.download
-                    : CupertinoIcons.cloud_download,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadExcel(),
-            ),
-            AppBarOption(
-              title: 'Upload Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.upload
-                    : CupertinoIcons.cloud_upload,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _uploadExcel(context),
-            ),
-            AppBarOption(
-              title: 'Download PDF',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.picture_as_pdf
-                    : CupertinoIcons.doc,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadPdf(),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              ),
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).size.width),
-                      rows: _createRows(
-                          filteredDocs, MediaQuery.of(context).size.width),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const <Widget>[
+                        Text(
+                          'Amber Text: Profile is Expired',
+                          style: TextStyle(
+                              color: Colors.amber, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
-                  Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Amber Text: Profile is Expired',
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
+                )
+              ],
+            ),
+          ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
             ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
 }

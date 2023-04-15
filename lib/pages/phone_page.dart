@@ -24,6 +24,7 @@ import '../models/app_bar_option.dart';
 import '../models/phone_number.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_phone_page.dart';
 import 'uploadPages/upload_phone_page.dart';
 import '../pdf/phone_pdf.dart';
@@ -459,23 +460,10 @@ class PhonePageState extends ConsumerState<PhonePage> {
           onPressed: () {
             _newRecord(context);
           }),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: TableFrame(
         children: [
-          if (_adLoaded)
-            Container(
-              alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
-              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-              child: AdWidget(
-                ad: myBanner!,
-              ),
-            ),
           Expanded(
             child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(8.0),
               children: <Widget>[
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
@@ -491,6 +479,16 @@ class PhonePageState extends ConsumerState<PhonePage> {
               ],
             ),
           ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
+              ),
+            ),
         ],
       ),
     );

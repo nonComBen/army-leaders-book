@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
-import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/hand_receipt_item.dart';
 import '../../models/soldier.dart';
@@ -17,6 +16,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
 class UploadHandReceiptPage extends ConsumerStatefulWidget {
   const UploadHandReceiptPage({
@@ -192,182 +192,171 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Upload Hand Receipt',
-      body: Center(
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    child: const Text('Pick File'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path!,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SoldierId'),
-                          items: columnHeaders,
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Item'),
-                          items: columnHeaders,
-                          value: item,
-                          onChanged: (value) {
-                            setState(() {
-                              item = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Model No.'),
-                          items: columnHeaders,
-                          value: model,
-                          onChanged: (value) {
-                            setState(() {
-                              model = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Serial No.'),
-                          items: columnHeaders,
-                          value: serial,
-                          onChanged: (value) {
-                            setState(() {
-                              serial = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('NSN No.'),
-                          items: columnHeaders,
-                          value: nsn,
-                          onChanged: (value) {
-                            setState(() {
-                              nsn = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Locataion'),
-                          items: columnHeaders,
-                          value: location,
-                          onChanged: (value) {
-                            setState(() {
-                              location = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Value'),
-                          items: columnHeaders,
-                          value: value,
-                          onChanged: (value) {
-                            setState(() {
-                              value = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Subcomponents'),
-                          items: columnHeaders,
-                          value: subComponents,
-                          onChanged: (value) {
-                            setState(() {
-                              subComponents = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Comments'),
-                          items: columnHeaders,
-                          value: comments,
-                          onChanged: (value) {
-                            setState(() {
-                              comments = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      if (path == '') {
-                        fileIsBlankMessage(context);
-                      }
-                      _saveData(context);
-                    },
-                    child: const Text('Upload Hand Receipt'),
-                  )
-                ],
-              ),
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Item'),
+                  items: columnHeaders,
+                  value: item,
+                  onChanged: (value) {
+                    setState(() {
+                      item = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Model No.'),
+                  items: columnHeaders,
+                  value: model,
+                  onChanged: (value) {
+                    setState(() {
+                      model = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Serial No.'),
+                  items: columnHeaders,
+                  value: serial,
+                  onChanged: (value) {
+                    setState(() {
+                      serial = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('NSN No.'),
+                  items: columnHeaders,
+                  value: nsn,
+                  onChanged: (value) {
+                    setState(() {
+                      nsn = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Locataion'),
+                  items: columnHeaders,
+                  value: location,
+                  onChanged: (value) {
+                    setState(() {
+                      location = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Value'),
+                  items: columnHeaders,
+                  value: value,
+                  onChanged: (value) {
+                    setState(() {
+                      value = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Subcomponents'),
+                  items: columnHeaders,
+                  value: subComponents,
+                  onChanged: (value) {
+                    setState(() {
+                      subComponents = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Comments'),
+                  items: columnHeaders,
+                  value: comments,
+                  onChanged: (value) {
+                    setState(() {
+                      comments = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Hand Receipt'),
+          )
+        ],
       ),
     );
   }

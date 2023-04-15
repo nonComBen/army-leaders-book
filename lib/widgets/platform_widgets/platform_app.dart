@@ -30,6 +30,10 @@ abstract class PlatformApp extends StatelessWidget {
         scaffoldBackgroundColor: themeData.scaffoldBackgroundColor,
         barBackgroundColor: themeData.dialogBackgroundColor,
         textTheme: CupertinoTextThemeData(
+          textStyle: TextStyle(
+              color: themeData.brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white),
           primaryColor: themeData.colorScheme.onPrimary,
           navTitleTextStyle: TextStyle(
             inherit: false,

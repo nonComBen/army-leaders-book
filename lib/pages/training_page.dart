@@ -25,6 +25,7 @@ import '../../models/training.dart';
 import '../models/app_bar_option.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_training_page.dart';
 import 'uploadPages/upload_trainings_page.dart';
 import '../pdf/training_pdf.dart';
@@ -498,119 +499,114 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
     final width = MediaQuery.of(context).size.width;
     toast.context = context;
     return PlatformScaffold(
-        title: 'Training',
-        actions: createAppBarActions(
-          width,
-          [
-            if (!kIsWeb && Platform.isIOS)
-              AppBarOption(
-                title: 'New Training',
-                icon: Icon(
-                  CupertinoIcons.add,
-                  color: getOnPrimaryColor(context),
-                ),
-                onPressed: () => _newRecord(context),
-              ),
+      title: 'Training',
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isIOS)
             AppBarOption(
-              title: 'Edit Training',
+              title: 'New Training',
               icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.edit
-                    : CupertinoIcons.pencil,
+                CupertinoIcons.add,
                 color: getOnPrimaryColor(context),
               ),
-              onPressed: () => _editRecord(),
+              onPressed: () => _newRecord(context),
             ),
-            AppBarOption(
-              title: 'Delete Training',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.delete
-                    : CupertinoIcons.delete,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _deleteRecord(),
+          AppBarOption(
+            title: 'Edit Training',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
+              color: getOnPrimaryColor(context),
             ),
-            AppBarOption(
-              title: 'Filter Trainings',
-              icon: Icon(
-                Icons.filter_alt,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => showFilterOptions(
-                  context, getSections(documents), _filterRecords),
+            onPressed: () => _editRecord(),
+          ),
+          AppBarOption(
+            title: 'Delete Training',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
             ),
-            AppBarOption(
-              title: 'Download Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.download
-                    : CupertinoIcons.cloud_download,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadExcel(),
+            onPressed: () => _deleteRecord(),
+          ),
+          AppBarOption(
+            title: 'Filter Trainings',
+            icon: Icon(
+              Icons.filter_alt,
+              color: getOnPrimaryColor(context),
             ),
-            AppBarOption(
-              title: 'Upload Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.upload
-                    : CupertinoIcons.cloud_upload,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _uploadExcel(context),
+            onPressed: () => showFilterOptions(
+                context, getSections(documents), _filterRecords),
+          ),
+          AppBarOption(
+            title: 'Download Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download,
+              color: getOnPrimaryColor(context),
             ),
-            AppBarOption(
-              title: 'Download PDF',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.picture_as_pdf
-                    : CupertinoIcons.doc,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadPdf(),
+            onPressed: () => _downloadExcel(),
+          ),
+          AppBarOption(
+            title: 'Upload Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.upload
+                  : CupertinoIcons.cloud_upload,
+              color: getOnPrimaryColor(context),
             ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              ),
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).size.width),
-                      rows: _createRows(
-                          filteredDocs, MediaQuery.of(context).size.width),
-                    ),
-                  )
-                ],
+            onPressed: () => _uploadExcel(context),
+          ),
+          AppBarOption(
+            title: 'Download PDF',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.picture_as_pdf
+                  : CupertinoIcons.doc,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadPdf(),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: TableFrame(
+        children: [
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        filteredDocs, MediaQuery.of(context).size.width),
+                  ),
+                )
+              ],
+            ),
+          ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
             ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
 }

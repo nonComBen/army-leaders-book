@@ -19,6 +19,7 @@ import '../methods/create_app_bar_actions.dart';
 import '../methods/filter_documents.dart';
 import '../models/acft.dart';
 import '../models/app_bar_option.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_acft_page.dart';
 import '../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
@@ -902,23 +903,10 @@ class AcftPageState extends ConsumerState<AcftPage> {
             onPressed: () {
               _newRecord(context);
             }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        body: TableFrame(
           children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              ),
-            Flexible(
-              flex: 1,
+            Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(8.0),
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
@@ -1066,6 +1054,16 @@ class AcftPageState extends ConsumerState<AcftPage> {
                 ],
               ),
             ),
+            if (_adLoaded)
+              Container(
+                alignment: Alignment.center,
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
+                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                child: AdWidget(
+                  ad: myBanner!,
+                ),
+              ),
           ],
         ));
   }

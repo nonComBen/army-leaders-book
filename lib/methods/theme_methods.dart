@@ -45,13 +45,7 @@ Brightness getThemeBrightness(BuildContext context) {
 }
 
 Color getTextColor(BuildContext context) {
-  if (kIsWeb || Platform.isAndroid) {
-    return getThemeBrightness(context) == Brightness.light
-        ? Colors.black
-        : Colors.white;
-  } else {
-    return getThemeBrightness(context) == Brightness.light
-        ? Colors.black
-        : Colors.white;
-  }
+  return getThemeBrightness(context) == Brightness.light
+      ? Colors.black
+      : Colors.white;
 }

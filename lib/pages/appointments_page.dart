@@ -22,6 +22,7 @@ import '../methods/theme_methods.dart';
 import '../models/app_bar_option.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_appointment_page.dart';
 import '../pdf/appointments_pdf.dart';
 import '../../providers/subscription_state.dart';
@@ -514,135 +515,130 @@ class AptsPageState extends ConsumerState<AptsPage> {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
-        title: 'Appointments',
-        actions: createAppBarActions(
-          width,
-          [
-            if (!kIsWeb && Platform.isIOS)
-              AppBarOption(
-                title: 'New Appointment',
-                icon: Icon(
-                  CupertinoIcons.add,
-                  color: getOnPrimaryColor(context),
+      title: 'Appointments',
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isIOS)
+            AppBarOption(
+              title: 'New Appointment',
+              icon: Icon(
+                CupertinoIcons.add,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _newRecord(context),
+            ),
+          AppBarOption(
+            title: 'Edit Apointment',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _editRecord(),
+          ),
+          AppBarOption(
+            title: 'Delete Appointment',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _deleteRecord(),
+          ),
+          AppBarOption(
+            title: 'Filter Appointments',
+            icon: Icon(
+              Icons.filter_alt,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => showFilterOptions(
+                context, getSections(documents), _filterRecords),
+          ),
+          AppBarOption(
+            title: 'Download Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadExcel(),
+          ),
+          AppBarOption(
+            title: 'Upload Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.upload
+                  : CupertinoIcons.cloud_upload,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _uploadExcel(context),
+          ),
+          AppBarOption(
+            title: 'Download PDF',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.picture_as_pdf
+                  : CupertinoIcons.doc,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadPdf(),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: TableFrame(
+        children: [
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        filteredDocs, MediaQuery.of(context).size.width),
+                  ),
                 ),
-                onPressed: () => _newRecord(context),
-              ),
-            AppBarOption(
-              title: 'Edit Apointment',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.edit
-                    : CupertinoIcons.pencil,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _editRecord(),
-            ),
-            AppBarOption(
-              title: 'Delete Appointment',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.delete
-                    : CupertinoIcons.delete,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _deleteRecord(),
-            ),
-            AppBarOption(
-              title: 'Filter Appointments',
-              icon: Icon(
-                Icons.filter_alt,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => showFilterOptions(
-                  context, getSections(documents), _filterRecords),
-            ),
-            AppBarOption(
-              title: 'Download Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.download
-                    : CupertinoIcons.cloud_download,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadExcel(),
-            ),
-            AppBarOption(
-              title: 'Upload Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.upload
-                    : CupertinoIcons.cloud_upload,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _uploadExcel(context),
-            ),
-            AppBarOption(
-              title: 'Download PDF',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.picture_as_pdf
-                    : CupertinoIcons.doc,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadPdf(),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              ),
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).size.width),
-                      rows: _createRows(
-                          filteredDocs, MediaQuery.of(context).size.width),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const <Widget>[
+                        Text(
+                          'Red Text: Past Thru Date',
+                          style: TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.bold),
+                        )
+                      ],
                     ),
                   ),
-                  Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Red Text: Past Thru Date',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                  )
-                ],
+                )
+              ],
+            ),
+          ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
             ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
 }

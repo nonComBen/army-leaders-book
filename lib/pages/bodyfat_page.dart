@@ -29,6 +29,7 @@ import '../../widgets/anon_warning_banner.dart';
 import '../../models/bodyfat.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_bodyfat_page.dart';
 import 'uploadPages/upload_body_fat_page.dart';
 import '../providers/tracking_provider.dart';
@@ -637,23 +638,10 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
             onPressed: () {
               _newRecord(context);
             }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        body: TableFrame(
           children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              ),
             Expanded(
               child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
@@ -698,6 +686,16 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                 ],
               ),
             ),
+            if (_adLoaded)
+              Container(
+                alignment: Alignment.center,
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
+                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                child: AdWidget(
+                  ad: myBanner!,
+                ),
+              ),
           ],
         ));
   }

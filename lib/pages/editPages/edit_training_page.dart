@@ -7,8 +7,11 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../methods/validate.dart';
 import '../../models/training.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -85,17 +88,35 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       _add4Date,
       _add5Date;
 
-  bool validateAndSave() {
-    final form = _formKey.currentState!;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
-  }
-
   void submit(BuildContext context) async {
-    if (validateAndSave()) {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [
+        _cyberController.text,
+        _opsecController.text,
+        _antiTerrorController.text,
+        _lawController.text,
+        _persRecController.text,
+        _infoSecController.text,
+        _ctipController.text,
+        _gatController.text,
+        _sereController.text,
+        _tarpController.text,
+        _eoController.text,
+        _asapController.text,
+        _suicideController.text,
+        _sharpController.text,
+        _add1DateController.text,
+        _add2DateController.text,
+        _add3DateController.text,
+        _add4DateController.text,
+        _add5DateController.text,
+      ],
+    )) {
       DocumentSnapshot doc =
           soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
@@ -394,192 +415,179 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
     toast.context = context;
     return PlatformScaffold(
       title: _title,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+      body: FormFrame(
+        formKey: _formKey,
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: ListView(
-              children: <Widget>[
-                if (user.isAnonymous) const AnonWarningBanner(),
-                GridView.count(
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: FutureBuilder(
-                          future: firestore
-                              .collection('soldiers')
-                              .where('users', arrayContains: user.uid)
-                              .get(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.waiting:
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              default:
-                                allSoldiers = snapshot.data!.docs;
-                                soldiers =
-                                    removeSoldiers ? lessSoldiers : allSoldiers;
-                                soldiers!.sort((a, b) => a['lastName']
-                                    .toString()
-                                    .compareTo(b['lastName'].toString()));
-                                soldiers!.sort((a, b) => a['rankSort']
-                                    .toString()
-                                    .compareTo(b['rankSort'].toString()));
-                                return PlatformItemPicker(
-                                  label: const Text('Soldier'),
-                                  items: soldiers!.map((e) => e.id).toList(),
-                                  onChanged: (value) {
-                                    int index = soldiers!
-                                        .indexWhere((doc) => doc.id == value);
-                                    if (mounted) {
-                                      setState(() {
-                                        _soldierId = value;
-                                        _rank = soldiers![index]['rank'];
-                                        _lastName =
-                                            soldiers![index]['lastName'];
-                                        _firstName =
-                                            soldiers![index]['firstName'];
-                                        _section = soldiers![index]['section'];
-                                        _rankSort = soldiers![index]['rankSort']
-                                            .toString();
-                                        _owner = soldiers![index]['owner'];
-                                        _users = soldiers![index]['users'];
-                                        updated = true;
-                                      });
-                                    }
-                                  },
-                                  value: _soldierId,
-                                );
-                            }
-                          }),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
-                      child: PlatformCheckboxListTile(
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: removeSoldiers,
-                        title: const Text('Remove Soldiers already added'),
-                        onChanged: (checked) {
-                          _removeSoldiers(checked, user.uid);
-                        },
-                      ),
-                    ),
-                    DateTextField(
-                      controller: _cyberController,
-                      label: 'Cyber Date',
-                      date: _cyberDate,
-                    ),
-                    DateTextField(
-                      controller: _opsecController,
-                      label: 'OPSEC Date',
-                      date: _opsecDate,
-                    ),
-                    DateTextField(
-                      controller: _antiTerrorController,
-                      label: 'Anti-Terror Date',
-                      date: _antiTerrorDate,
-                    ),
-                    DateTextField(
-                      controller: _lawController,
-                      label: 'Law of War Date',
-                      date: _lawDate,
-                    ),
-                    DateTextField(
-                      controller: _persRecController,
-                      label: 'Personnel Recover Date',
-                      date: _persRecDate,
-                    ),
-                    DateTextField(
-                      controller: _infoSecController,
-                      label: 'Info Security Date',
-                      date: _infoSecDate,
-                    ),
-                    DateTextField(
-                      controller: _ctipController,
-                      label: 'CTIP Date',
-                      date: _ctipDate,
-                    ),
-                    DateTextField(
-                      controller: _gatController,
-                      label: 'GAT Date',
-                      date: _gatDate,
-                    ),
-                    DateTextField(
-                      controller: _sereController,
-                      label: 'SERE Date',
-                      date: _sereDate,
-                    ),
-                    DateTextField(
-                      controller: _tarpController,
-                      label: 'TARP Date',
-                      date: _tarpDate,
-                    ),
-                    DateTextField(
-                      controller: _eoController,
-                      label: 'EO Date',
-                      date: _eoDate,
-                    ),
-                    DateTextField(
-                      controller: _asapController,
-                      label: 'ASAP Date',
-                      date: _asapDate,
-                    ),
-                    DateTextField(
-                      controller: _suicideController,
-                      label: 'Suicide Prev Date',
-                      date: _suicideDate,
-                    ),
-                    DateTextField(
-                      controller: _sharpController,
-                      label: 'SHARP Date',
-                      date: _sharpDate,
-                    ),
-                  ],
-                ),
-                PlatformButton(
-                  onPressed: () {
-                    setState(() {
-                      addMore = !addMore;
-                      if (addMore) {
-                        addMoreLess = 'Less Training';
-                      } else {
-                        addMoreLess = 'More Training';
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FutureBuilder(
+                    future: firestore
+                        .collection('soldiers')
+                        .where('users', arrayContains: user.uid)
+                        .get(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        default:
+                          allSoldiers = snapshot.data!.docs;
+                          soldiers =
+                              removeSoldiers ? lessSoldiers : allSoldiers;
+                          soldiers!.sort((a, b) => a['lastName']
+                              .toString()
+                              .compareTo(b['lastName'].toString()));
+                          soldiers!.sort((a, b) => a['rankSort']
+                              .toString()
+                              .compareTo(b['rankSort'].toString()));
+                          return PlatformItemPicker(
+                            label: const Text('Soldier'),
+                            items: soldiers!.map((e) => e.id).toList(),
+                            onChanged: (value) {
+                              int index = soldiers!
+                                  .indexWhere((doc) => doc.id == value);
+                              if (mounted) {
+                                setState(() {
+                                  _soldierId = value;
+                                  _rank = soldiers![index]['rank'];
+                                  _lastName = soldiers![index]['lastName'];
+                                  _firstName = soldiers![index]['firstName'];
+                                  _section = soldiers![index]['section'];
+                                  _rankSort =
+                                      soldiers![index]['rankSort'].toString();
+                                  _owner = soldiers![index]['owner'];
+                                  _users = soldiers![index]['users'];
+                                  updated = true;
+                                });
+                              }
+                            },
+                            value: _soldierId,
+                          );
                       }
-                    });
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                child: PlatformCheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: removeSoldiers,
+                  title: const Text('Remove Soldiers already added'),
+                  onChanged: (checked) {
+                    _removeSoldiers(checked, user.uid);
                   },
-                  child: Text(addMoreLess!),
                 ),
-                if (addMore) addMoreTraining(width),
-                PlatformButton(
-                  onPressed: () {
-                    submit(context);
-                  },
-                  child: Text(widget.training.id == null
-                      ? 'Add Training'
-                      : 'Update Training'),
-                ),
-              ],
-            ),
+              ),
+              DateTextField(
+                controller: _cyberController,
+                label: 'Cyber Date',
+                date: _cyberDate,
+              ),
+              DateTextField(
+                controller: _opsecController,
+                label: 'OPSEC Date',
+                date: _opsecDate,
+              ),
+              DateTextField(
+                controller: _antiTerrorController,
+                label: 'Anti-Terror Date',
+                date: _antiTerrorDate,
+              ),
+              DateTextField(
+                controller: _lawController,
+                label: 'Law of War Date',
+                date: _lawDate,
+              ),
+              DateTextField(
+                controller: _persRecController,
+                label: 'Personnel Recover Date',
+                date: _persRecDate,
+              ),
+              DateTextField(
+                controller: _infoSecController,
+                label: 'Info Security Date',
+                date: _infoSecDate,
+              ),
+              DateTextField(
+                controller: _ctipController,
+                label: 'CTIP Date',
+                date: _ctipDate,
+              ),
+              DateTextField(
+                controller: _gatController,
+                label: 'GAT Date',
+                date: _gatDate,
+              ),
+              DateTextField(
+                controller: _sereController,
+                label: 'SERE Date',
+                date: _sereDate,
+              ),
+              DateTextField(
+                controller: _tarpController,
+                label: 'TARP Date',
+                date: _tarpDate,
+              ),
+              DateTextField(
+                controller: _eoController,
+                label: 'EO Date',
+                date: _eoDate,
+              ),
+              DateTextField(
+                controller: _asapController,
+                label: 'ASAP Date',
+                date: _asapDate,
+              ),
+              DateTextField(
+                controller: _suicideController,
+                label: 'Suicide Prev Date',
+                date: _suicideDate,
+              ),
+              DateTextField(
+                controller: _sharpController,
+                label: 'SHARP Date',
+                date: _sharpDate,
+              ),
+            ],
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              setState(() {
+                addMore = !addMore;
+                if (addMore) {
+                  addMoreLess = 'Less Training';
+                } else {
+                  addMoreLess = 'More Training';
+                }
+              });
+            },
+            child: Text(addMoreLess!),
+          ),
+          if (addMore) addMoreTraining(width),
+          PlatformButton(
+            onPressed: () {
+              submit(context);
+            },
+            child: Text(widget.training.id == null
+                ? 'Add Training'
+                : 'Update Training'),
+          ),
+        ],
       ),
     );
   }

@@ -157,48 +157,47 @@ class FaqPageState extends ConsumerState<FaqPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Frequently Asked Questions',
-      body: Padding(
+      body: Container(
         padding: EdgeInsets.symmetric(
-            horizontal: width > 932 ? (width - 916) / 2 : 16),
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: ListView(
-            children: <Widget>[
-              if (user.isAnonymous) const AnonWarningBanner(),
-              ExpansionPanelList(
-                expansionCallback: (int index, bool isExpanded) {
-                  setState(() {
-                    for (int i = 0; i < faqs.length; i++) {
-                      if (i == index) {
-                        faqs[index].isExpanded = !faqs[index].isExpanded;
-                      } else {
-                        faqs[i].isExpanded = false;
-                      }
+          horizontal: width > 932 ? (width - 916) / 2 : 16,
+          vertical: 16.0,
+        ),
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: ListView(
+          children: <Widget>[
+            if (user.isAnonymous) const AnonWarningBanner(),
+            ExpansionPanelList(
+              expansionCallback: (int index, bool isExpanded) {
+                setState(() {
+                  for (int i = 0; i < faqs.length; i++) {
+                    if (i == index) {
+                      faqs[index].isExpanded = !faqs[index].isExpanded;
+                    } else {
+                      faqs[i].isExpanded = false;
                     }
-                  });
-                },
-                children: faqs.map((Faq faq) {
-                  return ExpansionPanel(
-                    headerBuilder: (BuildContext context, bool isExpanded) {
-                      return ListTile(
-                        title: SelectableText(
-                          faq.header,
-                          textAlign: TextAlign.start,
-                          style: const TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w400,
-                          ),
+                  }
+                });
+              },
+              children: faqs.map((Faq faq) {
+                return ExpansionPanel(
+                  headerBuilder: (BuildContext context, bool isExpanded) {
+                    return ListTile(
+                      title: SelectableText(
+                        faq.header,
+                        textAlign: TextAlign.start,
+                        style: const TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w400,
                         ),
-                      );
-                    },
-                    isExpanded: faq.isExpanded,
-                    body: faq.body,
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
+                      ),
+                    );
+                  },
+                  isExpanded: faq.isExpanded,
+                  body: faq.body,
+                );
+              }).toList(),
+            ),
+          ],
         ),
       ),
     );

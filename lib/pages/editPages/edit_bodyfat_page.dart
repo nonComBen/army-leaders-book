@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../methods/validate.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -263,17 +266,15 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
     return tapes;
   }
 
-  bool validateAndSave() {
-    final form = _formKey.currentState!;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
-  }
-
   void submit(BuildContext context) async {
-    if (validateAndSave()) {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_dateController.text],
+    )) {
       DocumentSnapshot doc =
           soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
@@ -426,189 +427,173 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
     toast.context = context;
     return PlatformScaffold(
       title: _title,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+      body: FormFrame(
+        formKey: _formKey,
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Container(
-              padding: const EdgeInsets.all(16.0),
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: ListView(
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: FutureBuilder(
-                            future: firestore
-                                .collection('soldiers')
-                                .where('users', arrayContains: user.uid)
-                                .get(),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<QuerySnapshot> snapshot) {
-                              switch (snapshot.connectionState) {
-                                case ConnectionState.waiting:
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                default:
-                                  allSoldiers = snapshot.data!.docs;
-                                  soldiers = removeSoldiers
-                                      ? lessSoldiers
-                                      : allSoldiers;
-                                  soldiers!.sort((a, b) => a['lastName']
-                                      .toString()
-                                      .compareTo(b['lastName'].toString()));
-                                  soldiers!.sort((a, b) => a['rankSort']
-                                      .toString()
-                                      .compareTo(b['rankSort'].toString()));
-                                  return PlatformItemPicker(
-                                    label: const Text('Soldier'),
-                                    items: soldiers!.map((e) => e.id).toList(),
-                                    onChanged: (value) {
-                                      int index = soldiers!
-                                          .indexWhere((doc) => doc.id == value);
-                                      if (mounted) {
-                                        setState(() {
-                                          _soldierId = value;
-                                          _rank = soldiers![index]['rank'];
-                                          _lastName =
-                                              soldiers![index]['lastName'];
-                                          _firstName =
-                                              soldiers![index]['firstName'];
-                                          _section =
-                                              soldiers![index]['section'];
-                                          _rankSort = soldiers![index]
-                                                  ['rankSort']
-                                              .toString();
-                                          _owner = soldiers![index]['owner'];
-                                          _users = soldiers![index]['users'];
-                                          updated = true;
-                                        });
-                                      }
-                                    },
-                                    value: _soldierId,
-                                  );
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FutureBuilder(
+                    future: firestore
+                        .collection('soldiers')
+                        .where('users', arrayContains: user.uid)
+                        .get(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        default:
+                          allSoldiers = snapshot.data!.docs;
+                          soldiers =
+                              removeSoldiers ? lessSoldiers : allSoldiers;
+                          soldiers!.sort((a, b) => a['lastName']
+                              .toString()
+                              .compareTo(b['lastName'].toString()));
+                          soldiers!.sort((a, b) => a['rankSort']
+                              .toString()
+                              .compareTo(b['rankSort'].toString()));
+                          return PlatformItemPicker(
+                            label: const Text('Soldier'),
+                            items: soldiers!.map((e) => e.id).toList(),
+                            onChanged: (value) {
+                              int index = soldiers!
+                                  .indexWhere((doc) => doc.id == value);
+                              if (mounted) {
+                                setState(() {
+                                  _soldierId = value;
+                                  _rank = soldiers![index]['rank'];
+                                  _lastName = soldiers![index]['lastName'];
+                                  _firstName = soldiers![index]['firstName'];
+                                  _section = soldiers![index]['section'];
+                                  _rankSort =
+                                      soldiers![index]['rankSort'].toString();
+                                  _owner = soldiers![index]['owner'];
+                                  _users = soldiers![index]['users'];
+                                  updated = true;
+                                });
                               }
-                            }),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
-                        child: PlatformCheckboxListTile(
-                          controlAffinity: ListTileControlAffinity.leading,
-                          value: removeSoldiers,
-                          title: const Text('Remove Soldiers already added'),
-                          onChanged: (checked) {
-                            _removeSoldiers(checked, user.uid);
-                          },
-                        ),
-                      ),
-                      DateTextField(
-                        controller: _dateController,
-                        label: 'Date',
-                        date: _dateTime,
-                      ),
-                      PlatformSelectionWidget(
-                        titles: const [Text('M'), Text('F')],
-                        values: const ['Male', 'Female'],
-                        groupValue: _gender,
-                        onChanged: (dynamic gender) {
-                          _gender = gender;
-                          calcBmi();
-                          calcBf();
-                        },
-                      ),
-                      PaddedTextField(
-                        controller: _ageController,
-                        keyboardType: TextInputType.number,
-                        label: 'Age',
-                        decoration: const InputDecoration(
-                          labelText: 'Age',
-                        ),
-                        onChanged: (value) {
-                          updated = true;
-                          calcBmi();
-                          calcBf();
-                        },
-                      ),
-                      PaddedTextField(
-                        controller: _heightController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        label: 'Height',
-                        decoration: const InputDecoration(
-                          labelText: 'Height',
-                        ),
-                        onChanged: (value) {
-                          updated = true;
-                          height = int.tryParse(value) ?? 0;
-                          heightDouble = height.toDouble();
-                          _heightDoubleController.text =
-                              heightDouble.toString();
-                          calcBmi();
-                          calcBf();
-                        },
-                      ),
-                      PaddedTextField(
-                        controller: _weightController,
-                        keyboardType: TextInputType.number,
-                        label: 'Weight',
-                        decoration: const InputDecoration(
-                          labelText: 'Weight',
-                        ),
-                        onChanged: (value) {
-                          updated = true;
-                          calcBmi();
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformCheckboxListTile(
-                          controlAffinity: ListTileControlAffinity.leading,
-                          title: const Text('Pass BMI'),
-                          value: bmiPass,
-                          onChanged: (value) {
-                            if (mounted) {
-                              bmiPass = value!;
-                            }
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                  if (underweight)
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: HeaderText(
-                        'Soldier is Under Weight',
-                      ),
-                    ),
-                  if (!bmiPass) _buildTape(width),
-                  PlatformButton(
-                    onPressed: () {
-                      submit(context);
-                    },
-                    child: Text(widget.bodyfat.id == null
-                        ? 'Add Body Comp'
-                        : 'Update Body Comp'),
-                  ),
-                ],
-              )),
-        ),
+                            },
+                            value: _soldierId,
+                          );
+                      }
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                child: PlatformCheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: removeSoldiers,
+                  title: const Text('Remove Soldiers already added'),
+                  onChanged: (checked) {
+                    _removeSoldiers(checked, user.uid);
+                  },
+                ),
+              ),
+              DateTextField(
+                controller: _dateController,
+                label: 'Date',
+                date: _dateTime,
+              ),
+              PlatformSelectionWidget(
+                titles: const [Text('M'), Text('F')],
+                values: const ['Male', 'Female'],
+                groupValue: _gender,
+                onChanged: (dynamic gender) {
+                  _gender = gender;
+                  calcBmi();
+                  calcBf();
+                },
+              ),
+              PaddedTextField(
+                controller: _ageController,
+                keyboardType: TextInputType.number,
+                label: 'Age',
+                decoration: const InputDecoration(
+                  labelText: 'Age',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                  calcBmi();
+                  calcBf();
+                },
+              ),
+              PaddedTextField(
+                controller: _heightController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                label: 'Height',
+                decoration: const InputDecoration(
+                  labelText: 'Height',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                  height = int.tryParse(value) ?? 0;
+                  heightDouble = height.toDouble();
+                  _heightDoubleController.text = heightDouble.toString();
+                  calcBmi();
+                  calcBf();
+                },
+              ),
+              PaddedTextField(
+                controller: _weightController,
+                keyboardType: TextInputType.number,
+                label: 'Weight',
+                decoration: const InputDecoration(
+                  labelText: 'Weight',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                  calcBmi();
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformCheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: const Text('Pass BMI'),
+                  value: bmiPass,
+                  onChanged: (value) {
+                    if (mounted) {
+                      bmiPass = value!;
+                    }
+                  },
+                ),
+              )
+            ],
+          ),
+          if (underweight)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: HeaderText(
+                'Soldier is Under Weight',
+              ),
+            ),
+          if (!bmiPass) _buildTape(width),
+          PlatformButton(
+            onPressed: () {
+              submit(context);
+            },
+            child: Text(widget.bodyfat.id == null
+                ? 'Add Body Comp'
+                : 'Update Body Comp'),
+          ),
+        ],
       ),
     );
   }

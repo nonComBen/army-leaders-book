@@ -356,13 +356,9 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
     return PlatformScaffold(
       title: 'Settings',
       body: Center(
+        heightFactor: 1,
         child: Container(
-          padding: const EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            bottom: 16.0,
-            top: 76.0,
-          ),
+          padding: const EdgeInsets.all(16.0),
           constraints: const BoxConstraints(maxWidth: 900),
           child: Form(
             key: _formState,
@@ -370,859 +366,857 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                 ? () => onBackPressed(context)
                 : () => Future(() => true),
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: HeaderText(
-                      'Theme',
-                    ),
+            child: ListView(
+              children: <Widget>[
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: HeaderText(
+                    'Theme',
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformSelectionWidget(
-                      titles: const [Text('Light'), Text('Dark')],
-                      values: const ['Light', 'Dark'],
-                      groupValue: _brightness,
-                      onChanged: (dynamic value) {
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformSelectionWidget(
+                    titles: const [Text('Light'), Text('Dark')],
+                    values: const ['Light', 'Dark'],
+                    groupValue: _brightness,
+                    onChanged: (dynamic value) {
+                      setState(() {
+                        _brightness = value;
+                        prefs.setBool('darkMode', value == 'Dark');
+                        if (value == 'Light') {
+                          themeService.lightTheme();
+                        } else {
+                          themeService.darkTheme();
+                        }
+                      });
+                    },
+                  ),
+                ),
+                Divider(
+                  color: accentColor,
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: HeaderText(
+                    'Home Screen Cards',
+                  ),
+                ),
+                GridView.count(
+                  padding: const EdgeInsets.all(8.0),
+                  crossAxisCount: width > 700 ? 2 : 1,
+                  mainAxisSpacing: 1.0,
+                  crossAxisSpacing: 1.0,
+                  shrinkWrap: true,
+                  childAspectRatio: width > 900
+                      ? 900 / 150
+                      : width > 700
+                          ? width / 150
+                          : width / 75,
+                  primary: false,
+                  children: [
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('PERSTAT'),
+                      onChanged: (value) {
                         setState(() {
-                          _brightness = value;
-                          prefs.setBool('darkMode', value == 'Dark');
-                          if (value == 'Light') {
-                            themeService.lightTheme();
-                          } else {
-                            themeService.darkTheme();
-                          }
+                          perstat = value!;
                         });
                       },
+                      value: perstat,
                     ),
-                  ),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: HeaderText(
-                      'Home Screen Cards',
-                    ),
-                  ),
-                  GridView.count(
-                    padding: const EdgeInsets.all(8.0),
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    shrinkWrap: true,
-                    childAspectRatio: width > 900
-                        ? 900 / 150
-                        : width > 700
-                            ? width / 150
-                            : width / 75,
-                    primary: false,
-                    children: [
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('PERSTAT'),
-                        onChanged: (value) {
-                          setState(() {
-                            perstat = value!;
-                          });
-                        },
-                        value: perstat,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('Appointments'),
-                        onChanged: (value) {
-                          setState(() {
-                            apts = value!;
-                          });
-                        },
-                        value: apts,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('APFT Stats'),
-                        onChanged: (value) {
-                          setState(() {
-                            apft = value!;
-                          });
-                        },
-                        value: apft,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('ACFT Stats'),
-                        onChanged: (value) {
-                          setState(() {
-                            acft = value!;
-                          });
-                        },
-                        value: acft,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('Profiles'),
-                        onChanged: (value) {
-                          setState(() {
-                            profiles = value!;
-                          });
-                        },
-                        value: profiles,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('Body Composition Stats'),
-                        onChanged: (value) {
-                          setState(() {
-                            bf = value!;
-                          });
-                        },
-                        value: bf,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('Weapon Stats'),
-                        onChanged: (value) {
-                          setState(() {
-                            weapons = value!;
-                          });
-                        },
-                        value: weapons,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('Flags'),
-                        onChanged: (value) {
-                          setState(() {
-                            flags = value!;
-                          });
-                        },
-                        value: flags,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('MedPros'),
-                        onChanged: (value) {
-                          setState(() {
-                            medpros = value!;
-                          });
-                        },
-                        value: medpros,
-                      ),
-                      PlatformCheckboxListTile(
-                        padding: const EdgeInsets.all(8.0),
-                        title: const Text('Training'),
-                        onChanged: (value) {
-                          setState(() {
-                            training = value!;
-                          });
-                        },
-                        value: training,
-                      ),
-                    ],
-                  ),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: HeaderText(
-                      'Notifications',
-                    ),
-                  ),
-                  PlatformCheckboxListTile(
-                    padding: const EdgeInsets.all(8.0),
-                    title: const Text('Receive Notifications'),
-                    onChanged: (value) {
-                      setState(() {
-                        addNotification = value!;
-                      });
-                    },
-                    value: addNotification,
-                  ),
-                  const Text(
-                    'APFT/ACFT',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: acftController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        acftMos = int.tryParse(value) ?? 6;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: acftNotifications.length,
-                      itemBuilder: (context, index) {
-                        acftNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${acftNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      acftNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.acft);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const HeaderText(
-                    'Body Composition',
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: bfController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        bfMos = int.tryParse(value) ?? 6;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: bfNotifications.length,
-                      itemBuilder: (context, index) {
-                        bfNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${bfNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      bfNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.bf);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Text(
-                    'Weapons Qualification',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: weaponsController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        weaponMos = int.tryParse(value) ?? 6;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: weaponNotifications.length,
-                      itemBuilder: (context, index) {
-                        weaponNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${weaponNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      weaponNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.weapon);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Text(
-                    'PHA',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: phaController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        phaMos = int.tryParse(value) ?? 12;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: phaNotifications.length,
-                      itemBuilder: (context, index) {
-                        phaNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${phaNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      phaNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.pha);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Text(
-                    'Dental',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: dentalController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        dentalMos = int.tryParse(value) ?? 12;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: dentalNotifications.length,
-                      itemBuilder: (context, index) {
-                        dentalNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${dentalNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      dentalNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.dental);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Text(
-                    'Vision',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: visionController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        visionMos = int.tryParse(value) ?? 12;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: visionNotifications.length,
-                      itemBuilder: (context, index) {
-                        visionNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${visionNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      visionNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.vision);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Text(
-                    'Hearing',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: hearingController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        hearingMos = int.tryParse(value) ?? 12;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: hearingNotifications.length,
-                      itemBuilder: (context, index) {
-                        hearingNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${hearingNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      hearingNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.hearing);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Divider(
-                    color: accentColor,
-                  ),
-                  const Text(
-                    'HIV',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.start,
-                  ),
-                  PaddedTextField(
-                    keyboardType: TextInputType.number,
-                    controller: hivController,
-                    enabled: true,
-                    label: 'Due after X months',
-                    decoration: const InputDecoration(
-                      labelText: 'Due after X months',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        hivMos = int.tryParse(value) ?? 24;
-                        updated = true;
-                      });
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: HeaderText(
-                          'Notifications',
-                          textAlign: TextAlign.start,
-                        ),
-                      ),
-                      PlatformIconButton(
-                          icon: Icon(
-                            Icons.add,
-                            size: 32,
-                            color: getTextColor(context),
-                          ),
-                          onPressed: () {
-                            _editNotification(context, null, Notification.acft);
-                          })
-                    ],
-                  ),
-                  GridView.builder(
-                      padding: const EdgeInsets.all(0.0),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: width > 700 ? 2 : 1,
-                        mainAxisSpacing: 1.0,
-                        crossAxisSpacing: 1.0,
-                        childAspectRatio: width > 900
-                            ? 900 / 150
-                            : width > 700
-                                ? width / 150
-                                : width / 75,
-                      ),
-                      shrinkWrap: true,
-                      primary: false,
-                      itemCount: hivNotifications.length,
-                      itemBuilder: (context, index) {
-                        hivNotifications.sort();
-                        return Card(
-                          color: getContrastingBackgroundColor(context),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformListTile(
-                              title: Text(
-                                  '${hivNotifications[index].toString()} Days Before'),
-                              trailing: PlatformIconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    setState(() {
-                                      hivNotifications.removeAt(index);
-                                    });
-                                  }),
-                              onTap: () {
-                                _editNotification(
-                                    context, index, Notification.hiv);
-                              },
-                            ),
-                          ),
-                        );
-                      }),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformButton(
-                      child: const Text('Save'),
-                      onPressed: () {
-                        if (_formState.currentState!.validate()) {
-                          submit();
-                        } else {
-                          FToast toast = FToast();
-                          toast.context = context;
-                          toast.showToast(
-                            child: const MyToast(
-                              message:
-                                  'Form is invalid, text fields must not be blank',
-                            ),
-                          );
-                        }
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('Appointments'),
+                      onChanged: (value) {
+                        setState(() {
+                          apts = value!;
+                        });
                       },
+                      value: apts,
                     ),
-                  )
-                ],
-              ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('APFT Stats'),
+                      onChanged: (value) {
+                        setState(() {
+                          apft = value!;
+                        });
+                      },
+                      value: apft,
+                    ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('ACFT Stats'),
+                      onChanged: (value) {
+                        setState(() {
+                          acft = value!;
+                        });
+                      },
+                      value: acft,
+                    ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('Profiles'),
+                      onChanged: (value) {
+                        setState(() {
+                          profiles = value!;
+                        });
+                      },
+                      value: profiles,
+                    ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('Body Composition Stats'),
+                      onChanged: (value) {
+                        setState(() {
+                          bf = value!;
+                        });
+                      },
+                      value: bf,
+                    ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('Weapon Stats'),
+                      onChanged: (value) {
+                        setState(() {
+                          weapons = value!;
+                        });
+                      },
+                      value: weapons,
+                    ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('Flags'),
+                      onChanged: (value) {
+                        setState(() {
+                          flags = value!;
+                        });
+                      },
+                      value: flags,
+                    ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('MedPros'),
+                      onChanged: (value) {
+                        setState(() {
+                          medpros = value!;
+                        });
+                      },
+                      value: medpros,
+                    ),
+                    PlatformCheckboxListTile(
+                      padding: const EdgeInsets.all(8.0),
+                      title: const Text('Training'),
+                      onChanged: (value) {
+                        setState(() {
+                          training = value!;
+                        });
+                      },
+                      value: training,
+                    ),
+                  ],
+                ),
+                Divider(
+                  color: accentColor,
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: HeaderText(
+                    'Notifications',
+                  ),
+                ),
+                PlatformCheckboxListTile(
+                  padding: const EdgeInsets.all(8.0),
+                  title: const Text('Receive Notifications'),
+                  onChanged: (value) {
+                    setState(() {
+                      addNotification = value!;
+                    });
+                  },
+                  value: addNotification,
+                ),
+                const Text(
+                  'APFT/ACFT',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: acftController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      acftMos = int.tryParse(value) ?? 6;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: acftNotifications.length,
+                    itemBuilder: (context, index) {
+                      acftNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${acftNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    acftNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.acft);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const HeaderText(
+                  'Body Composition',
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: bfController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      bfMos = int.tryParse(value) ?? 6;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: bfNotifications.length,
+                    itemBuilder: (context, index) {
+                      bfNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${bfNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    bfNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.bf);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const Text(
+                  'Weapons Qualification',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: weaponsController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      weaponMos = int.tryParse(value) ?? 6;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: weaponNotifications.length,
+                    itemBuilder: (context, index) {
+                      weaponNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${weaponNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    weaponNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.weapon);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const Text(
+                  'PHA',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: phaController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      phaMos = int.tryParse(value) ?? 12;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: phaNotifications.length,
+                    itemBuilder: (context, index) {
+                      phaNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${phaNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    phaNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.pha);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const Text(
+                  'Dental',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: dentalController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      dentalMos = int.tryParse(value) ?? 12;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: dentalNotifications.length,
+                    itemBuilder: (context, index) {
+                      dentalNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${dentalNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    dentalNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.dental);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const Text(
+                  'Vision',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: visionController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      visionMos = int.tryParse(value) ?? 12;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: visionNotifications.length,
+                    itemBuilder: (context, index) {
+                      visionNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${visionNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    visionNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.vision);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const Text(
+                  'Hearing',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: hearingController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      hearingMos = int.tryParse(value) ?? 12;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: hearingNotifications.length,
+                    itemBuilder: (context, index) {
+                      hearingNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${hearingNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    hearingNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.hearing);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const Text(
+                  'HIV',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: hivController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      hivMos = int.tryParse(value) ?? 24;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(context, null, Notification.acft);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: hivNotifications.length,
+                    itemBuilder: (context, index) {
+                      hivNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${hivNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    hivNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.hiv);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformButton(
+                    child: const Text('Save'),
+                    onPressed: () {
+                      if (_formState.currentState!.validate()) {
+                        submit();
+                      } else {
+                        FToast toast = FToast();
+                        toast.context = context;
+                        toast.showToast(
+                          child: const MyToast(
+                            message:
+                                'Form is invalid, text fields must not be blank',
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                )
+              ],
             ),
           ),
         ),

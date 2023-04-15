@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
-import '../../methods/theme_methods.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/medpro.dart';
 import '../../models/soldier.dart';
@@ -17,6 +16,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
 class UploadMedProsPage extends ConsumerStatefulWidget {
   const UploadMedProsPage({
@@ -249,325 +249,314 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Upload MedPros',
-      body: Center(
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    child: const Text('Pick File'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path!,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SoldierId'),
-                          items: columnHeaders,
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('PHA Date'),
-                          items: columnHeaders,
-                          value: pha,
-                          onChanged: (value) {
-                            setState(() {
-                              pha = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Dental Date'),
-                          items: columnHeaders,
-                          value: dental,
-                          onChanged: (value) {
-                            setState(() {
-                              dental = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Vision Date'),
-                          items: columnHeaders,
-                          value: vision,
-                          onChanged: (value) {
-                            setState(() {
-                              vision = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Hearing Date'),
-                          items: columnHeaders,
-                          value: hearing,
-                          onChanged: (value) {
-                            setState(() {
-                              hearing = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('HIV Date'),
-                          items: columnHeaders,
-                          value: hiv,
-                          onChanged: (value) {
-                            setState(() {
-                              hiv = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Influenza Date'),
-                          items: columnHeaders,
-                          value: flu,
-                          onChanged: (value) {
-                            setState(() {
-                              flu = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('MMR Date'),
-                          items: columnHeaders,
-                          value: mmr,
-                          onChanged: (value) {
-                            setState(() {
-                              mmr = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Varicella Date'),
-                          items: columnHeaders,
-                          value: varicella,
-                          onChanged: (value) {
-                            setState(() {
-                              varicella = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Polio Date'),
-                          items: columnHeaders,
-                          value: polio,
-                          onChanged: (value) {
-                            setState(() {
-                              polio = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Tuberculin Date'),
-                          items: columnHeaders,
-                          value: tuber,
-                          onChanged: (value) {
-                            setState(() {
-                              tuber = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Tetanus Date'),
-                          items: columnHeaders,
-                          value: tetanus,
-                          onChanged: (value) {
-                            setState(() {
-                              tetanus = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Hepatitis A Date'),
-                          items: columnHeaders,
-                          value: hepA,
-                          onChanged: (value) {
-                            setState(() {
-                              hepA = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Hepititis B Date'),
-                          items: columnHeaders,
-                          value: hepB,
-                          onChanged: (value) {
-                            setState(() {
-                              hepB = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Encephalitis Date'),
-                          items: columnHeaders,
-                          value: enc,
-                          onChanged: (value) {
-                            setState(() {
-                              enc = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Meningococcal Date'),
-                          items: columnHeaders,
-                          value: mening,
-                          onChanged: (value) {
-                            setState(() {
-                              mening = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Typhoid Date'),
-                          items: columnHeaders,
-                          value: typhoid,
-                          onChanged: (value) {
-                            setState(() {
-                              typhoid = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Yellow Fever Date'),
-                          items: columnHeaders,
-                          value: yellow,
-                          onChanged: (value) {
-                            setState(() {
-                              yellow = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Small Pox Date'),
-                          items: columnHeaders,
-                          value: smallPox,
-                          onChanged: (value) {
-                            setState(() {
-                              smallPox = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Anthrax Date'),
-                          items: columnHeaders,
-                          value: anthrax,
-                          onChanged: (value) {
-                            setState(() {
-                              anthrax = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      if (path == '') {
-                        fileIsBlankMessage(context);
-                      }
-                      _saveData(context);
-                    },
-                    child: const Text('Upload MedPros'),
-                  )
-                ],
-              ),
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('PHA Date'),
+                  items: columnHeaders,
+                  value: pha,
+                  onChanged: (value) {
+                    setState(() {
+                      pha = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Dental Date'),
+                  items: columnHeaders,
+                  value: dental,
+                  onChanged: (value) {
+                    setState(() {
+                      dental = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Vision Date'),
+                  items: columnHeaders,
+                  value: vision,
+                  onChanged: (value) {
+                    setState(() {
+                      vision = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Hearing Date'),
+                  items: columnHeaders,
+                  value: hearing,
+                  onChanged: (value) {
+                    setState(() {
+                      hearing = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('HIV Date'),
+                  items: columnHeaders,
+                  value: hiv,
+                  onChanged: (value) {
+                    setState(() {
+                      hiv = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Influenza Date'),
+                  items: columnHeaders,
+                  value: flu,
+                  onChanged: (value) {
+                    setState(() {
+                      flu = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('MMR Date'),
+                  items: columnHeaders,
+                  value: mmr,
+                  onChanged: (value) {
+                    setState(() {
+                      mmr = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Varicella Date'),
+                  items: columnHeaders,
+                  value: varicella,
+                  onChanged: (value) {
+                    setState(() {
+                      varicella = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Polio Date'),
+                  items: columnHeaders,
+                  value: polio,
+                  onChanged: (value) {
+                    setState(() {
+                      polio = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Tuberculin Date'),
+                  items: columnHeaders,
+                  value: tuber,
+                  onChanged: (value) {
+                    setState(() {
+                      tuber = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Tetanus Date'),
+                  items: columnHeaders,
+                  value: tetanus,
+                  onChanged: (value) {
+                    setState(() {
+                      tetanus = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Hepatitis A Date'),
+                  items: columnHeaders,
+                  value: hepA,
+                  onChanged: (value) {
+                    setState(() {
+                      hepA = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Hepititis B Date'),
+                  items: columnHeaders,
+                  value: hepB,
+                  onChanged: (value) {
+                    setState(() {
+                      hepB = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Encephalitis Date'),
+                  items: columnHeaders,
+                  value: enc,
+                  onChanged: (value) {
+                    setState(() {
+                      enc = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Meningococcal Date'),
+                  items: columnHeaders,
+                  value: mening,
+                  onChanged: (value) {
+                    setState(() {
+                      mening = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Typhoid Date'),
+                  items: columnHeaders,
+                  value: typhoid,
+                  onChanged: (value) {
+                    setState(() {
+                      typhoid = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Yellow Fever Date'),
+                  items: columnHeaders,
+                  value: yellow,
+                  onChanged: (value) {
+                    setState(() {
+                      yellow = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Small Pox Date'),
+                  items: columnHeaders,
+                  value: smallPox,
+                  onChanged: (value) {
+                    setState(() {
+                      smallPox = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Anthrax Date'),
+                  items: columnHeaders,
+                  value: anthrax,
+                  onChanged: (value) {
+                    setState(() {
+                      anthrax = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload MedPros'),
+          )
+        ],
       ),
     );
   }

@@ -4,7 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/methods/validate.dart';
 
+import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
@@ -47,17 +50,15 @@ class EditActionsTrackerPageState
   DateTime? _dateTime, _statusDateTime;
   FToast toast = FToast();
 
-  bool validateAndSave() {
-    final form = _formKey.currentState!;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
-  }
-
   void submit(BuildContext context) async {
-    if (validateAndSave()) {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_dateController.text, _statusDateController.text],
+    )) {
       DocumentSnapshot doc =
           soldiers!.firstWhere((element) => element.id == _soldierId);
       _users = doc['users'];
@@ -100,6 +101,7 @@ class EditActionsTrackerPageState
       }
     } else {
       toast.showToast(
+        toastDuration: const Duration(seconds: 5),
         child: const MyToast(
           message: 'Form is invalid - dates must be in yyyy-MM-dd format',
         ),
@@ -188,152 +190,139 @@ class EditActionsTrackerPageState
     toast.context = context;
     return PlatformScaffold(
       title: _title,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+      body: FormFrame(
+        formKey: _formKey,
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: ListView(
-              children: <Widget>[
-                if (user.isAnonymous) const AnonWarningBanner(),
-                GridView.count(
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: FutureBuilder(
-                          future: firestore
-                              .collection('soldiers')
-                              .where('users', arrayContains: user.uid)
-                              .get(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.waiting:
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              default:
-                                allSoldiers = snapshot.data!.docs;
-                                soldiers =
-                                    removeSoldiers ? lessSoldiers : allSoldiers;
-                                soldiers!.sort((a, b) => a['lastName']
-                                    .toString()
-                                    .compareTo(b['lastName'].toString()));
-                                soldiers!.sort((a, b) => a['rankSort']
-                                    .toString()
-                                    .compareTo(b['rankSort'].toString()));
-                                return PlatformItemPicker(
-                                  label: const Text('Soldier'),
-                                  items: soldiers!.map((e) => e.id).toList(),
-                                  onChanged: (value) {
-                                    int index = soldiers!
-                                        .indexWhere((doc) => doc.id == value);
-                                    if (mounted) {
-                                      setState(() {
-                                        _soldierId = value;
-                                        _rank = soldiers![index]['rank'];
-                                        _lastName =
-                                            soldiers![index]['lastName'];
-                                        _firstName =
-                                            soldiers![index]['firstName'];
-                                        _section = soldiers![index]['section'];
-                                        _rankSort = soldiers![index]['rankSort']
-                                            .toString();
-                                        _owner = soldiers![index]['owner'];
-                                        _users = soldiers![index]['users'];
-                                        updated = true;
-                                      });
-                                    }
-                                  },
-                                  value: _soldierId,
-                                );
-                            }
-                          }),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformCheckboxListTile(
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: removeSoldiers,
-                        title: const Text('Remove Soldiers already added'),
-                        onChanged: (checked) {
-                          _removeSoldiers(checked, user.uid);
-                        },
-                      ),
-                    ),
-                    PaddedTextField(
-                      autocorrect: false,
-                      controller: _actionController,
-                      keyboardType: TextInputType.text,
-                      textCapitalization: TextCapitalization.words,
-                      label: 'Action',
-                      decoration: const InputDecoration(
-                        labelText: 'Action',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    DateTextField(
-                      controller: _dateController,
-                      label: 'Date Submitted',
-                      date: _dateTime,
-                    ),
-                    PaddedTextField(
-                      autocorrect: false,
-                      controller: _statusController,
-                      keyboardType: TextInputType.text,
-                      textCapitalization: TextCapitalization.words,
-                      label: 'Current Status',
-                      decoration: const InputDecoration(
-                        labelText: 'Current Status',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    DateTextField(
-                      controller: _statusDateController,
-                      label: 'Status Date',
-                      date: _statusDateTime,
-                    ),
-                  ],
-                ),
-                PaddedTextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 2,
-                  controller: _remarksController,
-                  label: 'Remarks',
-                  decoration: const InputDecoration(labelText: 'Remarks'),
-                  onChanged: (value) {
-                    updated = true;
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          GridView.count(
+            padding: const EdgeInsets.all(0),
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FutureBuilder(
+                    future: firestore
+                        .collection('soldiers')
+                        .where('users', arrayContains: user.uid)
+                        .get(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        default:
+                          allSoldiers = snapshot.data!.docs;
+                          soldiers =
+                              removeSoldiers ? lessSoldiers : allSoldiers;
+                          soldiers!.sort((a, b) => a['lastName']
+                              .toString()
+                              .compareTo(b['lastName'].toString()));
+                          soldiers!.sort((a, b) => a['rankSort']
+                              .toString()
+                              .compareTo(b['rankSort'].toString()));
+                          return PlatformItemPicker(
+                            label: const Text('Soldier'),
+                            items: soldiers!.map((e) => e.id).toList(),
+                            onChanged: (value) {
+                              int index = soldiers!
+                                  .indexWhere((doc) => doc.id == value);
+                              if (mounted) {
+                                setState(() {
+                                  _soldierId = value;
+                                  _rank = soldiers![index]['rank'];
+                                  _lastName = soldiers![index]['lastName'];
+                                  _firstName = soldiers![index]['firstName'];
+                                  _section = soldiers![index]['section'];
+                                  _rankSort =
+                                      soldiers![index]['rankSort'].toString();
+                                  _owner = soldiers![index]['owner'];
+                                  _users = soldiers![index]['users'];
+                                  updated = true;
+                                });
+                              }
+                            },
+                            value: _soldierId,
+                          );
+                      }
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformCheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: removeSoldiers,
+                  title: const Text('Remove Soldiers already added'),
+                  onChanged: (checked) {
+                    _removeSoldiers(checked, user.uid);
                   },
                 ),
-                PlatformButton(
-                  child: Text(widget.action.id == null
-                      ? 'Add Action'
-                      : 'Update Action'),
-                  onPressed: () => submit(context),
+              ),
+              PaddedTextField(
+                autocorrect: false,
+                controller: _actionController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                label: 'Action',
+                decoration: const InputDecoration(
+                  labelText: 'Action',
                 ),
-              ],
-            ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              DateTextField(
+                controller: _dateController,
+                label: 'Date Submitted',
+                date: _dateTime,
+              ),
+              PaddedTextField(
+                autocorrect: false,
+                controller: _statusController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                label: 'Current Status',
+                decoration: const InputDecoration(
+                  labelText: 'Current Status',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              DateTextField(
+                controller: _statusDateController,
+                label: 'Status Date',
+                date: _statusDateTime,
+              ),
+            ],
           ),
-        ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 2,
+            controller: _remarksController,
+            label: 'Remarks',
+            decoration: const InputDecoration(labelText: 'Remarks'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PlatformButton(
+            child:
+                Text(widget.action.id == null ? 'Add Action' : 'Update Action'),
+            onPressed: () => submit(context),
+          ),
+        ],
       ),
     );
   }

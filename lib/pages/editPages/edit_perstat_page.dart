@@ -7,8 +7,11 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../methods/validate.dart';
 import '../../models/perstat.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -67,17 +70,15 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
   DateTime? _start, _end;
   FToast toast = FToast();
 
-  bool validateAndSave() {
-    final form = _formKey.currentState!;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
-  }
-
   void submit(BuildContext context) async {
-    if (validateAndSave()) {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_startController.text, _endController.text],
+    )) {
       String? type;
       if (_type == 'Other' && _typeController.text != '') {
         type = _typeController.text;
@@ -215,177 +216,163 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     toast.context = context;
     return PlatformScaffold(
       title: _title,
-      body: Form(
-        key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+      body: FormFrame(
+        formKey: _formKey,
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: ListView(
-              children: <Widget>[
-                if (user.isAnonymous) const AnonWarningBanner(),
-                GridView.count(
-                  primary: false,
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900
-                      ? 900 / 230
-                      : width > 700
-                          ? width / 230
-                          : width / 115,
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                      child: FutureBuilder(
-                          future: firestore
-                              .collection('soldiers')
-                              .where('users', arrayContains: user.uid)
-                              .get(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.waiting:
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              default:
-                                allSoldiers = snapshot.data!.docs;
-                                soldiers =
-                                    removeSoldiers ? lessSoldiers : allSoldiers;
-                                soldiers!.sort((a, b) => a['lastName']
-                                    .toString()
-                                    .compareTo(b['lastName'].toString()));
-                                soldiers!.sort((a, b) => a['rankSort']
-                                    .toString()
-                                    .compareTo(b['rankSort'].toString()));
-                                return PlatformItemPicker(
-                                  label: const Text('Soldier'),
-                                  items: soldiers!.map((e) => e.id).toList(),
-                                  onChanged: (value) {
-                                    int index = soldiers!
-                                        .indexWhere((doc) => doc.id == value);
-                                    if (mounted) {
-                                      setState(() {
-                                        _soldierId = value;
-                                        _rank = soldiers![index]['rank'];
-                                        _lastName =
-                                            soldiers![index]['lastName'];
-                                        _firstName =
-                                            soldiers![index]['firstName'];
-                                        _section = soldiers![index]['section'];
-                                        _rankSort = soldiers![index]['rankSort']
-                                            .toString();
-                                        _owner = soldiers![index]['owner'];
-                                        _users = soldiers![index]['users'];
-                                        updated = true;
-                                      });
-                                    }
-                                  },
-                                  value: _soldierId,
-                                );
-                            }
-                          }),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
-                      child: PlatformCheckboxListTile(
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: removeSoldiers,
-                        title: const Text('Remove Soldiers already added'),
-                        onChanged: (checked) {
-                          _removeSoldiers(checked, user.uid);
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformItemPicker(
-                        label: const Text('Type'),
-                        items: _types,
-                        onChanged: (dynamic value) {
-                          if (mounted) {
-                            setState(() {
-                              _type = value;
-                              updated = true;
-                            });
-                          }
-                        },
-                        value: _type,
-                      ),
-                    ),
-                    if (_type == 'Other')
-                      PaddedTextField(
-                        controller: _typeController,
-                        keyboardType: TextInputType.text,
-                        label: 'Type',
-                        decoration: const InputDecoration(
-                          labelText: 'Type',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            updated = true;
-                          });
-                        },
-                      ),
-                    PaddedTextField(
-                      controller: _locController,
-                      keyboardType: TextInputType.text,
-                      label: 'Location',
-                      decoration: const InputDecoration(
-                        labelText: 'Location',
-                      ),
-                      onChanged: (value) {
-                        updated = true;
-                      },
-                    ),
-                    DateTextField(
-                      controller: _startController,
-                      label: 'Start Date',
-                      date: _start,
-                    ),
-                    DateTextField(
-                      controller: _endController,
-                      label: 'End Date',
-                      date: _end,
-                    ),
-                  ],
-                ),
-                PaddedTextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 2,
-                  controller: _commentsController,
-                  label: 'Comments',
-                  decoration: const InputDecoration(labelText: 'Comments'),
-                  onChanged: (value) {
-                    updated = true;
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                child: FutureBuilder(
+                    future: firestore
+                        .collection('soldiers')
+                        .where('users', arrayContains: user.uid)
+                        .get(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        default:
+                          allSoldiers = snapshot.data!.docs;
+                          soldiers =
+                              removeSoldiers ? lessSoldiers : allSoldiers;
+                          soldiers!.sort((a, b) => a['lastName']
+                              .toString()
+                              .compareTo(b['lastName'].toString()));
+                          soldiers!.sort((a, b) => a['rankSort']
+                              .toString()
+                              .compareTo(b['rankSort'].toString()));
+                          return PlatformItemPicker(
+                            label: const Text('Soldier'),
+                            items: soldiers!.map((e) => e.id).toList(),
+                            onChanged: (value) {
+                              int index = soldiers!
+                                  .indexWhere((doc) => doc.id == value);
+                              if (mounted) {
+                                setState(() {
+                                  _soldierId = value;
+                                  _rank = soldiers![index]['rank'];
+                                  _lastName = soldiers![index]['lastName'];
+                                  _firstName = soldiers![index]['firstName'];
+                                  _section = soldiers![index]['section'];
+                                  _rankSort =
+                                      soldiers![index]['rankSort'].toString();
+                                  _owner = soldiers![index]['owner'];
+                                  _users = soldiers![index]['users'];
+                                  updated = true;
+                                });
+                              }
+                            },
+                            value: _soldierId,
+                          );
+                      }
+                    }),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                child: PlatformCheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: removeSoldiers,
+                  title: const Text('Remove Soldiers already added'),
+                  onChanged: (checked) {
+                    _removeSoldiers(checked, user.uid);
                   },
                 ),
-                PlatformButton(
-                  onPressed: () {
-                    if (_endController.text != '' && _end!.isBefore(_start!)) {
-                      toast.showToast(
-                        child: const MyToast(
-                          message: 'End Date must be after Start Date',
-                        ),
-                      );
-                    } else {
-                      submit(context);
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Type'),
+                  items: _types,
+                  onChanged: (dynamic value) {
+                    if (mounted) {
+                      setState(() {
+                        _type = value;
+                        updated = true;
+                      });
                     }
                   },
-                  child: Text(widget.perstat.id == null
-                      ? 'Add Perstat'
-                      : 'Update Perstat'),
+                  value: _type,
                 ),
-              ],
-            ),
+              ),
+              if (_type == 'Other')
+                PaddedTextField(
+                  controller: _typeController,
+                  keyboardType: TextInputType.text,
+                  label: 'Type',
+                  decoration: const InputDecoration(
+                    labelText: 'Type',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      updated = true;
+                    });
+                  },
+                ),
+              PaddedTextField(
+                controller: _locController,
+                keyboardType: TextInputType.text,
+                label: 'Location',
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              DateTextField(
+                controller: _startController,
+                label: 'Start Date',
+                date: _start,
+              ),
+              DateTextField(
+                controller: _endController,
+                label: 'End Date',
+                date: _end,
+              ),
+            ],
           ),
-        ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 2,
+            controller: _commentsController,
+            label: 'Comments',
+            decoration: const InputDecoration(labelText: 'Comments'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (_endController.text != '' && _end!.isBefore(_start!)) {
+                toast.showToast(
+                  child: const MyToast(
+                    message: 'End Date must be after Start Date',
+                  ),
+                );
+              } else {
+                submit(context);
+              }
+            },
+            child: Text(
+                widget.perstat.id == null ? 'Add Perstat' : 'Update Perstat'),
+          ),
+        ],
       ),
     );
   }

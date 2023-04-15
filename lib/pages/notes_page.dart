@@ -18,6 +18,7 @@ import '../methods/theme_methods.dart';
 import '../models/app_bar_option.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_note_page.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
@@ -282,23 +283,10 @@ class NotesPageState extends ConsumerState<NotesPage> {
           onPressed: () {
             _newRecord(context);
           }),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: TableFrame(
         children: [
-          if (_adLoaded)
-            Container(
-              alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
-              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-              child: AdWidget(
-                ad: myBanner!,
-              ),
-            ),
           Expanded(
             child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(8.0),
               children: <Widget>[
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
@@ -314,6 +302,16 @@ class NotesPageState extends ConsumerState<NotesPage> {
               ],
             ),
           ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
+              ),
+            ),
         ],
       ),
     );

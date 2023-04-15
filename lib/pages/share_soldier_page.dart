@@ -112,52 +112,6 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
                         lookUpMethod = value.toString();
                       }),
                     ),
-                    // child: Center(
-                    //   child: ToggleButtons(
-                    //       borderRadius: BorderRadius.circular(12.0),
-                    //       isSelected: [lookupUserId, lookupUserEmail],
-                    //       fillColor: Theme.of(context).primaryColor,
-                    //       selectedColor: Colors.white,
-                    //       color: getOnPrimaryColor(context),
-                    //       onPressed: ((value) {
-                    //         setState(() {
-                    //           switch (value) {
-                    //             case 0:
-                    //               lookupUserId = true;
-                    //               lookupUserEmail = false;
-                    //               break;
-                    //             case 1:
-                    //               lookupUserId = false;
-                    //               lookupUserEmail = true;
-                    //               break;
-                    //           }
-                    //         });
-                    //       }),
-                    //       children: [
-                    //         SizedBox(
-                    //           width: width > 500 ? 200 : 100,
-                    //           child: Center(
-                    //             child: Text(
-                    //               'User Id',
-                    //               style: TextStyle(
-                    //                 color: getTextColor(context),
-                    //               ),
-                    //             ),
-                    //           ),
-                    //         ),
-                    //         SizedBox(
-                    //           width: width > 500 ? 200 : 100,
-                    //           child: Center(
-                    //             child: Text(
-                    //               'User Email',
-                    //               style: TextStyle(
-                    //                 color: getTextColor(context),
-                    //               ),
-                    //             ),
-                    //           ),
-                    //         )
-                    //       ]),
-                    // ),
                   ),
                   PaddedTextField(
                     controller: controller,

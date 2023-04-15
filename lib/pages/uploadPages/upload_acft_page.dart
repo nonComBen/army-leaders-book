@@ -8,7 +8,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
 
-import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/acft.dart';
@@ -17,6 +16,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
 class UploadAcftPage extends ConsumerStatefulWidget {
   const UploadAcftPage({
@@ -255,300 +255,289 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Upload ACFT Stats',
-      body: Center(
-        child: Card(
-          color: getContrastingBackgroundColor(context),
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    child: const Text('Pick File'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path!,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SoldierId'),
-                          items: columnHeaders,
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Date'),
-                          items: columnHeaders,
-                          value: date,
-                          onChanged: (value) {
-                            setState(() {
-                              date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Age Group'),
-                          items: columnHeaders,
-                          value: ageGroup,
-                          onChanged: (value) {
-                            setState(() {
-                              ageGroup = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Gender'),
-                          items: columnHeaders,
-                          value: gender,
-                          onChanged: (value) {
-                            setState(() {
-                              gender = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('MDL Raw'),
-                          items: columnHeaders,
-                          value: mdlRaw,
-                          onChanged: (value) {
-                            setState(() {
-                              mdlRaw = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('MDL Score'),
-                          items: columnHeaders,
-                          value: mdlScore,
-                          onChanged: (value) {
-                            setState(() {
-                              mdlScore = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SPT Raw'),
-                          items: columnHeaders,
-                          value: sptRaw,
-                          onChanged: (value) {
-                            setState(() {
-                              sptRaw = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SPT Score'),
-                          items: columnHeaders,
-                          value: sptScore,
-                          onChanged: (value) {
-                            setState(() {
-                              sptScore = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('HRP Raw'),
-                          items: columnHeaders,
-                          value: puRaw,
-                          onChanged: (value) {
-                            setState(() {
-                              puRaw = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('HRP Score'),
-                          items: columnHeaders,
-                          value: puScore,
-                          onChanged: (value) {
-                            setState(() {
-                              puScore = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SDC Raw'),
-                          items: columnHeaders,
-                          value: sdcRaw,
-                          onChanged: (value) {
-                            setState(() {
-                              sdcRaw = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('SDC Score'),
-                          items: columnHeaders,
-                          value: sdcScore,
-                          onChanged: (value) {
-                            setState(() {
-                              sdcScore = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('PLK Raw'),
-                          items: columnHeaders,
-                          value: plkRaw,
-                          onChanged: (value) {
-                            setState(() {
-                              plkRaw = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('PLK Score'),
-                          items: columnHeaders,
-                          value: plkScore,
-                          onChanged: (value) {
-                            setState(() {
-                              plkScore = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Aerobic Event'),
-                          items: columnHeaders,
-                          value: runEvent,
-                          onChanged: (value) {
-                            setState(() {
-                              runEvent = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Aerobic Raw'),
-                          items: columnHeaders,
-                          value: runRaw,
-                          onChanged: (value) {
-                            setState(() {
-                              runRaw = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Aerobic Score'),
-                          items: columnHeaders,
-                          value: runScore,
-                          onChanged: (value) {
-                            setState(() {
-                              runScore = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformItemPicker(
-                          label: const Text('Pass'),
-                          items: columnHeaders,
-                          value: passDropdown,
-                          onChanged: (value) {
-                            setState(() {
-                              passDropdown = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  PlatformButton(
-                    onPressed: () {
-                      if (path == '') {
-                        fileIsBlankMessage(context);
-                      } else {
-                        _saveData(context);
-                      }
-                    },
-                    child: const Text('Upload ACFT Stats'),
-                  )
-                ],
-              ),
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Date'),
+                  items: columnHeaders,
+                  value: date,
+                  onChanged: (value) {
+                    setState(() {
+                      date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Age Group'),
+                  items: columnHeaders,
+                  value: ageGroup,
+                  onChanged: (value) {
+                    setState(() {
+                      ageGroup = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Gender'),
+                  items: columnHeaders,
+                  value: gender,
+                  onChanged: (value) {
+                    setState(() {
+                      gender = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('MDL Raw'),
+                  items: columnHeaders,
+                  value: mdlRaw,
+                  onChanged: (value) {
+                    setState(() {
+                      mdlRaw = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('MDL Score'),
+                  items: columnHeaders,
+                  value: mdlScore,
+                  onChanged: (value) {
+                    setState(() {
+                      mdlScore = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SPT Raw'),
+                  items: columnHeaders,
+                  value: sptRaw,
+                  onChanged: (value) {
+                    setState(() {
+                      sptRaw = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SPT Score'),
+                  items: columnHeaders,
+                  value: sptScore,
+                  onChanged: (value) {
+                    setState(() {
+                      sptScore = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('HRP Raw'),
+                  items: columnHeaders,
+                  value: puRaw,
+                  onChanged: (value) {
+                    setState(() {
+                      puRaw = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('HRP Score'),
+                  items: columnHeaders,
+                  value: puScore,
+                  onChanged: (value) {
+                    setState(() {
+                      puScore = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SDC Raw'),
+                  items: columnHeaders,
+                  value: sdcRaw,
+                  onChanged: (value) {
+                    setState(() {
+                      sdcRaw = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SDC Score'),
+                  items: columnHeaders,
+                  value: sdcScore,
+                  onChanged: (value) {
+                    setState(() {
+                      sdcScore = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('PLK Raw'),
+                  items: columnHeaders,
+                  value: plkRaw,
+                  onChanged: (value) {
+                    setState(() {
+                      plkRaw = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('PLK Score'),
+                  items: columnHeaders,
+                  value: plkScore,
+                  onChanged: (value) {
+                    setState(() {
+                      plkScore = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Aerobic Event'),
+                  items: columnHeaders,
+                  value: runEvent,
+                  onChanged: (value) {
+                    setState(() {
+                      runEvent = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Aerobic Raw'),
+                  items: columnHeaders,
+                  value: runRaw,
+                  onChanged: (value) {
+                    setState(() {
+                      runRaw = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Aerobic Score'),
+                  items: columnHeaders,
+                  value: runScore,
+                  onChanged: (value) {
+                    setState(() {
+                      runScore = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Pass'),
+                  items: columnHeaders,
+                  value: passDropdown,
+                  onChanged: (value) {
+                    setState(() {
+                      passDropdown = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              } else {
+                _saveData(context);
+              }
+            },
+            child: const Text('Upload ACFT Stats'),
+          )
+        ],
       ),
     );
   }

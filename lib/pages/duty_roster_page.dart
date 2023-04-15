@@ -26,6 +26,7 @@ import '../methods/web_download.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_duty_roster_page.dart';
 import '../../models/duty.dart';
 import 'uploadPages/upload_duty_roster_page.dart';
@@ -586,23 +587,10 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
           onPressed: () {
             _newRecord(context);
           }),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: TableFrame(
         children: [
-          if (_adLoaded)
-            Container(
-              alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
-              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-              child: AdWidget(
-                ad: myBanner!,
-              ),
-            ),
           Expanded(
             child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(8.0),
               children: <Widget>[
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
@@ -634,6 +622,16 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
               ],
             ),
           ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
+              ),
+            ),
         ],
       ),
     );

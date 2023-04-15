@@ -681,29 +681,27 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           ),
         ],
       ),
-      body: Padding(
+      body: Container(
         padding: EdgeInsets.symmetric(
             horizontal: width < 816 ? 16 : (width - 800) / 2),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: WillPopScope(
-            onWillPop: onWillPop,
-            child: ListView(
-              padding: const EdgeInsets.all(8.0),
-              children: <Widget>[
-                if (user.isAnonymous) const AnonWarningBanner(),
-                RepaintBoundary(
-                  key: _globalKey,
-                  child: Column(
-                    children: _allSoldiers.isEmpty
-                        ? _addSoldiersWarning()
-                        : _soldiers.isEmpty
-                            ? [const CircularProgressIndicator()]
-                            : buildRoster(),
-                  ),
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: WillPopScope(
+          onWillPop: onWillPop,
+          child: ListView(
+            padding: const EdgeInsets.all(8.0),
+            children: <Widget>[
+              if (user.isAnonymous) const AnonWarningBanner(),
+              RepaintBoundary(
+                key: _globalKey,
+                child: Column(
+                  children: _allSoldiers.isEmpty
+                      ? _addSoldiersWarning()
+                      : _soldiers.isEmpty
+                          ? [const CircularProgressIndicator()]
+                          : buildRoster(),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

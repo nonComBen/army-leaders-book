@@ -98,105 +98,103 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
       title: 'Create Account',
-      body: Padding(
+      body: Container(
         padding: EdgeInsets.symmetric(
-            horizontal: width > 932 ? (width - 916) / 2 : 16),
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          constraints: const BoxConstraints(maxWidth: 900.0),
-          child: Form(
-            key: formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Card(
-              color: getContrastingBackgroundColor(context),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListView(
-                  children: <Widget>[
-                    const SizedBox(height: 32.0),
-                    CircleAvatar(
-                      backgroundColor: Colors.transparent,
-                      radius: 96.0,
-                      child: Image.asset('assets/icon-512.png'),
-                    ),
-                    const SizedBox(height: 32.0),
-                    PaddedTextField(
-                      controller: TextEditingController(),
-                      label: 'Email',
-                      decoration: const InputDecoration(
-                          labelText: 'Email', icon: Icon(Icons.mail)),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Email can\'t be empty' : null,
-                    ),
-                    PaddedTextField(
-                      label: 'Password',
-                      decoration: const InputDecoration(
-                          labelText: 'Password', icon: Icon(Icons.lock)),
-                      controller: _passwordController,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Password can\'t be empty' : null,
-                      obscureText: true,
-                    ),
-                    PaddedTextField(
-                      controller: TextEditingController(),
-                      label: 'Confirm Password',
-                      decoration: const InputDecoration(
-                          labelText: 'Confirm Password',
-                          icon: Icon(Icons.lock)),
-                      validator: (value) => value != _passwordController.text
-                          ? 'Password fields must match'
-                          : null,
-                      obscureText: true,
-                    ),
-                    PlatformCheckboxListTile(
-                        title: PlatformTextButton(
-                          child: const Text(
-                            'I agree to Terms and Conditions',
-                            style: TextStyle(
-                                color: Colors.blue,
-                                decoration: TextDecoration.underline),
-                          ),
-                          onPressed: () => _launchURL(
-                              'https://www.termsfeed.com/terms-conditions/0424a9962833498977879c797842c626'),
+          horizontal: width > 932 ? (width - 916) / 2 : 16,
+          vertical: 16.0,
+        ),
+        constraints: const BoxConstraints(maxWidth: 900.0),
+        child: Form(
+          key: formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Card(
+            color: getContrastingBackgroundColor(context),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView(
+                children: <Widget>[
+                  const SizedBox(height: 32.0),
+                  CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    radius: 96.0,
+                    child: Image.asset('assets/icon-512.png'),
+                  ),
+                  const SizedBox(height: 32.0),
+                  PaddedTextField(
+                    controller: TextEditingController(),
+                    label: 'Email',
+                    decoration: const InputDecoration(
+                        labelText: 'Email', icon: Icon(Icons.mail)),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) =>
+                        value!.isEmpty ? 'Email can\'t be empty' : null,
+                  ),
+                  PaddedTextField(
+                    label: 'Password',
+                    decoration: const InputDecoration(
+                        labelText: 'Password', icon: Icon(Icons.lock)),
+                    controller: _passwordController,
+                    validator: (value) =>
+                        value!.isEmpty ? 'Password can\'t be empty' : null,
+                    obscureText: true,
+                  ),
+                  PaddedTextField(
+                    controller: TextEditingController(),
+                    label: 'Confirm Password',
+                    decoration: const InputDecoration(
+                        labelText: 'Confirm Password', icon: Icon(Icons.lock)),
+                    validator: (value) => value != _passwordController.text
+                        ? 'Password fields must match'
+                        : null,
+                    obscureText: true,
+                  ),
+                  PlatformCheckboxListTile(
+                      title: PlatformTextButton(
+                        child: const Text(
+                          'I agree to Terms and Conditions',
+                          style: TextStyle(
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline),
                         ),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: tosAgree,
-                        onChanged: (value) {
-                          setState(() {
-                            tosAgree = value!;
-                          });
+                        onPressed: () => _launchURL(
+                            'https://www.termsfeed.com/terms-conditions/0424a9962833498977879c797842c626'),
+                      ),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      value: tosAgree,
+                      onChanged: (value) {
+                        setState(() {
+                          tosAgree = value!;
+                        });
+                      }),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformButton(
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('Create Account',
+                              style: TextStyle(fontSize: 20.0)),
+                        ),
+                        onPressed: () {
+                          validateAndCreate(auth);
                         }),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformButton(
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text('Create Account',
-                                style: TextStyle(fontSize: 20.0)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformTextButton(
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Have an account? Login',
+                            style:
+                                TextStyle(fontSize: 20.0, color: Colors.blue),
+                            textAlign: TextAlign.center,
                           ),
-                          onPressed: () {
-                            validateAndCreate(auth);
-                          }),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextButton(
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Have an account? Login',
-                              style:
-                                  TextStyle(fontSize: 20.0, color: Colors.blue),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          onPressed: () {
-                            rootService.signOut();
-                          }),
-                    ),
-                  ],
-                ),
+                        ),
+                        onPressed: () {
+                          rootService.signOut();
+                        }),
+                  ),
+                ],
               ),
             ),
           ),

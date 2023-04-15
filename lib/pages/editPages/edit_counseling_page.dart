@@ -272,13 +272,10 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Date',
-                        date: _dateTime,
-                      ),
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Date',
+                      date: _dateTime,
                     ),
                   ],
                 ),
@@ -287,6 +284,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   maxLines: 5,
                   controller: _purposeController,
                   enabled: true,
+                  label: 'Purpose of Counseling',
                   decoration:
                       const InputDecoration(labelText: 'Purpose of Counseling'),
                   onChanged: (value) {
@@ -297,7 +295,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                   controller: _keyPointsController,
-                  enabled: true,
+                  label: 'Key Points of Discussion',
                   decoration: const InputDecoration(
                       labelText: 'Key Points of Discussion'),
                   onChanged: (value) {
@@ -308,7 +306,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                   controller: _planOfActionController,
-                  enabled: true,
+                  label: 'Plan of Action',
                   decoration:
                       const InputDecoration(labelText: 'Plan of Action'),
                   onChanged: (value) {
@@ -319,7 +317,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                   controller: _indivRemarksController,
-                  enabled: true,
+                  label: 'Individual Counseled Remarks',
                   decoration: const InputDecoration(
                       labelText: 'Individual Counseled Remarks'),
                   onChanged: (value) {
@@ -330,7 +328,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                   controller: _leaderRespController,
-                  enabled: true,
+                  label: 'Leader Responsibilities',
                   decoration: const InputDecoration(
                       labelText: 'Leader Responsibilities'),
                   onChanged: (value) {
@@ -341,7 +339,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                   controller: _assessmentController,
-                  enabled: true,
+                  label: 'Assessment',
                   decoration: const InputDecoration(labelText: 'Assessment'),
                   onChanged: (value) {
                     updated = true;

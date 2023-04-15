@@ -289,7 +289,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _dutyDescriptionController,
-                  enabled: true,
+                  label: 'Daily Duties and Scope',
                   decoration: const InputDecoration(
                       labelText: 'Daily Duties and Scope'),
                   onChanged: (value) {
@@ -300,7 +300,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _specialEmphasisController,
-                  enabled: true,
+                  label: 'Areas of Special Emphasis',
                   decoration: const InputDecoration(
                       labelText: 'Areas of Special Emphasis'),
                   onChanged: (value) {
@@ -311,7 +311,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _appointedDutiesController,
-                  enabled: true,
+                  label: 'Appointed Duties',
                   decoration:
                       const InputDecoration(labelText: 'Appointed Duties'),
                   onChanged: (value) {
@@ -325,7 +325,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _characterController,
-                  enabled: true,
+                  label: 'Character',
                   decoration: const InputDecoration(labelText: 'Character'),
                   onChanged: (value) {
                     updated = true;
@@ -335,7 +335,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _presenceController,
-                  enabled: true,
+                  label: 'Presence',
                   decoration: const InputDecoration(labelText: 'Presence'),
                   onChanged: (value) {
                     updated = true;
@@ -345,7 +345,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _intellectController,
-                  enabled: true,
+                  label: 'Intellect',
                   decoration: const InputDecoration(labelText: 'Intellect'),
                   onChanged: (value) {
                     updated = true;
@@ -355,7 +355,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _leadsController,
-                  enabled: true,
+                  label: 'Leads',
                   decoration: const InputDecoration(labelText: 'Leads'),
                   onChanged: (value) {
                     updated = true;
@@ -365,7 +365,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _developsController,
-                  enabled: true,
+                  label: 'Develops',
                   decoration: const InputDecoration(labelText: 'Develops'),
                   onChanged: (value) {
                     updated = true;
@@ -375,7 +375,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _achievesController,
-                  enabled: true,
+                  label: 'Achieves',
                   decoration: const InputDecoration(labelText: 'Achieves'),
                   onChanged: (value) {
                     updated = true;
@@ -388,7 +388,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
                   controller: _performanceController,
-                  enabled: true,
+                  label: 'Rater Overall Performance',
                   decoration: const InputDecoration(
                       labelText: 'Rater Overall Performance'),
                   onChanged: (value) {

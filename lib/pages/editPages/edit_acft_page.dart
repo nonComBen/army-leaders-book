@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
@@ -23,7 +25,6 @@ import '../../calculators/mdl_calculator.dart';
 import '../../calculators/sdc_calculator.dart';
 import '../../calculators/spt_calculator.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
-import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditAcftPage extends ConsumerStatefulWidget {
   const EditAcftPage({
@@ -538,82 +539,32 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                         },
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Date',
-                        date: _dateTime,
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Date',
+                      date: _dateTime,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: PlatformSelectionWidget(
+                        titles: const [Text('M'), Text('F')],
+                        groupValue: _gender,
+                        values: const ['Male', 'Female'],
+                        onChanged: (dynamic value) {
+                          setState(() {
+                            updated = true;
+                            _gender = value;
+                            calcMdl();
+                            calcSpt();
+                            calcHrp();
+                            calcSdc();
+                            calcPlk();
+                            calcRunScore();
+                            calcTotal();
+                          });
+                        },
                       ),
                     ),
-                    PlatformSelectionWidget(
-                      titles: const [Text('M'), Text('F')],
-                      groupValue: _gender,
-                      values: const ['Male', 'Female'],
-                      onChanged: (dynamic value) {
-                        setState(() {
-                          updated = true;
-                          _gender = value;
-                          calcMdl();
-                          calcSpt();
-                          calcHrp();
-                          calcSdc();
-                          calcPlk();
-                          calcRunScore();
-                          calcTotal();
-                        });
-                      },
-                    ),
-                    // Row(
-                    //   children: [
-                    //     Flexible(
-                    //       flex: 1,
-                    //       child: RadioListTile(
-                    //         title: const Text('M'),
-                    //         value: 'Male',
-                    //         groupValue: _gender,
-                    //         activeColor: Theme.of(context).primaryColor,
-                    //         onChanged: (dynamic value) {
-                    //           setState(() {
-                    //             updated = true;
-                    //             _gender = value;
-                    //             calcMdl();
-                    //             calcSpt();
-                    //             calcHrp();
-                    //             calcSdc();
-                    //             calcPlk();
-                    //             calcRunScore();
-                    //             calcTotal();
-                    //           });
-                    //         },
-                    //       ),
-                    //     ),
-                    //     Flexible(
-                    //       flex: 1,
-                    //       child: RadioListTile(
-                    //         title: const Text('F'),
-                    //         value: 'Female',
-                    //         groupValue: _gender,
-                    //         activeColor: Theme.of(context).primaryColor,
-                    //         onChanged: (dynamic value) {
-                    //           setState(() {
-                    //             updated = true;
-                    //             _gender = value;
-                    //             calcMdl();
-                    //             calcSpt();
-                    //             calcHrp();
-                    //             calcSdc();
-                    //             calcPlk();
-                    //             calcRunScore();
-                    //             calcTotal();
-                    //             calcRunScore();
-                    //             calcTotal();
-                    //           });
-                    //         },
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: PlatformItemPicker(
@@ -660,7 +611,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                   crossAxisCount: 3,
                   mainAxisSpacing: 1.0,
                   crossAxisSpacing: 1.0,
-                  childAspectRatio: width > 900 ? 900 / 300 : width / 300.0,
+                  childAspectRatio: width > 900 ? 900 / 325 : width / 325,
                   shrinkWrap: true,
                   children: <Widget>[
                     const Padding(
@@ -669,33 +620,28 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                           'MDL',
                           style: TextStyle(fontSize: 18),
                         )),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _deadliftRawController,
-                        keyboardType: TextInputType.number,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Raw',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            updated = true;
-                            _mdlRaw = int.tryParse(value) ?? 0;
-                            calcMdl();
-                            calcTotal();
-                          });
-                        },
+                    PaddedTextField(
+                      controller: _deadliftRawController,
+                      keyboardType: TextInputType.number,
+                      label: 'Raw',
+                      decoration: const InputDecoration(
+                        labelText: 'Raw',
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          updated = true;
+                          _mdlRaw = int.tryParse(value) ?? 0;
+                          calcMdl();
+                          calcTotal();
+                        });
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _deadliftController,
-                        enabled: false,
-                        decoration: const InputDecoration(
-                          labelText: 'Score',
-                        ),
+                    PaddedTextField(
+                      controller: _deadliftController,
+                      enabled: false,
+                      label: 'Score',
+                      decoration: const InputDecoration(
+                        labelText: 'Score',
                       ),
                     ),
                     const Padding(
@@ -704,33 +650,28 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                           'SPT',
                           textAlign: TextAlign.start,
                         )),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _powerThrowRawController,
-                        keyboardType: TextInputType.text,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Raw',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            updated = true;
-                            _sptRaw = double.tryParse(value) ?? 0;
-                            calcSpt();
-                            calcTotal();
-                          });
-                        },
+                    PaddedTextField(
+                      controller: _powerThrowRawController,
+                      keyboardType: TextInputType.text,
+                      label: 'Raw',
+                      decoration: const InputDecoration(
+                        labelText: 'Raw',
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          updated = true;
+                          _sptRaw = double.tryParse(value) ?? 0;
+                          calcSpt();
+                          calcTotal();
+                        });
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _powerThrowController,
-                        enabled: false,
-                        decoration: const InputDecoration(
-                          labelText: 'Score',
-                        ),
+                    PaddedTextField(
+                      controller: _powerThrowController,
+                      enabled: false,
+                      label: 'Score',
+                      decoration: const InputDecoration(
+                        labelText: 'Score',
                       ),
                     ),
                     const Padding(
@@ -740,33 +681,28 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                         textAlign: TextAlign.start,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _puRawController,
-                        keyboardType: TextInputType.number,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Raw',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            updated = true;
-                            _hrpRaw = int.tryParse(value) ?? 0;
-                            calcHrp();
-                            calcTotal();
-                          });
-                        },
+                    PaddedTextField(
+                      controller: _puRawController,
+                      keyboardType: TextInputType.number,
+                      label: 'Raw',
+                      decoration: const InputDecoration(
+                        labelText: 'Raw',
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          updated = true;
+                          _hrpRaw = int.tryParse(value) ?? 0;
+                          calcHrp();
+                          calcTotal();
+                        });
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _puController,
-                        enabled: false,
-                        decoration: const InputDecoration(
-                          labelText: 'Score',
-                        ),
+                    PaddedTextField(
+                      controller: _puController,
+                      enabled: false,
+                      label: 'Score',
+                      decoration: const InputDecoration(
+                        labelText: 'Score',
                       ),
                     ),
                     const Padding(
@@ -775,38 +711,33 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                           'SDC',
                           textAlign: TextAlign.start,
                         )),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _dragRawController,
-                        keyboardType: TextInputType.text,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Raw',
-                        ),
-                        onChanged: (value) {
-                          String mins = value.contains(':')
-                              ? value.substring(0, value.indexOf(':'))
-                              : '5';
-                          _sdcMins = int.tryParse(mins) ?? 5;
-                          String secs = value.substring(value.indexOf(':') + 1);
-                          _sdcSecs = int.tryParse(secs) ?? 0;
-                          setState(() {
-                            updated = true;
-                            calcSdc();
-                            calcTotal();
-                          });
-                        },
+                    PaddedTextField(
+                      controller: _dragRawController,
+                      keyboardType: TextInputType.text,
+                      label: 'Raw',
+                      decoration: const InputDecoration(
+                        labelText: 'Raw',
                       ),
+                      onChanged: (value) {
+                        String mins = value.contains(':')
+                            ? value.substring(0, value.indexOf(':'))
+                            : '5';
+                        _sdcMins = int.tryParse(mins) ?? 5;
+                        String secs = value.substring(value.indexOf(':') + 1);
+                        _sdcSecs = int.tryParse(secs) ?? 0;
+                        setState(() {
+                          updated = true;
+                          calcSdc();
+                          calcTotal();
+                        });
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _dragController,
-                        enabled: false,
-                        decoration: const InputDecoration(
-                          labelText: 'Score',
-                        ),
+                    PaddedTextField(
+                      controller: _dragController,
+                      enabled: false,
+                      label: 'Score',
+                      decoration: const InputDecoration(
+                        labelText: 'Score',
                       ),
                     ),
                     const Padding(
@@ -816,39 +747,33 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                         textAlign: TextAlign.start,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _plankRawController,
-                        keyboardType: TextInputType.text,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Raw',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            updated = true;
-                            String mins = value.contains(':')
-                                ? value.substring(0, value.indexOf(':'))
-                                : '0';
-                            _plkMins = int.tryParse(mins) ?? 0;
-                            String secs =
-                                value.substring(value.indexOf(':') + 1);
-                            _plkSecs = int.tryParse(secs) ?? 0;
-                            calcPlk();
-                            calcTotal();
-                          });
-                        },
+                    PaddedTextField(
+                      controller: _plankRawController,
+                      keyboardType: TextInputType.text,
+                      label: 'Raw',
+                      decoration: const InputDecoration(
+                        labelText: 'Raw',
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          updated = true;
+                          String mins = value.contains(':')
+                              ? value.substring(0, value.indexOf(':'))
+                              : '0';
+                          _plkMins = int.tryParse(mins) ?? 0;
+                          String secs = value.substring(value.indexOf(':') + 1);
+                          _plkSecs = int.tryParse(secs) ?? 0;
+                          calcPlk();
+                          calcTotal();
+                        });
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _plankController,
-                        enabled: false,
-                        decoration: const InputDecoration(
-                          labelText: 'Score',
-                        ),
+                    PaddedTextField(
+                      controller: _plankController,
+                      enabled: false,
+                      label: 'Score',
+                      decoration: const InputDecoration(
+                        labelText: 'Score',
                       ),
                     ),
                     Padding(
@@ -858,39 +783,33 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                         textAlign: TextAlign.start,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _runRawController,
-                        keyboardType: TextInputType.text,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Raw',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            updated = true;
-                            String mins = value.contains(':')
-                                ? value.substring(0, value.indexOf(':'))
-                                : '30';
-                            _runMins = int.tryParse(mins) ?? 30;
-                            String secs =
-                                value.substring(value.indexOf(':') + 1);
-                            _runSecs = int.tryParse(secs) ?? 0;
-                            calcRunScore();
-                            calcTotal();
-                          });
-                        },
+                    PaddedTextField(
+                      controller: _runRawController,
+                      keyboardType: TextInputType.text,
+                      label: 'Raw',
+                      decoration: const InputDecoration(
+                        labelText: 'Raw',
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          updated = true;
+                          String mins = value.contains(':')
+                              ? value.substring(0, value.indexOf(':'))
+                              : '30';
+                          _runMins = int.tryParse(mins) ?? 30;
+                          String secs = value.substring(value.indexOf(':') + 1);
+                          _runSecs = int.tryParse(secs) ?? 0;
+                          calcRunScore();
+                          calcTotal();
+                        });
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        controller: _runController,
-                        enabled: false,
-                        decoration: const InputDecoration(
-                          labelText: 'Score',
-                        ),
+                    PaddedTextField(
+                      controller: _runController,
+                      enabled: false,
+                      label: 'Score',
+                      decoration: const InputDecoration(
+                        labelText: 'Score',
                       ),
                     ),
                     const Padding(
@@ -906,7 +825,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context).primaryColor,
+                              color: getTextColor(context),
                               width: 2.0,
                               style: BorderStyle.solid,
                             ),

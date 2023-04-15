@@ -298,7 +298,7 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
                     PaddedTextField(
                       controller: _raterController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Rater',
                       decoration: const InputDecoration(
                         labelText: 'Rater',
                       ),
@@ -309,7 +309,7 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
                     PaddedTextField(
                       controller: _srController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Senior Rater',
                       decoration: const InputDecoration(
                         labelText: 'Senior Rater',
                       ),
@@ -320,7 +320,7 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
                     PaddedTextField(
                       controller: _reviewerController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Reviewer',
                       decoration: const InputDecoration(
                         labelText: 'Reviewer',
                       ),
@@ -328,21 +328,15 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
                         updated = true;
                       },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _lastController,
-                        label: 'Last Eval Date',
-                        date: _lastDate,
-                      ),
+                    DateTextField(
+                      controller: _lastController,
+                      label: 'Last Eval Date',
+                      date: _lastDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
-                      child: DateTextField(
-                        controller: _nextController,
-                        label: 'Next Eval Date',
-                        date: _nextDate,
-                      ),
+                    DateTextField(
+                      controller: _nextController,
+                      label: 'Next Eval Date',
+                      date: _nextDate,
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),

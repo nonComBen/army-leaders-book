@@ -137,62 +137,47 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
             mainAxisSpacing: 1.0,
             crossAxisSpacing: 1.0,
             childAspectRatio: width > 900
-                ? 900 / 200
+                ? 900 / 230
                 : width > 700
-                    ? width / 200
-                    : width / 100,
+                    ? width / 230
+                    : width / 115,
             shrinkWrap: true,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PaddedTextField(
-                    controller: _weapon2Controller,
-                    keyboardType: TextInputType.text,
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Secondary Weapon',
-                    )),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PaddedTextField(
-                    controller: _buttStock2Controller,
-                    keyboardType: TextInputType.number,
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Secondary Butt Stock #',
-                    )),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PaddedTextField(
-                    controller: _serial2Controller,
-                    keyboardType: TextInputType.text,
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Secondary Serial #',
-                    )),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PaddedTextField(
-                    controller: _optic2Controller,
-                    keyboardType: TextInputType.text,
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Secondary Optics',
-                    )),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PaddedTextField(
-                    controller: _opticSerial2Controller,
-                    keyboardType: TextInputType.text,
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Secondary Optics Serial #',
-                    )),
-              ),
+              PaddedTextField(
+                  controller: _weapon2Controller,
+                  keyboardType: TextInputType.text,
+                  label: 'Secondary Weapon',
+                  decoration: const InputDecoration(
+                    labelText: 'Secondary Weapon',
+                  )),
+              PaddedTextField(
+                  controller: _buttStock2Controller,
+                  keyboardType: TextInputType.number,
+                  label: 'Secondary Butt Stock #',
+                  decoration: const InputDecoration(
+                    labelText: 'Secondary Butt Stock #',
+                  )),
+              PaddedTextField(
+                  controller: _serial2Controller,
+                  keyboardType: TextInputType.text,
+                  label: 'Secondary Serial #',
+                  decoration: const InputDecoration(
+                    labelText: 'Secondary Serial #',
+                  )),
+              PaddedTextField(
+                  controller: _optic2Controller,
+                  keyboardType: TextInputType.text,
+                  label: 'Secondary Optics',
+                  decoration: const InputDecoration(
+                    labelText: 'Secondary Optics',
+                  )),
+              PaddedTextField(
+                  controller: _opticSerial2Controller,
+                  keyboardType: TextInputType.text,
+                  label: 'Secondary Optics Serial #',
+                  decoration: const InputDecoration(
+                    labelText: 'Secondary Optics Serial #',
+                  )),
             ],
           )
         ],
@@ -397,7 +382,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _weaponController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Weapon',
                       decoration: const InputDecoration(
                         labelText: 'Weapon',
                       ),
@@ -408,7 +393,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _buttStockController,
                       keyboardType: TextInputType.number,
-                      enabled: true,
+                      label: 'Butt Stock #',
                       decoration: const InputDecoration(
                         labelText: 'Butt Stock #',
                       ),
@@ -419,7 +404,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _serialController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Serial #',
                       decoration: const InputDecoration(
                         labelText: 'Serial #',
                       ),
@@ -430,7 +415,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _opticController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Optics',
                       decoration: const InputDecoration(
                         labelText: 'Optics',
                       ),
@@ -441,7 +426,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _opticSerialController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Optics Serial #',
                       decoration: const InputDecoration(
                         labelText: 'Optics Serial #',
                       ),
@@ -469,16 +454,16 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                   mainAxisSpacing: 1.0,
                   crossAxisSpacing: 1.0,
                   childAspectRatio: width > 900
-                      ? 900 / 200
+                      ? 900 / 230
                       : width > 700
-                          ? width / 200
-                          : width / 100,
+                          ? width / 230
+                          : width / 115,
                   shrinkWrap: true,
                   children: <Widget>[
                     PaddedTextField(
                       controller: _maskController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Mask',
                       decoration: const InputDecoration(
                         labelText: 'Mask',
                       ),
@@ -489,7 +474,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _vehicleController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Vehicle',
                       decoration: const InputDecoration(
                         labelText: 'Vehicle',
                       ),
@@ -500,7 +485,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _bumperController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Bumper #',
                       decoration: const InputDecoration(
                         labelText: 'Bumper #',
                       ),
@@ -511,7 +496,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _otherController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Other Item',
                       decoration: const InputDecoration(
                         labelText: 'Other Item',
                       ),
@@ -522,7 +507,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                     PaddedTextField(
                       controller: _otherSerialController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Other Item Serial #',
                       decoration: const InputDecoration(
                         labelText: 'Other Item Serial #',
                       ),

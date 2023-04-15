@@ -7,7 +7,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
+import '../../widgets/platform_widgets/platform_text_field.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
@@ -18,7 +20,6 @@ import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditBodyfatPage extends ConsumerStatefulWidget {
   const EditBodyfatPage({
@@ -201,64 +202,53 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
 
   List<Widget> tapes() {
     List<Widget> tapes = [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PlatformTextField(
-          controller: _neckController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          enabled: true,
-          decoration: const InputDecoration(
-            labelText: 'Neck',
-          ),
-          onChanged: (value) {
-            calcBf();
-          },
+      PaddedTextField(
+        controller: _neckController,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        label: 'Neck',
+        decoration: const InputDecoration(
+          labelText: 'Neck',
         ),
+        onChanged: (value) {
+          calcBf();
+        },
       ),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PlatformTextField(
-          controller: _waistController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          enabled: true,
-          decoration: const InputDecoration(
-            labelText: 'Waist',
-          ),
-          onChanged: (value) {
-            calcBf();
-          },
+      PaddedTextField(
+        controller: _waistController,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        label: 'Waist',
+        decoration: const InputDecoration(
+          labelText: 'Waist',
         ),
+        onChanged: (value) {
+          calcBf();
+        },
       ),
     ];
     if (_gender == 'Female') {
       tapes.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformTextField(
-            controller: _hipController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            enabled: true,
-            decoration: const InputDecoration(
-              labelText: 'Hip',
-            ),
-            onChanged: (value) {
-              calcBf();
-            },
+        PaddedTextField(
+          controller: _hipController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          label: 'Hip',
+          decoration: const InputDecoration(
+            labelText: 'Hip',
           ),
+          onChanged: (value) {
+            calcBf();
+          },
         ),
       );
     }
     tapes.add(
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PlatformTextField(
-            controller: _percentController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            enabled: false,
-            decoration: const InputDecoration(
-              labelText: 'Bodyfat Percent',
-            )),
-      ),
+      PaddedTextField(
+          controller: _percentController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          enabled: false,
+          label: 'Bodyfat Percentage',
+          decoration: const InputDecoration(
+            labelText: 'Bodyfat Percent',
+          )),
     );
     tapes.add(CheckboxListTile(
       title: const Text('Pass Bodyfat'),
@@ -542,89 +532,48 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                           calcBf();
                         },
                       ),
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      //   crossAxisAlignment: CrossAxisAlignment.start,
-                      //   children: <Widget>[
-                      //     SizedBox(
-                      //       width: 150,
-                      //       child: RadioListTile(
-                      //         title: const Text('M'),
-                      //         value: 'Male',
-                      //         groupValue: _gender,
-                      //         onChanged: (dynamic gender) {
-                      //           _gender = gender;
-                      //           calcBmi();
-                      //           calcBf();
-                      //         },
-                      //       ),
-                      //     ),
-                      //     SizedBox(
-                      //       width: 150,
-                      //       child: RadioListTile(
-                      //         title: const Text('F'),
-                      //         value: 'Female',
-                      //         groupValue: _gender,
-                      //         onChanged: (dynamic gender) {
-                      //           _gender = gender;
-                      //           calcBmi();
-                      //           calcBf();
-                      //         },
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformTextField(
-                          controller: _ageController,
-                          keyboardType: TextInputType.number,
-                          enabled: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Age',
-                          ),
-                          onChanged: (value) {
-                            updated = true;
-                            calcBmi();
-                            calcBf();
-                          },
+                      PaddedTextField(
+                        controller: _ageController,
+                        keyboardType: TextInputType.number,
+                        label: 'Age',
+                        decoration: const InputDecoration(
+                          labelText: 'Age',
                         ),
+                        onChanged: (value) {
+                          updated = true;
+                          calcBmi();
+                          calcBf();
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformTextField(
-                          controller: _heightController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          enabled: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Height',
-                          ),
-                          onChanged: (value) {
-                            updated = true;
-                            height = int.tryParse(value) ?? 0;
-                            heightDouble = height.toDouble();
-                            _heightDoubleController.text =
-                                heightDouble.toString();
-                            calcBmi();
-                            calcBf();
-                          },
+                      PaddedTextField(
+                        controller: _heightController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        label: 'Height',
+                        decoration: const InputDecoration(
+                          labelText: 'Height',
                         ),
+                        onChanged: (value) {
+                          updated = true;
+                          height = int.tryParse(value) ?? 0;
+                          heightDouble = height.toDouble();
+                          _heightDoubleController.text =
+                              heightDouble.toString();
+                          calcBmi();
+                          calcBf();
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: PlatformTextField(
-                          controller: _weightController,
-                          keyboardType: TextInputType.number,
-                          enabled: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Weight',
-                          ),
-                          onChanged: (value) {
-                            updated = true;
-                            calcBmi();
-                          },
+                      PaddedTextField(
+                        controller: _weightController,
+                        keyboardType: TextInputType.number,
+                        label: 'Weight',
+                        decoration: const InputDecoration(
+                          labelText: 'Weight',
                         ),
+                        onChanged: (value) {
+                          updated = true;
+                          calcBmi();
+                        },
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),

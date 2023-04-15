@@ -12,6 +12,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/auth_provider.dart';
+import 'package:leaders_book/methods/create_app_bar_actions.dart';
+import 'package:leaders_book/methods/filter_documents.dart';
+import 'package:leaders_book/widgets/padded_text_field.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -20,11 +24,14 @@ import '../methods/download_methods.dart';
 import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/perstat.dart';
+import '../models/app_bar_option.dart';
 import '../models/perstat_by_name.dart';
 import '../models/soldier.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
+import '../widgets/header_text.dart';
 import '../widgets/my_toast.dart';
+import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_icon_button.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
@@ -49,7 +56,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
 
   final GlobalKey _globalKey = GlobalKey();
 
-  List<String?> types = [
+  List<String> types = [
     'PDY',
     'Leave',
     'Pass',
@@ -175,11 +182,11 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          HeaderText(
             text,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.start,
           ),
-          IconButton(
+          PlatformIconButton(
               icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
               onPressed: () {
                 setState(() {
@@ -213,10 +220,10 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   editRecord(int index, Map<dynamic, dynamic> soldier) {
     int dailyIndex = dailies.indexOf(soldier);
     int filteredIndex = filteredDailies.indexOf(soldier);
-    String? type = soldier['type'];
-    String? otherType = '';
+    String type = soldier['type'];
+    final controller = TextEditingController(text: '');
     if (!types.contains(type)) {
-      otherType = type;
+      controller.text = type;
       type = 'Other';
     }
     Widget title = const Text('Edit Status');
@@ -231,16 +238,10 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                   content: SingleChildScrollView(
                     child: Column(
                       children: <Widget>[
-                        DropdownButtonFormField(
-                            items: types.map((type) {
-                              return DropdownMenuItem(
-                                value: type,
-                                child: Text(type!),
-                              );
-                            }).toList(),
+                        PlatformItemPicker(
+                            items: types,
                             value: type,
-                            decoration:
-                                const InputDecoration(labelText: 'Status'),
+                            label: const Text('Status'),
                             onChanged: (dynamic value) {
                               refresh(() {
                                 type = value;
@@ -259,13 +260,13 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                               });
                             }),
                         type == 'Other'
-                            ? TextFormField(
+                            ? PaddedTextField(
+                                label: 'Other Status',
                                 decoration: const InputDecoration(
                                     labelText: 'Other Status'),
-                                initialValue: otherType,
+                                controller: controller,
                                 onChanged: (value) {
                                   refresh(() {
-                                    otherType = value;
                                     soldier['type'] = value;
                                     soldier['typeSort'] = '3';
                                   });
@@ -310,15 +311,10 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: <Widget>[
-                    DropdownButtonFormField(
-                        items: types.map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type!),
-                          );
-                        }).toList(),
+                    PlatformItemPicker(
+                        items: types,
                         value: type,
-                        decoration: const InputDecoration(labelText: 'Status'),
+                        label: const Text('Status'),
                         onChanged: (dynamic value) {
                           refresh(() {
                             type = value;
@@ -337,13 +333,13 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                           });
                         }),
                     type == 'Other'
-                        ? TextFormField(
+                        ? PaddedTextField(
+                            label: 'Other Status',
                             decoration: const InputDecoration(
                                 labelText: 'Other Status'),
-                            initialValue: otherType,
+                            controller: controller,
                             onChanged: (value) {
                               refresh(() {
-                                otherType = value;
                                 soldier['type'] = value;
                                 soldier['typeSort'] = '3';
                               });
@@ -379,13 +375,11 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     }
   }
 
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDailies = List.from(dailies);
-    } else {
-      filteredDailies =
-          dailies.where((element) => element['section'] == section).toList();
-    }
+  void _filterRecords(List<String> sections) {
+    filteredDailies = dailies
+        .where((element) => sections.contains(element['section']))
+        .toList();
+
     setState(() {});
   }
 
@@ -638,71 +632,71 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
 
     return PlatformScaffold(
       title: 'PERSTAT By Name',
-      actions: <Widget>[
-        Tooltip(
-          message: 'Refresh',
-          child: IconButton(
-              icon: const Icon(Icons.refresh),
+      actions: createAppBarActions(
+        width,
+        [
+          AppBarOption(
+              title: 'Refresh',
+              icon: Icon(kIsWeb || Platform.isAndroid
+                  ? Icons.refresh
+                  : CupertinoIcons.refresh),
               onPressed: () {
                 dailies.clear();
                 buildNewDailies();
               }),
-        ),
-        Tooltip(
-            message: 'Filter Records',
-            child: PopupMenuButton(
+          AppBarOption(
+              title: 'Filter Records',
               icon: const Icon(Icons.filter_alt),
-              onSelected: (String result) => _filterRecords(result),
-              itemBuilder: (context) {
-                return sections;
-              },
-            )),
-        Tooltip(
-            message: kIsWeb ? 'Feature Not Available' : 'Download as Image',
-            child: IconButton(
-              icon: const Icon(Icons.image),
-              onPressed: kIsWeb
-                  ? null
-                  : () {
-                      _downloadPng();
-                    },
-            )),
-        Tooltip(
-            message: 'Download as Excel',
-            child: IconButton(
-                icon: const Icon(Icons.file_download),
-                onPressed: _downloadExcel))
-      ],
+              onPressed: () {
+                showFilterOptions(
+                  context,
+                  dailies.map((e) => e['section'].toString()).toList(),
+                  (sections) => _filterRecords(sections),
+                );
+              }),
+          if (!kIsWeb)
+            AppBarOption(
+                title: 'Download Image',
+                icon: Icon(kIsWeb || Platform.isAndroid
+                    ? Icons.image
+                    : CupertinoIcons.photo),
+                onPressed: () => _downloadPng()),
+          AppBarOption(
+              title: 'Download Excel',
+              icon: Icon(kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download),
+              onPressed: () => _downloadExcel()),
+        ],
+      ),
       body: WillPopScope(
         onWillPop: onWillPop,
-        child: ListView(
-          children: [
-            RepaintBoundary(
-              key: _globalKey,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: width > 932 ? (width - 916) / 2 : 16),
-                child: Card(
-                  color: getContrastingBackgroundColor(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: dailyStatuses()),
+        child: Center(
+          heightFactor: 1,
+          child: ListView(
+            children: [
+              RepaintBoundary(
+                key: _globalKey,
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  constraints: const BoxConstraints(maxWidth: 900),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: dailyStatuses(),
                   ),
                 ),
               ),
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  submit(context);
-                },
-                child: const Text('Update PERSTAT Section'),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformButton(
+                  onPressed: () {
+                    submit(context);
+                  },
+                  child: const Text('Update PERSTAT Section'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -299,22 +299,16 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                         value: _type,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Date',
-                        date: _dateTime,
-                      ),
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Date',
+                      date: _dateTime,
                     ),
                     if (_type == 'Punishment Phase')
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DateTextField(
-                          controller: _expController,
-                          label: 'Exp Date',
-                          date: _expDate,
-                        ),
+                      DateTextField(
+                        controller: _expController,
+                        label: 'Exp Date',
+                        date: _expDate,
                       ),
                   ],
                 ),
@@ -322,7 +316,7 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   controller: _commentsController,
-                  enabled: true,
+                  label: 'Comments',
                   decoration: const InputDecoration(labelText: 'Comments'),
                   onChanged: (value) {
                     updated = true;

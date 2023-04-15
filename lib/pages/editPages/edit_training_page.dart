@@ -180,82 +180,67 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
         PaddedTextField(
           controller: _add1Controller,
           keyboardType: TextInputType.text,
-          enabled: true,
+          label: 'Additional Training 1',
           decoration: const InputDecoration(
             labelText: 'Additional Training 1',
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DateTextField(
-            controller: _add1DateController,
-            label: 'Additional Training 1 Date',
-            date: _add1Date,
-          ),
+        DateTextField(
+          controller: _add1DateController,
+          label: 'Additional Training 1 Date',
+          date: _add1Date,
         ),
         PaddedTextField(
           controller: _add2Controller,
           keyboardType: TextInputType.text,
-          enabled: true,
+          label: 'Additional Training 2',
           decoration: const InputDecoration(
             labelText: 'Additional Training 2',
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DateTextField(
-            controller: _add2DateController,
-            label: 'Additional Training 2 Date',
-            date: _add2Date,
-          ),
+        DateTextField(
+          controller: _add2DateController,
+          label: 'Additional Training 2 Date',
+          date: _add2Date,
         ),
         PaddedTextField(
           controller: _add3Controller,
           keyboardType: TextInputType.text,
-          enabled: true,
+          label: 'Additional Training 3',
           decoration: const InputDecoration(
             labelText: 'Additional Training 3',
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DateTextField(
-            controller: _add3DateController,
-            label: 'Additional Training 3 Date',
-            date: _add3Date,
-          ),
+        DateTextField(
+          controller: _add3DateController,
+          label: 'Additional Training 3 Date',
+          date: _add3Date,
         ),
         PaddedTextField(
           controller: _add4Controller,
           keyboardType: TextInputType.text,
-          enabled: true,
+          label: 'Additional Training 4',
           decoration: const InputDecoration(
             labelText: 'Additional Training 4',
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DateTextField(
-            controller: _add4DateController,
-            label: 'Additional Training 4 Date',
-            date: _add4Date,
-          ),
+        DateTextField(
+          controller: _add4DateController,
+          label: 'Additional Training 4 Date',
+          date: _add4Date,
         ),
         PaddedTextField(
           controller: _add5Controller,
           keyboardType: TextInputType.text,
-          enabled: true,
+          label: 'Additional Training 5',
           decoration: const InputDecoration(
             labelText: 'Additional Training 5',
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DateTextField(
-            controller: _add5DateController,
-            label: 'Additional Training 5 Date',
-            date: _add5Date,
-          ),
+        DateTextField(
+          controller: _add5DateController,
+          label: 'Additional Training 5 Date',
+          date: _add5Date,
         ),
       ],
     );
@@ -497,147 +482,99 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _cyberController,
-                        label: 'Cyber Date',
-                        date: _cyberDate,
-                      ),
+                    DateTextField(
+                      controller: _cyberController,
+                      label: 'Cyber Date',
+                      date: _cyberDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _opsecController,
-                        label: 'OPSEC Date',
-                        date: _opsecDate,
-                      ),
+                    DateTextField(
+                      controller: _opsecController,
+                      label: 'OPSEC Date',
+                      date: _opsecDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _antiTerrorController,
-                        label: 'Anti-Terror Date',
-                        date: _antiTerrorDate,
-                      ),
+                    DateTextField(
+                      controller: _antiTerrorController,
+                      label: 'Anti-Terror Date',
+                      date: _antiTerrorDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _lawController,
-                        label: 'Law of War Date',
-                        date: _lawDate,
-                      ),
+                    DateTextField(
+                      controller: _lawController,
+                      label: 'Law of War Date',
+                      date: _lawDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _persRecController,
-                        label: 'Personnel Recover Date',
-                        date: _persRecDate,
-                      ),
+                    DateTextField(
+                      controller: _persRecController,
+                      label: 'Personnel Recover Date',
+                      date: _persRecDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _infoSecController,
-                        label: 'Info Security Date',
-                        date: _infoSecDate,
-                      ),
+                    DateTextField(
+                      controller: _infoSecController,
+                      label: 'Info Security Date',
+                      date: _infoSecDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _ctipController,
-                        label: 'CTIP Date',
-                        date: _ctipDate,
-                      ),
+                    DateTextField(
+                      controller: _ctipController,
+                      label: 'CTIP Date',
+                      date: _ctipDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _gatController,
-                        label: 'GAT Date',
-                        date: _gatDate,
-                      ),
+                    DateTextField(
+                      controller: _gatController,
+                      label: 'GAT Date',
+                      date: _gatDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _sereController,
-                        label: 'SERE Date',
-                        date: _sereDate,
-                      ),
+                    DateTextField(
+                      controller: _sereController,
+                      label: 'SERE Date',
+                      date: _sereDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _tarpController,
-                        label: 'TARP Date',
-                        date: _tarpDate,
-                      ),
+                    DateTextField(
+                      controller: _tarpController,
+                      label: 'TARP Date',
+                      date: _tarpDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _eoController,
-                        label: 'EO Date',
-                        date: _eoDate,
-                      ),
+                    DateTextField(
+                      controller: _eoController,
+                      label: 'EO Date',
+                      date: _eoDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _asapController,
-                        label: 'ASAP Date',
-                        date: _asapDate,
-                      ),
+                    DateTextField(
+                      controller: _asapController,
+                      label: 'ASAP Date',
+                      date: _asapDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _suicideController,
-                        label: 'Suicide Prev Date',
-                        date: _suicideDate,
-                      ),
+                    DateTextField(
+                      controller: _suicideController,
+                      label: 'Suicide Prev Date',
+                      date: _suicideDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _sharpController,
-                        label: 'SHARP Date',
-                        date: _sharpDate,
-                      ),
+                    DateTextField(
+                      controller: _sharpController,
+                      label: 'SHARP Date',
+                      date: _sharpDate,
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PlatformButton(
-                    onPressed: () {
-                      setState(() {
-                        addMore = !addMore;
-                        if (addMore) {
-                          addMoreLess = 'Less Training';
-                        } else {
-                          addMoreLess = 'More Training';
-                        }
-                      });
-                    },
-                    child: Text(addMoreLess!),
-                  ),
+                PlatformButton(
+                  onPressed: () {
+                    setState(() {
+                      addMore = !addMore;
+                      if (addMore) {
+                        addMoreLess = 'Less Training';
+                      } else {
+                        addMoreLess = 'More Training';
+                      }
+                    });
+                  },
+                  child: Text(addMoreLess!),
                 ),
                 if (addMore) addMoreTraining(width),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PlatformButton(
-                    onPressed: () {
-                      submit(context);
-                    },
-                    child: Text(widget.training.id == null
-                        ? 'Add Training'
-                        : 'Update Training'),
-                  ),
+                PlatformButton(
+                  onPressed: () {
+                    submit(context);
+                  },
+                  child: Text(widget.training.id == null
+                      ? 'Add Training'
+                      : 'Update Training'),
                 ),
               ],
             ),

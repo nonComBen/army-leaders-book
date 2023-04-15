@@ -70,18 +70,22 @@ class _DateTextFieldState extends State<DateTextField> {
           ),
         ),
         if (!kIsWeb && Platform.isIOS)
-          PlatformIconButton(
-            icon: Icon(
-              CupertinoIcons.calendar,
-              color: getTextColor(context),
-            ),
-            onPressed: () => pickIosDate(
-              context: context,
-              date: _date,
-              onPicked: (newDate) {
-                _date = newDate;
-                widget.controller.text = dateFormat.format(_date);
-              },
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: PlatformIconButton(
+              icon: Icon(
+                CupertinoIcons.calendar,
+                size: 36,
+                color: getTextColor(context),
+              ),
+              onPressed: () => pickIosDate(
+                context: context,
+                date: _date,
+                onPicked: (newDate) {
+                  _date = newDate;
+                  widget.controller.text = dateFormat.format(_date);
+                },
+              ),
             ),
           )
       ],

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
@@ -15,7 +16,6 @@ import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
-import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditActionsTrackerPage extends ConsumerStatefulWidget {
   const EditActionsTrackerPage({
@@ -276,68 +276,53 @@ class EditActionsTrackerPageState
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        autocorrect: false,
-                        controller: _actionController,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.words,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Action',
-                        ),
-                        onChanged: (value) {
-                          updated = true;
-                        },
+                    PaddedTextField(
+                      autocorrect: false,
+                      controller: _actionController,
+                      keyboardType: TextInputType.text,
+                      textCapitalization: TextCapitalization.words,
+                      label: 'Action',
+                      decoration: const InputDecoration(
+                        labelText: 'Action',
                       ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Date Submitted',
-                        date: _dateTime,
-                      ),
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Date Submitted',
+                      date: _dateTime,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        autocorrect: false,
-                        controller: _statusController,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.words,
-                        enabled: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Current Status',
-                        ),
-                        onChanged: (value) {
-                          updated = true;
-                        },
+                    PaddedTextField(
+                      autocorrect: false,
+                      controller: _statusController,
+                      keyboardType: TextInputType.text,
+                      textCapitalization: TextCapitalization.words,
+                      label: 'Current Status',
+                      decoration: const InputDecoration(
+                        labelText: 'Current Status',
                       ),
+                      onChanged: (value) {
+                        updated = true;
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _statusDateController,
-                        label: 'Status Date',
-                        date: _statusDateTime,
-                      ),
+                    DateTextField(
+                      controller: _statusDateController,
+                      label: 'Status Date',
+                      date: _statusDateTime,
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: PlatformTextField(
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 2,
-                    controller: _remarksController,
-                    enabled: true,
-                    decoration: const InputDecoration(labelText: 'Remarks'),
-                    onChanged: (value) {
-                      updated = true;
-                    },
-                  ),
+                PaddedTextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 2,
+                  controller: _remarksController,
+                  label: 'Remarks',
+                  decoration: const InputDecoration(labelText: 'Remarks'),
+                  onChanged: (value) {
+                    updated = true;
+                  },
                 ),
                 PlatformButton(
                   child: Text(widget.action.id == null

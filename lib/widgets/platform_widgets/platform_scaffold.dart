@@ -8,6 +8,7 @@ import '../../methods/theme_methods.dart';
 
 abstract class PlatformScaffold extends StatelessWidget {
   factory PlatformScaffold({
+    Key? key,
     String? title,
     List<Widget> actions = const [],
     Widget? floatingActionButton,
@@ -16,6 +17,7 @@ abstract class PlatformScaffold extends StatelessWidget {
   }) {
     if (kIsWeb || Platform.isAndroid) {
       return AndroidScaffold(
+        key: key,
         title: title,
         actions: actions,
         floatingActionButton: floatingActionButton,
@@ -24,6 +26,7 @@ abstract class PlatformScaffold extends StatelessWidget {
       );
     } else {
       return IOSScaffold(
+        key: key,
         title: title,
         actions: actions,
         body: body,

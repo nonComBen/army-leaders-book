@@ -84,6 +84,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
           PaddedTextField(
             decoration: const InputDecoration(
                 labelText: 'Email', icon: Icon(Icons.mail)),
+            label: 'Email',
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
             validator: (value) =>
@@ -91,6 +92,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
           ),
           PaddedTextField(
             controller: passwordController,
+            label: 'Password',
             decoration: const InputDecoration(
                 labelText: 'Password', icon: Icon(Icons.lock)),
             validator: (value) =>
@@ -378,6 +380,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                     PaddedTextField(
                       controller: TextEditingController(text: widget.userId),
                       enabled: false,
+                      label: 'User Id',
                       decoration: InputDecoration(
                           labelText: 'User Id',
                           suffixIcon: IconButton(
@@ -397,7 +400,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                       controller: _rankController,
                       keyboardType: TextInputType.text,
                       textCapitalization: TextCapitalization.characters,
-                      enabled: true,
+                      label: 'Rank',
                       decoration: const InputDecoration(
                         labelText: 'Rank',
                       ),
@@ -411,7 +414,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                       textCapitalization: TextCapitalization.words,
                       validator: (value) =>
                           value!.isEmpty ? 'Name can\'t be empty' : null,
-                      enabled: true,
+                      label: 'Name',
                       decoration: const InputDecoration(
                         labelText: 'Name',
                       ),
@@ -422,7 +425,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                     PaddedTextField(
                       controller: _unitController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Unit',
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                       ),
@@ -434,7 +437,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                       PaddedTextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        enabled: true,
+                        label: 'Email',
                         decoration: const InputDecoration(
                           labelText: 'Email',
                         ),

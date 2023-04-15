@@ -71,21 +71,25 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
         PaddedTextField(
           controller: subController,
           keyboardType: TextInputType.text,
+          label: 'Item',
           decoration: const InputDecoration(labelText: 'Item'),
         ),
         PaddedTextField(
           controller: nsnController,
           keyboardType: TextInputType.number,
+          label: 'NSN #',
           decoration: const InputDecoration(labelText: 'NSN #'),
         ),
         PaddedTextField(
           controller: onHandController,
           keyboardType: TextInputType.number,
+          label: 'On Hand',
           decoration: const InputDecoration(labelText: 'On Hand'),
         ),
         PaddedTextField(
           controller: reqController,
           keyboardType: TextInputType.number,
+          label: 'Required',
           decoration: const InputDecoration(labelText: 'Required'),
         ),
       ],
@@ -390,7 +394,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                     PaddedTextField(
                       controller: _itemController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Item',
                       decoration: const InputDecoration(
                         labelText: 'Item',
                       ),
@@ -401,7 +405,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                     PaddedTextField(
                       controller: _modelController,
                       keyboardType: TextInputType.number,
-                      enabled: true,
+                      label: 'Model #',
                       decoration: const InputDecoration(
                         labelText: 'Model #',
                       ),
@@ -412,7 +416,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                     PaddedTextField(
                       controller: _serialController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Serial #',
                       decoration: const InputDecoration(
                         labelText: 'Serial #',
                       ),
@@ -423,7 +427,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                     PaddedTextField(
                       controller: _nsnController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'NSN #',
                       decoration: const InputDecoration(
                         labelText: 'NSN #',
                       ),
@@ -434,7 +438,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                     PaddedTextField(
                       controller: _locationController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Location',
                       decoration: const InputDecoration(
                         labelText: 'Location',
                       ),
@@ -445,7 +449,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                     PaddedTextField(
                       controller: _valueController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Value',
                       decoration: const InputDecoration(
                         labelText: 'Value',
                       ),
@@ -495,7 +499,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   controller: _commentsController,
-                  enabled: true,
+                  label: 'Comments',
                   decoration: const InputDecoration(labelText: 'Comments'),
                   onChanged: (value) {
                     updated = true;

@@ -308,18 +308,15 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                             }
                           }),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Date',
-                        date: _dateTime,
-                      ),
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Date',
+                      date: _dateTime,
                     ),
                     PaddedTextField(
                       controller: _typeController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Weapon',
                       decoration: const InputDecoration(
                         labelText: 'Weapon',
                       ),
@@ -330,7 +327,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                     PaddedTextField(
                       controller: _hitsController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Hits',
                       decoration: const InputDecoration(
                         labelText: 'Hits',
                       ),
@@ -341,7 +338,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                     PaddedTextField(
                       controller: _maxController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Maximum',
                       decoration: const InputDecoration(
                         labelText: 'Maximum',
                       ),
@@ -352,7 +349,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                     PaddedTextField(
                       controller: _badgeController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Badge',
                       decoration: const InputDecoration(
                         labelText: 'Badge',
                       ),

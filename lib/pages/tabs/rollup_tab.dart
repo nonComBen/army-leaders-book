@@ -344,14 +344,16 @@ class HomePageState extends ConsumerState<RollupTab>
                     tdy: tdy,
                     other: other,
                     button: PlatformButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(PerstatPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(PerstatPage.routeName),
                       child: const Text('Go to PERSTAT'),
                     ),
                     button2: PlatformButton(
                       child: const Text('By Name'),
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(DailyPerstatPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(DailyPerstatPage.routeName),
                     ),
                   );
               }
@@ -424,7 +426,8 @@ class HomePageState extends ConsumerState<RollupTab>
                     ),
                     button: PlatformButton(
                       onPressed: () =>
-                          Navigator.of(context).pushNamed(AptsPage.routeName),
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(AptsPage.routeName),
                       child: const Text('Go to Appointments'),
                     ),
                   );
@@ -490,7 +493,8 @@ class HomePageState extends ConsumerState<RollupTab>
                     ),
                     button: PlatformButton(
                       onPressed: () =>
-                          Navigator.of(context).pushNamed(ApftPage.routeName),
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(ApftPage.routeName),
                       child: const Text('Go to APFT'),
                     ),
                   );
@@ -556,7 +560,8 @@ class HomePageState extends ConsumerState<RollupTab>
                     ),
                     button: PlatformButton(
                       onPressed: () =>
-                          Navigator.of(context).pushNamed(AcftPage.routeName),
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(AcftPage.routeName),
                       child: const Text('Go to ACFT'),
                     ),
                   );
@@ -618,13 +623,15 @@ class HomePageState extends ConsumerState<RollupTab>
                       },
                     ),
                     button: PlatformButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(TempProfilesPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(TempProfilesPage.routeName),
                       child: const Text('Go to Temp'),
                     ),
                     button2: PlatformButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(PermProfilesPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(PermProfilesPage.routeName),
                       child: const Text('Go to Perm'),
                     ),
                   );
@@ -692,8 +699,9 @@ class HomePageState extends ConsumerState<RollupTab>
                       },
                     ),
                     button: PlatformButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(BodyfatPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(BodyfatPage.routeName),
                       child: const Text('Go to Body Comp'),
                     ),
                   );
@@ -761,8 +769,9 @@ class HomePageState extends ConsumerState<RollupTab>
                       },
                     ),
                     button: PlatformButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(WeaponsPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(WeaponsPage.routeName),
                       child: const Text('Go to Weapons'),
                     ),
                   );
@@ -818,7 +827,8 @@ class HomePageState extends ConsumerState<RollupTab>
                     ),
                     button: PlatformButton(
                       onPressed: () =>
-                          Navigator.of(context).pushNamed(FlagsPage.routeName),
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(FlagsPage.routeName),
                       child: const Text('Go to Flags'),
                     ),
                   );
@@ -879,8 +889,9 @@ class HomePageState extends ConsumerState<RollupTab>
                       },
                     ),
                     button: PlatformButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(MedProsPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(MedProsPage.routeName),
                       child: const Text('Go to Medpros'),
                     ),
                   );
@@ -946,8 +957,9 @@ class HomePageState extends ConsumerState<RollupTab>
                       },
                     ),
                     button: PlatformButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(TrainingPage.routeName),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(TrainingPage.routeName),
                       child: const Text('Go to Training'),
                     ),
                   );

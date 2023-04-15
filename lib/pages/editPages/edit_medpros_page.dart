@@ -170,138 +170,115 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
             mainAxisSpacing: 1.0,
             crossAxisSpacing: 1.0,
             childAspectRatio: width > 900
-                ? 900 / 200
+                ? 900 / 230
                 : width > 700
-                    ? width / 200
-                    : width / 100,
+                    ? width / 230
+                    : width / 115,
             shrinkWrap: true,
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _mmrController,
-                  label: 'MMR Date',
-                  date: _mmrDate,
-                ),
+              DateTextField(
+                controller: _mmrController,
+                label: 'MMR Date',
+                date: _mmrDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _varicellaController,
-                  label: 'Varicella Date',
-                  date: _varicellaDate,
-                ),
+              DateTextField(
+                controller: _varicellaController,
+                label: 'Varicella Date',
+                date: _varicellaDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _polioController,
-                  label: 'Polio Date',
-                  date: _polioDate,
-                ),
+              DateTextField(
+                controller: _polioController,
+                label: 'Polio Date',
+                date: _polioDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _tuberculinController,
-                  label: 'Tuberculin Date',
-                  date: _tuberDate,
-                ),
+              DateTextField(
+                controller: _tuberculinController,
+                label: 'Tuberculin Date',
+                date: _tuberDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _tetanusController,
-                  label: 'Tetanus Date',
-                  date: _tetanusDate,
-                ),
+              DateTextField(
+                controller: _tetanusController,
+                label: 'Tetanus Date',
+                date: _tetanusDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _hepAController,
-                  label: 'Hepatitis A Date',
-                  date: _hepADate,
-                ),
+              DateTextField(
+                controller: _hepAController,
+                label: 'Hepatitis A Date',
+                date: _hepADate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _hepBController,
-                  label: 'Hepatitis B Date',
-                  date: _hepBDate,
-                ),
+              DateTextField(
+                controller: _hepBController,
+                label: 'Hepatitis B Date',
+                date: _hepBDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _encephalitisController,
-                  label: 'Encephalitis Date',
-                  date: _encephalitisDate,
-                ),
+              DateTextField(
+                controller: _encephalitisController,
+                label: 'Encephalitis Date',
+                date: _encephalitisDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _meningController,
-                  label: 'Meningococcal Date',
-                  date: _meningDate,
-                ),
+              DateTextField(
+                controller: _meningController,
+                label: 'Meningococcal Date',
+                date: _meningDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _typhoidController,
-                  label: 'Typhoid Date',
-                  date: _typhoidDate,
-                ),
+              DateTextField(
+                controller: _typhoidController,
+                label: 'Typhoid Date',
+                date: _typhoidDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _yellowController,
-                  label: 'Yellow Fever Date',
-                  date: _yellowDate,
-                ),
+              DateTextField(
+                controller: _yellowController,
+                label: 'Yellow Fever Date',
+                date: _yellowDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _smallPoxController,
-                  label: 'Small Pox Date',
-                  date: _smallPoxDate,
-                ),
+              DateTextField(
+                controller: _smallPoxController,
+                label: 'Small Pox Date',
+                date: _smallPoxDate,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DateTextField(
-                  controller: _anthraxController,
-                  label: 'Anthrax Date',
-                  date: _anthraxDate,
-                ),
+              DateTextField(
+                controller: _anthraxController,
+                label: 'Anthrax Date',
+                date: _anthraxDate,
               ),
             ],
           ),
           const Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: HeaderText(
-                  'Other Immunizations',
-                ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.0),
+                  color: getPrimaryColor(context)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: HeaderText(
+                      'Other Immunizations',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: getOnPrimaryColor(context)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformIconButton(
+                      icon: Icon(
+                        Icons.add,
+                        color: getOnPrimaryColor(context),
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        _editImm(context, null);
+                      },
+                    ),
+                  )
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PlatformIconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    _editImm(context, null);
-                  },
-                ),
-              )
-            ],
+            ),
           ),
           if (_otherImms!.isNotEmpty)
             GridView.count(
@@ -322,10 +299,19 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                       child: Card(
                         color: getContrastingBackgroundColor(context),
                         child: PlatformListTile(
-                          title: Text(imm['title']),
-                          subtitle: Text(imm['date']),
+                          title: Padding(
+                            padding: const EdgeInsets.only(top: 12.0),
+                            child: Text(imm['title']),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Text(imm['date']),
+                          ),
                           trailing: PlatformIconButton(
-                            icon: const Icon(Icons.delete),
+                            icon: Icon(
+                              Icons.delete,
+                              color: getTextColor(context),
+                            ),
                             onPressed: () {
                               setState(() {
                                 _otherImms!.removeAt(_otherImms!.indexOf(imm));
@@ -363,11 +349,13 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         PaddedTextField(
           controller: titleController,
           keyboardType: TextInputType.text,
+          label: 'Immunization',
           decoration: const InputDecoration(labelText: 'Immunization'),
         ),
         PaddedTextField(
           controller: dateController,
           keyboardType: TextInputType.text,
+          label: 'Date',
           decoration: const InputDecoration(labelText: 'Date'),
         ),
       ],
@@ -634,80 +622,56 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                           },
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DateTextField(
-                          controller: _phaController,
-                          label: 'PHA Date',
-                          date: _phaDate,
-                        ),
+                      DateTextField(
+                        controller: _phaController,
+                        label: 'PHA Date',
+                        date: _phaDate,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DateTextField(
-                          controller: _dentalController,
-                          label: 'Dental Date',
-                          date: _dentalDate,
-                        ),
+                      DateTextField(
+                        controller: _dentalController,
+                        label: 'Dental Date',
+                        date: _dentalDate,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DateTextField(
-                          controller: _visionController,
-                          label: 'Vision Date',
-                          date: _visionDate,
-                        ),
+                      DateTextField(
+                        controller: _visionController,
+                        label: 'Vision Date',
+                        date: _visionDate,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DateTextField(
-                          controller: _hearingController,
-                          label: 'Hearing Date',
-                          date: _hearingDate,
-                        ),
+                      DateTextField(
+                        controller: _hearingController,
+                        label: 'Hearing Date',
+                        date: _hearingDate,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DateTextField(
-                          controller: _hivController,
-                          label: 'HIV Date',
-                          date: _hivDate,
-                        ),
+                      DateTextField(
+                        controller: _hivController,
+                        label: 'HIV Date',
+                        date: _hivDate,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DateTextField(
-                          controller: _fluController,
-                          label: 'Influenza Date',
-                          date: _fluDate,
-                        ),
+                      DateTextField(
+                        controller: _fluController,
+                        label: 'Influenza Date',
+                        date: _fluDate,
                       ),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformButton(
-                      onPressed: () {
-                        setState(() {
-                          expanded = !expanded;
-                        });
-                      },
-                      child: expanded
-                          ? const Text('Less Immunizations')
-                          : const Text('More Immunizations'),
-                    ),
+                  PlatformButton(
+                    onPressed: () {
+                      setState(() {
+                        expanded = !expanded;
+                      });
+                    },
+                    child: expanded
+                        ? const Text('Less Immunizations')
+                        : const Text('More Immunizations'),
                   ),
                   moreImmunizations(width),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformButton(
-                      onPressed: () {
-                        submit(context);
-                      },
-                      child: Text(widget.medpro.id == null
-                          ? 'Add MedPros'
-                          : 'Update MedPros'),
-                    ),
+                  PlatformButton(
+                    onPressed: () {
+                      submit(context);
+                    },
+                    child: Text(widget.medpro.id == null
+                        ? 'Add MedPros'
+                        : 'Update MedPros'),
                   ),
                 ],
               )),

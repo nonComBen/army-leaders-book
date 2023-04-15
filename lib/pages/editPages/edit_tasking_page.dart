@@ -264,7 +264,7 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
                     ),
                     PaddedTextField(
                       controller: _typeController,
-                      enabled: true,
+                      label: 'Tasking',
                       decoration: const InputDecoration(labelText: 'Tasking'),
                       onChanged: (value) {
                         updated = true;
@@ -272,27 +272,21 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
                     ),
                     PaddedTextField(
                       controller: _locController,
-                      enabled: true,
+                      label: 'Location',
                       decoration: const InputDecoration(labelText: 'Location'),
                       onChanged: (value) {
                         updated = true;
                       },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _startController,
-                        label: 'Start Date',
-                        date: _start,
-                      ),
+                    DateTextField(
+                      controller: _startController,
+                      label: 'Start Date',
+                      date: _start,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _endController,
-                        label: 'End Date',
-                        date: _end,
-                      ),
+                    DateTextField(
+                      controller: _endController,
+                      label: 'End Date',
+                      date: _end,
                     ),
                   ],
                 ),
@@ -300,7 +294,7 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   controller: _commentsController,
-                  enabled: true,
+                  label: 'Comments',
                   decoration: const InputDecoration(labelText: 'Comments'),
                   onChanged: (value) {
                     updated = true;

@@ -137,18 +137,18 @@ class IOSTextField extends StatelessWidget implements PlatformTextField {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null)
-          SizedBox(
-              width: double.infinity,
-              height: 30,
-              child: Text(
-                label!,
-                style: TextStyle(color: getTextColor(context)),
-                textAlign: TextAlign.start,
-              )),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              label!,
+              style: TextStyle(color: getTextColor(context)),
+            ),
+          ),
         CupertinoTextField(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12.0),
           controller: controller,
           style: style ?? TextStyle(color: getTextColor(context)),
           focusNode: focusNode,

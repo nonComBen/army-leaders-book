@@ -298,7 +298,7 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                   controller: _ach1Controller,
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
-                  enabled: true,
+                  label: 'Achievement',
                   decoration: const InputDecoration(
                     labelText: 'Achievement',
                   ),
@@ -310,7 +310,7 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                   controller: _ach2Controller,
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
-                  enabled: true,
+                  label: 'Achievement',
                   decoration: const InputDecoration(
                     labelText: 'Achievement',
                   ),
@@ -322,7 +322,7 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                   controller: _ach3Controller,
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
-                  enabled: true,
+                  label: 'Achievement',
                   decoration: const InputDecoration(
                     labelText: 'Achievement',
                   ),
@@ -334,7 +334,7 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                   controller: _ach4Controller,
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
-                  enabled: true,
+                  label: 'Achievement',
                   decoration: const InputDecoration(
                     labelText: 'Achievement',
                   ),
@@ -346,7 +346,7 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                   controller: _citationController,
                   keyboardType: TextInputType.multiline,
                   maxLines: 4,
-                  enabled: true,
+                  label: 'Citation',
                   decoration: const InputDecoration(
                     labelText: 'Citation',
                   ),

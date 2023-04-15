@@ -26,16 +26,19 @@ class AndroidButton extends StatelessWidget implements PlatformButton {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        shape: MaterialStateProperty.all<OutlinedBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(40),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        style: ButtonStyle(
+          shape: MaterialStateProperty.all<OutlinedBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
           ),
         ),
+        onPressed: onPressed,
+        child: child,
       ),
-      onPressed: onPressed,
-      child: child,
     );
   }
 }
@@ -51,11 +54,14 @@ class IOSButton extends StatelessWidget implements PlatformButton {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton.filled(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 40.0),
-      borderRadius: BorderRadius.circular(25),
-      onPressed: onPressed,
-      child: child,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: CupertinoButton.filled(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 40.0),
+        borderRadius: BorderRadius.circular(25),
+        onPressed: onPressed,
+        child: child,
+      ),
     );
   }
 }

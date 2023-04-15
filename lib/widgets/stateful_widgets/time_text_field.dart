@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 import '../../methods/pick_time.dart';
 import '../../widgets/padded_text_field.dart';
@@ -46,8 +47,9 @@ class _TimeTextFieldState extends State<TimeTextField> {
             validator: (value) => isValidTime(value!) || value.isEmpty
                 ? null
                 : 'Time must be in hhmm format',
+            label: widget.label,
             decoration: InputDecoration(
-              labelText: 'Start Time',
+              labelText: widget.label,
               suffixIcon: IconButton(
                 icon: const Icon(Icons.access_time),
                 onPressed: () async {
@@ -72,14 +74,21 @@ class _TimeTextFieldState extends State<TimeTextField> {
           ),
         ),
         if (!kIsWeb && Platform.isIOS)
-          PlatformIconButton(
-            icon: const Icon(CupertinoIcons.time),
-            onPressed: () => pickIosTime(
-              context: context,
-              time: DateTime(2023, 1, 1, _time.hour, _time.minute),
-              onPicked: (date) {
-                widget.controller.text = formatter.format(date);
-              },
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: PlatformIconButton(
+              icon: Icon(
+                CupertinoIcons.time,
+                size: 36,
+                color: getTextColor(context),
+              ),
+              onPressed: () => pickIosTime(
+                context: context,
+                time: DateTime(2023, 1, 1, _time.hour, _time.minute),
+                onPicked: (date) {
+                  widget.controller.text = formatter.format(date);
+                },
+              ),
             ),
           )
       ],

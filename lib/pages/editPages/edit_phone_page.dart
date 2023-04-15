@@ -146,7 +146,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
                     PaddedTextField(
                       controller: _titleController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Title',
                       decoration: const InputDecoration(
                         labelText: 'Title',
                       ),
@@ -157,7 +157,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
                     PaddedTextField(
                       controller: _nameController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'POC',
                       decoration: const InputDecoration(
                         labelText: 'POC',
                       ),
@@ -168,7 +168,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
                     PaddedTextField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      enabled: true,
+                      label: 'Phone Number',
                       decoration: const InputDecoration(
                         labelText: 'Phone Number',
                       ),
@@ -179,7 +179,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
                     PaddedTextField(
                       controller: _locationController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Location',
                       decoration: const InputDecoration(
                         labelText: 'Location',
                       ),

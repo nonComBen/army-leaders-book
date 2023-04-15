@@ -190,9 +190,15 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
           child: Card(
             color: getContrastingBackgroundColor(context),
             child: PlatformListTile(
-              title: Text(qualVehicles![index]),
+              title: Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Text(qualVehicles![index]),
+              ),
               trailing: PlatformIconButton(
-                icon: const Icon(Icons.delete),
+                icon: Icon(
+                  Icons.delete,
+                  color: getTextColor(context),
+                ),
                 onPressed: () {
                   setState(() {
                     qualVehicles!.removeAt(index);
@@ -217,6 +223,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
     Widget content = PaddedTextField(
       controller: vehicleController,
       keyboardType: TextInputType.text,
+      label: 'Vehicle',
       decoration: const InputDecoration(labelText: 'Vehicle'),
     );
     customAlertDialog(
@@ -382,7 +389,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                     PaddedTextField(
                       controller: _licenseController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'License',
                       decoration: const InputDecoration(
                         labelText: 'License',
                       ),
@@ -390,46 +397,59 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                         updated = true;
                       },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Issued Date',
-                        date: _dateTime,
-                      ),
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Issued Date',
+                      date: _dateTime,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _expController,
-                        label: 'Expiration Date',
-                        date: _expDate,
-                      ),
+                    DateTextField(
+                      controller: _expController,
+                      label: 'Expiration Date',
+                      date: _expDate,
                     ),
                   ],
                 ),
                 Divider(
                   color: getOnPrimaryColor(context),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: HeaderText(
-                        'Qualified Vehicles',
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: getPrimaryColor(context)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: HeaderText(
+                              'Qualified Vehicles',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: getOnPrimaryColor(context)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformIconButton(
+                              icon: Icon(
+                                Icons.add,
+                                size: 32,
+                                color: getOnPrimaryColor(context),
+                              ),
+                              onPressed: () {
+                                _editVehicle(context, null);
+                              },
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformIconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          _editVehicle(context, null);
-                        },
-                      ),
-                    )
-                  ],
+                  ),
                 ),
                 if (qualVehicles!.isNotEmpty)
                   GridView.count(
@@ -451,7 +471,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   controller: _restrictionsController,
-                  enabled: true,
+                  label: 'Restrictions',
                   decoration: const InputDecoration(labelText: 'Restrictions'),
                   onChanged: (value) {
                     updated = true;

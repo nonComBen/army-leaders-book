@@ -126,7 +126,7 @@ class EditNotePageState extends ConsumerState<EditNotePage> {
                 PaddedTextField(
                   controller: _titleController,
                   keyboardType: TextInputType.text,
-                  enabled: true,
+                  label: 'Title',
                   decoration: const InputDecoration(
                     labelText: 'Title',
                   ),
@@ -138,7 +138,7 @@ class EditNotePageState extends ConsumerState<EditNotePage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 20,
                   controller: _commentsController,
-                  enabled: true,
+                  label: 'Comments',
                   decoration: const InputDecoration(labelText: 'Comments'),
                   onChanged: (value) {
                     updated = true;

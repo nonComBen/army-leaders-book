@@ -268,39 +268,33 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _dd93Controller,
-                        label: 'DD93 Date',
-                        date: _dd93Date,
-                      ),
+                    DateTextField(
+                      controller: _dd93Controller,
+                      label: 'DD93 Date',
+                      date: _dd93Date,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _sglvController,
-                        label: 'SGLV Date',
-                        date: _sglvDate,
-                      ),
+                    DateTextField(
+                      controller: _sglvController,
+                      label: 'SGLV Date',
+                      date: _sglvDate,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _prrController,
-                        label: 'Record Review Date',
-                        date: _prrDate,
-                      ),
+                    DateTextField(
+                      controller: _prrController,
+                      label: 'Record Review Date',
+                      date: _prrDate,
                     ),
                   ],
                 ),
-                PlatformButton(
-                  onPressed: () {
-                    submit(context);
-                  },
-                  child: Text(widget.hrAction.id == null
-                      ? 'Add HR Metrics'
-                      : 'Update HR Metrics'),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformButton(
+                    onPressed: () {
+                      submit(context);
+                    },
+                    child: Text(widget.hrAction.id == null
+                        ? 'Add HR Metrics'
+                        : 'Update HR Metrics'),
+                  ),
                 ),
               ],
             ),

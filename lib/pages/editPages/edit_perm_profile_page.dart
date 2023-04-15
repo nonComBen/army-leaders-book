@@ -125,9 +125,9 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
   }
 
   double childRatio(double width) {
-    if (width > 900) return 900 / 400;
-    if (width > 650) return width / 300;
-    if (width > 400) return width / 200;
+    if (width > 900) return 900 / 425;
+    if (width > 650) return width / 325;
+    if (width > 400) return width / 225;
     return width / 100;
   }
 
@@ -382,13 +382,10 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Start Date',
-                        date: _dateTime,
-                      ),
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Start Date',
+                      date: _dateTime,
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 0.0),
@@ -420,7 +417,7 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   controller: _commentsController,
-                  enabled: true,
+                  label: 'Comments',
                   decoration: const InputDecoration(labelText: 'Comments'),
                   onChanged: (value) {
                     updated = true;

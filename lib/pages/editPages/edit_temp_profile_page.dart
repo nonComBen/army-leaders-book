@@ -272,21 +272,15 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _dateController,
-                        label: 'Issued Date',
-                        date: _dateTime,
-                      ),
+                    DateTextField(
+                      controller: _dateController,
+                      label: 'Issued Date',
+                      date: _dateTime,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _expController,
-                        label: 'Expiration Date',
-                        date: _expDate,
-                      ),
+                    DateTextField(
+                      controller: _expController,
+                      label: 'Expiration Date',
+                      date: _expDate,
                     ),
                   ],
                 ),
@@ -294,7 +288,7 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   controller: _commentsController,
-                  enabled: true,
+                  label: 'Comments',
                   decoration: const InputDecoration(labelText: 'Comments'),
                   onChanged: (value) {
                     updated = true;

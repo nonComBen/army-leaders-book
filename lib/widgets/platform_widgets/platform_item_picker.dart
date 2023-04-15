@@ -9,7 +9,7 @@ import '../../methods/theme_methods.dart';
 
 abstract class PlatformItemPicker extends Widget {
   factory PlatformItemPicker({
-    required Widget label,
+    required label,
     String? value,
     required List<String> items,
     required void Function(dynamic) onChanged,
@@ -49,21 +49,20 @@ abstract class PlatformItemPicker extends Widget {
         },
         buttonBuilder: (context, showMenu) {
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: label,
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: label,
               ),
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                    border: Border.all(
-                      color: getTextColor(context),
-                    ),
-                    borderRadius: BorderRadius.circular(8.0)),
+                  border: Border.all(
+                    color: getTextColor(context),
+                  ),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(8.0),
                   onPressed: showMenu,

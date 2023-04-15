@@ -265,7 +265,7 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                     PaddedTextField(
                       controller: _dutyController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Duty Title',
                       decoration: const InputDecoration(
                         labelText: 'Duty Title',
                       ),
@@ -276,7 +276,7 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                     PaddedTextField(
                       controller: _locController,
                       keyboardType: TextInputType.text,
-                      enabled: true,
+                      label: 'Location',
                       decoration: const InputDecoration(
                         labelText: 'Location',
                       ),
@@ -284,21 +284,15 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                         updated = true;
                       },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _startController,
-                        label: 'Start Date',
-                        date: _start,
-                      ),
+                    DateTextField(
+                      controller: _startController,
+                      label: 'Start Date',
+                      date: _start,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DateTextField(
-                        controller: _endController,
-                        label: 'End Date',
-                        date: _end,
-                      ),
+                    DateTextField(
+                      controller: _endController,
+                      label: 'End Date',
+                      date: _end,
                     ),
                   ],
                 ),
@@ -306,7 +300,7 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 2,
                   controller: _commentsController,
-                  enabled: true,
+                  label: 'Comments',
                   decoration: const InputDecoration(labelText: 'Comments'),
                   onChanged: (value) {
                     updated = true;

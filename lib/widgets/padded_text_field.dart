@@ -10,7 +10,7 @@ class PaddedTextField extends StatelessWidget {
     required this.controller,
     this.focusNode,
     this.enabled = true,
-    this.label,
+    required this.label,
     this.inputFormatters,
     this.keyboardType,
     this.obscureText = false,
@@ -33,7 +33,7 @@ class PaddedTextField extends StatelessWidget {
   final TextEditingController controller;
   final TextStyle? style;
   final FocusNode? focusNode;
-  final String? label;
+  final String label;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final bool enabled;

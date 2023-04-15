@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../widgets/stateful_widgets/time_text_field.dart';
@@ -16,7 +17,6 @@ import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class EditAppointmentPage extends ConsumerStatefulWidget {
   const EditAppointmentPage({
@@ -213,13 +213,19 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
           padding: EdgeInsets.symmetric(
               horizontal: width > 932 ? (width - 916) / 2 : 16),
           child: Container(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                bottom: 16.0,
+                top: kToolbarHeight + 16.0,
+              ),
               constraints: const BoxConstraints(maxWidth: 900),
               child: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
                     if (user.isAnonymous) const AnonWarningBanner(),
                     GridView.count(
+                      padding: const EdgeInsets.all(0.0),
                       primary: false,
                       crossAxisCount: width > 700 ? 2 : 1,
                       mainAxisSpacing: 1.0,
@@ -297,58 +303,42 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                             },
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: PlatformTextField(
-                            controller: _titleController,
-                            keyboardType: TextInputType.text,
-                            enabled: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Apt Title',
-                            ),
-                            onChanged: (value) {
-                              updated = true;
-                            },
+                        PaddedTextField(
+                          controller: _titleController,
+                          keyboardType: TextInputType.text,
+                          label: 'Apt Title',
+                          decoration: const InputDecoration(
+                            labelText: 'Apt Title',
                           ),
+                          onChanged: (value) {
+                            updated = true;
+                          },
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: DateTextField(
-                            controller: _dateController,
-                            label: 'Apt Date',
-                            date: _dateTime,
-                          ),
+                        DateTextField(
+                          controller: _dateController,
+                          label: 'Apt Date',
+                          date: _dateTime,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TimeTextField(
-                            controller: _startController,
-                            label: 'Start Time',
-                            time: _startTime,
-                          ),
+                        TimeTextField(
+                          controller: _startController,
+                          label: 'Start Time',
+                          time: _startTime,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TimeTextField(
-                            controller: _endController,
-                            label: 'End Time',
-                            time: _endTime,
-                          ),
+                        TimeTextField(
+                          controller: _endController,
+                          label: 'End Time',
+                          time: _endTime,
                         ),
-                        Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(8.0, 15.0, 8.0, 0.0),
-                          child: PlatformTextField(
-                            controller: _locController,
-                            keyboardType: TextInputType.text,
-                            enabled: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Location',
-                            ),
-                            onChanged: (value) {
-                              updated = true;
-                            },
+                        PaddedTextField(
+                          controller: _locController,
+                          keyboardType: TextInputType.text,
+                          label: 'Location',
+                          decoration: const InputDecoration(
+                            labelText: 'Location',
                           ),
+                          onChanged: (value) {
+                            updated = true;
+                          },
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -368,19 +358,15 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                         ),
                       ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformTextField(
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 2,
-                        controller: _commentsController,
-                        enabled: true,
-                        decoration:
-                            const InputDecoration(labelText: 'Comments'),
-                        onChanged: (value) {
-                          updated = true;
-                        },
-                      ),
+                    PaddedTextField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 2,
+                      controller: _commentsController,
+                      label: 'Comments',
+                      decoration: const InputDecoration(labelText: 'Comments'),
+                      onChanged: (value) {
+                        updated = true;
+                      },
                     ),
                     PlatformButton(
                       child: Text(widget.apt.id == null

@@ -8,6 +8,7 @@ import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/models/user.dart';
 import 'package:leaders_book/providers/root_provider.dart';
 import 'package:leaders_book/widgets/center_progress_indicator.dart';
+import 'package:leaders_book/widgets/form_frame.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +16,6 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../apple_sign_in_available.dart';
 import '../methods/show_on_login.dart';
-import '../methods/theme_methods.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/user_provider.dart';
 import '../widgets/my_toast.dart';
@@ -31,7 +31,7 @@ class LoginPage extends ConsumerStatefulWidget {
   LoginPageState createState() => LoginPageState();
 }
 
-enum FormType { login, register, forgotPassword }
+enum FormType { login, forgotPassword }
 
 class LoginPageState extends ConsumerState<LoginPage> {
   final formKey = GlobalKey<FormState>();
@@ -217,33 +217,118 @@ class LoginPageState extends ConsumerState<LoginPage> {
         ref.read(appleSignInAvailableProvider).isAvailable;
     return PlatformScaffold(
       title: 'Login',
-      body: Center(
-        heightFactor: 1,
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          constraints: const BoxConstraints(maxWidth: 900.0),
-          child: isLoggingIn
-              ? const CenterProgressIndicator()
-              : Form(
-                  key: formKey,
-                  autovalidateMode: AutovalidateMode.always,
-                  child: Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: sizedBox(32.0) +
-                            logo() +
-                            sizedBox(32.0) +
-                            buildInputs() +
-                            buildSubmitButtons(
-                                appleSignInAvailable, rootService),
+      body: isLoggingIn
+          ? const CenterProgressIndicator()
+          : FormFrame(
+              formKey: formKey,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    radius: 96.0,
+                    child: Image.asset('assets/icon-512.png'),
+                  ),
+                ),
+                PaddedTextField(
+                  label: 'Email',
+                  decoration: const InputDecoration(
+                      labelText: 'Email', icon: Icon(Icons.mail)),
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) =>
+                      value!.isEmpty ? 'Email can\'t be empty' : null,
+                ),
+                if (_formType == FormType.login)
+                  PaddedTextField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    decoration: const InputDecoration(
+                        labelText: 'Password', icon: Icon(Icons.lock)),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Password can\'t be empty' : null,
+                    obscureText: true,
+                  ),
+                if (_formType == FormType.login)
+                  PlatformButton(
+                      child: const Text(
+                        'Sign in',
+                        style: TextStyle(fontSize: 18.0),
+                        textAlign: TextAlign.center,
                       ),
+                      onPressed: () {
+                        validateAndSubmit('email');
+                      }),
+                if (_formType == FormType.login)
+                  PlatformButton(
+                      child: const Text(
+                        'Sign in with Google',
+                        style: TextStyle(fontSize: 18.0),
+                        textAlign: TextAlign.center,
+                      ),
+                      onPressed: () {
+                        validateAndSubmit('google');
+                      }),
+                if (_formType == FormType.login && appleSignInAvailable)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SignInWithAppleButton(
+                      borderRadius: const BorderRadius.all(Radius.circular(24)),
+                      iconAlignment: IconAlignment.center,
+                      onPressed: () {
+                        validateAndSubmit('apple');
+                      },
                     ),
-                  )),
-        ),
-      ),
+                  ),
+                if (_formType == FormType.login)
+                  PlatformButton(
+                    onPressed: signInAnonymously,
+                    child: const Text(
+                      'Sign in as Guest',
+                      style: TextStyle(fontSize: 18.0),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (_formType == FormType.forgotPassword)
+                  PlatformButton(
+                      child: const Text(
+                        'Send reset password email',
+                        style: TextStyle(fontSize: 18.0),
+                        textAlign: TextAlign.center,
+                      ),
+                      onPressed: () {
+                        validateAndSubmit('reset');
+                      }),
+                PlatformTextButton(
+                  child: const Text(
+                    'Create an account',
+                    style: TextStyle(fontSize: 18.0, color: Colors.blue),
+                    textAlign: TextAlign.center,
+                  ),
+                  onPressed: () {
+                    rootService.createAccout();
+                  },
+                ),
+                if (_formType == FormType.login)
+                  PlatformTextButton(
+                    onPressed: moveToForgotPassword,
+                    child: const Text(
+                      'Forgot password',
+                      style: TextStyle(fontSize: 18.0, color: Colors.blue),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                if (_formType == FormType.forgotPassword)
+                  PlatformTextButton(
+                    onPressed: moveToLogin,
+                    child: const Text(
+                      'Back to Login',
+                      style: TextStyle(fontSize: 18.0, color: Colors.blue),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 
@@ -296,82 +381,32 @@ class LoginPageState extends ConsumerState<LoginPage> {
     ];
   }
 
-  List<Widget> rankFormField() {
-    return [
-      PaddedTextField(
-        controller: _rankController,
-        label: 'Rank (Optional)',
-        decoration: const InputDecoration(
-          labelText: 'Rank (Optional)',
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> nameFormField() {
-    return [
-      PaddedTextField(
-        controller: _nameController,
-        label: 'Name',
-        validator: (value) => value!.isEmpty ? 'Name can\'t be empty' : null,
-        decoration: const InputDecoration(
-          labelText: 'Name',
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> confirmPasswordField() {
-    return [
-      PaddedTextField(
-        controller: TextEditingController(),
-        label: 'Confirm Password',
-        decoration: const InputDecoration(
-            labelText: 'Confirm Password', icon: Icon(Icons.lock)),
-        validator: (value) => value != _passwordController.text
-            ? 'Password fields must match'
-            : null,
-        obscureText: true,
-      ),
-    ];
-  }
-
   List<Widget> buildSubmitButtons(
       bool appleAvailable, RootService rootService) {
     if (_formType == FormType.login) {
       List<Widget> list = [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformButton(
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Sign in',
-                  style: TextStyle(fontSize: 18.0),
-                  textAlign: TextAlign.center,
-                ),
+        PlatformButton(
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                'Sign in',
+                style: TextStyle(fontSize: 18.0),
+                textAlign: TextAlign.center,
               ),
-              onPressed: () {
-                validateAndSubmit('email');
-              }),
-        ),
+            ),
+            onPressed: () {
+              validateAndSubmit('email');
+            }),
       ];
       if (localAuthAvail || kIsWeb) {
-        list.add(Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformButton(
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Sign in with Google',
-                  style: TextStyle(fontSize: 18.0),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              onPressed: () {
-                validateAndSubmit('google');
-              }),
-        ));
+        list.add(PlatformButton(
+            child: const Text(
+              'Sign in with Google',
+              textAlign: TextAlign.center,
+            ),
+            onPressed: () {
+              validateAndSubmit('google');
+            }));
       }
       if (appleAvailable) {
         list.add(Padding(
@@ -385,19 +420,16 @@ class LoginPageState extends ConsumerState<LoginPage> {
           ),
         ));
       }
-      list.add(Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PlatformButton(
-            onPressed: signInAnonymously,
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Sign in as Guest',
-                style: TextStyle(fontSize: 18.0),
-                textAlign: TextAlign.center,
-              ),
-            )),
-      ));
+      list.add(PlatformButton(
+          onPressed: signInAnonymously,
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'Sign in as Guest',
+              style: TextStyle(fontSize: 18.0),
+              textAlign: TextAlign.center,
+            ),
+          )));
       list.add(Padding(
         padding: const EdgeInsets.all(8.0),
         child: PlatformTextButton(
@@ -424,7 +456,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       ));
 
       return list;
-    } else if (_formType == FormType.register) {
+    } else if (_formType == FormType.forgotPassword) {
       return [
         PlatformButton(
             child: const Padding(
@@ -460,13 +492,9 @@ class LoginPageState extends ConsumerState<LoginPage> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: PlatformButton(
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Send reset password email',
-                  style: TextStyle(fontSize: 18.0),
-                  textAlign: TextAlign.center,
-                ),
+              child: const Text(
+                'Send reset password email',
+                textAlign: TextAlign.center,
               ),
               onPressed: () {
                 validateAndSubmit('reset');

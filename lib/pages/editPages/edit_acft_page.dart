@@ -4,10 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/methods/theme_methods.dart';
-import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/theme_methods.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/validate.dart';
+import '../../models/soldier.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
@@ -16,6 +19,7 @@ import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
 import '../../calculators/twomr_calculator.dart';
@@ -79,7 +83,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       _mdlRaw,
       _hrpRaw;
   double? _sptRaw;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? lessSoldiers;
+  late List<Soldier> allSoldiers;
   bool pass = true,
       removeSoldiers = false,
       updated = false,
@@ -105,6 +110,127 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     '57-61',
     '62+'
   ];
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _deadliftController.dispose();
+    _powerThrowController.dispose();
+    _puController.dispose();
+    _dragController.dispose();
+    _plankController.dispose();
+    _runController.dispose();
+    _deadliftRawController.dispose();
+    _powerThrowRawController.dispose();
+    _puRawController.dispose();
+    _dragRawController.dispose();
+    _plankRawController.dispose();
+    _runRawController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    allSoldiers = ref.read(soldiersProvider);
+
+    _runType = widget.acft.altEvent;
+
+    if (widget.acft.id != null) {
+      _title = '${widget.acft.rank} ${widget.acft.name}';
+    }
+    _ageGroup = widget.acft.ageGroup;
+    _gender = widget.acft.gender;
+
+    _soldierId = widget.acft.soldierId;
+    _rank = widget.acft.rank;
+    _lastName = widget.acft.name;
+    _firstName = widget.acft.firstName;
+    _section = widget.acft.section;
+    _rankSort = widget.acft.rankSort;
+    _owner = widget.acft.owner;
+    _users = widget.acft.users;
+
+    _total = widget.acft.total;
+    _mdlScore = widget.acft.deadliftScore;
+    _sptScore = widget.acft.powerThrowScore;
+    _hrpScore = widget.acft.puScore;
+    _sdcScore = widget.acft.dragScore;
+    _plkScore = widget.acft.plankScore;
+    _runScore = widget.acft.runScore;
+
+    _mdlRaw = int.tryParse(widget.acft.deadliftRaw) ?? 0;
+    _sptRaw = int.tryParse(widget.acft.powerThrowRaw) as double? ?? 0;
+    _hrpRaw = int.tryParse(widget.acft.puRaw) ?? 0;
+    if (widget.acft.dragRaw.characters.contains(":")) {
+      _sdcMins = int.tryParse(widget.acft.dragRaw
+              .substring(0, widget.acft.dragRaw.indexOf(":"))) ??
+          0;
+      _sdcSecs = int.tryParse(widget.acft.dragRaw
+              .substring(widget.acft.dragRaw.indexOf(":") + 1)) ??
+          0;
+    } else {
+      _sdcMins = 0;
+      _sdcSecs = 0;
+    }
+    if (widget.acft.plankRaw.characters.contains(":")) {
+      _plkMins = int.tryParse(widget.acft.plankRaw
+              .substring(0, widget.acft.plankRaw.indexOf(":"))) ??
+          0;
+      _plkSecs = int.tryParse(widget.acft.plankRaw
+              .substring(widget.acft.plankRaw.indexOf(":") + 1)) ??
+          0;
+    } else {
+      _plkMins = 0;
+      _plkMins = 0;
+    }
+    if (widget.acft.runRaw.characters.contains(":")) {
+      _runMins = int.tryParse(widget.acft.runRaw
+              .substring(0, widget.acft.runRaw.indexOf(":"))) ??
+          0;
+      _runSecs = int.tryParse(widget.acft.runRaw
+              .substring(widget.acft.runRaw.indexOf(":") + 1)) ??
+          0;
+    } else {
+      _runMins = 0;
+      _runSecs = 0;
+    }
+
+    _dateController.text = widget.acft.date;
+    _deadliftController.text = _mdlScore.toString();
+    _powerThrowController.text = _sptScore.toString();
+    _puController.text = _hrpScore.toString();
+    _dragController.text = _sdcScore.toString();
+    _plankController.text = _plkScore.toString();
+    _runController.text = _runScore.toString();
+    _deadliftRawController.text = widget.acft.deadliftRaw;
+    _powerThrowRawController.text = widget.acft.powerThrowRaw;
+    _puRawController.text = widget.acft.puRaw;
+    _dragRawController.text = widget.acft.dragRaw;
+    _plankRawController.text = widget.acft.plankRaw;
+    _runRawController.text = widget.acft.runRaw;
+
+    pass = widget.acft.pass;
+    if (pass) {
+      mdlPass = true;
+      sptPass = true;
+      hrpPass = true;
+      sdcPass = true;
+      plkPass = true;
+      runPass = true;
+    } else {
+      mdlPass = _mdlScore! >= 60;
+      sptPass = _sptScore! >= 60;
+      hrpPass = _hrpScore! >= 60;
+      sdcPass = _sdcScore! >= 60;
+      plkPass = _plkScore! >= 60;
+      runPass = _runScore! >= 60;
+    }
+    removeSoldiers = false;
+    updated = false;
+
+    _dateTime = DateTime.tryParse(widget.acft.date) ?? DateTime.now();
+  }
 
   int getIntTime(int? mins, int? secs) {
     String secString = secs.toString().length == 2 ? secs.toString() : '0$secs';
@@ -226,16 +352,17 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
 
   void submit(BuildContext context) async {
     if (_soldierId == null) {
-      soldierIdIsBlankMessage(context);
+      toast.showToast(
+        child: const MyToast(
+          message: 'Please select a Soldier',
+        ),
+      );
       return;
     }
     if (validateAndSave(
       _formKey,
       [_dateController.text],
     )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
       Acft saveAcft = Acft(
         id: widget.acft.id,
         soldierId: _soldierId,
@@ -267,14 +394,14 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       );
 
       if (widget.acft.id == null) {
-        await firestore.collection('acftStats').add(saveAcft.toMap());
+        await firestore.collection(kAcftCollection).add(saveAcft.toMap());
 
         if (mounted) {
           Navigator.pop(context);
         }
       } else {
         firestore
-            .collection('acftStats')
+            .collection(kAcftCollection)
             .doc(widget.acft.id)
             .set(saveAcft.toMap())
             .then((value) {
@@ -291,161 +418,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         ),
       );
     }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('acftStats')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _dateController.dispose();
-    _deadliftController.dispose();
-    _powerThrowController.dispose();
-    _puController.dispose();
-    _dragController.dispose();
-    _plankController.dispose();
-    _runController.dispose();
-    _deadliftRawController.dispose();
-    _powerThrowRawController.dispose();
-    _puRawController.dispose();
-    _dragRawController.dispose();
-    _plankRawController.dispose();
-    _runRawController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _runType = widget.acft.altEvent;
-
-    if (widget.acft.id != null) {
-      _title = '${widget.acft.rank} ${widget.acft.name}';
-    }
-    _ageGroup = widget.acft.ageGroup;
-    _gender = widget.acft.gender;
-
-    _soldierId = widget.acft.soldierId;
-    _rank = widget.acft.rank;
-    _lastName = widget.acft.name;
-    _firstName = widget.acft.firstName;
-    _section = widget.acft.section;
-    _rankSort = widget.acft.rankSort;
-    _owner = widget.acft.owner;
-    _users = widget.acft.users;
-
-    _total = widget.acft.total;
-    _mdlScore = widget.acft.deadliftScore;
-    _sptScore = widget.acft.powerThrowScore;
-    _hrpScore = widget.acft.puScore;
-    _sdcScore = widget.acft.dragScore;
-    _plkScore = widget.acft.plankScore;
-    _runScore = widget.acft.runScore;
-
-    _mdlRaw = int.tryParse(widget.acft.deadliftRaw) ?? 0;
-    _sptRaw = int.tryParse(widget.acft.powerThrowRaw) as double? ?? 0;
-    _hrpRaw = int.tryParse(widget.acft.puRaw) ?? 0;
-    if (widget.acft.dragRaw.characters.contains(":")) {
-      _sdcMins = int.tryParse(widget.acft.dragRaw
-              .substring(0, widget.acft.dragRaw.indexOf(":"))) ??
-          0;
-      _sdcSecs = int.tryParse(widget.acft.dragRaw
-              .substring(widget.acft.dragRaw.indexOf(":") + 1)) ??
-          0;
-    } else {
-      _sdcMins = 0;
-      _sdcSecs = 0;
-    }
-    if (widget.acft.plankRaw.characters.contains(":")) {
-      _plkMins = int.tryParse(widget.acft.plankRaw
-              .substring(0, widget.acft.plankRaw.indexOf(":"))) ??
-          0;
-      _plkSecs = int.tryParse(widget.acft.plankRaw
-              .substring(widget.acft.plankRaw.indexOf(":") + 1)) ??
-          0;
-    } else {
-      _plkMins = 0;
-      _plkMins = 0;
-    }
-    if (widget.acft.runRaw.characters.contains(":")) {
-      _runMins = int.tryParse(widget.acft.runRaw
-              .substring(0, widget.acft.runRaw.indexOf(":"))) ??
-          0;
-      _runSecs = int.tryParse(widget.acft.runRaw
-              .substring(widget.acft.runRaw.indexOf(":") + 1)) ??
-          0;
-    } else {
-      _runMins = 0;
-      _runSecs = 0;
-    }
-
-    _dateController.text = widget.acft.date;
-    _deadliftController.text = _mdlScore.toString();
-    _powerThrowController.text = _sptScore.toString();
-    _puController.text = _hrpScore.toString();
-    _dragController.text = _sdcScore.toString();
-    _plankController.text = _plkScore.toString();
-    _runController.text = _runScore.toString();
-    _deadliftRawController.text = widget.acft.deadliftRaw;
-    _powerThrowRawController.text = widget.acft.powerThrowRaw;
-    _puRawController.text = widget.acft.puRaw;
-    _dragRawController.text = widget.acft.dragRaw;
-    _plankRawController.text = widget.acft.plankRaw;
-    _runRawController.text = widget.acft.runRaw;
-
-    pass = widget.acft.pass;
-    if (pass) {
-      mdlPass = true;
-      sptPass = true;
-      hrpPass = true;
-      sdcPass = true;
-      plkPass = true;
-      runPass = true;
-    } else {
-      mdlPass = _mdlScore! >= 60;
-      sptPass = _sptScore! >= 60;
-      hrpPass = _hrpScore! >= 60;
-      sdcPass = _sdcScore! >= 60;
-      plkPass = _plkScore! >= 60;
-      runPass = _runScore! >= 60;
-    }
-    removeSoldiers = false;
-    updated = false;
-
-    _dateTime = DateTime.tryParse(widget.acft.date) ?? DateTime.now();
   }
 
   @override
@@ -475,50 +447,26 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              setState(() {
-                                _soldierId = value;
-                                _rank = soldiers![index]['rank'];
-                                _lastName = soldiers![index]['lastName'];
-                                _firstName = soldiers![index]['firstName'];
-                                _section = soldiers![index]['section'];
-                                _rankSort =
-                                    soldiers![index]['rankSort'].toString();
-                                _owner = soldiers![index]['owner'];
-                                _users = soldiers![index]['users'];
-                                updated = true;
-                              });
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -526,8 +474,15 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                  onChanged: (checked) async {
+                    lessSoldiers ??= await createLessSoldiers(
+                      userId: user.uid,
+                      collection: kAcftCollection,
+                      allSoldiers: allSoldiers,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

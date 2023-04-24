@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/custom_alert_dialog.dart';
@@ -20,9 +24,9 @@ import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_icon_button.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditMilLicPage extends ConsumerStatefulWidget {
@@ -48,7 +52,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
   final TextEditingController _restrictionsController = TextEditingController();
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   List<dynamic>? qualVehicles;
   bool removeSoldiers = false, updated = false;
   bool? abrams,
@@ -83,6 +87,49 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
   DateTime? _dateTime, _expDate;
   FToast toast = FToast();
 
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _expController.dispose();
+    _licenseController.dispose();
+    _restrictionsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.milLic.id != null) {
+      _title = '${widget.milLic.rank} ${widget.milLic.name}';
+    }
+
+    _soldierId = widget.milLic.soldierId;
+    _rank = widget.milLic.rank;
+    _lastName = widget.milLic.name;
+    _firstName = widget.milLic.firstName;
+    _section = widget.milLic.section;
+    _rankSort = widget.milLic.rankSort;
+    _owner = widget.milLic.owner;
+    _users = widget.milLic.users;
+
+    _dateController.text = widget.milLic.date;
+    _expController.text = widget.milLic.exp;
+    _licenseController.text = widget.milLic.license;
+    _restrictionsController.text = widget.milLic.restrictions;
+
+    if (widget.milLic.vehicles.isEmpty) {
+      qualVehicles = [];
+    } else {
+      qualVehicles = widget.milLic.vehicles.toList();
+    }
+
+    _dateTime = DateTime.tryParse(widget.milLic.date) ?? DateTime.now();
+    _expDate = DateTime.tryParse(widget.milLic.exp) ?? DateTime.now();
+  }
+
   void submit(BuildContext context) async {
     if (_soldierId == null) {
       soldierIdIsBlankMessage(context);
@@ -92,9 +139,6 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       _formKey,
       [_dateController.text, _expController.text],
     )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
       if (qualVehicles!.last == '') qualVehicles!.removeLast();
       MilLic saveMilLic = MilLic(
         id: widget.milLic.id,
@@ -114,8 +158,9 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       );
 
       if (widget.milLic.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('milLic').add(saveMilLic.toMap());
+        DocumentReference docRef = await firestore
+            .collection(kMilLicenseCollection)
+            .add(saveMilLic.toMap());
 
         saveMilLic.id = docRef.id;
         if (mounted) {
@@ -123,7 +168,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
         }
       } else {
         firestore
-            .collection('milLic')
+            .collection(kMilLicenseCollection)
             .doc(widget.milLic.id)
             .set(saveMilLic.toMap())
             .then((value) {
@@ -140,46 +185,6 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
         ),
       );
     }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('milLic')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
   }
 
   List<Widget> _vehicles() {
@@ -253,47 +258,6 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
   }
 
   @override
-  void dispose() {
-    _dateController.dispose();
-    _expController.dispose();
-    _licenseController.dispose();
-    _restrictionsController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.milLic.id != null) {
-      _title = '${widget.milLic.rank} ${widget.milLic.name}';
-    }
-
-    _soldierId = widget.milLic.soldierId;
-    _rank = widget.milLic.rank;
-    _lastName = widget.milLic.name;
-    _firstName = widget.milLic.firstName;
-    _section = widget.milLic.section;
-    _rankSort = widget.milLic.rankSort;
-    _owner = widget.milLic.owner;
-    _users = widget.milLic.users;
-
-    _dateController.text = widget.milLic.date;
-    _expController.text = widget.milLic.exp;
-    _licenseController.text = widget.milLic.license;
-    _restrictionsController.text = widget.milLic.restrictions;
-
-    if (widget.milLic.vehicles.isEmpty) {
-      qualVehicles = [];
-    } else {
-      qualVehicles = widget.milLic.vehicles.toList();
-    }
-
-    _dateTime = DateTime.tryParse(widget.milLic.date) ?? DateTime.now();
-    _expDate = DateTime.tryParse(widget.milLic.exp) ?? DateTime.now();
-  }
-
-  @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
@@ -319,52 +283,26 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -373,7 +311,11 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kMilLicenseCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

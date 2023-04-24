@@ -860,7 +860,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
             AppBarOption(
               title: 'Filter ACFTs',
               icon: Icon(
-                Icons.filter,
+                Icons.filter_alt,
                 color: getOnPrimaryColor(context),
               ),
               onPressed: () => showFilterOptions(

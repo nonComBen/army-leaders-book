@@ -4,6 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/constants/firestore_collections.dart';
+import 'package:leaders_book/methods/create_less_soldiers.dart';
+import 'package:leaders_book/models/soldier.dart';
+import 'package:leaders_book/providers/soldiers_provider.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
@@ -17,6 +21,7 @@ import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditHrActionPage extends ConsumerStatefulWidget {
@@ -41,101 +46,10 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
   final TextEditingController _prrController = TextEditingController();
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _dd93Date, _sglvDate, _prrDate;
   FToast toast = FToast();
-
-  void submit(BuildContext context) async {
-    if (_soldierId == null) {
-      soldierIdIsBlankMessage(context);
-      return;
-    }
-    if (validateAndSave(
-      _formKey,
-      [_dd93Controller.text, _sglvController.text, _prrController.text],
-    )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
-      HrAction saveHrAction = HrAction(
-        id: widget.hrAction.id,
-        soldierId: _soldierId,
-        owner: _owner!,
-        users: _users!,
-        rank: _rank!,
-        name: _lastName!,
-        firstName: _firstName!,
-        section: _section!,
-        rankSort: _rankSort!,
-        dd93: _dd93Controller.text,
-        sglv: _sglvController.text,
-        prr: _prrController.text,
-      );
-
-      if (widget.hrAction.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('hrActions').add(saveHrAction.toMap());
-
-        saveHrAction.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      } else {
-        firestore
-            .collection('hrActions')
-            .doc(widget.hrAction.id)
-            .set(saveHrAction.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Hr Metrics');
-        });
-      }
-    } else {
-      toast.showToast(
-        child: const MyToast(
-          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
-        ),
-      );
-    }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('hrActions')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
 
   @override
   void dispose() {
@@ -148,6 +62,8 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
   @override
   void initState() {
     super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
 
     if (widget.hrAction.id != null) {
       _title = '${widget.hrAction.rank} ${widget.hrAction.name}';
@@ -172,6 +88,60 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
     _dd93Date = DateTime.tryParse(widget.hrAction.dd93) ?? DateTime.now();
     _sglvDate = DateTime.tryParse(widget.hrAction.sglv) ?? DateTime.now();
     _prrDate = DateTime.tryParse(widget.hrAction.prr) ?? DateTime.now();
+  }
+
+  void submit(BuildContext context) async {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_dd93Controller.text, _sglvController.text, _prrController.text],
+    )) {
+      HrAction saveHrAction = HrAction(
+        id: widget.hrAction.id,
+        soldierId: _soldierId,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
+        dd93: _dd93Controller.text,
+        sglv: _sglvController.text,
+        prr: _prrController.text,
+      );
+
+      if (widget.hrAction.id == null) {
+        DocumentReference docRef = await firestore
+            .collection(kHrMetricCollection)
+            .add(saveHrAction.toMap());
+
+        saveHrAction.id = docRef.id;
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        firestore
+            .collection(kHrMetricCollection)
+            .doc(widget.hrAction.id)
+            .set(saveHrAction.toMap())
+            .then((value) {
+          Navigator.pop(context);
+        }).catchError((e) {
+          // ignore: avoid_print
+          print('Error $e thrown while updating Hr Metrics');
+        });
+      }
+    } else {
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
+    }
   }
 
   @override
@@ -201,52 +171,26 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -255,7 +199,11 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kHrMetricCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
@@ -17,6 +21,7 @@ import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 
 class EditWorkingAwardPage extends ConsumerStatefulWidget {
   const EditWorkingAwardPage({
@@ -56,9 +61,44 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
     'Heroism',
     'Valor',
   ];
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
   FToast toast = FToast();
+
+  @override
+  void dispose() {
+    _ach1Controller.dispose();
+    _ach2Controller.dispose();
+    _ach3Controller.dispose();
+    _ach4Controller.dispose();
+    _citationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.award.id != null) {
+      _title = '${widget.award.rank} ${widget.award.name}';
+    }
+
+    _soldierId = widget.award.soldierId;
+    _rank = widget.award.rank;
+    _lastName = widget.award.name;
+    _firstName = widget.award.firstName;
+    _section = widget.award.section;
+    _rankSort = widget.award.rankSort;
+    _reason = widget.award.awardReason;
+
+    _ach1Controller.text = widget.award.ach1;
+    _ach2Controller.text = widget.award.ach2;
+    _ach3Controller.text = widget.award.ach3;
+    _ach4Controller.text = widget.award.ach4;
+    _citationController.text = widget.award.citation;
+  }
 
   bool validateAndSave() {
     final form = _formKey.currentState!;
@@ -93,8 +133,9 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
       );
 
       if (widget.award.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('workingAwards').add(saveAward.toMap());
+        DocumentReference docRef = await firestore
+            .collection(kWorkingAwardsCollection)
+            .add(saveAward.toMap());
 
         saveAward.id = docRef.id;
         if (mounted) {
@@ -102,7 +143,7 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
         }
       } else {
         firestore
-            .collection('workingAwards')
+            .collection(kWorkingAwardsCollection)
             .doc(widget.award.id)
             .set(saveAward.toMap())
             .then((value) {
@@ -119,74 +160,6 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
         ),
       );
     }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('workingAwards')
-          .where('owner', isEqualTo: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _ach1Controller.dispose();
-    _ach2Controller.dispose();
-    _ach3Controller.dispose();
-    _ach4Controller.dispose();
-    _citationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.award.id != null) {
-      _title = '${widget.award.rank} ${widget.award.name}';
-    }
-
-    _soldierId = widget.award.soldierId;
-    _rank = widget.award.rank;
-    _lastName = widget.award.name;
-    _firstName = widget.award.firstName;
-    _section = widget.award.section;
-    _rankSort = widget.award.rankSort;
-    _reason = widget.award.awardReason;
-
-    _ach1Controller.text = widget.award.ach1;
-    _ach2Controller.text = widget.award.ach2;
-    _ach3Controller.text = widget.award.ach3;
-    _ach4Controller.text = widget.award.ach4;
-    _citationController.text = widget.award.citation;
   }
 
   @override
@@ -216,50 +189,24 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('owner', isEqualTo: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -268,7 +215,11 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kWorkingAwardsCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

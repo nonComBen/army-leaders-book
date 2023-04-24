@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/constants/firestore_collections.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
@@ -38,6 +39,29 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.phone.id != null) {
+      _title = 'Edit Phone';
+    }
+
+    _titleController.text = widget.phone.title;
+    _nameController.text = widget.phone.name;
+    _phoneController.text = widget.phone.phone;
+    _locationController.text = widget.phone.location;
+  }
+
   bool validateAndSave() {
     final form = _formKey.currentState!;
     if (form.validate()) {
@@ -60,7 +84,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
 
       if (widget.phone.id == null) {
         DocumentReference docRef =
-            await firestore.collection('phoneNumbers').add(savePhone.toMap());
+            await firestore.collection(kPhoneCollection).add(savePhone.toMap());
 
         savePhone.id = docRef.id;
         if (mounted) {
@@ -68,7 +92,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
         }
       } else {
         firestore
-            .collection('phoneNumbers')
+            .collection(kPhoneCollection)
             .doc(widget.phone.id)
             .set(savePhone.toMap())
             .then((value) {
@@ -87,29 +111,6 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
         ),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _nameController.dispose();
-    _phoneController.dispose();
-    _locationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.phone.id != null) {
-      _title = 'Edit Phone';
-    }
-
-    _titleController.text = widget.phone.title;
-    _nameController.text = widget.phone.name;
-    _phoneController.text = widget.phone.phone;
-    _locationController.text = widget.phone.location;
   }
 
   @override

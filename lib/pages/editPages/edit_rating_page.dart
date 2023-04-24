@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
@@ -18,6 +22,7 @@ import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditRatingPage extends ConsumerStatefulWidget {
@@ -64,104 +69,10 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
     'Change of Duty',
     'Officer Failing Promotion Selection',
   ];
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _lastDate, _nextDate;
   FToast toast = FToast();
-
-  void submit(BuildContext context) async {
-    if (_soldierId == null) {
-      soldierIdIsBlankMessage(context);
-      return;
-    }
-    if (validateAndSave(
-      _formKey,
-      [_lastController.text, _nextController.text],
-    )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
-      Rating saveRating = Rating(
-        id: widget.rating.id,
-        soldierId: _soldierId,
-        owner: _owner!,
-        users: _users!,
-        rank: _rank!,
-        name: _lastName!,
-        firstName: _firstName!,
-        section: _section!,
-        rankSort: _rankSort!,
-        last: _lastController.text,
-        next: _nextController.text,
-        nextType: _type!,
-        rater: _raterController.text,
-        sr: _srController.text,
-        reviewer: _reviewerController.text,
-      );
-
-      if (widget.rating.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('ratings').add(saveRating.toMap());
-
-        saveRating.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      } else {
-        firestore
-            .collection('ratings')
-            .doc(widget.rating.id)
-            .set(saveRating.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Rating');
-        });
-      }
-    } else {
-      toast.showToast(
-        child: const MyToast(
-          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
-        ),
-      );
-    }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('ratings')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
 
   @override
   void dispose() {
@@ -176,6 +87,8 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
   @override
   void initState() {
     super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
 
     if (widget.rating.id != null) {
       _title = '${widget.rating.rank} ${widget.rating.name}';
@@ -199,6 +112,63 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
 
     _lastDate = DateTime.tryParse(widget.rating.last) ?? DateTime.now();
     _nextDate = DateTime.tryParse(widget.rating.next) ?? DateTime.now();
+  }
+
+  void submit(BuildContext context) async {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_lastController.text, _nextController.text],
+    )) {
+      Rating saveRating = Rating(
+        id: widget.rating.id,
+        soldierId: _soldierId,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
+        last: _lastController.text,
+        next: _nextController.text,
+        nextType: _type!,
+        rater: _raterController.text,
+        sr: _srController.text,
+        reviewer: _reviewerController.text,
+      );
+
+      if (widget.rating.id == null) {
+        DocumentReference docRef = await firestore
+            .collection(kRatingCollection)
+            .add(saveRating.toMap());
+
+        saveRating.id = docRef.id;
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        firestore
+            .collection(kRatingCollection)
+            .doc(widget.rating.id)
+            .set(saveRating.toMap())
+            .then((value) {
+          Navigator.pop(context);
+        }).catchError((e) {
+          // ignore: avoid_print
+          print('Error $e thrown while updating Rating');
+        });
+      }
+    } else {
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
+    }
   }
 
   @override
@@ -228,52 +198,26 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -282,7 +226,11 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kRatingCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

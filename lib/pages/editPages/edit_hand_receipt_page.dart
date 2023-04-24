@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
 import '../../auth_provider.dart';
@@ -20,9 +24,9 @@ import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_icon_button.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 
 class EditHandReceiptPage extends ConsumerStatefulWidget {
   const EditHandReceiptPage({
@@ -51,9 +55,54 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
 
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users, _subComponents;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
   FToast toast = FToast();
+
+  @override
+  void dispose() {
+    _itemController.dispose();
+    _modelController.dispose();
+    _serialController.dispose();
+    _nsnController.dispose();
+    _locationController.dispose();
+    _valueController.dispose();
+    _commentsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.item.id != null) {
+      _title = '${widget.item.rank} ${widget.item.name}';
+    }
+
+    _soldierId = widget.item.soldierId;
+    _rank = widget.item.rank;
+    _lastName = widget.item.name;
+    _firstName = widget.item.firstName;
+    _section = widget.item.section;
+    _rankSort = widget.item.rankSort;
+    _owner = widget.item.owner;
+    _users = widget.item.users;
+
+    _itemController.text = widget.item.item;
+    _modelController.text = widget.item.model;
+    _serialController.text = widget.item.serial;
+    _nsnController.text = widget.item.nsn;
+    _locationController.text = widget.item.location;
+    _valueController.text = widget.item.value;
+    _commentsController.text = widget.item.comments;
+
+    _subComponents = widget.item.subComponents;
+
+    removeSoldiers = false;
+    updated = false;
+  }
 
   void _editSubComponent(BuildContext context, int? index) {
     TextEditingController subController = TextEditingController();
@@ -167,9 +216,6 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
       _formKey,
       [],
     )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
       HandReceiptItem saveHRItem = HandReceiptItem(
         id: widget.item.id,
         soldierId: _soldierId,
@@ -191,8 +237,9 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
       );
 
       if (widget.item.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('handReceipt').add(saveHRItem.toMap());
+        DocumentReference docRef = await firestore
+            .collection(kHandReceiptCollection)
+            .add(saveHRItem.toMap());
 
         saveHRItem.id = docRef.id;
         if (mounted) {
@@ -200,7 +247,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
         }
       } else {
         firestore
-            .collection('handReceipt')
+            .collection(kHandReceiptCollection)
             .doc(widget.item.id)
             .set(saveHRItem.toMap())
             .then((value) {
@@ -217,84 +264,6 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
         ),
       );
     }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('equipment')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _itemController.dispose();
-    _modelController.dispose();
-    _serialController.dispose();
-    _nsnController.dispose();
-    _locationController.dispose();
-    _valueController.dispose();
-    _commentsController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.item.id != null) {
-      _title = '${widget.item.rank} ${widget.item.name}';
-    }
-
-    _soldierId = widget.item.soldierId;
-    _rank = widget.item.rank;
-    _lastName = widget.item.name;
-    _firstName = widget.item.firstName;
-    _section = widget.item.section;
-    _rankSort = widget.item.rankSort;
-    _owner = widget.item.owner;
-    _users = widget.item.users;
-
-    _itemController.text = widget.item.item;
-    _modelController.text = widget.item.model;
-    _serialController.text = widget.item.serial;
-    _nsnController.text = widget.item.nsn;
-    _locationController.text = widget.item.location;
-    _valueController.text = widget.item.value;
-    _commentsController.text = widget.item.comments;
-
-    _subComponents = widget.item.subComponents;
-
-    removeSoldiers = false;
-    updated = false;
   }
 
   @override
@@ -324,52 +293,26 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier Signed'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -378,7 +321,11 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kHandReceiptCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

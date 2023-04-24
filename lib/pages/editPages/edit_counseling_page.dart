@@ -5,19 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/counseling.dart';
+import '../../models/soldier.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditCounselingPage extends ConsumerStatefulWidget {
@@ -45,10 +49,50 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
   final TextEditingController _planOfActionController = TextEditingController();
   final TextEditingController _purposeController = TextEditingController();
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _dateTime;
   FToast toast = FToast();
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _assessmentController.dispose();
+    _keyPointsController.dispose();
+    _indivRemarksController.dispose();
+    _leaderRespController.dispose();
+    _planOfActionController.dispose();
+    _purposeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.counseling.id != null) {
+      _title = '${widget.counseling.rank} ${widget.counseling.name}';
+    }
+
+    _soldierId = widget.counseling.soldierId;
+    _rank = widget.counseling.rank;
+    _lastName = widget.counseling.name;
+    _firstName = widget.counseling.firstName;
+    _section = widget.counseling.section;
+    _rankSort = widget.counseling.rankSort;
+
+    _dateController.text = widget.counseling.date;
+    _assessmentController.text = widget.counseling.assessment;
+    _indivRemarksController.text = widget.counseling.indivRemarks;
+    _leaderRespController.text = widget.counseling.leaderResp;
+    _planOfActionController.text = widget.counseling.planOfAction;
+    _purposeController.text = widget.counseling.purpose;
+    _keyPointsController.text = widget.counseling.keyPoints;
+
+    _dateTime = DateTime.tryParse(widget.counseling.date) ?? DateTime.now();
+  }
 
   void submit(BuildContext context, String userId) async {
     if (_soldierId == null) {
@@ -107,79 +151,6 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
     }
   }
 
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('counselings')
-          .where('owner', isEqualTo: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _dateController.dispose();
-    _assessmentController.dispose();
-    _keyPointsController.dispose();
-    _indivRemarksController.dispose();
-    _leaderRespController.dispose();
-    _planOfActionController.dispose();
-    _purposeController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.counseling.id != null) {
-      _title = '${widget.counseling.rank} ${widget.counseling.name}';
-    }
-
-    _soldierId = widget.counseling.soldierId;
-    _rank = widget.counseling.rank;
-    _lastName = widget.counseling.name;
-    _firstName = widget.counseling.firstName;
-    _section = widget.counseling.section;
-    _rankSort = widget.counseling.rankSort;
-
-    _dateController.text = widget.counseling.date;
-    _assessmentController.text = widget.counseling.assessment;
-    _indivRemarksController.text = widget.counseling.indivRemarks;
-    _leaderRespController.text = widget.counseling.leaderResp;
-    _planOfActionController.text = widget.counseling.planOfAction;
-    _purposeController.text = widget.counseling.purpose;
-    _keyPointsController.text = widget.counseling.keyPoints;
-
-    _dateTime = DateTime.tryParse(widget.counseling.date) ?? DateTime.now();
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -207,50 +178,24 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -259,7 +204,10 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                        collection: kCounselingCollection,
+                        userId: user.uid,
+                        allSoldiers: allSoldiers!);
                   },
                 ),
               ),

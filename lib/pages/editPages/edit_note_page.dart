@@ -36,6 +36,25 @@ class EditNotePageState extends ConsumerState<EditNotePage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _commentsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.note.id != null) {
+      _title = 'Edit Note';
+    }
+
+    _titleController.text = widget.note.title;
+    _commentsController.text = widget.note.comments;
+  }
+
   bool validateAndSave() {
     final form = _formKey.currentState!;
     if (form.validate()) {
@@ -83,25 +102,6 @@ class EditNotePageState extends ConsumerState<EditNotePage> {
         ),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _commentsController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.note.id != null) {
-      _title = 'Edit Note';
-    }
-
-    _titleController.text = widget.note.title;
-    _commentsController.text = widget.note.comments;
   }
 
   @override

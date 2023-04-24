@@ -5,19 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/profile.dart';
+import '../../models/soldier.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditTempProfilePage extends ConsumerStatefulWidget {
@@ -49,99 +53,10 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
       _rankSort,
       _owner;
   List<dynamic>? _users;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _dateTime, _expDate;
   FToast toast = FToast();
-
-  void submit(BuildContext context) async {
-    if (_soldierId == null) {
-      soldierIdIsBlankMessage(context);
-      return;
-    }
-    if (validateAndSave(
-      _formKey,
-      [_dateController.text, _expController.text],
-    )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
-      TempProfile saveProfile = TempProfile(
-        id: widget.profile.id,
-        soldierId: _soldierId,
-        owner: _owner!,
-        users: _users!,
-        rank: _rank!,
-        name: _lastName!,
-        firstName: _firstName!,
-        section: _section!,
-        rankSort: _rankSort!,
-        date: _dateController.text,
-        exp: _expController.text,
-        type: _type!,
-        comments: _commentsController.text,
-      );
-
-      DocumentReference docRef;
-      if (widget.profile.id == null) {
-        docRef =
-            await firestore.collection('profiles').add(saveProfile.toMap());
-
-        //saveProfile.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      } else {
-        docRef = firestore.collection('profiles').doc(widget.profile.id);
-        docRef.set(saveProfile.toMap());
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      }
-    } else {
-      toast.showToast(
-        child: const MyToast(
-          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
-        ),
-      );
-    }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('profiles')
-          .where('users', arrayContains: userId)
-          .where('type', isEqualTo: 'Temporary')
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
 
   @override
   void dispose() {
@@ -154,6 +69,8 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
   @override
   void initState() {
     super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
 
     _type = widget.profile.type;
 
@@ -176,6 +93,51 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
 
     _dateTime = DateTime.tryParse(widget.profile.date) ?? DateTime.now();
     _expDate = DateTime.tryParse(widget.profile.exp) ?? DateTime.now();
+  }
+
+  void submit(BuildContext context) async {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_dateController.text, _expController.text],
+    )) {
+      TempProfile saveProfile = TempProfile(
+        id: widget.profile.id,
+        soldierId: _soldierId,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
+        date: _dateController.text,
+        exp: _expController.text,
+        type: _type!,
+        comments: _commentsController.text,
+      );
+
+      DocumentReference docRef;
+      if (widget.profile.id == null) {
+        firestore.collection(kProfilesCollection).add(saveProfile.toMap());
+        Navigator.pop(context);
+      } else {
+        docRef = firestore.collection('profiles').doc(widget.profile.id);
+        docRef.set(saveProfile.toMap());
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } else {
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
+    }
   }
 
   @override
@@ -205,52 +167,26 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -259,7 +195,11 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                        collection: kProfilesCollection,
+                        userId: user.uid,
+                        allSoldiers: allSoldiers!,
+                        profileType: 'Temporary');
                   },
                 ),
               ),

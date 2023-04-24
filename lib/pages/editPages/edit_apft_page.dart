@@ -5,15 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/soldier.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
@@ -55,7 +60,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   int _total = 0, _puScore = 0, _suScore = 0, _runScore = 0;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool pass = true,
       removeSoldiers = false,
       updated = false,
@@ -70,6 +75,61 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
   PuCalculator puCalculator = PuCalculator();
   SuCalculator suCalculator = SuCalculator();
   RunCalculator runCalculator = RunCalculator();
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _puController.dispose();
+    _suController.dispose();
+    _runController.dispose();
+    _puRawController.dispose();
+    _suRawController.dispose();
+    _runRawController.dispose();
+    _ageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    _runType = widget.apft.altEvent;
+
+    if (widget.apft.id != null) {
+      _title = '${widget.apft.rank} ${widget.apft.name}';
+    }
+
+    _gender = widget.apft.gender;
+
+    _soldierId = widget.apft.soldierId;
+    _rank = widget.apft.rank;
+    _lastName = widget.apft.name;
+    _firstName = widget.apft.firstName;
+    _section = widget.apft.section;
+    _rankSort = widget.apft.rankSort;
+    _owner = widget.apft.owner;
+    _users = widget.apft.users;
+
+    _total = widget.apft.total;
+    _puScore = widget.apft.puScore;
+    _suScore = widget.apft.suScore;
+    _runScore = widget.apft.runScore;
+
+    _dateController.text = widget.apft.date;
+    _puController.text = _puScore.toString();
+    _suController.text = _suScore.toString();
+    _runController.text = _runScore.toString();
+    _puRawController.text = widget.apft.puRaw;
+    _suRawController.text = widget.apft.suRaw;
+    _runRawController.text = widget.apft.runRaw;
+    _ageController.text = widget.apft.age.toString();
+
+    pass = widget.apft.pass;
+
+    _dateTime = DateTime.tryParse(widget.apft.date) ?? DateTime.now();
+  }
 
   int ageGroupIndex() {
     int age = int.tryParse(_ageController.text) ?? 17;
@@ -187,9 +247,6 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
       _formKey,
       [_dateController.text],
     )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
       int age = int.tryParse(_ageController.text.trim()) ?? 0;
       Apft saveApft = Apft(
         id: widget.apft.id,
@@ -217,7 +274,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
 
       if (widget.apft.id == null) {
         DocumentReference docRef =
-            await firestore.collection('apftStats').add(saveApft.toMap());
+            await firestore.collection(kApftCollection).add(saveApft.toMap());
 
         saveApft.id = docRef.id;
         if (mounted) {
@@ -225,7 +282,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
         }
       } else {
         firestore
-            .collection('apftStats')
+            .collection(kApftCollection)
             .doc(widget.apft.id)
             .set(saveApft.toMap())
             .then((value) {
@@ -242,94 +299,6 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
         ),
       );
     }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('apftStats')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _dateController.dispose();
-    _puController.dispose();
-    _suController.dispose();
-    _runController.dispose();
-    _puRawController.dispose();
-    _suRawController.dispose();
-    _runRawController.dispose();
-    _ageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _runType = widget.apft.altEvent;
-
-    if (widget.apft.id != null) {
-      _title = '${widget.apft.rank} ${widget.apft.name}';
-    }
-
-    _gender = widget.apft.gender;
-
-    _soldierId = widget.apft.soldierId;
-    _rank = widget.apft.rank;
-    _lastName = widget.apft.name;
-    _firstName = widget.apft.firstName;
-    _section = widget.apft.section;
-    _rankSort = widget.apft.rankSort;
-    _owner = widget.apft.owner;
-    _users = widget.apft.users;
-
-    _total = widget.apft.total;
-    _puScore = widget.apft.puScore;
-    _suScore = widget.apft.suScore;
-    _runScore = widget.apft.runScore;
-
-    _dateController.text = widget.apft.date;
-    _puController.text = _puScore.toString();
-    _suController.text = _suScore.toString();
-    _runController.text = _runScore.toString();
-    _puRawController.text = widget.apft.puRaw;
-    _suRawController.text = widget.apft.suRaw;
-    _runRawController.text = widget.apft.runRaw;
-    _ageController.text = widget.apft.age.toString();
-
-    pass = widget.apft.pass;
-
-    _dateTime = DateTime.tryParse(widget.apft.date) ?? DateTime.now();
   }
 
   @override
@@ -360,55 +329,26 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: Text(
-                              'Soldier',
-                              style: TextStyle(color: getTextColor(context)),
-                            ),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -417,7 +357,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kApftCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

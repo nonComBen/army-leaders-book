@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../methods/theme_methods.dart';
 import '../../auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
@@ -20,9 +24,9 @@ import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_icon_button.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditMedprosPage extends ConsumerStatefulWidget {
@@ -64,7 +68,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
 
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   List<dynamic>? _otherImms;
   bool removeSoldiers = false, updated = false, expanded = false;
   DateTime? _phaDate,
@@ -87,6 +91,112 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       _smallPoxDate,
       _anthraxDate;
   FToast toast = FToast();
+
+  @override
+  void dispose() {
+    _phaController.dispose();
+    _dentalController.dispose();
+    _visionController.dispose();
+    _hearingController.dispose();
+    _hivController.dispose();
+    _fluController.dispose();
+    _mmrController.dispose();
+    _varicellaController.dispose();
+    _polioController.dispose();
+    _tuberculinController.dispose();
+    _tetanusController.dispose();
+    _hepAController.dispose();
+    _hepBController.dispose();
+    _encephalitisController.dispose();
+    _meningController.dispose();
+    _typhoidController.dispose();
+    _yellowController.dispose();
+    _smallPoxController.dispose();
+    _anthraxController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.medpro.id != null) {
+      _title = '${widget.medpro.rank} ${widget.medpro.name}';
+    }
+
+    _soldierId = widget.medpro.soldierId;
+    _rank = widget.medpro.rank;
+    _lastName = widget.medpro.name;
+    _firstName = widget.medpro.firstName;
+    _section = widget.medpro.section;
+    _rankSort = widget.medpro.rankSort;
+    _owner = widget.medpro.owner;
+    _users = widget.medpro.users;
+
+    _phaController.text = widget.medpro.pha;
+    _dentalController.text = widget.medpro.dental;
+    _visionController.text = widget.medpro.vision;
+    _hearingController.text = widget.medpro.hearing;
+    _hivController.text = widget.medpro.hiv;
+    _fluController.text = widget.medpro.flu;
+    _mmrController.text = widget.medpro.mmr;
+    _varicellaController.text = widget.medpro.varicella;
+    _polioController.text = widget.medpro.polio;
+    _tuberculinController.text = widget.medpro.tuberculin;
+    _tetanusController.text = widget.medpro.tetanus;
+    _hepAController.text = widget.medpro.hepA;
+    _hepBController.text = widget.medpro.hepB;
+    _encephalitisController.text = widget.medpro.encephalitis;
+    _meningController.text = widget.medpro.meningococcal;
+    _typhoidController.text = widget.medpro.typhoid;
+    _yellowController.text = widget.medpro.yellow;
+    _smallPoxController.text = widget.medpro.smallPox;
+    _anthraxController.text = widget.medpro.anthrax;
+    _otherImms = widget.medpro.otherImms;
+
+    if (widget.medpro.mmr != '' ||
+        widget.medpro.varicella != '' ||
+        widget.medpro.polio != '' ||
+        widget.medpro.tuberculin != '' ||
+        widget.medpro.tetanus != '' ||
+        widget.medpro.hepA != '' ||
+        widget.medpro.hepB != '' ||
+        widget.medpro.encephalitis != '' ||
+        widget.medpro.meningococcal != '' ||
+        widget.medpro.typhoid != '' ||
+        widget.medpro.yellow != '' ||
+        widget.medpro.smallPox != '' ||
+        widget.medpro.anthrax != '') {
+      expanded = true;
+    } else {
+      expanded = false;
+    }
+
+    _phaDate = DateTime.tryParse(widget.medpro.pha) ?? DateTime.now();
+    _dentalDate = DateTime.tryParse(widget.medpro.dental) ?? DateTime.now();
+    _visionDate = DateTime.tryParse(widget.medpro.vision) ?? DateTime.now();
+    _hearingDate = DateTime.tryParse(widget.medpro.hearing) ?? DateTime.now();
+    _hivDate = DateTime.tryParse(widget.medpro.hiv) ?? DateTime.now();
+    _fluDate = DateTime.tryParse(widget.medpro.flu) ?? DateTime.now();
+    _mmrDate = DateTime.tryParse(widget.medpro.mmr) ?? DateTime.now();
+    _varicellaDate =
+        DateTime.tryParse(widget.medpro.varicella) ?? DateTime.now();
+    _polioDate = DateTime.tryParse(widget.medpro.polio) ?? DateTime.now();
+    _tuberDate = DateTime.tryParse(widget.medpro.tuberculin) ?? DateTime.now();
+    _tetanusDate = DateTime.tryParse(widget.medpro.tetanus) ?? DateTime.now();
+    _hepADate = DateTime.tryParse(widget.medpro.hepA) ?? DateTime.now();
+    _hepBDate = DateTime.tryParse(widget.medpro.hepB) ?? DateTime.now();
+    _encephalitisDate =
+        DateTime.tryParse(widget.medpro.encephalitis) ?? DateTime.now();
+    _meningDate =
+        DateTime.tryParse(widget.medpro.meningococcal) ?? DateTime.now();
+    _typhoidDate = DateTime.tryParse(widget.medpro.typhoid) ?? DateTime.now();
+    _yellowDate = DateTime.tryParse(widget.medpro.yellow) ?? DateTime.now();
+    _smallPoxDate = DateTime.tryParse(widget.medpro.smallPox) ?? DateTime.now();
+    _anthraxDate = DateTime.tryParse(widget.medpro.anthrax) ?? DateTime.now();
+  }
 
   void submit(BuildContext context) async {
     if (_soldierId == null) {
@@ -117,9 +227,6 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         _anthraxController.text,
       ],
     )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
       Medpro saveMedpros = Medpro(
         id: widget.medpro.id,
         soldierId: _soldierId,
@@ -153,8 +260,9 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       );
 
       if (widget.medpro.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('medpros').add(saveMedpros.toMap());
+        DocumentReference docRef = await firestore
+            .collection(kMedprosCollection)
+            .add(saveMedpros.toMap());
 
         saveMedpros.id = docRef.id;
         if (mounted) {
@@ -162,7 +270,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         }
       } else {
         firestore
-            .collection('medpros')
+            .collection(kMedprosCollection)
             .doc(widget.medpro.id)
             .set(saveMedpros.toMap())
             .then((value) {
@@ -406,145 +514,6 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
     });
   }
 
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('medpros')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _phaController.dispose();
-    _dentalController.dispose();
-    _visionController.dispose();
-    _hearingController.dispose();
-    _hivController.dispose();
-    _fluController.dispose();
-    _mmrController.dispose();
-    _varicellaController.dispose();
-    _polioController.dispose();
-    _tuberculinController.dispose();
-    _tetanusController.dispose();
-    _hepAController.dispose();
-    _hepBController.dispose();
-    _encephalitisController.dispose();
-    _meningController.dispose();
-    _typhoidController.dispose();
-    _yellowController.dispose();
-    _smallPoxController.dispose();
-    _anthraxController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.medpro.id != null) {
-      _title = '${widget.medpro.rank} ${widget.medpro.name}';
-    }
-
-    _soldierId = widget.medpro.soldierId;
-    _rank = widget.medpro.rank;
-    _lastName = widget.medpro.name;
-    _firstName = widget.medpro.firstName;
-    _section = widget.medpro.section;
-    _rankSort = widget.medpro.rankSort;
-    _owner = widget.medpro.owner;
-    _users = widget.medpro.users;
-
-    _phaController.text = widget.medpro.pha;
-    _dentalController.text = widget.medpro.dental;
-    _visionController.text = widget.medpro.vision;
-    _hearingController.text = widget.medpro.hearing;
-    _hivController.text = widget.medpro.hiv;
-    _fluController.text = widget.medpro.flu;
-    _mmrController.text = widget.medpro.mmr;
-    _varicellaController.text = widget.medpro.varicella;
-    _polioController.text = widget.medpro.polio;
-    _tuberculinController.text = widget.medpro.tuberculin;
-    _tetanusController.text = widget.medpro.tetanus;
-    _hepAController.text = widget.medpro.hepA;
-    _hepBController.text = widget.medpro.hepB;
-    _encephalitisController.text = widget.medpro.encephalitis;
-    _meningController.text = widget.medpro.meningococcal;
-    _typhoidController.text = widget.medpro.typhoid;
-    _yellowController.text = widget.medpro.yellow;
-    _smallPoxController.text = widget.medpro.smallPox;
-    _anthraxController.text = widget.medpro.anthrax;
-    _otherImms = widget.medpro.otherImms;
-
-    if (widget.medpro.mmr != '' ||
-        widget.medpro.varicella != '' ||
-        widget.medpro.polio != '' ||
-        widget.medpro.tuberculin != '' ||
-        widget.medpro.tetanus != '' ||
-        widget.medpro.hepA != '' ||
-        widget.medpro.hepB != '' ||
-        widget.medpro.encephalitis != '' ||
-        widget.medpro.meningococcal != '' ||
-        widget.medpro.typhoid != '' ||
-        widget.medpro.yellow != '' ||
-        widget.medpro.smallPox != '' ||
-        widget.medpro.anthrax != '') {
-      expanded = true;
-    } else {
-      expanded = false;
-    }
-
-    _phaDate = DateTime.tryParse(widget.medpro.pha) ?? DateTime.now();
-    _dentalDate = DateTime.tryParse(widget.medpro.dental) ?? DateTime.now();
-    _visionDate = DateTime.tryParse(widget.medpro.vision) ?? DateTime.now();
-    _hearingDate = DateTime.tryParse(widget.medpro.hearing) ?? DateTime.now();
-    _hivDate = DateTime.tryParse(widget.medpro.hiv) ?? DateTime.now();
-    _fluDate = DateTime.tryParse(widget.medpro.flu) ?? DateTime.now();
-    _mmrDate = DateTime.tryParse(widget.medpro.mmr) ?? DateTime.now();
-    _varicellaDate =
-        DateTime.tryParse(widget.medpro.varicella) ?? DateTime.now();
-    _polioDate = DateTime.tryParse(widget.medpro.polio) ?? DateTime.now();
-    _tuberDate = DateTime.tryParse(widget.medpro.tuberculin) ?? DateTime.now();
-    _tetanusDate = DateTime.tryParse(widget.medpro.tetanus) ?? DateTime.now();
-    _hepADate = DateTime.tryParse(widget.medpro.hepA) ?? DateTime.now();
-    _hepBDate = DateTime.tryParse(widget.medpro.hepB) ?? DateTime.now();
-    _encephalitisDate =
-        DateTime.tryParse(widget.medpro.encephalitis) ?? DateTime.now();
-    _meningDate =
-        DateTime.tryParse(widget.medpro.meningococcal) ?? DateTime.now();
-    _typhoidDate = DateTime.tryParse(widget.medpro.typhoid) ?? DateTime.now();
-    _yellowDate = DateTime.tryParse(widget.medpro.yellow) ?? DateTime.now();
-    _smallPoxDate = DateTime.tryParse(widget.medpro.smallPox) ?? DateTime.now();
-    _anthraxDate = DateTime.tryParse(widget.medpro.anthrax) ?? DateTime.now();
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -572,52 +541,26 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -626,7 +569,11 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kMedprosCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:leaders_book/methods/custom_modal_bottom_sheet.dart';
 
+import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/validate.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';

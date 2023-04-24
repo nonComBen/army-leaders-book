@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
@@ -16,8 +20,8 @@ import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditTrainingPage extends ConsumerStatefulWidget {
@@ -63,7 +67,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
   final TextEditingController _add5DateController = TextEditingController();
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false, addMore = false;
   String? addMoreLess;
   FToast toast = FToast();
@@ -87,6 +91,114 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       _add3Date,
       _add4Date,
       _add5Date;
+
+  @override
+  void dispose() {
+    _cyberController.dispose();
+    _opsecController.dispose();
+    _antiTerrorController.dispose();
+    _lawController.dispose();
+    _persRecController.dispose();
+    _infoSecController.dispose();
+    _ctipController.dispose();
+    _gatController.dispose();
+    _sereController.dispose();
+    _tarpController.dispose();
+    _eoController.dispose();
+    _asapController.dispose();
+    _suicideController.dispose();
+    _sharpController.dispose();
+    _add1Controller.dispose();
+    _add1DateController.dispose();
+    _add2Controller.dispose();
+    _add2DateController.dispose();
+    _add3Controller.dispose();
+    _add3DateController.dispose();
+    _add4Controller.dispose();
+    _add4DateController.dispose();
+    _add5Controller.dispose();
+    _add5DateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.training.id != null) {
+      _title = '${widget.training.rank} ${widget.training.name}';
+    }
+
+    _soldierId = widget.training.soldierId;
+    _rank = widget.training.rank;
+    _lastName = widget.training.name;
+    _firstName = widget.training.firstName;
+    _section = widget.training.section;
+    _rankSort = widget.training.rankSort;
+    _owner = widget.training.owner;
+    _users = widget.training.users;
+
+    _cyberController.text = widget.training.cyber;
+    _opsecController.text = widget.training.opsec;
+    _antiTerrorController.text = widget.training.antiTerror;
+    _lawController.text = widget.training.lawOfWar;
+    _persRecController.text = widget.training.persRec;
+    _infoSecController.text = widget.training.infoSec;
+    _ctipController.text = widget.training.ctip;
+    _gatController.text = widget.training.gat;
+    _sereController.text = widget.training.sere;
+    _tarpController.text = widget.training.tarp;
+    _eoController.text = widget.training.eo;
+    _asapController.text = widget.training.asap;
+    _suicideController.text = widget.training.suicide;
+    _sharpController.text = widget.training.sharp;
+    _add1Controller.text = widget.training.add1;
+    _add1DateController.text = widget.training.add1Date;
+    _add2Controller.text = widget.training.add2;
+    _add2DateController.text = widget.training.add2Date;
+    _add3Controller.text = widget.training.add3;
+    _add3DateController.text = widget.training.add3Date;
+    _add4Controller.text = widget.training.add4;
+    _add4DateController.text = widget.training.add4Date;
+    _add5Controller.text = widget.training.add5;
+    _add5DateController.text = widget.training.add5Date;
+
+    if (_add1DateController.text != '' ||
+        _add2DateController.text != '' ||
+        _add3DateController.text != '' ||
+        _add4DateController.text != '' ||
+        _add5DateController.text != '') {
+      addMore = true;
+    }
+    if (addMore) {
+      addMoreLess = 'Less Training';
+    } else {
+      addMoreLess = 'More Training';
+    }
+
+    _cyberDate = DateTime.tryParse(widget.training.cyber) ?? DateTime.now();
+    _opsecDate = DateTime.tryParse(widget.training.opsec) ?? DateTime.now();
+    _antiTerrorDate =
+        DateTime.tryParse(widget.training.antiTerror) ?? DateTime.now();
+    _lawDate = DateTime.tryParse(widget.training.lawOfWar) ?? DateTime.now();
+    _persRecDate = DateTime.tryParse(widget.training.persRec) ?? DateTime.now();
+    _infoSecDate = DateTime.tryParse(widget.training.infoSec) ?? DateTime.now();
+    _ctipDate = DateTime.tryParse(widget.training.ctip) ?? DateTime.now();
+    _gatDate = DateTime.tryParse(widget.training.gat) ?? DateTime.now();
+    _sereDate = DateTime.tryParse(widget.training.sere) ?? DateTime.now();
+    _tarpDate = DateTime.tryParse(widget.training.tarp) ?? DateTime.now();
+    _eoDate = DateTime.tryParse(widget.training.eo) ?? DateTime.now();
+    _asapDate = DateTime.tryParse(widget.training.asap) ?? DateTime.now();
+    _sharpDate = DateTime.tryParse(widget.training.sharp) ?? DateTime.now();
+    _suicideDate = DateTime.tryParse(widget.training.suicide) ?? DateTime.now();
+    _add1Date = DateTime.tryParse(widget.training.add1Date) ?? DateTime.now();
+    _add2Date = DateTime.tryParse(widget.training.add2Date) ?? DateTime.now();
+    _add3Date = DateTime.tryParse(widget.training.add3Date) ?? DateTime.now();
+    _add4Date = DateTime.tryParse(widget.training.add4Date) ?? DateTime.now();
+    _add5Date = DateTime.tryParse(widget.training.add5Date) ?? DateTime.now();
+  }
 
   void submit(BuildContext context) async {
     if (_soldierId == null) {
@@ -117,9 +229,6 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
         _add5DateController.text,
       ],
     )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
       Training saveTraining = Training(
         id: widget.training.id,
         soldierId: _soldierId,
@@ -157,8 +266,9 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       );
 
       if (widget.training.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('training').add(saveTraining.toMap());
+        DocumentReference docRef = await firestore
+            .collection(kTrainingCollection)
+            .add(saveTraining.toMap());
 
         saveTraining.id = docRef.id;
         if (mounted) {
@@ -166,7 +276,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
         }
       } else {
         firestore
-            .collection('training')
+            .collection(kTrainingCollection)
             .doc(widget.training.id)
             .set(saveTraining.toMap())
             .then((value) {
@@ -267,147 +377,6 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
     );
   }
 
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('training')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _cyberController.dispose();
-    _opsecController.dispose();
-    _antiTerrorController.dispose();
-    _lawController.dispose();
-    _persRecController.dispose();
-    _infoSecController.dispose();
-    _ctipController.dispose();
-    _gatController.dispose();
-    _sereController.dispose();
-    _tarpController.dispose();
-    _eoController.dispose();
-    _asapController.dispose();
-    _suicideController.dispose();
-    _sharpController.dispose();
-    _add1Controller.dispose();
-    _add1DateController.dispose();
-    _add2Controller.dispose();
-    _add2DateController.dispose();
-    _add3Controller.dispose();
-    _add3DateController.dispose();
-    _add4Controller.dispose();
-    _add4DateController.dispose();
-    _add5Controller.dispose();
-    _add5DateController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.training.id != null) {
-      _title = '${widget.training.rank} ${widget.training.name}';
-    }
-
-    _soldierId = widget.training.soldierId;
-    _rank = widget.training.rank;
-    _lastName = widget.training.name;
-    _firstName = widget.training.firstName;
-    _section = widget.training.section;
-    _rankSort = widget.training.rankSort;
-    _owner = widget.training.owner;
-    _users = widget.training.users;
-
-    _cyberController.text = widget.training.cyber;
-    _opsecController.text = widget.training.opsec;
-    _antiTerrorController.text = widget.training.antiTerror;
-    _lawController.text = widget.training.lawOfWar;
-    _persRecController.text = widget.training.persRec;
-    _infoSecController.text = widget.training.infoSec;
-    _ctipController.text = widget.training.ctip;
-    _gatController.text = widget.training.gat;
-    _sereController.text = widget.training.sere;
-    _tarpController.text = widget.training.tarp;
-    _eoController.text = widget.training.eo;
-    _asapController.text = widget.training.asap;
-    _suicideController.text = widget.training.suicide;
-    _sharpController.text = widget.training.sharp;
-    _add1Controller.text = widget.training.add1;
-    _add1DateController.text = widget.training.add1Date;
-    _add2Controller.text = widget.training.add2;
-    _add2DateController.text = widget.training.add2Date;
-    _add3Controller.text = widget.training.add3;
-    _add3DateController.text = widget.training.add3Date;
-    _add4Controller.text = widget.training.add4;
-    _add4DateController.text = widget.training.add4Date;
-    _add5Controller.text = widget.training.add5;
-    _add5DateController.text = widget.training.add5Date;
-
-    if (_add1DateController.text != '' ||
-        _add2DateController.text != '' ||
-        _add3DateController.text != '' ||
-        _add4DateController.text != '' ||
-        _add5DateController.text != '') {
-      addMore = true;
-    }
-    if (addMore) {
-      addMoreLess = 'Less Training';
-    } else {
-      addMoreLess = 'More Training';
-    }
-
-    _cyberDate = DateTime.tryParse(widget.training.cyber) ?? DateTime.now();
-    _opsecDate = DateTime.tryParse(widget.training.opsec) ?? DateTime.now();
-    _antiTerrorDate =
-        DateTime.tryParse(widget.training.antiTerror) ?? DateTime.now();
-    _lawDate = DateTime.tryParse(widget.training.lawOfWar) ?? DateTime.now();
-    _persRecDate = DateTime.tryParse(widget.training.persRec) ?? DateTime.now();
-    _infoSecDate = DateTime.tryParse(widget.training.infoSec) ?? DateTime.now();
-    _ctipDate = DateTime.tryParse(widget.training.ctip) ?? DateTime.now();
-    _gatDate = DateTime.tryParse(widget.training.gat) ?? DateTime.now();
-    _sereDate = DateTime.tryParse(widget.training.sere) ?? DateTime.now();
-    _tarpDate = DateTime.tryParse(widget.training.tarp) ?? DateTime.now();
-    _eoDate = DateTime.tryParse(widget.training.eo) ?? DateTime.now();
-    _asapDate = DateTime.tryParse(widget.training.asap) ?? DateTime.now();
-    _sharpDate = DateTime.tryParse(widget.training.sharp) ?? DateTime.now();
-    _suicideDate = DateTime.tryParse(widget.training.suicide) ?? DateTime.now();
-    _add1Date = DateTime.tryParse(widget.training.add1Date) ?? DateTime.now();
-    _add2Date = DateTime.tryParse(widget.training.add2Date) ?? DateTime.now();
-    _add3Date = DateTime.tryParse(widget.training.add3Date) ?? DateTime.now();
-    _add4Date = DateTime.tryParse(widget.training.add4Date) ?? DateTime.now();
-    _add5Date = DateTime.tryParse(widget.training.add5Date) ?? DateTime.now();
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -435,52 +404,26 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -489,7 +432,11 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                      collection: kTrainingCollection,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
                   },
                 ),
               ),

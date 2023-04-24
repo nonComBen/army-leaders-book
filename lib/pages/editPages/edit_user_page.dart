@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/auth_service.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../methods/create_app_bar_actions.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../models/app_bar_option.dart';
 import '../../models/user.dart';
 import '../../auth_provider.dart';
 import '../../providers/root_provider.dart';
@@ -23,6 +23,8 @@ import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../auth_service.dart';
+import '../../methods/custom_alert_dialog.dart';
 
 class EditUserPage extends ConsumerStatefulWidget {
   const EditUserPage({
@@ -47,6 +49,22 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _unitController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  void init() async {
+    DocumentSnapshot doc = await firestore.doc('users/${widget.userId}').get();
+    user = UserObj.fromSnapshot(doc);
+    _rankController.text = user.userRank;
+    _nameController.text = user.userName;
+    _unitController.text = user.userUnit;
+    _emailController.text = user.userEmail;
+    setState(() {});
+  }
 
   Future<void> deleteAccount(BuildContext context) async {
     final rootService = ref.read(rootProvider.notifier);
@@ -325,34 +343,23 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    init();
-  }
-
-  void init() async {
-    DocumentSnapshot doc = await firestore.doc('users/${widget.userId}').get();
-    user = UserObj.fromSnapshot(doc);
-    _rankController.text = user.userRank;
-    _nameController.text = user.userName;
-    _unitController.text = user.userUnit;
-    _emailController.text = user.userEmail;
-    setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     toast.context = context;
     return PlatformScaffold(
       title: 'Edit User',
-      actions: [
-        Tooltip(
-          message: 'Delete Account',
-          child: IconButton(
-              onPressed: confirmDeleteAccount, icon: const Icon(Icons.delete)),
-        )
-      ],
+      actions: createAppBarActions(
+        width,
+        [
+          AppBarOption(
+            title: 'Delete Account',
+            icon: Icon(kIsWeb || Platform.isAndroid
+                ? Icons.delete
+                : CupertinoIcons.delete),
+            onPressed: confirmDeleteAccount,
+          ),
+        ],
+      ),
       body: FormFrame(
         formKey: _formKey,
         onWillPop:

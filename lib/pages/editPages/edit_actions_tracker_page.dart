@@ -4,13 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/methods/validate.dart';
 
-import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../methods/validate.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../models/soldier.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
@@ -18,7 +22,6 @@ import '../../models/action.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 
 class EditActionsTrackerPage extends ConsumerStatefulWidget {
   const EditActionsTrackerPage({
@@ -45,104 +48,10 @@ class EditActionsTrackerPageState
   final TextEditingController _remarksController = TextEditingController();
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
   DateTime? _dateTime, _statusDateTime;
   FToast toast = FToast();
-
-  void submit(BuildContext context) async {
-    if (_soldierId == null) {
-      soldierIdIsBlankMessage(context);
-      return;
-    }
-    if (validateAndSave(
-      _formKey,
-      [_dateController.text, _statusDateController.text],
-    )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
-      ActionObj saveAction = ActionObj(
-        id: widget.action.id,
-        soldierId: _soldierId,
-        owner: _owner!,
-        users: _users!,
-        rank: _rank!,
-        name: _lastName!,
-        firstName: _firstName!,
-        section: _section!,
-        rankSort: _rankSort!,
-        action: _actionController.text,
-        dateSubmitted: _dateController.text,
-        currentStatus: _statusController.text,
-        statusDate: _statusDateController.text,
-        remarks: _remarksController.text,
-      );
-
-      if (widget.action.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('actions').add(saveAction.toMap());
-
-        saveAction.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
-      } else {
-        firestore
-            .collection('actions')
-            .doc(widget.action.id)
-            .set(saveAction.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Action');
-        });
-      }
-    } else {
-      toast.showToast(
-        toastDuration: const Duration(seconds: 5),
-        child: const MyToast(
-          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
-        ),
-      );
-    }
-  }
-
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('actions')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
 
   @override
   void dispose() {
@@ -157,6 +66,8 @@ class EditActionsTrackerPageState
   @override
   void initState() {
     super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
 
     if (widget.action.id != null) {
       _title = '${widget.action.rank} ${widget.action.name}';
@@ -181,6 +92,67 @@ class EditActionsTrackerPageState
         DateTime.tryParse(widget.action.dateSubmitted) ?? DateTime.now();
     _statusDateTime =
         DateTime.tryParse(widget.action.statusDate) ?? DateTime.now();
+  }
+
+  void submit(BuildContext context) async {
+    if (_soldierId == null) {
+      toast.showToast(
+        child: const MyToast(
+          message: 'Please Select a Soldier',
+        ),
+      );
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_dateController.text, _statusDateController.text],
+    )) {
+      ActionObj saveAction = ActionObj(
+        id: widget.action.id,
+        soldierId: _soldierId,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
+        action: _actionController.text,
+        dateSubmitted: _dateController.text,
+        currentStatus: _statusController.text,
+        statusDate: _statusDateController.text,
+        remarks: _remarksController.text,
+      );
+
+      if (widget.action.id == null) {
+        DocumentReference docRef = await firestore
+            .collection(kActionsCollection)
+            .add(saveAction.toMap());
+
+        saveAction.id = docRef.id;
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        firestore
+            .collection(kActionsCollection)
+            .doc(widget.action.id)
+            .set(saveAction.toMap())
+            .then((value) {
+          Navigator.pop(context);
+        }).catchError((e) {
+          // ignore: avoid_print
+          print('Error $e thrown while updating Action');
+        });
+      }
+    } else {
+      toast.showToast(
+        toastDuration: const Duration(seconds: 5),
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
+    }
   }
 
   @override
@@ -211,52 +183,26 @@ class EditActionsTrackerPageState
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -265,7 +211,10 @@ class EditActionsTrackerPageState
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                        collection: kActionsCollection,
+                        userId: user.uid,
+                        allSoldiers: allSoldiers!);
                   },
                 ),
               ),

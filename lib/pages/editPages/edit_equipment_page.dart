@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/on_back_pressed.dart';
@@ -17,8 +21,8 @@ import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 
 class EditEquipmentPage extends ConsumerStatefulWidget {
   const EditEquipmentPage({
@@ -55,9 +59,71 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
   final TextEditingController _otherSerialController = TextEditingController();
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
-  List<DocumentSnapshot>? allSoldiers, lessSoldiers, soldiers;
+  List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false, secondaryExpanded = false;
   FToast toast = FToast();
+
+  @override
+  void dispose() {
+    _weaponController.dispose();
+    _buttStockController.dispose();
+    _serialController.dispose();
+    _opticController.dispose();
+    _opticSerialController.dispose();
+    _weapon2Controller.dispose();
+    _buttStock2Controller.dispose();
+    _serial2Controller.dispose();
+    _optic2Controller.dispose();
+    _opticSerial2Controller.dispose();
+    _maskController.dispose();
+    _vehicleController.dispose();
+    _bumperController.dispose();
+    _licenseController.dispose();
+    _otherController.dispose();
+    _otherSerialController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.equipment.id != null) {
+      _title = '${widget.equipment.rank} ${widget.equipment.name}';
+    }
+
+    _soldierId = widget.equipment.soldierId;
+    _rank = widget.equipment.rank;
+    _lastName = widget.equipment.name;
+    _firstName = widget.equipment.firstName;
+    _section = widget.equipment.section;
+    _rankSort = widget.equipment.rankSort;
+    _owner = widget.equipment.owner;
+    _users = widget.equipment.users;
+
+    _weaponController.text = widget.equipment.weapon;
+    _buttStockController.text = widget.equipment.buttStock;
+    _serialController.text = widget.equipment.serial;
+    _opticController.text = widget.equipment.optic;
+    _opticSerialController.text = widget.equipment.opticSerial;
+    _weapon2Controller.text = widget.equipment.weapon2;
+    _buttStock2Controller.text = widget.equipment.buttStock2;
+    _serial2Controller.text = widget.equipment.serial2;
+    _optic2Controller.text = widget.equipment.optic2;
+    _opticSerial2Controller.text = widget.equipment.opticSerial2;
+    _maskController.text = widget.equipment.mask;
+    _vehicleController.text = widget.equipment.vehType;
+    _bumperController.text = widget.equipment.veh;
+    _licenseController.text = widget.equipment.license;
+    _otherController.text = widget.equipment.other;
+    _otherSerialController.text = widget.equipment.otherSerial;
+
+    if (_weapon2Controller.text != '' || _optic2Controller.text != '') {
+      secondaryExpanded = true;
+    }
+  }
 
   void submit(BuildContext context) async {
     if (_soldierId == null) {
@@ -68,9 +134,6 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
       _formKey,
       [],
     )) {
-      DocumentSnapshot doc =
-          soldiers!.firstWhere((element) => element.id == _soldierId);
-      _users = doc['users'];
       Equipment saveEquipment = Equipment(
         id: widget.equipment.id,
         soldierId: _soldierId,
@@ -100,8 +163,9 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
       );
 
       if (widget.equipment.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('equipment').add(saveEquipment.toMap());
+        DocumentReference docRef = await firestore
+            .collection(kEquipmentCollection)
+            .add(saveEquipment.toMap());
 
         saveEquipment.id = docRef.id;
         if (mounted) {
@@ -109,7 +173,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
         }
       } else {
         firestore
-            .collection('equipment')
+            .collection(kEquipmentCollection)
             .doc(widget.equipment.id)
             .set(saveEquipment.toMap())
             .then((value) {
@@ -190,101 +254,6 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
     }
   }
 
-  void _removeSoldiers(bool? checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers!, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('equipment')
-          .where('users', arrayContains: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers!
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers!.isEmpty) {
-      if (mounted) {
-        toast.showToast(
-          child: const MyToast(
-            message: 'All Soldiers have been added',
-          ),
-        );
-      }
-    }
-
-    setState(() {
-      if (checked! && lessSoldiers!.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _weaponController.dispose();
-    _buttStockController.dispose();
-    _serialController.dispose();
-    _opticController.dispose();
-    _opticSerialController.dispose();
-    _weapon2Controller.dispose();
-    _buttStock2Controller.dispose();
-    _serial2Controller.dispose();
-    _optic2Controller.dispose();
-    _opticSerial2Controller.dispose();
-    _maskController.dispose();
-    _vehicleController.dispose();
-    _bumperController.dispose();
-    _licenseController.dispose();
-    _otherController.dispose();
-    _otherSerialController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.equipment.id != null) {
-      _title = '${widget.equipment.rank} ${widget.equipment.name}';
-    }
-
-    _soldierId = widget.equipment.soldierId;
-    _rank = widget.equipment.rank;
-    _lastName = widget.equipment.name;
-    _firstName = widget.equipment.firstName;
-    _section = widget.equipment.section;
-    _rankSort = widget.equipment.rankSort;
-    _owner = widget.equipment.owner;
-    _users = widget.equipment.users;
-
-    _weaponController.text = widget.equipment.weapon;
-    _buttStockController.text = widget.equipment.buttStock;
-    _serialController.text = widget.equipment.serial;
-    _opticController.text = widget.equipment.optic;
-    _opticSerialController.text = widget.equipment.opticSerial;
-    _weapon2Controller.text = widget.equipment.weapon2;
-    _buttStock2Controller.text = widget.equipment.buttStock2;
-    _serial2Controller.text = widget.equipment.serial2;
-    _optic2Controller.text = widget.equipment.optic2;
-    _opticSerial2Controller.text = widget.equipment.opticSerial2;
-    _maskController.text = widget.equipment.mask;
-    _vehicleController.text = widget.equipment.vehType;
-    _bumperController.text = widget.equipment.veh;
-    _licenseController.text = widget.equipment.license;
-    _otherController.text = widget.equipment.other;
-    _otherSerialController.text = widget.equipment.otherSerial;
-
-    if (_weapon2Controller.text != '' || _optic2Controller.text != '') {
-      secondaryExpanded = true;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -312,52 +281,26 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder(
-                    future: firestore
-                        .collection('soldiers')
-                        .where('users', arrayContains: user.uid)
-                        .get(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        default:
-                          allSoldiers = snapshot.data!.docs;
-                          soldiers =
-                              removeSoldiers ? lessSoldiers : allSoldiers;
-                          soldiers!.sort((a, b) => a['lastName']
-                              .toString()
-                              .compareTo(b['lastName'].toString()));
-                          soldiers!.sort((a, b) => a['rankSort']
-                              .toString()
-                              .compareTo(b['rankSort'].toString()));
-                          return PlatformItemPicker(
-                            label: const Text('Soldier'),
-                            items: soldiers!.map((e) => e.id).toList(),
-                            onChanged: (value) {
-                              int index = soldiers!
-                                  .indexWhere((doc) => doc.id == value);
-                              if (mounted) {
-                                setState(() {
-                                  _soldierId = value;
-                                  _rank = soldiers![index]['rank'];
-                                  _lastName = soldiers![index]['lastName'];
-                                  _firstName = soldiers![index]['firstName'];
-                                  _section = soldiers![index]['section'];
-                                  _rankSort =
-                                      soldiers![index]['rankSort'].toString();
-                                  _owner = soldiers![index]['owner'];
-                                  _users = soldiers![index]['users'];
-                                  updated = true;
-                                });
-                              }
-                            },
-                            value: _soldierId,
-                          );
-                      }
-                    }),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      _owner = soldier.owner;
+                      _users = soldier.users;
+                      updated = true;
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
@@ -366,7 +309,10 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
-                    _removeSoldiers(checked, user.uid);
+                    createLessSoldiers(
+                        collection: kEquipmentCollection,
+                        userId: user.uid,
+                        allSoldiers: allSoldiers!);
                   },
                 ),
               ),

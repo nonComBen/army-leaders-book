@@ -141,7 +141,8 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Title'),
                   items: columnHeaders,
@@ -154,7 +155,8 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('POC'),
                   items: columnHeaders,
@@ -167,7 +169,8 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Phone Number'),
                   items: columnHeaders,
@@ -180,7 +183,8 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Location'),
                   items: columnHeaders,

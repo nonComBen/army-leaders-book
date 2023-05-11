@@ -11,6 +11,7 @@ import '../../methods/on_back_pressed.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -125,17 +126,8 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               PaddedTextField(
                 controller: _titleController,

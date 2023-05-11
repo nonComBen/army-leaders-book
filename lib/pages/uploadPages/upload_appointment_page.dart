@@ -224,7 +224,8 @@ class UploadAppointmentsPageState
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -237,7 +238,8 @@ class UploadAppointmentsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Title'),
                   items: columnHeaders,
@@ -250,7 +252,8 @@ class UploadAppointmentsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date'),
                   items: columnHeaders,
@@ -263,7 +266,8 @@ class UploadAppointmentsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Start Time'),
                   items: columnHeaders,
@@ -276,7 +280,8 @@ class UploadAppointmentsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('End Time'),
                   items: columnHeaders,
@@ -289,7 +294,8 @@ class UploadAppointmentsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Location'),
                   items: columnHeaders,
@@ -302,7 +308,8 @@ class UploadAppointmentsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Status'),
                   items: columnHeaders,
@@ -315,7 +322,8 @@ class UploadAppointmentsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Comments'),
                   items: columnHeaders,

@@ -18,6 +18,7 @@ import '../../models/user.dart';
 import '../../auth_provider.dart';
 import '../../providers/root_provider.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/formatted_text_button.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -365,17 +366,8 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
         onWillPop:
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               PaddedTextField(
                 controller: TextEditingController(text: widget.userId),

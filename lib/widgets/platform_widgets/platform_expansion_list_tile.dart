@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 abstract class PlatformExpansionTile extends Widget {
   factory PlatformExpansionTile({
@@ -80,14 +80,12 @@ class IOSExpansionTile extends StatefulWidget implements PlatformExpansionTile {
 
 class _IOSExpansionTileState extends State<IOSExpansionTile> {
   bool isExpanded = false;
-  late bool isTrailingIcon;
   late Widget rotatedIcon;
 
   @override
   void initState() {
     super.initState();
     isExpanded = widget.initiallyExpanded;
-    isTrailingIcon = widget.trailing is Icon;
     rotatedIcon = RotatedBox(
       quarterTurns: 2,
       child: widget.trailing,
@@ -98,23 +96,35 @@ class _IOSExpansionTileState extends State<IOSExpansionTile> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: CupertinoListTile(
-            padding: const EdgeInsets.all(12),
-            title: widget.title,
-            leading: widget.leading,
-            trailing:
-                isTrailingIcon && isExpanded ? rotatedIcon : widget.trailing,
-            backgroundColor:
-                !isExpanded ? widget.collapsedBackgroundColor : null,
-            onTap: () {
-              setState(() {
-                isExpanded = !isExpanded;
-              });
-            },
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              isExpanded = !isExpanded;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isExpanded
+                  ? getBackgroundColor(context)
+                  : getPrimaryColor(context),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: widget.title,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: isExpanded ? rotatedIcon : widget.trailing!,
+                )
+              ],
+            ),
           ),
         ),
         if (isExpanded) Column(children: widget.children)

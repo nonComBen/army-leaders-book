@@ -10,7 +10,7 @@ import '../../methods/theme_methods.dart';
 abstract class PlatformTextField extends Widget {
   factory PlatformTextField({
     required TextEditingController controller,
-    TextStyle? style,
+    TextStyle? style = const TextStyle(fontSize: 18),
     FocusNode? focusNode,
     String? label,
     InputDecoration? decoration,
@@ -24,7 +24,7 @@ abstract class PlatformTextField extends Widget {
     bool autofocus = false,
     bool autocorrect = false,
     TextInputAction textInputAction = TextInputAction.done,
-    TextCapitalization? textCapitalization,
+    TextCapitalization textCapitalization = TextCapitalization.none,
     TextAlign textAlign = TextAlign.start,
     int maxLines = 1,
     void Function(String)? onChanged,
@@ -46,6 +46,7 @@ abstract class PlatformTextField extends Widget {
         autocorrect: autocorrect,
         autofocus: autofocus,
         textAlign: textAlign,
+        textCapitalization: textCapitalization,
         maxLines: maxLines,
         onChanged: onChanged,
         onEditingComplete: onEditingComplete,
@@ -67,6 +68,7 @@ abstract class PlatformTextField extends Widget {
         maxLines: maxLines,
         onChanged: onChanged,
         onEditingComplete: onEditingComplete,
+        textCapitalization: textCapitalization,
       );
     }
   }

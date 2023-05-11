@@ -13,7 +13,7 @@ class AnonWarningBanner extends ConsumerWidget {
     return Card(
       color: Colors.redAccent,
       child: Padding(
-        padding: const EdgeInsets.all(4.0),
+        padding: const EdgeInsets.all(8.0),
         child: ListTile(
           title: const Text('Guest Account'),
           subtitle: const Text('Create account or your data will be lost'),

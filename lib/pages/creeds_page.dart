@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/auth_provider.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_expansion_list_tile.dart';
 
 import '../providers/subscription_state.dart';
 import '../widgets/anon_warning_banner.dart';
@@ -37,7 +40,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'I am an American Soldier.\nI am a warrior and a member of a team.\nI serve the people of the United States, and live the Army Values.'
             '\n\nI will always place the mission first.\nI will never accept defeat.\nI will never quit.\nI will never leave a fallen comrade.'
             '\n\nI am disciplined, physically and mentally tough, trained and proficient in my warrior tasks and drills.'
@@ -45,6 +48,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             '\nI stand ready to deploy, engage, and destroy, the enemies of the United States of America in close combat.'
             '\nI am a guardian of freedom and the American way of life.\nI am an American Soldier.',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -53,7 +57,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'No one is more professional than I. I am a NonCommissioned Officer, a leader of Soldiers. As a NonCommissioned '
             'Officer, I realize that I am a member of a time honored corps, which is known as "The Backbone of the Army". '
             'I am proud of the Corps of NonCommissioned Officers and will at all times conduct myself so as to bring credit '
@@ -71,6 +75,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             'absence of orders. I will not compromise my integrity, nor my moral courage. I will not forget, nor will I allow '
             'my comrades to forget that we are professionals, NonCommissioned Officers, leaders!',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -79,7 +84,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'I will discharge carefully and diligently the duties of the grade to which I have been promoted and uphold the traditions '
             'and standards of the Army.'
             '\n\nI understand that Soldiers of lesser rank are required to obey my lawful orders. Accordingly, I accept responsibility '
@@ -88,6 +93,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             'correct conditions detrimental to the readiness thereof. In so doing, I will fulfill my greatest obligation as a leader '
             'and thereby confirm my status as a NonCommissioned officer.',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -96,7 +102,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'An NCO Corps, grounded in heritage, values and tradition, that embodies the warrior ethos; values perpetual learning; '
             'and is capable of leading, training and motivating Soldiers.'
             '\n\nWe must always be an NCO Corps that'
@@ -109,6 +115,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             '\nMaintains an Outstanding Personal Appearance'
             '\nDisciplined Leaders Produce Disciplined Soldiers',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -117,7 +124,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'March along, sing our song, with the Army of the free.\n'
             'Count the brave, count the true, who have fought to victory.\n'
             'We’re the Army and proud of our name!\n'
@@ -135,6 +142,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             'You will always know\n'
             'That the Army goes rolling along.',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -143,7 +151,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'LOYALTY\n'
             'Bear true faith and allegiance to the U.S. Constitution, the Army, your unit and other Soldiers. Bearing '
             'true faith and allegiance is a matter of believing in and devoting yourself to something or someone. A loyal '
@@ -183,6 +191,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             'taking those actions is not popular with others. You can build your personal courage by daily standing up for '
             'and acting upon the things that you know are honorable.',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -191,21 +200,23 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
-              'Article I: I am an American, fighting in the forces which guard my country and our way of life. I am prepared to give my life in '
-              'their defense.\n\n'
-              'Article II:  I will never surrender of my own free will. If in command, I will never surrender the members of my command while '
-              'they still have the means to resist.\n\n'
-              'Article III:  If I am captured I will continue to resist by all means available. I will make every effort to escape and aid others '
-              'to escape. I will accept neither parole nor special favors from the enemy.\n\n'
-              'Article IV:  If I become a prisoner of war, I will keep faith with my fellow prisoners. I will give no information or take part '
-              'in any action which might be harmful to my comrades. If I am senior, I will take command. If not, I will obey the lawful orders '
-              'of those appointed over me and will back them up in every way.\n\n'
-              'Article V:  When questioned, should I become a prisoner of war, I am required to give name, rank, service number and date of birth. '
-              'I will evade answering further questions to the utmost of my ability. I will make no oral or written statements disloyal to my '
-              'country and its allies or harmful to their cause.\n\n'
-              'Article VI:  I will never forget that I am an American, fighting for freedom, responsible for my actions, and dedicated to the '
-              'principles which made my country free. I will trust in my God and in the United States of America.'),
+          child: const Text(
+            'Article I: I am an American, fighting in the forces which guard my country and our way of life. I am prepared to give my life in '
+            'their defense.\n\n'
+            'Article II:  I will never surrender of my own free will. If in command, I will never surrender the members of my command while '
+            'they still have the means to resist.\n\n'
+            'Article III:  If I am captured I will continue to resist by all means available. I will make every effort to escape and aid others '
+            'to escape. I will accept neither parole nor special favors from the enemy.\n\n'
+            'Article IV:  If I become a prisoner of war, I will keep faith with my fellow prisoners. I will give no information or take part '
+            'in any action which might be harmful to my comrades. If I am senior, I will take command. If not, I will obey the lawful orders '
+            'of those appointed over me and will back them up in every way.\n\n'
+            'Article V:  When questioned, should I become a prisoner of war, I am required to give name, rank, service number and date of birth. '
+            'I will evade answering further questions to the utmost of my ability. I will make no oral or written statements disloyal to my '
+            'country and its allies or harmful to their cause.\n\n'
+            'Article VI:  I will never forget that I am an American, fighting for freedom, responsible for my actions, and dedicated to the '
+            'principles which made my country free. I will trust in my God and in the United States of America.',
+            style: TextStyle(fontSize: 18),
+          ),
         )),
     Creed(
         false,
@@ -213,13 +224,14 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'I, _____, do solemnly swear (or affirm) that I will support and defend the Constitution of the United States against '
             'all enemies, foreign and domestic; that I will bear true faith and allegiance to the same; and that I will obey '
             'the orders of the President of the United States and the orders of the officers appointed over me, according to '
             'regulations and the Uniform Code of Military Justice. *So help me God.\n\n'
             '*Optional',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -228,7 +240,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'To all who shall see these presents, greeting:\n\n'
             'Know ye, that reposing special trust and confidence in the fidelity and the abilities of\n\n'
             '[Full Name]\n\n'
@@ -246,6 +258,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             '[Rank]/[Branch]\n'
             'Commanding',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
     Creed(
@@ -254,7 +267,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const SelectableText(
+          child: const Text(
             'To all who shall see these presents, greeting:\n\n'
             'Know ye, that reposing special trust and confidence in the fidelity and the abilities of\n\n'
             '[Full Name]\n\n'
@@ -272,6 +285,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             '[Rank]/[Branch]\n'
             'Commanding',
             textAlign: TextAlign.start,
+            style: TextStyle(fontSize: 18),
           ),
         )),
   ];
@@ -310,70 +324,70 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
     if (!kIsWeb && !isSubscribed) {
       myBanner!.load();
     }
-    double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
       title: 'Creeds, Etc.',
-      body: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: width > 932 ? (width - 916) / 2 : 16,
-          vertical: 16.0,
-        ),
-        constraints: const BoxConstraints(maxWidth: 900),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  ExpansionPanelList(
-                    expansionCallback: (int index, bool isExpanded) {
-                      setState(() {
-                        for (int i = 0; i < _creeds.length; i++) {
-                          if (i == index) {
-                            _creeds[index].isExpanded =
-                                !_creeds[index].isExpanded;
-                          } else {
-                            _creeds[i].isExpanded = false;
-                          }
-                        }
-                      });
-                    },
-                    children: _creeds.map((Creed creed) {
-                      return ExpansionPanel(
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return ListTile(
-                            title: SelectableText(
-                              creed.header,
-                              textAlign: TextAlign.start,
-                              style: const TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.w400,
+      body: Center(
+        heightFactor: 1,
+        child: Container(
+          padding: const EdgeInsets.all(
+            16.0,
+          ),
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    if (user.isAnonymous) const AnonWarningBanner(),
+                    ..._creeds
+                        .map(
+                          (creed) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: PlatformExpansionTile(
+                              title: Text(
+                                creed.header,
+                                style: TextStyle(
+                                  color: getOnPrimaryColor(context),
+                                  fontSize: 20,
+                                ),
                               ),
+                              trailing: Platform.isAndroid
+                                  ? Icon(
+                                      Icons.arrow_drop_down,
+                                      color: getOnPrimaryColor(context),
+                                    )
+                                  : Icon(
+                                      CupertinoIcons.chevron_down,
+                                      color: getOnPrimaryColor(context),
+                                    ),
+                              collapsedBackgroundColor:
+                                  getPrimaryColor(context),
+                              collapsedTextColor: getOnPrimaryColor(context),
+                              collapsedIconColor: getOnPrimaryColor(context),
+                              textColor: getOnPrimaryColor(context),
+                              children: [creed.body],
                             ),
-                          );
-                        },
-                        isExpanded: creed.isExpanded,
-                        body: creed.body,
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            if (!isSubscribed && !kIsWeb)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
+                          ),
+                        )
+                        .toList(),
+                  ],
                 ),
               ),
-          ],
+              if (!isSubscribed && !kIsWeb)
+                Container(
+                  alignment: Alignment.center,
+                  width: myBanner!.size.width.toDouble(),
+                  height: myBanner!.size.height.toDouble(),
+                  constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                  child: AdWidget(
+                    ad: myBanner!,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

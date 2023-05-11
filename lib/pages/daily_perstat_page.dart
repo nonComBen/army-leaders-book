@@ -306,59 +306,67 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
         builder: (context2) => StatefulBuilder(
           builder: (context, refresh) => CupertinoAlertDialog(
             title: title,
-            content: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: <Widget>[
-                    PlatformItemPicker(
-                        items: types,
-                        value: type,
-                        label: const Text('Status'),
-                        onChanged: (dynamic value) {
-                          refresh(() {
-                            type = value;
-                            soldier['type'] = type;
-                            if (type == 'PDY') {
-                              soldier['typeSort'] = '0';
-                            } else if (type == 'Leave') {
-                              soldier['typeSort'] = '1';
-                            } else if (type == 'TDY') {
-                              soldier['typeSort'] = '2';
-                            } else if (type == 'FTR') {
-                              soldier['typeSort'] = '4';
-                            } else {
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: <Widget>[
+                  PlatformItemPicker(
+                      items: types,
+                      value: type,
+                      label: const Text('Status'),
+                      onChanged: (dynamic value) {
+                        refresh(() {
+                          type = value;
+                          soldier['type'] = type;
+                          if (type == 'PDY') {
+                            soldier['typeSort'] = '0';
+                          } else if (type == 'Leave') {
+                            soldier['typeSort'] = '1';
+                          } else if (type == 'TDY') {
+                            soldier['typeSort'] = '2';
+                          } else if (type == 'FTR') {
+                            soldier['typeSort'] = '4';
+                          } else {
+                            soldier['typeSort'] = '3';
+                          }
+                        });
+                      }),
+                  type == 'Other'
+                      ? PaddedTextField(
+                          label: 'Other Status',
+                          decoration:
+                              const InputDecoration(labelText: 'Other Status'),
+                          controller: controller,
+                          onChanged: (value) {
+                            refresh(() {
+                              soldier['type'] = value;
                               soldier['typeSort'] = '3';
-                            }
-                          });
-                        }),
-                    type == 'Other'
-                        ? PaddedTextField(
-                            label: 'Other Status',
-                            decoration: const InputDecoration(
-                                labelText: 'Other Status'),
-                            controller: controller,
-                            onChanged: (value) {
-                              refresh(() {
-                                soldier['type'] = value;
-                                soldier['typeSort'] = '3';
-                              });
-                            },
-                          )
-                        : const SizedBox(),
-                  ],
-                ),
+                            });
+                          },
+                        )
+                      : const SizedBox(),
+                ],
               ),
             ),
             actions: <Widget>[
               CupertinoDialogAction(
-                child: const Text('Cancel'),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: getTextColor(context),
+                  ),
+                ),
                 onPressed: () {
                   Navigator.pop(context2);
                 },
               ),
               CupertinoDialogAction(
-                child: const Text('Ok'),
+                child: Text(
+                  'Ok',
+                  style: TextStyle(
+                    color: getTextColor(context),
+                  ),
+                ),
                 onPressed: () {
                   setState(() {
                     soldier['end'] = '';

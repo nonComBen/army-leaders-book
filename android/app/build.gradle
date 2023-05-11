@@ -41,7 +41,7 @@ android {
         applicationId "com.armynoncomtools.leadersbook"
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 179
+        versionCode 181
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -60,10 +60,9 @@ android {
         release {
             signingConfig signingConfigs.release
 
-            minifyEnabled true
-            useProguard true
+            shrinkResources true
 
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }

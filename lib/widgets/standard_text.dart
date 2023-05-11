@@ -3,9 +3,9 @@ import 'package:leaders_book/methods/theme_methods.dart';
 
 class StandardText extends StatelessWidget {
   const StandardText(this.data,
-      {super.key, this.textAlign = TextAlign.start, this.textStyle});
+      {super.key, this.textAlign = TextAlign.start, this.style});
   final String data;
-  final TextStyle? textStyle;
+  final TextStyle? style;
   final TextAlign textAlign;
 
   @override
@@ -13,7 +13,7 @@ class StandardText extends StatelessWidget {
     return Text(
       data,
       textAlign: textAlign,
-      style: textStyle ?? TextStyle(color: getTextColor(context)),
+      style: style ?? TextStyle(color: getTextColor(context)),
     );
   }
 }

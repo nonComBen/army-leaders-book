@@ -194,7 +194,8 @@ class UploadWorkingAwardsPageState
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -207,7 +208,8 @@ class UploadWorkingAwardsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Award Reason'),
                   items: columnHeaders,
@@ -220,7 +222,8 @@ class UploadWorkingAwardsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Achievement #1'),
                   items: columnHeaders,
@@ -233,7 +236,8 @@ class UploadWorkingAwardsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Achievement #2'),
                   items: columnHeaders,
@@ -246,7 +250,8 @@ class UploadWorkingAwardsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Achievement #3'),
                   items: columnHeaders,
@@ -259,7 +264,8 @@ class UploadWorkingAwardsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Achievement #4'),
                   items: columnHeaders,
@@ -272,7 +278,8 @@ class UploadWorkingAwardsPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Citation'),
                   items: columnHeaders,

@@ -403,7 +403,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Soldier Id'),
                   items: columnHeaders,
@@ -416,7 +417,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Rank'),
                   items: columnHeaders,
@@ -429,7 +431,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Last Name'),
                   items: columnHeaders,
@@ -442,7 +445,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('First Name'),
                   items: columnHeaders,
@@ -455,7 +459,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Middle Initial'),
                   items: columnHeaders,
@@ -468,7 +473,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Assigned'),
                   items: columnHeaders,
@@ -481,7 +487,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Section'),
                   items: columnHeaders,
@@ -494,7 +501,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Supervisor'),
                   items: columnHeaders,
@@ -507,7 +515,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('DoD ID'),
                   items: columnHeaders,
@@ -520,7 +529,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date of Rank'),
                   items: columnHeaders,
@@ -533,7 +543,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('MOS'),
                   items: columnHeaders,
@@ -546,7 +557,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Duty Position'),
                   items: columnHeaders,
@@ -559,7 +571,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Paragraph/Line No'),
                   items: columnHeaders,
@@ -572,7 +585,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Required MOS'),
                   items: columnHeaders,
@@ -585,7 +599,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Loss Date'),
                   items: columnHeaders,
@@ -598,7 +613,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('ETS Date'),
                   items: columnHeaders,
@@ -611,7 +627,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('BASD'),
                   items: columnHeaders,
@@ -624,7 +641,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('PEBD'),
                   items: columnHeaders,
@@ -637,7 +655,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Gain Date'),
                   items: columnHeaders,
@@ -650,7 +669,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Civilian Education'),
                   items: columnHeaders,
@@ -663,7 +683,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Military Education'),
                   items: columnHeaders,
@@ -676,7 +697,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('CBRN Suit Size'),
                   items: columnHeaders,
@@ -689,7 +711,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('CBRN Mask Size'),
                   items: columnHeaders,
@@ -702,7 +725,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('CBRN Boot Size'),
                   items: columnHeaders,
@@ -715,7 +739,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('CBRN Glove Size'),
                   items: columnHeaders,
@@ -728,7 +753,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Hat Size'),
                   items: columnHeaders,
@@ -741,7 +767,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Boot Size'),
                   items: columnHeaders,
@@ -754,7 +781,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('OCP Top Size'),
                   items: columnHeaders,
@@ -767,7 +795,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('OCP Trouser Size'),
                   items: columnHeaders,
@@ -780,7 +809,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Address'),
                   items: columnHeaders,
@@ -793,7 +823,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('City'),
                   items: columnHeaders,
@@ -806,7 +837,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('State'),
                   items: columnHeaders,
@@ -819,7 +851,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Zip Code'),
                   items: columnHeaders,
@@ -832,7 +865,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Phone Number'),
                   items: columnHeaders,
@@ -845,7 +879,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Work Phone'),
                   items: columnHeaders,
@@ -858,7 +893,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Email Address'),
                   items: columnHeaders,
@@ -871,7 +907,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Work Email'),
                   items: columnHeaders,
@@ -884,7 +921,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Next of Kin'),
                   items: columnHeaders,
@@ -897,7 +935,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('NOK Phone'),
                   items: columnHeaders,
@@ -910,7 +949,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Marital Status'),
                   items: columnHeaders,
@@ -923,7 +963,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Comments'),
                   items: columnHeaders,

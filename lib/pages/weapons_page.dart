@@ -533,7 +533,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
     final width = MediaQuery.of(context).size.width;
     toast.context = context;
     return PlatformScaffold(
-      title: 'Weapons Qualifications',
+      title: 'Weapon Quals',
       actions: createAppBarActions(
         width,
         [

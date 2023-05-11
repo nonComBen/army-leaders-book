@@ -215,7 +215,7 @@ uploadExcel(BuildContext context, bool isSubscribed) {
         MaterialPageRoute(builder: (context) => const UploadSoldierPage()));
   } else {
     FToast toast = FToast();
-    toast.context = context;
+    toast.init(context);
     toast.showToast(
       child: const MyToast(
           message:

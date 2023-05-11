@@ -182,7 +182,8 @@ class UploadTempProfilesPageState
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -195,7 +196,8 @@ class UploadTempProfilesPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Issued Date'),
                   items: columnHeaders,
@@ -208,7 +210,8 @@ class UploadTempProfilesPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Expiration Date'),
                   items: columnHeaders,
@@ -221,7 +224,8 @@ class UploadTempProfilesPageState
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Comments'),
                   items: columnHeaders,

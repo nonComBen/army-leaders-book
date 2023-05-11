@@ -251,7 +251,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -264,7 +265,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Weapon'),
                   items: columnHeaders,
@@ -277,7 +279,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Butt Stock'),
                   items: columnHeaders,
@@ -290,7 +293,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Serial No.'),
                   items: columnHeaders,
@@ -303,7 +307,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Optics'),
                   items: columnHeaders,
@@ -316,7 +321,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Optics Serial No.'),
                   items: columnHeaders,
@@ -329,7 +335,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Secondary Weapon'),
                   items: columnHeaders,
@@ -342,7 +349,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Secondary Butt Stock'),
                   items: columnHeaders,
@@ -355,7 +363,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Secondary Serial No.'),
                   items: columnHeaders,
@@ -368,7 +377,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Secondary Optics'),
                   items: columnHeaders,
@@ -381,7 +391,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Secondary Optics Serial No.'),
                   items: columnHeaders,
@@ -394,7 +405,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Mask'),
                   items: columnHeaders,
@@ -407,7 +419,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Vehicle'),
                   items: columnHeaders,
@@ -420,7 +433,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Vehicle Bumper'),
                   items: columnHeaders,
@@ -433,7 +447,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Other Item'),
                   items: columnHeaders,
@@ -446,7 +461,8 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Other Item Serial No.'),
                   items: columnHeaders,

@@ -199,7 +199,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -212,7 +213,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date'),
                   items: columnHeaders,
@@ -225,7 +227,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Shaving'),
                   items: columnHeaders,
@@ -238,7 +241,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Push Ups'),
                   items: columnHeaders,
@@ -251,7 +255,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Sit Ups'),
                   items: columnHeaders,
@@ -264,7 +269,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Run'),
                   items: columnHeaders,
@@ -277,7 +283,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Alternative Event'),
                   items: columnHeaders,
@@ -290,7 +297,8 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Comments'),
                   items: columnHeaders,

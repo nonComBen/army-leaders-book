@@ -229,7 +229,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -242,7 +243,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Item'),
                   items: columnHeaders,
@@ -255,7 +257,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Model No.'),
                   items: columnHeaders,
@@ -268,7 +271,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Serial No.'),
                   items: columnHeaders,
@@ -281,7 +285,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('NSN No.'),
                   items: columnHeaders,
@@ -294,7 +299,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Locataion'),
                   items: columnHeaders,
@@ -307,7 +313,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Value'),
                   items: columnHeaders,
@@ -320,7 +327,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Subcomponents'),
                   items: columnHeaders,
@@ -333,7 +341,8 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Comments'),
                   items: columnHeaders,

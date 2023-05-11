@@ -12,6 +12,7 @@ import '../../methods/create_less_soldiers.dart';
 import '../../methods/validate.dart';
 import '../../models/soldier.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -433,20 +434,12 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformSoldierPicker(
                   label: 'Soldier',
                   soldiers: removeSoldiers ? lessSoldiers! : allSoldiers,
@@ -513,7 +506,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   value: _ageGroup,
                   label: const Text('Age Group'),
@@ -536,7 +530,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Aerobic Event'),
                   items: _runTypes,
@@ -786,17 +781,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
               )
             ],
           ),
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 500 ? 3 : 2,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 300
-                : width > 500
-                    ? width / 300
-                    : width / 200,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),

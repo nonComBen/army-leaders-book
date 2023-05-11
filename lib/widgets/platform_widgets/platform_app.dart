@@ -31,9 +31,10 @@ abstract class PlatformApp extends StatelessWidget {
         barBackgroundColor: themeData.dialogBackgroundColor,
         textTheme: CupertinoTextThemeData(
           textStyle: TextStyle(
-              color: themeData.brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white),
+            color: themeData.brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+          ),
           primaryColor: themeData.colorScheme.onPrimary,
           navTitleTextStyle: TextStyle(
             inherit: false,

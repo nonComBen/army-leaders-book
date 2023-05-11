@@ -33,58 +33,82 @@ class PerstatRollupCard extends ConsumerWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 18.0),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                    color: getTextColor(context),
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('Assigned: ${soldiers.length}',
-                          textAlign: TextAlign.start,
-                          style: const TextStyle(fontSize: 16.0)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Assigned: ${soldiers.length}',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
                     ),
-                    Expanded(
-                      child: Text(
-                          'PDY: ${soldiers.length - leave - tdy - other}',
-                          textAlign: TextAlign.end,
-                          style: const TextStyle(fontSize: 16.0)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'PDY: ${soldiers.length - leave - tdy - other}',
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('Leave: $leave',
-                          textAlign: TextAlign.start,
-                          style: const TextStyle(fontSize: 16.0)),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Leave: $leave',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
                     ),
-                    Expanded(
-                      child: Text('TDY: $tdy',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16.0)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'TDY: $tdy',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
                     ),
-                    Expanded(
-                      child: Text('Other: $other',
-                          textAlign: TextAlign.end,
-                          style: const TextStyle(fontSize: 16.0)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Other: $other',
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             Expanded(
               child: ButtonBar(
+                layoutBehavior: ButtonBarLayoutBehavior.constrained,
                 children: <Widget>[
                   button2,
                   button,

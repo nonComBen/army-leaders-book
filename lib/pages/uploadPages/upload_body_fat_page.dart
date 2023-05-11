@@ -238,7 +238,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -251,7 +252,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date'),
                   items: columnHeaders,
@@ -264,7 +266,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Gender'),
                   items: columnHeaders,
@@ -277,7 +280,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Age'),
                   items: columnHeaders,
@@ -290,7 +294,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Height'),
                   items: columnHeaders,
@@ -303,7 +308,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Weight'),
                   items: columnHeaders,
@@ -316,7 +322,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('BMI Pass'),
                   items: columnHeaders,
@@ -329,7 +336,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Height to Nearest Half Inch'),
                   items: columnHeaders,
@@ -342,7 +350,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Neck'),
                   items: columnHeaders,
@@ -355,7 +364,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Waist'),
                   items: columnHeaders,
@@ -368,7 +378,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Hip'),
                   items: columnHeaders,
@@ -381,7 +392,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('BF Percent'),
                   items: columnHeaders,
@@ -394,7 +406,8 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('BF Pass'),
                   items: columnHeaders,

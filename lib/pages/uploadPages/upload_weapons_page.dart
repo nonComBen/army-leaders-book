@@ -197,7 +197,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -210,7 +211,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date'),
                   items: columnHeaders,
@@ -223,7 +225,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Qualification Type'),
                   items: columnHeaders,
@@ -236,7 +239,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Weapon'),
                   items: columnHeaders,
@@ -249,7 +253,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Hits'),
                   items: columnHeaders,
@@ -262,7 +267,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Maximum'),
                   items: columnHeaders,
@@ -275,7 +281,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Badge'),
                   items: columnHeaders,
@@ -288,7 +295,8 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Pass'),
                   items: columnHeaders,

@@ -26,6 +26,7 @@ Future<void> pickIosTime({
         height: MediaQuery.of(context).size.height / 4,
         child: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.time,
+          use24hFormat: true,
           initialDateTime: time,
           onDateTimeChanged: onPicked,
         ),

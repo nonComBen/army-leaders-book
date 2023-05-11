@@ -5,9 +5,11 @@ import 'package:leaders_book/methods/theme_methods.dart';
 Future<DateTime?> pickAndroidDate({
   required BuildContext context,
   required DateTime date,
+  required int minYears,
+  required int maxYears,
 }) async {
-  DateTime minDate = DateTime.now().add(const Duration(days: -365 * 20));
-  DateTime maxDate = DateTime.now().add(const Duration(days: 365 * 5));
+  DateTime minDate = DateTime.now().add(Duration(days: -365 * minYears));
+  DateTime maxDate = DateTime.now().add(Duration(days: 365 * maxYears));
   return await showDatePicker(
       context: context,
       initialDate: date,
@@ -18,6 +20,8 @@ Future<DateTime?> pickAndroidDate({
 Future<void> pickIosDate({
   required BuildContext context,
   required DateTime date,
+  required int minYears,
+  required int maxYears,
   required void Function(DateTime) onPicked,
 }) async {
   showCupertinoModalPopup(
@@ -30,8 +34,8 @@ Future<void> pickIosDate({
         child: CupertinoDatePicker(
           mode: CupertinoDatePickerMode.date,
           initialDateTime: date,
-          minimumDate: DateTime.now().add(const Duration(days: -365 * 10)),
-          maximumDate: DateTime.now().add(const Duration(days: 365 * 1)),
+          minimumDate: DateTime.now().add(Duration(days: -365 * minYears)),
+          maximumDate: DateTime.now().add(Duration(days: 365 * maxYears)),
           onDateTimeChanged: onPicked,
         ),
       );

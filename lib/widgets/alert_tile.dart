@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -21,7 +22,6 @@ class AlertTile extends StatelessWidget {
         color: getContrastingBackgroundColor(context),
         child: Container(
           padding: const EdgeInsets.all(4.0),
-          constraints: const BoxConstraints(maxWidth: 900),
           child: Column(
             children: <Widget>[
               Text(
@@ -44,7 +44,7 @@ class AlertTile extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        if (phone.isNotEmpty) {
+                        if (!kIsWeb && phone.isNotEmpty) {
                           launchUrl(Uri.parse('tel:$phone'));
                         }
                       },
@@ -60,7 +60,7 @@ class AlertTile extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        if (workPhone.isNotEmpty) {
+                        if (!kIsWeb && workPhone.isNotEmpty) {
                           launchUrl(Uri.parse('tel:$workPhone'));
                         }
                       },

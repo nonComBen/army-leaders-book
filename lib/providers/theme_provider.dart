@@ -24,6 +24,7 @@ const MaterialColor primaryBlack =
 });
 
 ThemeData darkThemeData = ThemeData(
+  appBarTheme: const AppBarTheme(foregroundColor: Colors.yellow),
   primarySwatch: primaryBlack,
   dialogBackgroundColor: Colors.grey[800],
   colorScheme: ColorScheme.highContrastDark(

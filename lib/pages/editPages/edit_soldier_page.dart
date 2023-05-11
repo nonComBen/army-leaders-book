@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/validate.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
@@ -330,7 +331,10 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
       context,
       ListView(
         children: [
-          HeaderText(index == null ? 'Add POV' : 'Edit POV'),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: HeaderText(index == null ? 'Add POV' : 'Edit POV'),
+          ),
           PaddedTextField(
             controller: year,
             keyboardType: TextInputType.number,
@@ -521,6 +525,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
             'Form is invalid - rank and last name must not be blank and dates must be in yyyy-MM-dd format',
       );
       FToast toast = FToast();
+      toast.context = context;
       toast.showToast(child: myToast);
     }
   }
@@ -537,17 +542,8 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               PaddedTextField(
                 controller: _rankController,
@@ -651,6 +647,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
               DateTextField(
                   label: 'Date of Rank',
                   date: _dorDate,
+                  minYears: 20,
                   controller: _dorController),
               PaddedTextField(
                 label: 'MOS',
@@ -689,38 +686,44 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                 onChanged: (_) => updated = true,
               ),
               DateTextField(
-                  label: 'Loss Date',
-                  date: _lossDate,
-                  controller: _lossController),
+                label: 'Loss Date',
+                date: _lossDate,
+                minYears: 1,
+                maxYears: 10,
+                controller: _lossController,
+              ),
               DateTextField(
-                  label: 'ETS Date',
-                  date: _etsDate,
-                  controller: _etsController),
+                label: 'ETS Date',
+                date: _etsDate,
+                minYears: 1,
+                maxYears: 20,
+                controller: _etsController,
+              ),
               DateTextField(
-                  label: 'BASD', date: _basdDate, controller: _basdController),
+                label: 'BASD',
+                date: _basdDate,
+                minYears: 40,
+                controller: _basdController,
+              ),
               DateTextField(
-                  label: 'PEBD', date: _pebdDate, controller: _pebdController),
+                label: 'PEBD',
+                date: _pebdDate,
+                minYears: 40,
+                controller: _pebdController,
+              ),
               DateTextField(
-                  label: 'Gain Date',
-                  date: _gainDate,
-                  controller: _gainController),
+                label: 'Gain Date',
+                date: _gainDate,
+                minYears: 20,
+                controller: _gainController,
+              ),
             ],
           ),
           Divider(
             color: getOnPrimaryColor(context),
           ),
-          GridView.count(
-            padding: const EdgeInsets.all(0.0),
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               PaddedTextField(
                 label: 'CBRN Suit Size',
@@ -799,21 +802,12 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
           Divider(
             color: getOnPrimaryColor(context),
           ),
-          GridView.count(
-            padding: const EdgeInsets.all(0.0),
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Civilian Education'),
                   items: _civEds,
@@ -827,7 +821,8 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Military Education'),
                   items: _milEds,
@@ -970,7 +965,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                   pov: POV(
                     owner: user.uid,
                     users: [user.uid],
-                    soldierId: widget.soldier.id!,
+                    soldierId: widget.soldier.id,
                   ),
                 ),
               ),
@@ -1028,7 +1023,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                   award: Award(
                     owner: user.uid,
                     users: [user.uid],
-                    soldierId: widget.soldier.id!,
+                    soldierId: widget.soldier.id,
                   ),
                 ),
               ),

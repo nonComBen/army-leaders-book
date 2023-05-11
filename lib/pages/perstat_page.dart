@@ -330,23 +330,27 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPerstatPage(
-                  perstat: Perstat.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPerstatPage(
+          perstat: Perstat.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPerstatPage(
-                  perstat: Perstat(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPerstatPage(
+          perstat: Perstat(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -516,7 +520,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser()!;
     final width = MediaQuery.of(context).size.width;
-    toast.context = context;
+    toast.init(context);
     return PlatformScaffold(
       title: 'PERSTAT',
       actions: createAppBarActions(

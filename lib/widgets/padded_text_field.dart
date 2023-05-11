@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -6,7 +9,7 @@ import '../widgets/platform_widgets/platform_text_field.dart';
 class PaddedTextField extends StatelessWidget {
   const PaddedTextField({
     super.key,
-    this.padding = const EdgeInsets.all(8),
+    this.padding,
     required this.controller,
     this.focusNode,
     this.enabled = true,
@@ -29,7 +32,7 @@ class PaddedTextField extends StatelessWidget {
     this.autovalidateMode,
   });
 
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
   final TextEditingController controller;
   final TextStyle? style;
   final FocusNode? focusNode;
@@ -54,7 +57,9 @@ class PaddedTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: padding,
+      padding: padding ??
+          EdgeInsets.only(
+              left: 8, right: 8, top: kIsWeb || Platform.isAndroid ? 14 : 12),
       child: PlatformTextField(
         controller: controller,
         decoration: decoration,

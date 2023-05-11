@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/auth_service.dart';
 import 'package:leaders_book/models/user.dart';
+import 'package:leaders_book/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../auth_provider.dart';
@@ -44,7 +48,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   bool validateAndSave() {
     if (!tosAgree) {
       FToast toast = FToast();
-      toast.context = context;
+      toast.init(context);
       toast.showToast(
         child: const MyToast(
           message:
@@ -54,17 +58,15 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
 
       return false;
     }
-    final form = formKey.currentState!;
-    if (form.validate() &&
-        _emailController.text.isNotEmpty &&
+    if (_emailController.text.isNotEmpty &&
         _passwordController.text == _confirmPasswordController.text) {
-      form.save();
       return true;
     }
     return false;
   }
 
   void validateAndCreate(AuthService auth) async {
+    debugPrint('Validating');
     if (validateAndSave()) {
       try {
         User user = (await auth.createUserWithEmailAndPassword(
@@ -76,15 +78,17 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
           createdDate: DateTime.now(),
           lastLoginDate: DateTime.now(),
           updatedUserArray: true,
+          tosAgree: true,
           agreeDate: DateTime.now(),
         );
-        FirebaseFirestore.instance
+        await FirebaseFirestore.instance
             .doc('users/${user.uid}')
             .set(userObj.toMap());
+        ref.read(userProvider).loadUser(user.uid);
         ref.read(rootProvider.notifier).signIn();
       } catch (e) {
         FToast toast = FToast();
-        toast.context = context;
+        toast.init(context);
         toast.showToast(
           child: MyToast(
             message: e.toString(),
@@ -112,7 +116,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
             ),
           ),
           PaddedTextField(
-            controller: TextEditingController(),
+            controller: _emailController,
             label: 'Email',
             decoration: const InputDecoration(
                 labelText: 'Email', icon: Icon(Icons.mail)),
@@ -159,10 +163,15 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: PlatformButton(
+                buttonPadding: kIsWeb
+                    ? 18.0
+                    : Platform.isAndroid
+                        ? 8.0
+                        : 0.0,
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
                   child:
-                      Text('Create Account', style: TextStyle(fontSize: 20.0)),
+                      Text('Create Account', style: TextStyle(fontSize: 18.0)),
                 ),
                 onPressed: () {
                   validateAndCreate(auth);
@@ -174,8 +183,8 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
-                    'Have an account? Login',
-                    style: TextStyle(fontSize: 20.0, color: Colors.blue),
+                    'Back to Login',
+                    style: TextStyle(fontSize: 18.0, color: Colors.blue),
                     textAlign: TextAlign.center,
                   ),
                 ),

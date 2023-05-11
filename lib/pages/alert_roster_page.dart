@@ -8,10 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:leaders_book/providers/shared_prefs_provider.dart';
-import 'package:open_file/open_file.dart';
+import 'package:leaders_book/methods/custom_modal_bottom_sheet.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
+import 'package:leaders_book/widgets/header_text.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_button.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,7 +29,12 @@ import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
 import '../widgets/alert_tile.dart';
 import '../widgets/my_toast.dart';
+import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../../auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../providers/shared_prefs_provider.dart';
+import 'package:open_file/open_file.dart';
 
 class AlertRosterPage extends ConsumerStatefulWidget {
   const AlertRosterPage({Key? key}) : super(key: key);
@@ -40,20 +46,85 @@ class AlertRosterPage extends ConsumerStatefulWidget {
 }
 
 class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
-  List<dynamic> _soldiers = [];
+  List<AlertSoldier?> _soldiers = [];
   List<Soldier> _allSoldiers = [];
+  final List<dynamic> _supervisors = [
+    {'soldier': '', 'soldierId': ''},
+    {'soldier': 'Top of Hierarchy', 'soldierId': 'Top of Hierarchy'},
+  ];
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   late SharedPreferences prefs;
   bool isSubscribed = false, isInitial = true;
   String? _userId;
 
-  final GlobalKey _globalKey = GlobalKey();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (isInitial) {
+      isInitial = false;
+      initialize();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
+    prefs = ref.read(sharedPreferencesProvider);
+  }
+
+  initialize() async {
+    _allSoldiers = ref.read(soldiersProvider);
+    _supervisors.addAll(_allSoldiers
+        .map((e) => {
+              'soldier': '${e.rank} ${e.lastName}, ${e.firstName}',
+              'soldierId': e.id
+            })
+        .toList());
+    DocumentSnapshot snapshot;
+    AlertSoldiers? alertSoldiers;
+    try {
+      snapshot = await firestore.collection('alertSoldiers').doc(_userId).get();
+      alertSoldiers = AlertSoldiers.fromSnapshot(snapshot);
+    } catch (e) {
+      FirebaseAnalytics.instance
+          .logEvent(name: 'Alert Soldiers Does Not Exist');
+    }
+    if (alertSoldiers == null) {
+      buildNewSoldiers();
+    } else {
+      setState(() {
+        _soldiers = alertSoldiers!.soldiers!
+            .map((e) => AlertSoldier.fromMap(e))
+            .toList();
+        List<String> soldierIds =
+            _allSoldiers.map((e) => e.id.toString()).toList();
+        _soldiers.removeWhere((e) => !soldierIds.contains(e!.soldierId));
+        if (_allSoldiers.length > _soldiers.length) {
+          final addedSoldierIds = _soldiers.map((e) => e!.soldierId).toList();
+          final extraSoldiers = _allSoldiers
+              .where((e) => !addedSoldierIds.contains(e.id))
+              .toList();
+          for (Soldier soldier in extraSoldiers) {
+            addSoldier(soldier);
+          }
+        }
+      });
+    }
+
+    bool dontShow = prefs.getBool('dontShowHelpAlert') ?? false;
+    if (!dontShow) {
+      _showHelp();
+    }
+  }
 
   void _textAll() async {
     String recipients = 'sms:';
     for (var soldier in _soldiers) {
-      if (soldier['phone'] != '') {
-        recipients = '${recipients + soldier['phone']},';
+      if (soldier!.phone != '') {
+        recipients = '${recipients + soldier.phone},';
       }
     }
 
@@ -70,150 +141,80 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     }
   }
 
-  void _editSupervisor(Map<String, dynamic> soldier) {
-    List<dynamic> supervisors = [];
-    supervisors.add({'soldier': '', 'soldierId': ''});
+  void _editSupervisor(AlertSoldier soldier) {
+    List<dynamic> supervisors = List.from(_supervisors);
     supervisors
-        .add({'soldier': 'Top of Hierarchy', 'soldierId': 'Top of Hierarchy'});
-    supervisors.addAll(_soldiers);
-    supervisors
-        .removeWhere((element) => element['soldierId'] == soldier['soldierId']);
+        .removeWhere((element) => element['soldierId'] == soldier.soldierId);
+
+    String supervisorId = soldier.supervisorId ?? '';
+
     if (!supervisors
         .map((e) => e['soldierId'])
         .toList()
-        .contains(soldier['supervisorId'])) {
-      soldier['supervisorId'] = '';
+        .contains(supervisorId)) {
+      supervisorId = '';
     }
 
-    String? supervisorId = soldier['supervisorId'] ?? '';
-
-    Text title = const Text('Edit Supervisor');
-    Text content = Text(
-        'Select ${soldier['soldier']}\'s supervisor from the drop down to place them in the hierarchy.');
-
-    if (kIsWeb || Platform.isAndroid) {
-      showDialog(
-          context: context,
-          builder: (BuildContext context2) {
-            return StatefulBuilder(
-              builder: (context, refresh) {
-                return AlertDialog(
-                  title: title,
-                  content: SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        content,
-                        DropdownButtonFormField(
-                            items: supervisors.map((supervisor) {
-                              return DropdownMenuItem(
-                                value: supervisor['soldierId'],
-                                child: Text(supervisor['soldier']),
-                              );
-                            }).toList(),
-                            value: supervisorId,
-                            decoration:
-                                const InputDecoration(labelText: 'Supervisor'),
-                            onChanged: (dynamic value) {
-                              refresh(() {
-                                supervisorId = value;
-                              });
-                            }),
-                      ],
-                    ),
-                  ),
-                  actions: <Widget>[
-                    FormattedTextButton(
-                      label: 'Cancel',
-                      onPressed: () {
-                        Navigator.pop(context2);
-                      },
-                    ),
-                    FormattedTextButton(
-                      label: 'Ok',
-                      onPressed: () {
-                        setState(() {
-                          soldier['supervisorId'] = supervisorId;
-                        });
-                        Navigator.pop(context2);
-                      },
-                    )
-                  ],
-                );
-              },
-            );
-          });
-    } else {
-      showCupertinoDialog(
-          context: context,
-          builder: (context2) => StatefulBuilder(
-                builder: (context, refresh) => CupertinoAlertDialog(
-                  title: title,
-                  content: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: <Widget>[
-                          content,
-                          DropdownButtonFormField(
-                              items: supervisors.map((supervisor) {
-                                return DropdownMenuItem(
-                                  value: supervisor['soldierId'],
-                                  child: Text(supervisor['soldier']),
-                                );
-                              }).toList(),
-                              value: supervisorId,
-                              decoration: const InputDecoration(
-                                  labelText: 'Supervisor'),
-                              onChanged: (dynamic value) {
-                                refresh(() {
-                                  supervisorId = value;
-                                });
-                              }),
-                        ],
-                      ),
-                    ),
-                  ),
-                  actions: <Widget>[
-                    CupertinoDialogAction(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.pop(context2);
-                      },
-                    ),
-                    CupertinoDialogAction(
-                      child: const Text('Ok'),
-                      onPressed: () {
-                        setState(() {
-                          soldier['supervisorId'] = supervisorId;
-                        });
-                        Navigator.pop(context2);
-                      },
-                    )
-                  ],
-                ),
-              ));
-    }
-  }
-
-  List<Widget> _addSoldiersWarning() {
-    return [
-      const Center(
-        child: Card(
-            color: Colors.redAccent,
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
+    customModalBottomSheet(
+      context,
+      StatefulBuilder(builder: (context, refresh) {
+        return ListView(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: HeaderText('Edit Supervisor'),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Text(
-                  'You need to add Soldiers before setting your Alert Roster'),
-            )),
-      )
-    ];
+                  'Select ${soldier.name}\'s supervisor from the drop down to place them in the hierarchy.'),
+            ),
+            PlatformItemPicker(
+              label: const Text('Supervisor'),
+              value: supervisorId,
+              items: supervisors.map((e) => e['soldierId'].toString()).toList(),
+              itemLabels:
+                  supervisors.map((e) => e['soldier'].toString()).toList(),
+              onChanged: (dynamic value) {
+                refresh(() {
+                  supervisorId = value;
+                });
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  PlatformButton(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  PlatformButton(
+                    child: const Text('Ok'),
+                    onPressed: () {
+                      setState(() {
+                        soldier.supervisorId = supervisorId;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
+    );
   }
 
   List<Widget> buildRoster() {
     List<dynamic> soldiers = List.from(_soldiers);
     List<Widget> list = [];
-    Map<String, dynamic>? top = soldiers.firstWhere(
-        (element) => element['supervisorId'] == 'Top of Hierarchy',
+    AlertSoldier? top = soldiers.firstWhere(
+        (element) => element.supervisorId == 'Top of Hierarchy',
         orElse: () => null);
     if (top == null) {
       list.add(
@@ -230,113 +231,110 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
       );
     } else {
       list.add(
-        InkWell(
+        GestureDetector(
           onLongPress: () {
             _editSupervisor(top);
           },
           child: AlertTile(
-              soldier: top['soldier'],
-              phone: top['phone'],
-              workPhone: top['workPhone']),
+              soldier: top.name, phone: top.phone, workPhone: top.workPhone),
         ),
       );
-      soldiers
-          .removeWhere((element) => element['soldierId'] == top['soldierId']);
+      soldiers.removeWhere((element) => element.soldierId == top.soldierId);
       for (var soldierA in _soldiers
-          .where((e) => e['supervisorId'] == top['soldierId'])
+          .where((e) => e!.supervisorId == top.soldierId)
           .toList()) {
         list.add(
           Container(
             padding: const EdgeInsets.only(left: 16, top: 4),
-            child: InkWell(
+            child: GestureDetector(
               onLongPress: () {
-                _editSupervisor(soldierA);
+                _editSupervisor(soldierA!);
               },
               child: AlertTile(
-                  soldier: soldierA['soldier'],
-                  phone: soldierA['phone'],
-                  workPhone: soldierA['workPhone']),
+                  soldier: soldierA!.name,
+                  phone: soldierA.phone,
+                  workPhone: soldierA.workPhone),
             ),
           ),
         );
-        soldiers.removeWhere(
-            (element) => element['soldierId'] == soldierA['soldierId']);
+        soldiers
+            .removeWhere((element) => element.soldierId == soldierA.soldierId);
         for (var soldierB in _soldiers
-            .where((e) => e['supervisorId'] == soldierA['soldierId'])
+            .where((e) => e!.supervisorId == soldierA.soldierId)
             .toList()) {
           list.add(
             Container(
               padding: const EdgeInsets.only(left: 32, top: 4),
-              child: InkWell(
+              child: GestureDetector(
                 onLongPress: () {
-                  _editSupervisor(soldierB);
+                  _editSupervisor(soldierB!);
                 },
                 child: AlertTile(
-                    soldier: soldierB['soldier'],
-                    phone: soldierB['phone'],
-                    workPhone: soldierB['workPhone']),
+                    soldier: soldierB!.name,
+                    phone: soldierB.phone,
+                    workPhone: soldierB.workPhone),
               ),
             ),
           );
           soldiers.removeWhere(
-              (element) => element['soldierId'] == soldierB['soldierId']);
+              (element) => element.soldierId == soldierB.soldierId);
           for (var soldierC in _soldiers
-              .where((e) => e['supervisorId'] == soldierB['soldierId'])
+              .where((e) => e!.supervisorId == soldierB.soldierId)
               .toList()) {
             list.add(
               Container(
                 padding: const EdgeInsets.only(left: 48, top: 4),
-                child: InkWell(
+                child: GestureDetector(
                   onLongPress: () {
-                    _editSupervisor(soldierC);
+                    _editSupervisor(soldierC!);
                   },
                   child: AlertTile(
-                      soldier: soldierC['soldier'],
-                      phone: soldierC['phone'],
-                      workPhone: soldierC['workPhone']),
+                      soldier: soldierC!.name,
+                      phone: soldierC.phone,
+                      workPhone: soldierC.workPhone),
                 ),
               ),
             );
             soldiers.removeWhere(
-                (element) => element['soldierId'] == soldierC['soldierId']);
+                (element) => element.soldierId == soldierC.soldierId);
             for (var soldierD in _soldiers
-                .where((e) => e['supervisorId'] == soldierB['soldierId'])
+                .where((e) => e!.supervisorId == soldierB.soldierId)
                 .toList()) {
               list.add(
                 Container(
                   padding: const EdgeInsets.only(left: 64, top: 4),
-                  child: InkWell(
+                  child: GestureDetector(
                     onLongPress: () {
-                      _editSupervisor(soldierD);
+                      _editSupervisor(soldierD!);
                     },
                     child: AlertTile(
-                        soldier: soldierD['soldier'],
-                        phone: soldierD['phone'],
-                        workPhone: soldierD['workPhone']),
+                        soldier: soldierD!.name,
+                        phone: soldierD.phone,
+                        workPhone: soldierD.workPhone),
                   ),
                 ),
               );
               soldiers.removeWhere(
-                  (element) => element['soldierId'] == soldierD['soldierId']);
+                  (element) => element.soldierId == soldierD.soldierId);
               for (var soldierE in _soldiers
-                  .where((e) => e['supervisorId'] == soldierB['soldierId'])
+                  .where((e) => e!.supervisorId == soldierB.soldierId)
                   .toList()) {
                 list.add(
                   Container(
                     padding: const EdgeInsets.only(left: 80, top: 4),
-                    child: InkWell(
+                    child: GestureDetector(
                       onLongPress: () {
-                        _editSupervisor(soldierE);
+                        _editSupervisor(soldierE!);
                       },
                       child: AlertTile(
-                          soldier: soldierE['soldier'],
-                          phone: soldierE['phone'],
-                          workPhone: soldierE['workPhone']),
+                          soldier: soldierE!.name,
+                          phone: soldierE.phone,
+                          workPhone: soldierE.workPhone),
                     ),
                   ),
                 );
                 soldiers.removeWhere(
-                    (element) => element['soldierId'] == soldierE['soldierId']);
+                    (element) => element.soldierId == soldierE.soldierId);
               }
             }
           }
@@ -350,21 +348,21 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
         ),
       );
     }
-    for (Map<String, dynamic> soldier in soldiers) {
+    for (var soldier in soldiers) {
       list.add(
         Container(
           padding: const EdgeInsets.only(
             top: 4.0,
             left: 4.0,
           ),
-          child: InkWell(
+          child: GestureDetector(
             onLongPress: () {
-              _editSupervisor(soldier);
+              _editSupervisor(soldier!);
             },
             child: AlertTile(
-              soldier: soldier['soldier'],
-              phone: soldier['phone'],
-              workPhone: soldier['workPhone'],
+              soldier: soldier.name,
+              phone: soldier.phone,
+              workPhone: soldier.workPhone,
             ),
           ),
         ),
@@ -373,51 +371,10 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     return list;
   }
 
-  // void _shareRoster() async {
-  //   bool approved = await checkPermission(Permission.storage);
-  //   if (!approved || !mounted) return;
-  //   try {
-  //     RenderRepaintBoundary boundary = _globalKey.currentContext!
-  //         .findRenderObject() as RenderRepaintBoundary;
-  //     ui.Image image = await boundary.toImage();
-  //     var pngBytes = (await image.toByteData(format: ui.ImageByteFormat.png))!;
-
-  //     String location;
-
-  //     Directory dir = Platform.isAndroid
-  //         ? await getTemporaryDirectory()
-  //         : getApplicationDocumentsDirectory() as Directory;
-  //     String path = dir.path;
-  //     location = Platform.isAndroid
-  //         ? 'temporary storage. Please open and save to a permanent location.'
-  //         : 'On my iPhone(iPad)/Leader\'s Book';
-
-  //     File file = File('$path/Alert Roster.png');
-  //     file.writeAsBytesSync(pngBytes.buffer.asUint8List());
-
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('Alert Roster Downloaded to $location'),
-  //           duration: const Duration(seconds: 5),
-  //           action: SnackBarAction(
-  //             label: 'Open',
-  //             onPressed: () {
-  //               OpenFile.open(file.path);
-  //             },
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
-  //   }
-  // }
-
   void _downloadPdf() async {
     if (isSubscribed) {
-      Map<String, dynamic>? top = _soldiers.firstWhere(
-          (doc) => doc['supervisorId'] == 'Top of Hierarchy', orElse: () {
+      AlertSoldier? top = _soldiers.firstWhere(
+          (doc) => doc!.supervisorId == 'Top of Hierarchy', orElse: () {
         FToast toast = FToast();
         toast.context = context;
         toast.showToast(
@@ -425,7 +382,6 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
             message: 'Hierarchy must be set before downloading to Pdf.',
           ),
         );
-
         return null;
       });
       if (top == null) return;
@@ -503,15 +459,19 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   }
 
   void addSoldier(Soldier soldier) {
-    var map = <String, dynamic>{};
-    map['soldierId'] = soldier.id;
-    map['soldier'] =
-        '${soldier.rank} ${soldier.lastName}, ${soldier.firstName}';
-    map['supervisorId'] = '';
-    map['rankSort'] = soldier.rankSort.toString();
-    map['phone'] = soldier.phone;
-    map['workPhone'] = soldier.workPhone;
-    _soldiers.add(map);
+    var map = <String, dynamic>{
+      'soldierId': soldier.id,
+      'supervisorId': '',
+      'soldier': '${soldier.rank} ${soldier.lastName}, ${soldier.firstName}',
+      'rankSort': soldier.rankSort.toString(),
+      'phone': soldier.phone,
+      'workPhone': soldier.workPhone,
+    };
+    _soldiers.add(AlertSoldier.fromMap(map));
+  }
+
+  void removeSoldier(String soldierId) {
+    _soldiers.removeWhere((element) => element!.soldierId == soldierId);
   }
 
   void _showHelp() {
@@ -519,7 +479,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     Widget content = const Text(
         'In order to set the hierarchy, long press on each card and a pop up will allow you to select the Soldier\'s supervisor.  '
         'Select \'Top of Hierarchy\' for the starting point of the hierarchy');
-    bool? dontShow = false;
+    bool dontShow = false;
     if (kIsWeb || Platform.isAndroid) {
       showDialog(
           context: context,
@@ -533,13 +493,13 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
                       children: <Widget>[
                         Padding(
                             padding: const EdgeInsets.all(8.0), child: content),
-                        CheckboxListTile(
+                        PlatformCheckboxListTile(
                           title: const Text('Don\'t Show Again'),
                           value: dontShow,
                           controlAffinity: ListTileControlAffinity.leading,
                           onChanged: (value) {
                             refresh(() {
-                              dontShow = value;
+                              dontShow = value!;
                             });
                           },
                         )
@@ -550,7 +510,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
                     FormattedTextButton(
                       label: 'OK',
                       onPressed: () {
-                        prefs.setBool('dontShowHelpAlert', dontShow!);
+                        prefs.setBool('dontShowHelpAlert', dontShow);
                         Navigator.of(context2).pop();
                       },
                     ),
@@ -572,13 +532,13 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
                     children: <Widget>[
                       Padding(
                           padding: const EdgeInsets.all(8.0), child: content),
-                      CheckboxListTile(
+                      PlatformCheckboxListTile(
                         title: const Text('Don\'t Show Again'),
                         value: dontShow,
                         controlAffinity: ListTileControlAffinity.leading,
                         onChanged: (value) {
                           refresh(() {
-                            dontShow = value;
+                            dontShow = value!;
                           });
                         },
                       )
@@ -587,9 +547,14 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
                 ),
                 actions: <Widget>[
                   CupertinoDialogAction(
-                    child: const Text('OK'),
+                    child: Text(
+                      'OK',
+                      style: TextStyle(
+                        color: getTextColor(context),
+                      ),
+                    ),
                     onPressed: () async {
-                      prefs.setBool('dontShowHelpAlert', dontShow!);
+                      prefs.setBool('dontShowHelpAlert', dontShow);
                       Navigator.of(context2).pop();
                     },
                   ),
@@ -603,58 +568,13 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   }
 
   Future<bool> onWillPop() {
-    AlertSoldiers alertSoldiers = AlertSoldiers(_userId, _userId, _soldiers);
+    AlertSoldiers alertSoldiers = AlertSoldiers(
+        _userId, _userId, _soldiers.map((e) => e!.toMap()).toList());
     firestore
         .collection('alertSoldiers')
         .doc(_userId)
         .set(alertSoldiers.toMap());
     return Future.value(true);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (isInitial) {
-      isInitial = false;
-      initialize();
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _userId = ref.read(authProvider).currentUser()!.uid;
-    isSubscribed = ref.read(subscriptionStateProvider);
-    prefs = ref.read(sharedPreferencesProvider);
-
-    bool dontShow = prefs.getBool('dontShowHelpAlert') ?? false;
-    if (!dontShow) {
-      _showHelp();
-    }
-  }
-
-  initialize() async {
-    _allSoldiers = ref.read(soldiersProvider);
-    DocumentSnapshot snapshot;
-    AlertSoldiers? alertSoldiers;
-    try {
-      snapshot = await firestore.collection('alertSoldiers').doc(_userId).get();
-      alertSoldiers = AlertSoldiers.fromSnapshot(snapshot);
-    } catch (e) {
-      FirebaseAnalytics.instance
-          .logEvent(name: 'Alert Soldiers Does Not Exist');
-    }
-    if (alertSoldiers == null) {
-      debugPrint('Alert Soldiers is null.');
-      buildNewSoldiers();
-    } else {
-      debugPrint('Alert Soldiers Length: ${alertSoldiers.soldiers!.length}');
-      setState(() {
-        _soldiers = alertSoldiers!.soldiers!.toList();
-        buildRoster();
-      });
-    }
   }
 
   @override
@@ -681,27 +601,35 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           ),
         ],
       ),
-      body: Container(
-        padding: EdgeInsets.symmetric(
-            horizontal: width < 816 ? 16 : (width - 800) / 2),
-        constraints: const BoxConstraints(maxWidth: 900),
-        child: WillPopScope(
-          onWillPop: onWillPop,
-          child: ListView(
-            padding: const EdgeInsets.all(8.0),
-            children: <Widget>[
-              if (user.isAnonymous) const AnonWarningBanner(),
-              RepaintBoundary(
-                key: _globalKey,
-                child: Column(
+      body: Center(
+        heightFactor: 1,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: WillPopScope(
+            onWillPop: onWillPop,
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Column(
                   children: _allSoldiers.isEmpty
-                      ? _addSoldiersWarning()
+                      ? [
+                          const Center(
+                            child: Card(
+                                color: Colors.redAccent,
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(
+                                      'You need to add Soldiers before setting your Alert Roster'),
+                                )),
+                          )
+                        ]
                       : _soldiers.isEmpty
                           ? [const CircularProgressIndicator()]
                           : buildRoster(),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

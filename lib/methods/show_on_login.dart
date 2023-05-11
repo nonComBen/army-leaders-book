@@ -209,12 +209,11 @@ Future<void> showTos(BuildContext context, String? userId) async {
     content: content,
     primaryText: 'Agree',
     primary: () {
-      FirebaseFirestore.instance.collection('users').doc(userId).set(
+      FirebaseFirestore.instance.collection('users').doc(userId).update(
         {
           'tosAgree': true,
           'agreeDate': DateTime.now(),
         },
-        SetOptions(merge: true),
       );
     },
   );

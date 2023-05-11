@@ -317,12 +317,13 @@ class HomePageState extends ConsumerState<RollupTab>
                   for (DocumentSnapshot doc in snapshot.data!.docs) {
                     Object start;
                     if (isValidDate(doc['start'])) {
-                      start = DateTime.parse(doc['start'] + ' 00:00:00');
+                      start =
+                          DateTime.tryParse(doc['start'] + ' 00:00:00') ?? '';
                     } else {
                       start = '';
                     }
                     var end = isValidDate(doc['end'])
-                        ? DateTime.parse(doc['end'] + ' 18:00:00')
+                        ? DateTime.tryParse(doc['end'] + ' 18:00:00') ?? ''
                         : '';
                     if (start != '' &&
                         DateTime.now().isAfter(start as DateTime)) {
@@ -812,7 +813,10 @@ class HomePageState extends ConsumerState<RollupTab>
                       onPressed: null,
                       child: Text(
                         'Active: $flags',
-                        style: const TextStyle(fontSize: 16),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: getTextColor(context),
+                        ),
                       ),
                     ),
                     info2: TextButton(
@@ -984,7 +988,6 @@ class HomePageState extends ConsumerState<RollupTab>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            flex: 1,
             child: ListView(
               primary: true,
               shrinkWrap: true,
@@ -1027,9 +1030,12 @@ class HomePageState extends ConsumerState<RollupTab>
                           }
 
                           return GridView.count(
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            childAspectRatio:
-                                width > 700 ? width / 450 : width / 225,
+                            crossAxisCount: width > 750 ? 2 : 1,
+                            childAspectRatio: width > 750
+                                ? width / 450
+                                : width > 350
+                                    ? width / 225
+                                    : width / 275,
                             shrinkWrap: true,
                             primary: false,
                             crossAxisSpacing: 1.0,

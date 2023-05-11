@@ -9,9 +9,10 @@ import '../../methods/theme_methods.dart';
 
 abstract class PlatformItemPicker extends Widget {
   factory PlatformItemPicker({
-    required label,
+    required Widget label,
     String? value,
     required List<String> items,
+    List<String>? itemLabels,
     required void Function(dynamic) onChanged,
   }) {
     if (kIsWeb || Platform.isAndroid) {
@@ -30,7 +31,9 @@ abstract class PlatformItemPicker extends Widget {
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
-                    event,
+                    itemLabels != null
+                        ? itemLabels[items.indexOf(event)]
+                        : event,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -44,7 +47,9 @@ abstract class PlatformItemPicker extends Widget {
       return IOSItemPicker(
         itemBuilder: (context) {
           return items
-              .map((e) => PullDownMenuItem(onTap: () => onChanged(e), title: e))
+              .map((e) => PullDownMenuItem(
+                  onTap: () => onChanged(e),
+                  title: itemLabels != null ? itemLabels[items.indexOf(e)] : e))
               .toList();
         },
         buttonBuilder: (context, showMenu) {
@@ -67,7 +72,9 @@ abstract class PlatformItemPicker extends Widget {
                   padding: const EdgeInsets.all(8.0),
                   onPressed: showMenu,
                   child: Text(
-                    value ?? '',
+                    itemLabels != null && value != null
+                        ? itemLabels[items.indexOf(value)]
+                        : value ?? '',
                     style: TextStyle(
                       color: getTextColor(context),
                     ),

@@ -4,11 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/providers/filtered_soldiers_provider.dart';
-import 'package:leaders_book/providers/selected_soldiers_provider.dart';
-import 'package:leaders_book/providers/soldiers_provider.dart';
-import 'package:leaders_book/providers/subscription_state.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 
 import '../../methods/create_app_bar_actions.dart';
@@ -21,6 +16,11 @@ import '../../pages/editPages/edit_soldier_page.dart';
 import '../../pages/tabs/rollup_tab.dart';
 import '../../pages/tabs/overflow_tab.dart';
 import '../../pages/tabs/soldiers_tab.dart';
+import '../../auth_provider.dart';
+import '../../providers/filtered_soldiers_provider.dart';
+import '../../providers/selected_soldiers_provider.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../providers/subscription_state.dart';
 
 abstract class PlatformHomePage extends StatefulWidget {
   factory PlatformHomePage() {
@@ -91,20 +91,6 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
   List<AppBarOption> getOptions() {
     return [
       AppBarOption(
-        title: 'New Soldier',
-        icon: Icon(
-          Icons.add,
-          color: getOnPrimaryColor(context),
-        ),
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => EditSoldierPage(
-              soldier: Soldier(owner: userId, users: [userId]),
-            ),
-          ),
-        ),
-      ),
-      AppBarOption(
         title: 'Edit Soldier',
         icon: Icon(
           Icons.edit,
@@ -118,7 +104,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
           Icons.delete,
           color: getOnPrimaryColor(context),
         ),
-        onPressed: () => deleteSoldiers(context, selectedSoldiers, userId),
+        onPressed: () => deleteSoldiers(context, selectedSoldiers, userId, ref),
       ),
       AppBarOption(
         title: 'Filter Soldiers',
@@ -135,7 +121,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
           Icons.share,
           color: getOnPrimaryColor(context),
         ),
-        onPressed: () => shareSoldiers(context, soldiers, userId),
+        onPressed: () => shareSoldiers(context, selectedSoldiers, userId),
       ),
       AppBarOption(
         title: 'Download Excel',
@@ -193,18 +179,20 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
       appBar: AppBar(
           title: Text(titles[index]),
           actions: index != 1 ? [] : createAppBarActions(width, getOptions())),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => EditSoldierPage(
-                soldier: Soldier(owner: userId, users: [userId]),
-              ),
+      floatingActionButton: index != 1
+          ? null
+          : FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => EditSoldierPage(
+                      soldier: Soldier(owner: userId, users: [userId]),
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         destinations: const [
@@ -246,7 +234,7 @@ class IOSHomePage extends ConsumerStatefulWidget implements PlatformHomePage {
 class _IOSHomePageState extends ConsumerState<IOSHomePage> {
   late String userId;
   bool isSubscribed = false;
-  late List<Soldier> soldiers, selctedSoldiers;
+  late List<Soldier> soldiers, selectedSoldiers;
   late FilteredSoldiers filteredSoldiers;
   final RateMyApp _rateMyApp = RateMyApp(
     minDays: 7,
@@ -300,7 +288,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
           CupertinoIcons.pencil,
           color: getOnPrimaryColor(context),
         ),
-        onPressed: () => editSoldier(context, selctedSoldiers),
+        onPressed: () => editSoldier(context, selectedSoldiers),
       ),
       AppBarOption(
         title: 'Delete Soldier(s)',
@@ -308,7 +296,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
           CupertinoIcons.delete,
           color: getOnPrimaryColor(context),
         ),
-        onPressed: () => deleteSoldiers(context, selctedSoldiers, userId),
+        onPressed: () => deleteSoldiers(context, selectedSoldiers, userId, ref),
       ),
       AppBarOption(
         title: 'Filter Soldiers',
@@ -325,7 +313,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
           CupertinoIcons.share,
           color: getOnPrimaryColor(context),
         ),
-        onPressed: () => shareSoldiers(context, soldiers, userId),
+        onPressed: () => shareSoldiers(context, selectedSoldiers, userId),
       ),
       AppBarOption(
         title: 'Download Excel',
@@ -350,7 +338,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
           color: getOnPrimaryColor(context),
         ),
         onPressed: () =>
-            downloadPdf(context, isSubscribed, selctedSoldiers, userId),
+            downloadPdf(context, isSubscribed, selectedSoldiers, userId),
       ),
       AppBarOption(
         title: 'Transfer Soldier',
@@ -358,7 +346,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
           CupertinoIcons.arrow_right_circle,
           color: getOnPrimaryColor(context),
         ),
-        onPressed: () => transferSoldier(context, selctedSoldiers, userId),
+        onPressed: () => transferSoldier(context, selectedSoldiers, userId),
       ),
       AppBarOption(
         title: 'Manage Users',
@@ -377,7 +365,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
     userId = ref.read(authProvider).currentUser()!.uid;
     isSubscribed = ref.watch(subscriptionStateProvider);
     soldiers = ref.watch(soldiersProvider);
-    selctedSoldiers = ref.watch(selectedSoldiersProvider);
+    selectedSoldiers = ref.watch(selectedSoldiersProvider);
     filteredSoldiers = ref.read(filteredSoldiersProvider.notifier);
     List<Widget> tabs = const [
       RollupTab(),

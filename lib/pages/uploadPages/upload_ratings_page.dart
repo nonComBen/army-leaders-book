@@ -202,7 +202,8 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -215,7 +216,8 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Rater'),
                   items: columnHeaders,
@@ -228,7 +230,8 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Senior Rater'),
                   items: columnHeaders,
@@ -241,7 +244,8 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Reviewer'),
                   items: columnHeaders,
@@ -254,7 +258,8 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Last Eval'),
                   items: columnHeaders,
@@ -267,7 +272,8 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Next Eval Date'),
                   items: columnHeaders,
@@ -280,7 +286,8 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Next Eval Type'),
                   items: columnHeaders,

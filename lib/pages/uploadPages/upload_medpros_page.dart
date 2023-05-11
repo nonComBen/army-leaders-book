@@ -286,7 +286,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -299,7 +300,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('PHA Date'),
                   items: columnHeaders,
@@ -312,7 +314,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Dental Date'),
                   items: columnHeaders,
@@ -325,7 +328,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Vision Date'),
                   items: columnHeaders,
@@ -338,7 +342,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Hearing Date'),
                   items: columnHeaders,
@@ -351,7 +356,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('HIV Date'),
                   items: columnHeaders,
@@ -364,7 +370,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Influenza Date'),
                   items: columnHeaders,
@@ -377,7 +384,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('MMR Date'),
                   items: columnHeaders,
@@ -390,7 +398,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Varicella Date'),
                   items: columnHeaders,
@@ -403,7 +412,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Polio Date'),
                   items: columnHeaders,
@@ -416,7 +426,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Tuberculin Date'),
                   items: columnHeaders,
@@ -429,7 +440,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Tetanus Date'),
                   items: columnHeaders,
@@ -442,7 +454,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Hepatitis A Date'),
                   items: columnHeaders,
@@ -455,7 +468,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Hepititis B Date'),
                   items: columnHeaders,
@@ -468,7 +482,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Encephalitis Date'),
                   items: columnHeaders,
@@ -481,7 +496,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Meningococcal Date'),
                   items: columnHeaders,
@@ -494,7 +510,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Typhoid Date'),
                   items: columnHeaders,
@@ -507,7 +524,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Yellow Fever Date'),
                   items: columnHeaders,
@@ -520,7 +538,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Small Pox Date'),
                   items: columnHeaders,
@@ -533,7 +552,8 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Anthrax Date'),
                   items: columnHeaders,

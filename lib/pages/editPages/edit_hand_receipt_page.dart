@@ -18,6 +18,7 @@ import '../../methods/validate.dart';
 import '../../models/hand_receipt_item.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -178,27 +179,42 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
           padding: const EdgeInsets.all(4.0),
           child: Card(
             color: getContrastingBackgroundColor(context),
-            child: PlatformListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(_subComponents![index]['item']),
-                  Text(
-                      '${_subComponents![index]['onHand']}/${_subComponents![index]['required']}')
-                ],
-              ),
-              subtitle: Text('NSN: ${_subComponents![index]['nsn']}'),
-              trailing: PlatformIconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () {
-                  setState(() {
-                    _subComponents!.removeAt(index);
-                  });
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: PlatformListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(_subComponents![index]['item']),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 24.0,
+                      ),
+                      child: Text(
+                          '${_subComponents![index]['onHand']}/${_subComponents![index]['required']}'),
+                    )
+                  ],
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text('NSN: ${_subComponents![index]['nsn']}'),
+                ),
+                trailing: PlatformIconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() {
+                      _subComponents!.removeAt(index);
+                    });
+                  },
+                ),
+                onTap: () {
+                  _editSubComponent(context, index);
                 },
               ),
-              onTap: () {
-                _editSubComponent(context, index);
-              },
             ),
           ),
         ),
@@ -279,20 +295,12 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformSoldierPicker(
                   label: 'Soldier',
                   soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
@@ -397,39 +405,46 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: HeaderText(
-                  'Subcompents',
-                ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.0),
+                color: getPrimaryColor(context),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PlatformIconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    _editSubComponent(context, null);
-                  },
-                ),
-              )
-            ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: HeaderText(
+                      'Subcompents',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: getOnPrimaryColor(context),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformIconButton(
+                      icon: Icon(
+                        Icons.add,
+                        size: 28,
+                        color: getOnPrimaryColor(context),
+                      ),
+                      onPressed: () {
+                        _editSubComponent(context, null);
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ),
           ),
           if (_subComponents!.isNotEmpty)
-            GridView.count(
-                primary: false,
-                crossAxisCount: width > 700 ? 2 : 1,
-                mainAxisSpacing: 1.0,
-                crossAxisSpacing: 1.0,
-                childAspectRatio: width > 900
-                    ? 900 / 200
-                    : width > 700
-                        ? width / 200
-                        : width / 100,
-                shrinkWrap: true,
-                children: _subComponentWidgets()),
+            FormGridView(width: width, children: _subComponentWidgets()),
           Divider(
             color: getOnPrimaryColor(context),
           ),

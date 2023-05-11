@@ -18,6 +18,7 @@ import '../../methods/validate.dart';
 import '../../models/medpro.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -293,82 +294,86 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
     if (expanded) {
       return Column(
         children: [
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               DateTextField(
                 controller: _mmrController,
                 label: 'MMR Date',
                 date: _mmrDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _varicellaController,
                 label: 'Varicella Date',
                 date: _varicellaDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _polioController,
                 label: 'Polio Date',
                 date: _polioDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _tuberculinController,
                 label: 'Tuberculin Date',
                 date: _tuberDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _tetanusController,
                 label: 'Tetanus Date',
                 date: _tetanusDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _hepAController,
                 label: 'Hepatitis A Date',
                 date: _hepADate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _hepBController,
                 label: 'Hepatitis B Date',
                 date: _hepBDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _encephalitisController,
                 label: 'Encephalitis Date',
                 date: _encephalitisDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _meningController,
                 label: 'Meningococcal Date',
                 date: _meningDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _typhoidController,
                 label: 'Typhoid Date',
                 date: _typhoidDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _yellowController,
                 label: 'Yellow Fever Date',
                 date: _yellowDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _smallPoxController,
                 label: 'Small Pox Date',
                 date: _smallPoxDate,
+                minYears: 30,
               ),
               DateTextField(
                 controller: _anthraxController,
                 label: 'Anthrax Date',
                 date: _anthraxDate,
+                minYears: 30,
               ),
             ],
           ),
@@ -410,17 +415,8 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
             ),
           ),
           if (_otherImms!.isNotEmpty)
-            GridView.count(
-              primary: false,
-              crossAxisCount: width > 700 ? 2 : 1,
-              mainAxisSpacing: 1.0,
-              crossAxisSpacing: 1.0,
-              childAspectRatio: width > 900
-                  ? 900 / 200
-                  : width > 700
-                      ? width / 200
-                      : width / 100,
-              shrinkWrap: true,
+            FormGridView(
+              width: width,
               children: _otherImms!
                   .map(
                     (imm) => Padding(
@@ -527,20 +523,12 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformSoldierPicker(
                   label: 'Soldier',
                   soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
@@ -581,6 +569,8 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                 controller: _phaController,
                 label: 'PHA Date',
                 date: _phaDate,
+                minYears: 2,
+                maxYears: 1,
               ),
               DateTextField(
                 controller: _dentalController,

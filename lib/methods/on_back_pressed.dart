@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 import '../widgets/formatted_text_button.dart';
 
 Future<bool> onBackPressed(BuildContext context) async {
@@ -47,13 +48,23 @@ Future<bool> onBackPressed(BuildContext context) async {
               ),
               actions: <Widget>[
                 CupertinoDialogAction(
-                  child: const Text('No'),
+                  child: Text(
+                    'No',
+                    style: TextStyle(
+                      color: getTextColor(context),
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.pop(context2, false);
                   },
                 ),
                 CupertinoDialogAction(
-                  child: const Text('Yes'),
+                  child: Text(
+                    'Yes',
+                    style: TextStyle(
+                      color: getTextColor(context),
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.pop(context2, true);
                   },

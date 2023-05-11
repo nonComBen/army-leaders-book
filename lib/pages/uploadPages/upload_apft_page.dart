@@ -244,7 +244,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -257,7 +258,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date'),
                   items: columnHeaders,
@@ -270,7 +272,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Age'),
                   items: columnHeaders,
@@ -283,7 +286,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Gender'),
                   items: columnHeaders,
@@ -296,7 +300,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('PU Raw'),
                   items: columnHeaders,
@@ -309,7 +314,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('PU Score'),
                   items: columnHeaders,
@@ -322,7 +328,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SU Raw'),
                   items: columnHeaders,
@@ -335,7 +342,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SU Score'),
                   items: columnHeaders,
@@ -348,7 +356,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Aerobic Event'),
                   items: columnHeaders,
@@ -361,7 +370,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Aerobic Raw'),
                   items: columnHeaders,
@@ -374,7 +384,8 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Aerobic Score'),
                   items: columnHeaders,

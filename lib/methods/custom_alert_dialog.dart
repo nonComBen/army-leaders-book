@@ -18,7 +18,7 @@ Future<void> customAlertDialog({
   if (kIsWeb || Platform.isAndroid) {
     showDialog(
         context: context,
-        builder: (ctx) {
+        builder: (context) {
           return AlertDialog(
             title: title,
             content: content,
@@ -27,14 +27,14 @@ Future<void> customAlertDialog({
                 FormattedTextButton(
                   onPressed: () {
                     secondary();
-                    Navigator.pop(ctx);
+                    Navigator.pop(context);
                   },
                   label: secondaryText,
                 ),
               FormattedTextButton(
                 onPressed: () {
                   primary();
-                  Navigator.pop(ctx);
+                  Navigator.pop(context);
                 },
                 label: primaryText,
               ),

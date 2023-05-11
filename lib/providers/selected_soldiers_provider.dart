@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/soldier.dart';
@@ -14,11 +15,13 @@ class SelectedSoldiers extends StateNotifier<List<Soldier>> {
   }
 
   void addSoldier(Soldier soldier) {
+    debugPrint('Soldier added to selected soldiers');
     state.add(soldier);
   }
 
   void removeSoldier(Soldier soldier) {
-    state.remove(soldier);
+    debugPrint('Soldier removed to selected soldiers');
+    state.remove(state.firstWhere((element) => element.id == soldier.id));
   }
 
   void clearSoldiers() {

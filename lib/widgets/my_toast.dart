@@ -25,10 +25,14 @@ class MyToast extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            message,
-            style: TextStyle(
-              color: getOnPrimaryColor(context),
+          Expanded(
+            child: Text(
+              message,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: getOnPrimaryColor(context),
+              ),
             ),
           ),
           if (buttonText != null && onPressed != null)

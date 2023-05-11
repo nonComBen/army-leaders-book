@@ -204,7 +204,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -217,7 +218,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date'),
                   items: columnHeaders,
@@ -230,7 +232,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Purpose of Counseling'),
                   items: columnHeaders,
@@ -243,7 +246,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Key Points'),
                   items: columnHeaders,
@@ -256,7 +260,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Plan of Action'),
                   items: columnHeaders,
@@ -269,7 +274,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Individual Remarks'),
                   items: columnHeaders,
@@ -282,7 +288,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Leader Responsibilities'),
                   items: columnHeaders,
@@ -295,7 +302,8 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Assessment'),
                   items: columnHeaders,

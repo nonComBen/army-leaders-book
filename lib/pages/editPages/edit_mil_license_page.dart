@@ -18,6 +18,7 @@ import '../../methods/validate.dart';
 import '../../models/mil_license.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -269,20 +270,12 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
-          GridView.count(
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformSoldierPicker(
                   label: 'Soldier',
                   soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
@@ -334,11 +327,14 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                 controller: _dateController,
                 label: 'Issued Date',
                 date: _dateTime,
+                minYears: 10,
               ),
               DateTextField(
                 controller: _expController,
                 label: 'Expiration Date',
                 date: _expDate,
+                minYears: 1,
+                maxYears: 10,
               ),
             ],
           ),
@@ -385,18 +381,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
             ),
           ),
           if (qualVehicles!.isNotEmpty)
-            GridView.count(
-                primary: false,
-                crossAxisCount: width > 700 ? 2 : 1,
-                mainAxisSpacing: 1.0,
-                crossAxisSpacing: 1.0,
-                childAspectRatio: width > 900
-                    ? 900 / 200
-                    : width > 700
-                        ? width / 200
-                        : width / 100,
-                shrinkWrap: true,
-                children: _vehicles()),
+            FormGridView(width: width, children: _vehicles()),
           Divider(
             color: getOnPrimaryColor(context),
           ),

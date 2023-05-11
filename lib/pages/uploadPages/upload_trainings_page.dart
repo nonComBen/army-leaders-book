@@ -316,7 +316,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -329,7 +330,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Cyber Awareness Date'),
                   items: columnHeaders,
@@ -342,7 +344,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('OPSEC Date'),
                   items: columnHeaders,
@@ -355,7 +358,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Anti-Terror Date'),
                   items: columnHeaders,
@@ -368,7 +372,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Law of War Date'),
                   items: columnHeaders,
@@ -381,7 +386,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Personnel Recovery Date'),
                   items: columnHeaders,
@@ -394,7 +400,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Info Security Date'),
                   items: columnHeaders,
@@ -407,7 +414,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('CTIP Date'),
                   items: columnHeaders,
@@ -420,7 +428,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('GAT Date'),
                   items: columnHeaders,
@@ -433,7 +442,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SERE Date'),
                   items: columnHeaders,
@@ -446,7 +456,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('TARP Date'),
                   items: columnHeaders,
@@ -459,7 +470,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('EO Date'),
                   items: columnHeaders,
@@ -472,7 +484,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('ASAP Date'),
                   items: columnHeaders,
@@ -485,7 +498,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Suicide Prev Date'),
                   items: columnHeaders,
@@ -498,7 +512,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SHARP Date'),
                   items: columnHeaders,
@@ -511,7 +526,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 1'),
                   items: columnHeaders,
@@ -524,7 +540,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 1 Date'),
                   items: columnHeaders,
@@ -537,7 +554,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 2'),
                   items: columnHeaders,
@@ -550,7 +568,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 2 Date'),
                   items: columnHeaders,
@@ -563,7 +582,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 3'),
                   items: columnHeaders,
@@ -576,7 +596,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 3 Date'),
                   items: columnHeaders,
@@ -589,7 +610,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 4'),
                   items: columnHeaders,
@@ -602,7 +624,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 4 Date'),
                   items: columnHeaders,
@@ -615,7 +638,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 5'),
                   items: columnHeaders,
@@ -628,7 +652,8 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Additional Training 5 Date'),
                   items: columnHeaders,

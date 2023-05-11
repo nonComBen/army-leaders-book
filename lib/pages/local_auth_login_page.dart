@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_service.dart';
-import 'package:leaders_book/methods/theme_methods.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_button.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
@@ -58,51 +57,48 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
         heightFactor: 1,
         child: Container(
           padding: const EdgeInsets.all(16),
-          child: Card(
-            color: getContrastingBackgroundColor(context),
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              constraints: const BoxConstraints(maxWidth: 900),
-              child: ListView(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.transparent,
-                      radius: 96.0,
-                      child: Image.asset('assets/icon-512.png'),
-                    ),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: ListView(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    radius: 96.0,
+                    child: Image.asset('assets/icon-512.png'),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformButton(
-                      onPressed: () => onUnlockApp(context),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Unlock App',
-                          style: TextStyle(fontSize: 18.0),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformTextButton(
-                      onPressed: () => onSignOut(context),
-                      child: const Text(
-                        'Back to Login Page',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.blue,
-                        ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformButton(
+                    onPressed: () => onUnlockApp(context),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Unlock App',
+                        style: TextStyle(fontSize: 18.0),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  )
-                ],
-              ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformTextButton(
+                    onPressed: () => onSignOut(context),
+                    child: const Text(
+                      'Back to Login Page',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.blue,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              ],
             ),
           ),
         ),

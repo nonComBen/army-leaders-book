@@ -80,7 +80,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
     List<DataColumn> columnList = [
       DataColumn(
         label: const Flexible(
-          flex: 1,
           child: Text('Rank'),
         ),
         onSort: (int columnIndex, bool ascending) {
@@ -91,7 +90,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
       ),
       DataColumn(
         label: const Flexible(
-          flex: 1,
           child: Text('Name'),
         ),
         onSort: (int columnIndex, bool ascending) {
@@ -105,7 +103,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
       columnList.add(
         DataColumn(
           label: const Flexible(
-            flex: 1,
             child: Text('Section'),
           ),
           onSort: (int columnIndex, bool ascending) {
@@ -120,7 +117,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
       columnList.add(
         DataColumn(
           label: const Flexible(
-            flex: 1,
             child: Text('Duty'),
           ),
           onSort: (int columnIndex, bool ascending) {
@@ -135,7 +131,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
       columnList.add(
         DataColumn(
           label: const Flexible(
-            flex: 1,
             child: Text('Loss Date'),
           ),
           onSort: (int columnIndex, bool ascending) {
@@ -150,7 +145,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
       columnList.add(
         DataColumn(
           label: const Flexible(
-            flex: 1,
             child: Text('ETS Date'),
           ),
           onSort: (int columnIndex, bool ascending) {
@@ -165,7 +159,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
       columnList.add(
         DataColumn(
           label: const Flexible(
-            flex: 1,
             child: Text('DOR'),
           ),
           onSort: (int columnIndex, bool ascending) {
@@ -179,9 +172,9 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
     return columnList;
   }
 
-  List<DataRow> _createRows(List<Soldier> snapshot, double width) {
+  List<DataRow> _createRows(List<Soldier> soldiers, double width) {
     List<DataRow> newList;
-    newList = snapshot.map((Soldier soldier) {
+    newList = soldiers.map((Soldier soldier) {
       var selected =
           _selectedSoldiers.map((e) => e.id).toList().contains(soldier.id);
       return DataRow(
@@ -298,6 +291,7 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
 
   void onSelected(bool? selected, Soldier soldier) {
     final selectedSoldersService = ref.read(selectedSoldiersProvider.notifier);
+    debugPrint('Selected: $selected');
     setState(() {
       if (selected!) {
         selectedSoldersService.addSoldier(soldier);
@@ -314,13 +308,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
     _filteredSoldiers = ref.watch(filteredSoldiersProvider);
     soldiers = ref.watch(soldiersProvider);
 
-    if (_selectedSoldiers.isNotEmpty) {
-      for (var soldier in _selectedSoldiers) {
-        if (!soldiers.contains(soldier)) {
-          ref.read(selectedSoldiersProvider.notifier).removeSoldier(soldier);
-        }
-      }
-    }
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(

@@ -292,7 +292,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -305,7 +306,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Date'),
                   items: columnHeaders,
@@ -318,7 +320,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Age Group'),
                   items: columnHeaders,
@@ -331,7 +334,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Gender'),
                   items: columnHeaders,
@@ -344,7 +348,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('MDL Raw'),
                   items: columnHeaders,
@@ -357,7 +362,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('MDL Score'),
                   items: columnHeaders,
@@ -370,7 +376,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SPT Raw'),
                   items: columnHeaders,
@@ -383,7 +390,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SPT Score'),
                   items: columnHeaders,
@@ -396,7 +404,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('HRP Raw'),
                   items: columnHeaders,
@@ -409,7 +418,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('HRP Score'),
                   items: columnHeaders,
@@ -422,7 +432,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SDC Raw'),
                   items: columnHeaders,
@@ -435,7 +446,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SDC Score'),
                   items: columnHeaders,
@@ -448,7 +460,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('PLK Raw'),
                   items: columnHeaders,
@@ -461,7 +474,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('PLK Score'),
                   items: columnHeaders,
@@ -474,7 +488,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Aerobic Event'),
                   items: columnHeaders,
@@ -487,7 +502,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Aerobic Raw'),
                   items: columnHeaders,
@@ -500,7 +516,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Aerobic Score'),
                   items: columnHeaders,
@@ -513,7 +530,8 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Pass'),
                   items: columnHeaders,

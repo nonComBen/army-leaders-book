@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -103,6 +105,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       FirebaseFirestore.instance.doc('users/${user.uid}').update(
           {'lastLogin': DateTime.now(), 'created': user.metadata.creationTime});
 
+      ref.read(userProvider).loadUser(user.uid);
       return;
     }
     final userObj = UserObj(
@@ -251,6 +254,11 @@ class LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 if (_formType == FormType.login)
                   PlatformButton(
+                      buttonPadding: kIsWeb
+                          ? 18.0
+                          : Platform.isAndroid
+                              ? 12.0
+                              : 0.0,
                       child: const Text(
                         'Sign in',
                         style: TextStyle(fontSize: 18.0),
@@ -261,6 +269,11 @@ class LoginPageState extends ConsumerState<LoginPage> {
                       }),
                 if (_formType == FormType.login)
                   PlatformButton(
+                      buttonPadding: kIsWeb
+                          ? 18.0
+                          : Platform.isAndroid
+                              ? 12.0
+                              : 0.0,
                       child: const Text(
                         'Sign in with Google',
                         style: TextStyle(fontSize: 18.0),
@@ -282,6 +295,11 @@ class LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 if (_formType == FormType.login)
                   PlatformButton(
+                    buttonPadding: kIsWeb
+                        ? 18.0
+                        : Platform.isAndroid
+                            ? 12.0
+                            : 0.0,
                     onPressed: signInAnonymously,
                     child: const Text(
                       'Sign in as Guest',
@@ -291,6 +309,11 @@ class LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 if (_formType == FormType.forgotPassword)
                   PlatformButton(
+                      buttonPadding: kIsWeb
+                          ? 18.0
+                          : Platform.isAndroid
+                              ? 12.0
+                              : 0.0,
                       child: const Text(
                         'Send reset password email',
                         style: TextStyle(fontSize: 18.0),
@@ -299,263 +322,45 @@ class LoginPageState extends ConsumerState<LoginPage> {
                       onPressed: () {
                         validateAndSubmit('reset');
                       }),
-                PlatformTextButton(
-                  child: const Text(
-                    'Create an account',
-                    style: TextStyle(fontSize: 18.0, color: Colors.blue),
-                    textAlign: TextAlign.center,
-                  ),
-                  onPressed: () {
-                    rootService.createAccout();
-                  },
-                ),
-                if (_formType == FormType.login)
-                  PlatformTextButton(
-                    onPressed: moveToForgotPassword,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformTextButton(
                     child: const Text(
-                      'Forgot password',
+                      'Create an account',
                       style: TextStyle(fontSize: 18.0, color: Colors.blue),
                       textAlign: TextAlign.center,
                     ),
+                    onPressed: () {
+                      rootService.createAccout();
+                    },
+                  ),
+                ),
+                if (_formType == FormType.login)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformTextButton(
+                      onPressed: moveToForgotPassword,
+                      child: const Text(
+                        'Forgot password',
+                        style: TextStyle(fontSize: 18.0, color: Colors.blue),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 if (_formType == FormType.forgotPassword)
-                  PlatformTextButton(
-                    onPressed: moveToLogin,
-                    child: const Text(
-                      'Back to Login',
-                      style: TextStyle(fontSize: 18.0, color: Colors.blue),
-                      textAlign: TextAlign.center,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlatformTextButton(
+                      onPressed: moveToLogin,
+                      child: const Text(
+                        'Back to Login',
+                        style: TextStyle(fontSize: 18.0, color: Colors.blue),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
               ],
             ),
     );
-  }
-
-  List<Widget> logo() {
-    return [
-      CircleAvatar(
-        backgroundColor: Colors.transparent,
-        radius: 96.0,
-        child: Image.asset('assets/icon-512.png'),
-      )
-    ];
-  }
-
-  List<Widget> sizedBox(height) {
-    return [SizedBox(height: height)];
-  }
-
-  List<Widget> buildInputs() {
-    if (_formType == FormType.login) {
-      return emailFormField() + sizedBox(16.0) + passwordFormField();
-    } else {
-      return emailFormField();
-    }
-  }
-
-  List<Widget> emailFormField() {
-    return [
-      PaddedTextField(
-        label: 'Email',
-        decoration:
-            const InputDecoration(labelText: 'Email', icon: Icon(Icons.mail)),
-        controller: _emailController,
-        keyboardType: TextInputType.emailAddress,
-        validator: (value) => value!.isEmpty ? 'Email can\'t be empty' : null,
-      ),
-    ];
-  }
-
-  List<Widget> passwordFormField() {
-    return [
-      PaddedTextField(
-        controller: _passwordController,
-        label: 'Password',
-        decoration: const InputDecoration(
-            labelText: 'Password', icon: Icon(Icons.lock)),
-        validator: (value) =>
-            value!.isEmpty ? 'Password can\'t be empty' : null,
-        obscureText: true,
-      ),
-    ];
-  }
-
-  List<Widget> buildSubmitButtons(
-      bool appleAvailable, RootService rootService) {
-    if (_formType == FormType.login) {
-      List<Widget> list = [
-        PlatformButton(
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Sign in',
-                style: TextStyle(fontSize: 18.0),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            onPressed: () {
-              validateAndSubmit('email');
-            }),
-      ];
-      if (localAuthAvail || kIsWeb) {
-        list.add(PlatformButton(
-            child: const Text(
-              'Sign in with Google',
-              textAlign: TextAlign.center,
-            ),
-            onPressed: () {
-              validateAndSubmit('google');
-            }));
-      }
-      if (appleAvailable) {
-        list.add(Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SignInWithAppleButton(
-            borderRadius: const BorderRadius.all(Radius.circular(24)),
-            iconAlignment: IconAlignment.center,
-            onPressed: () {
-              validateAndSubmit('apple');
-            },
-          ),
-        ));
-      }
-      list.add(PlatformButton(
-          onPressed: signInAnonymously,
-          child: const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              'Sign in as Guest',
-              style: TextStyle(fontSize: 18.0),
-              textAlign: TextAlign.center,
-            ),
-          )));
-      list.add(Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PlatformTextButton(
-          child: const Text(
-            'Create an account',
-            style: TextStyle(fontSize: 18.0, color: Colors.blue),
-            textAlign: TextAlign.center,
-          ),
-          onPressed: () {
-            rootService.createAccout();
-          },
-        ),
-      ));
-      list.add(Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PlatformTextButton(
-          onPressed: moveToForgotPassword,
-          child: const Text(
-            'Forgot password',
-            style: TextStyle(fontSize: 18.0, color: Colors.blue),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ));
-
-      return list;
-    } else if (_formType == FormType.forgotPassword) {
-      return [
-        PlatformButton(
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Create an account',
-                style: TextStyle(fontSize: 18.0),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            onPressed: () {
-              validateAndSubmit('register');
-            }),
-        PlatformTextButton(
-          onPressed: moveToLogin,
-          child: const Text(
-            'Have an account? Login',
-            style: TextStyle(fontSize: 18.0, color: Colors.blue),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        PlatformTextButton(
-          onPressed: moveToForgotPassword,
-          child: const Text(
-            'Forgot password',
-            style: TextStyle(fontSize: 18.0, color: Colors.blue),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ];
-    } else if (_formType == FormType.forgotPassword) {
-      return [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformButton(
-              child: const Text(
-                'Send reset password email',
-                textAlign: TextAlign.center,
-              ),
-              onPressed: () {
-                validateAndSubmit('reset');
-              }),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformTextButton(
-            onPressed: moveToLogin,
-            child: const Text(
-              'Remember password? Login',
-              style: TextStyle(fontSize: 18.0, color: Colors.blue),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PlatformTextButton(
-            child: const Text(
-              'Create an account',
-              style: TextStyle(fontSize: 18.0, color: Colors.blue),
-              textAlign: TextAlign.center,
-            ),
-            onPressed: () {
-              rootService.createAccout();
-            },
-          ),
-        )
-      ];
-    } else {
-      return [
-        PlatformButton(
-          child: const Text(
-            'Sign in with Google',
-            style: TextStyle(fontSize: 18.0),
-            textAlign: TextAlign.center,
-          ),
-          onPressed: () {
-            validateAndSubmit('google');
-          },
-        ),
-        PlatformTextButton(
-          onPressed: moveToLogin,
-          child: const Text(
-            'Back to Login Page',
-            style: TextStyle(fontSize: 18.0, color: Colors.blue),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        PlatformTextButton(
-          child: const Text(
-            'Create an account',
-            style: TextStyle(fontSize: 18.0, color: Colors.blue),
-            textAlign: TextAlign.center,
-          ),
-          onPressed: () {
-            rootService.createAccout();
-          },
-        )
-      ];
-    }
   }
 }

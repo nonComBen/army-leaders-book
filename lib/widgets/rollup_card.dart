@@ -15,37 +15,6 @@ class RollupCard extends StatelessWidget {
   final Widget info1, info2;
   final Widget? button, button2;
 
-  Widget _row1() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Expanded(
-            child: info1,
-          ),
-          Expanded(
-            child: info2,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buttonBar() {
-    if (title == 'Profiles') {
-      return ButtonBar(
-        children: <Widget>[button!, button2!],
-      );
-    } else {
-      return ButtonBar(
-        children: <Widget>[
-          button!,
-        ],
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -59,19 +28,40 @@ class RollupCard extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
                   child: Text(
                     title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 18.0),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: getTextColor(context),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
               ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
-                  child: _row1(),
+              Container(
+                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: info1,
+                      ),
+                      Expanded(
+                        child: info2,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Expanded(child: _buttonBar())
+              Expanded(
+                  child: ButtonBar(
+                layoutBehavior: ButtonBarLayoutBehavior.constrained,
+                children: <Widget>[
+                  button!,
+                  if (button2 != null) button2!,
+                ],
+              ))
             ],
           ),
         ));

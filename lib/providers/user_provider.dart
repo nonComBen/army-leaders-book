@@ -19,6 +19,10 @@ class UserService {
     });
   }
 
+  void nullUser() {
+    _user = null;
+  }
+
   UserObj? get user {
     return _user;
   }

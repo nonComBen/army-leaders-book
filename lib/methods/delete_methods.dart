@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
+import 'package:leaders_book/providers/selected_soldiers_provider.dart';
 
 import '../models/soldier.dart';
 
-Future<void> deleteSoldiers(
-    BuildContext context, List<Soldier> selectedSoldiers, String userId) async {
+Future<void> deleteSoldiers(BuildContext context,
+    List<Soldier> selectedSoldiers, String userId, WidgetRef ref) async {
   bool superWarning = false;
   for (Soldier soldier in selectedSoldiers) {
     if (soldier.owner == userId && soldier.users.length > 1) {
@@ -36,6 +38,7 @@ Future<void> deleteSoldiers(
       for (Soldier soldier in selectedSoldiers) {
         deleteSoldier(soldier, userId);
       }
+      ref.read(selectedSoldiersProvider.notifier).clearSoldiers();
     },
     secondaryText: 'Cancel',
     secondary: () {},

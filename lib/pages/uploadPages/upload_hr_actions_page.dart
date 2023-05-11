@@ -175,7 +175,8 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
             shrinkWrap: true,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SoldierId'),
                   items: columnHeaders,
@@ -188,7 +189,8 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('DD93 Date'),
                   items: columnHeaders,
@@ -201,7 +203,8 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('SGLV Date'),
                   items: columnHeaders,
@@ -214,7 +217,8 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Record Review Date'),
                   items: columnHeaders,

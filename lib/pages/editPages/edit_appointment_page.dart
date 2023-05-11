@@ -13,6 +13,7 @@ import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/soldier.dart';
 import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
@@ -181,21 +182,12 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
             updated ? () => onBackPressed(context) : () => Future(() => true),
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
-          GridView.count(
-            padding: const EdgeInsets.all(0.0),
-            primary: false,
-            crossAxisCount: width > 700 ? 2 : 1,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900
-                ? 900 / 230
-                : width > 700
-                    ? width / 230
-                    : width / 115,
-            shrinkWrap: true,
+          FormGridView(
+            width: width,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformSoldierPicker(
                   label: 'Soldier',
                   soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
@@ -245,6 +237,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
               DateTextField(
                 controller: _dateController,
                 label: 'Apt Date',
+                minYears: 1,
                 date: _dateTime,
               ),
               TimeTextField(
@@ -269,7 +262,8 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                 },
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
                   label: const Text('Status'),
                   items: _statuses,

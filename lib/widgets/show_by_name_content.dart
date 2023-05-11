@@ -1,20 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/pages/home_page.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_list_tile.dart';
 
+import '../../pages/tabs/rollup_tab.dart';
 import '../methods/date_methods.dart';
+import '../methods/theme_methods.dart';
 import '../models/setting.dart';
 
 class ShowByNameContent extends StatelessWidget {
-  const ShowByNameContent(
-      {Key key,
-      this.title,
-      this.list,
-      this.homeCard,
-      this.setting,
-      this.width,
-      this.height})
-      : super(key: key);
+  const ShowByNameContent({
+    Key? key,
+    required this.title,
+    required this.list,
+    required this.homeCard,
+    required this.setting,
+    required this.width,
+    required this.height,
+  }) : super(key: key);
   final String title;
   final List<DocumentSnapshot> list;
   final HomeCard homeCard;
@@ -31,11 +33,12 @@ class ShowByNameContent extends StatelessWidget {
         itemCount: list.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          Card card;
+          late Card card;
           switch (homeCard) {
             case HomeCard.appointments:
               card = Card(
-                child: ListTile(
+                color: getContrastingBackgroundColor(context),
+                child: PlatformListTile(
                   title: Text(
                       '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                   subtitle: title == 'Apts Today'
@@ -49,7 +52,7 @@ class ShowByNameContent extends StatelessWidget {
               break;
             case HomeCard.acft:
               card = Card(
-                child: ListTile(
+                child: PlatformListTile(
                   title: Text(
                       '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                   subtitle: title == 'Overdue ACFTs'
@@ -63,7 +66,7 @@ class ShowByNameContent extends StatelessWidget {
               break;
             case HomeCard.apft:
               card = Card(
-                child: ListTile(
+                child: PlatformListTile(
                   title: Text(
                       '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                   subtitle: title == 'Overdue APFTs'
@@ -76,7 +79,7 @@ class ShowByNameContent extends StatelessWidget {
               break;
             case HomeCard.bf:
               card = Card(
-                child: ListTile(
+                child: PlatformListTile(
                   title: Text(
                       '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                   subtitle: title == 'Overdue Body Compositions'
@@ -88,7 +91,7 @@ class ShowByNameContent extends StatelessWidget {
               break;
             case HomeCard.profile:
               card = Card(
-                child: ListTile(
+                child: PlatformListTile(
                   title: Text(
                       '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                   subtitle: title == 'Temp Profiles'
@@ -101,7 +104,7 @@ class ShowByNameContent extends StatelessWidget {
               break;
             case HomeCard.weapons:
               card = Card(
-                child: ListTile(
+                child: PlatformListTile(
                   title: Text(
                       '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                   subtitle: title == 'Overdue Weapon Quals'
@@ -130,7 +133,7 @@ class ShowByNameContent extends StatelessWidget {
                 subtitle = '${subtitle}HIV: ${list[index]['hiv']}';
               }
               card = Card(
-                  child: ListTile(
+                  child: PlatformListTile(
                 title: Text(
                     '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                 subtitle: Text(subtitle),
@@ -138,7 +141,7 @@ class ShowByNameContent extends StatelessWidget {
               break;
             case HomeCard.flags:
               card = Card(
-                child: ListTile(
+                child: PlatformListTile(
                     title: Text(
                         '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                     subtitle: Text(
@@ -175,12 +178,15 @@ class ShowByNameContent extends StatelessWidget {
                 subtitle = '${subtitle}GAT: ${list[index]['gat']}';
               }
               card = Card(
-                child: ListTile(
+                color: getContrastingBackgroundColor(context),
+                child: PlatformListTile(
                     title: Text(
                         '${list[index]['rank']} ${list[index]['name']}, ${list[index]['firstName']}'),
                     subtitle: Text(subtitle)),
               );
               break;
+            default:
+              null;
           }
           return card;
         },

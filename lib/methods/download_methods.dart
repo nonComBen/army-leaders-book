@@ -1,7 +1,6 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:io';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pdf;
@@ -31,7 +30,6 @@ Future<bool> checkPermission(Permission permission) async {
     return true;
   }
   var status = await permission.status;
-  print(status.toString());
   if (!status.isGranted) {
     var requestStatus = await permission.request();
     if (requestStatus.isGranted) {
@@ -60,14 +58,13 @@ Future<String> pdfDownload(pdf.Document pdf, String filename) async {
         ? await getTemporaryDirectory()
         : await getApplicationDocumentsDirectory();
     location = dir.path;
-    print(dir);
     File f = File("$location/$filename.pdf");
 
     try {
       f.writeAsBytesSync(await pdf.save());
       return location;
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Download Failed');
       return '';
     }
   }

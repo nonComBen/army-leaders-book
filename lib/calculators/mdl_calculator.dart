@@ -1,4 +1,8 @@
-int getMdlScore(int weight, int ageGroup, bool male) {
+int getMdlScore({
+  required int weight,
+  required int ageGroup,
+  required bool male,
+}) {
   if (male) {
     if (weight > 330) return 100;
     if (weight < 90) return 0;

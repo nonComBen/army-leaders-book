@@ -1,16 +1,29 @@
-// ignore_for_file: file_names, use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_selection_widget.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../methods/theme_methods.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_list_tile.dart';
+import '../../widgets/platform_widgets/platform_loading_widget.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/standard_text.dart';
 import '../../models/soldier.dart';
+import '../widgets/upload_frame.dart';
 
 class TransferSoldierPage extends StatefulWidget {
   const TransferSoldierPage({
-    @required this.userId,
-    @required this.soldiers,
-  });
+    Key? key,
+    required this.userId,
+    required this.soldiers,
+  }) : super(key: key);
   final String userId;
   final List<Soldier> soldiers;
 
@@ -23,14 +36,15 @@ class TransferSoldierPage extends StatefulWidget {
 class TransferSoldierPageState extends State<TransferSoldierPage> {
   TextEditingController controller = TextEditingController();
 
-  List<DocumentSnapshot> allSnapshots;
-  FirebaseFirestore firestore;
-  String userId = '';
-  List<dynamic> userIds = [];
-  bool typeInUserId = false, retainAccess = true;
+  List<DocumentSnapshot>? allSnapshots;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String? userId = '', method = 'UserId';
+  List<String> userIds = [];
+  final List<String> methods = ['UserId', 'DropDown'];
+  bool retainAccess = true;
 
   void _makeSure(
-      BuildContext context, String userId, String rank, String name) {
+      BuildContext context, String? userId, String? rank, String? name) {
     String soldierList = '';
     for (Soldier soldier in widget.soldiers) {
       soldierList = '$soldierList\n - ${soldier.rank} ${soldier.lastName}';
@@ -55,13 +69,13 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
   }
 
   void _transferSoldier(
-      BuildContext context, String userId, bool remainMember) async {
+      BuildContext context, String? userId, bool? remainMember) async {
     for (Soldier soldier in widget.soldiers) {
-      List<dynamic> users = soldier.users ?? [widget.userId];
+      List<String> users = soldier.users as List<String>;
       if (!users.contains(userId)) {
-        users.add(userId);
+        users.add(userId!);
       }
-      if (!remainMember) {
+      if (!remainMember!) {
         users.remove(widget.userId);
       }
       DocumentReference soldierRef =
@@ -73,159 +87,149 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
   @override
   void initState() {
     super.initState();
-    firestore = FirebaseFirestore.instance;
 
-    List<dynamic> ids = [];
     for (Soldier soldier in widget.soldiers) {
-      ids.addAll(soldier.users);
+      userIds.addAll(soldier.users.map((e) => e.toString()).toList());
     }
-    for (dynamic id in ids) {
-      if (!userIds.contains(id)) {
-        userIds.add(id);
-      }
-    }
+    userIds = userIds.toSet().toList();
     userId = userIds.first;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Transfer Soldiers'),
-        ),
-        body: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SwitchListTile(
-                  title: typeInUserId
-                      ? const Text('Type In User Id')
-                      : const Text('Select User Id From Dropdown'),
-                  value: typeInUserId,
-                  onChanged: (value) {
-                    setState(() {
-                      typeInUserId = value;
-                      if (!typeInUserId) {
-                        userId = userIds.first;
-                      }
-                    });
-                  },
-                ),
-              ),
-              typeInUserId
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: controller,
-                        decoration: const InputDecoration(
-                            labelText: 'User Id',
-                            hintText: 'Enter the User Id',
-                            prefixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(25.0)),
-                            )),
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: DropdownButtonFormField(
-                        items: userIds
-                            .map((e) => DropdownMenuItem<String>(
-                                  value: e,
-                                  child: Text(e),
-                                ))
-                            .toList(),
-                        value: userId,
-                        onChanged: (value) {
-                          setState(() {
-                            userId = value;
-                          });
-                        },
-                      ),
-                    ),
-              typeInUserId
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Theme.of(context).primaryColor),
-                        ),
-                        child: const Text(
-                          'Find User',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        onPressed: () {
-                          if (controller.text.isNotEmpty) {
-                            setState(() {
-                              userId = controller.text;
-                            });
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('User Id must not be blank')));
-                          }
-                        },
-                      ),
-                    )
-                  : const SizedBox(),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CheckboxListTile(
-                  value: retainAccess,
-                  title: const Text('Retain Read/Update Access'),
-                  onChanged: (value) {
-                    setState(() {
-                      retainAccess = value;
-                    });
-                  },
-                ),
-              ),
-              FutureBuilder<DocumentSnapshot>(
-                  future: firestore.collection('users').doc(userId).get(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<DocumentSnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return const Card(
-                        child: ListTile(
-                          title: Text('No User Found'),
-                        ),
-                      );
-                    }
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return const CircularProgressIndicator();
-                      default:
-                        if (snapshot.data.exists) {
-                          return Card(
-                            child: ListTile(
-                              title: Text(
-                                  '${snapshot.data['rank'] ?? ''} ${snapshot.data['userName'] ?? ''}'),
-                              subtitle: Text(snapshot.data['userEmail'] ?? ''),
-                              onTap: () {
-                                _makeSure(
-                                    context,
-                                    snapshot.data['userId'],
-                                    snapshot.data['rank'],
-                                    snapshot.data['userName']);
-                              },
-                            ),
-                          );
-                        } else {
-                          return const Card(
-                            child: ListTile(
-                              title: Text('No User Found'),
-                            ),
-                          );
-                        }
-                    }
-                  }),
-            ],
+    return PlatformScaffold(
+      title: 'Transfer Soldiers',
+      body: UploadFrame(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: PlatformSelectionWidget(
+              titles: const [
+                StandardText('Type In User Id'),
+                StandardText('Select User Id From Dropdown')
+              ],
+              values: methods,
+              groupValue: method,
+              onChanged: (value) {
+                setState(() {
+                  method = value.toString();
+                  userId = userIds.first;
+                });
+              },
+            ),
           ),
-        ));
+          method == 'UserId'
+              ? PaddedTextField(
+                  controller: controller,
+                  label: 'User ID',
+                  decoration: const InputDecoration(
+                    labelText: 'User ID',
+                    hintText: 'Enter the User ID',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformItemPicker(
+                    label: const StandardText('User'),
+                    items: userIds,
+                    value: userId!,
+                    onChanged: (value) {
+                      setState(
+                        () {
+                          userId = value.toString();
+                        },
+                      );
+                    },
+                  ),
+                ),
+          method == 'UserId'
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformButton(
+                    child: const HeaderText(
+                      'Find User',
+                    ),
+                    onPressed: () {
+                      if (controller.text.isNotEmpty) {
+                        setState(() {
+                          userId = controller.text;
+                        });
+                      } else {
+                        FToast toast = FToast();
+                        toast.context = context;
+                        toast.showToast(
+                          child: const MyToast(
+                              message: 'User Id must not be blank'),
+                        );
+                      }
+                    },
+                  ),
+                )
+              : const SizedBox(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: PlatformCheckboxListTile(
+              value: retainAccess,
+              title: const StandardText('Retain Read/Update Access'),
+              onChanged: (value) {
+                setState(() {
+                  retainAccess = value!;
+                });
+              },
+            ),
+          ),
+          FutureBuilder<DocumentSnapshot>(
+            future: firestore.collection('users').doc(userId).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformListTile(
+                    title: const StandardText(
+                      'No User Found',
+                    ),
+                  ),
+                );
+              }
+              switch (snapshot.connectionState) {
+                case ConnectionState.waiting:
+                  return PlatformLoadingWidget();
+                default:
+                  if (snapshot.data!.exists) {
+                    return Card(
+                      color: getContrastingBackgroundColor(context),
+                      child: PlatformListTile(
+                        title: StandardText(
+                            '${snapshot.data!['rank'] ?? ''} ${snapshot.data!['userName'] ?? ''}'),
+                        subtitle:
+                            StandardText(snapshot.data!['userEmail'] ?? ''),
+                        onTap: () {
+                          _makeSure(
+                              context,
+                              snapshot.data!['userId'],
+                              snapshot.data!['rank'],
+                              snapshot.data!['userName']);
+                        },
+                      ),
+                    );
+                  } else {
+                    return Card(
+                      color: getContrastingBackgroundColor(context),
+                      child: PlatformListTile(
+                        title: const StandardText('No User Found'),
+                      ),
+                    );
+                  }
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

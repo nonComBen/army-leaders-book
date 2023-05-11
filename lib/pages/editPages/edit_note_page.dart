@@ -1,20 +1,24 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/note.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/form_frame.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
-class EditNotePage extends StatefulWidget {
+class EditNotePage extends ConsumerStatefulWidget {
   const EditNotePage({
-    Key key,
-    @required this.note,
+    Key? key,
+    required this.note,
   }) : super(key: key);
   final Note note;
 
@@ -22,19 +26,37 @@ class EditNotePage extends StatefulWidget {
   EditNotePageState createState() => EditNotePageState();
 }
 
-class EditNotePageState extends State<EditNotePage> {
+class EditNotePageState extends ConsumerState<EditNotePage> {
   String _title = 'New Note';
-  bool updated;
-  FirebaseFirestore firestore;
+  bool updated = false;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  TextEditingController _titleController;
-  TextEditingController _commentsController;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _commentsController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _commentsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.note.id != null) {
+      _title = 'Edit Note';
+    }
+
+    _titleController.text = widget.note.title;
+    _commentsController.text = widget.note.comments;
+  }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -72,107 +94,56 @@ class EditNotePageState extends State<EditNotePage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _commentsController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    firestore = FirebaseFirestore.instance;
-
-    updated = false;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    if (widget.note.id != null) {
-      _title = 'Edit Note';
-    }
-
-    _titleController = TextEditingController(text: widget.note.title);
-    _commentsController = TextEditingController(text: widget.note.comments);
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: width > 932 ? (width - 916) / 2 : 16),
-          child: Card(
-            child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                onWillPop: _onBackPressed,
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              controller: _titleController,
-                              keyboardType: TextInputType.text,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Title',
-                              ),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 20,
-                              controller: _commentsController,
-                              enabled: true,
-                              decoration:
-                                  const InputDecoration(labelText: 'Comments'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          FormattedElevatedButton(
-                            onPressed: () {
-                              submit(context, user.uid);
-                            },
-                            text: widget.note.id == null
-                                ? 'Add Note'
-                                : 'Update Note',
-                          ),
-                        ],
-                      ),
-                    ))),
+    final user = ref.read(authProvider).currentUser()!;
+    return PlatformScaffold(
+      title: _title,
+      body: FormFrame(
+        formKey: _formKey,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          PaddedTextField(
+            controller: _titleController,
+            keyboardType: TextInputType.text,
+            label: 'Title',
+            decoration: const InputDecoration(
+              labelText: 'Title',
+            ),
+            onChanged: (value) {
+              updated = true;
+            },
           ),
-        ));
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 20,
+            controller: _commentsController,
+            label: 'Comments',
+            decoration: const InputDecoration(labelText: 'Comments'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PlatformButton(
+            onPressed: () {
+              submit(context, user.uid);
+            },
+            child: Text(widget.note.id == null ? 'Add Note' : 'Update Note'),
+          ),
+        ],
+      ),
+    );
   }
 }

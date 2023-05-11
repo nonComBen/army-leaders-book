@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,27 +5,32 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
+import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
 import '../../methods/upload_methods.dart';
 import '../../models/equipment.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
-class UploadEquipmentPage extends StatefulWidget {
+class UploadEquipmentPage extends ConsumerStatefulWidget {
   const UploadEquipmentPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   UploadEquipmentPageState createState() => UploadEquipmentPageState();
 }
 
-class UploadEquipmentPageState extends State<UploadEquipmentPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
+  late List<String> columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       weapon,
       buttStock,
       serial,
@@ -45,18 +48,16 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
       miscSerial,
       path;
 
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
-
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -104,21 +105,18 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
 
   void _saveData(BuildContext context) {
     if (soldierId == '') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Soldier Id must not be blank. To get your Soldiers\' Ids, download their data from the Soldiers page.')));
+      soldierIdIsBlankMessage(context);
       return;
     }
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -214,371 +212,280 @@ class UploadEquipmentPageState extends State<UploadEquipmentPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Equipment'),
-      ),
-      body: Center(
-        child: Card(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    text: 'Pick File',
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Weapon'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: weapon,
-                          onChanged: (value) {
-                            setState(() {
-                              weapon = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Butt Stock'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: buttStock,
-                          onChanged: (value) {
-                            setState(() {
-                              buttStock = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Serial No.'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: serial,
-                          onChanged: (value) {
-                            setState(() {
-                              serial = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Optics'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: optic,
-                          onChanged: (value) {
-                            setState(() {
-                              optic = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Optics Serial No.'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: opticSerial,
-                          onChanged: (value) {
-                            setState(() {
-                              opticSerial = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Weapon'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: weapon2,
-                          onChanged: (value) {
-                            setState(() {
-                              weapon2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Butt Stock'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: buttStock2,
-                          onChanged: (value) {
-                            setState(() {
-                              buttStock2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Serial No.'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: serial2,
-                          onChanged: (value) {
-                            setState(() {
-                              serial2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Optics'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: optic2,
-                          onChanged: (value) {
-                            setState(() {
-                              optic2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Secondary Optics Serial No.'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: opticSerial2,
-                          onChanged: (value) {
-                            setState(() {
-                              opticSerial2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Mask'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: mask,
-                          onChanged: (value) {
-                            setState(() {
-                              mask = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Vehicle'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: veh,
-                          onChanged: (value) {
-                            setState(() {
-                              veh = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Vehicle Bumper'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: bumper,
-                          onChanged: (value) {
-                            setState(() {
-                              bumper = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Other Item'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: misc,
-                          onChanged: (value) {
-                            setState(() {
-                              misc = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Other Item Serial No.'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: miscSerial,
-                          onChanged: (value) {
-                            setState(() {
-                              miscSerial = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
-                    text: 'Upload Equipment',
-                  )
-                ],
-              ),
+    return PlatformScaffold(
+      title: 'Upload Equipment',
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Weapon'),
+                  items: columnHeaders,
+                  value: weapon,
+                  onChanged: (value) {
+                    setState(() {
+                      weapon = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Butt Stock'),
+                  items: columnHeaders,
+                  value: buttStock,
+                  onChanged: (value) {
+                    setState(() {
+                      buttStock = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Serial No.'),
+                  items: columnHeaders,
+                  value: serial,
+                  onChanged: (value) {
+                    setState(() {
+                      serial = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Optics'),
+                  items: columnHeaders,
+                  value: optic,
+                  onChanged: (value) {
+                    setState(() {
+                      optic = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Optics Serial No.'),
+                  items: columnHeaders,
+                  value: opticSerial,
+                  onChanged: (value) {
+                    setState(() {
+                      opticSerial = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Weapon'),
+                  items: columnHeaders,
+                  value: weapon2,
+                  onChanged: (value) {
+                    setState(() {
+                      weapon2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Butt Stock'),
+                  items: columnHeaders,
+                  value: buttStock2,
+                  onChanged: (value) {
+                    setState(() {
+                      buttStock2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Serial No.'),
+                  items: columnHeaders,
+                  value: serial2,
+                  onChanged: (value) {
+                    setState(() {
+                      serial2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Optics'),
+                  items: columnHeaders,
+                  value: optic2,
+                  onChanged: (value) {
+                    setState(() {
+                      optic2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Secondary Optics Serial No.'),
+                  items: columnHeaders,
+                  value: opticSerial2,
+                  onChanged: (value) {
+                    setState(() {
+                      opticSerial2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Mask'),
+                  items: columnHeaders,
+                  value: mask,
+                  onChanged: (value) {
+                    setState(() {
+                      mask = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Vehicle'),
+                  items: columnHeaders,
+                  value: veh,
+                  onChanged: (value) {
+                    setState(() {
+                      veh = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Vehicle Bumper'),
+                  items: columnHeaders,
+                  value: bumper,
+                  onChanged: (value) {
+                    setState(() {
+                      bumper = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Other Item'),
+                  items: columnHeaders,
+                  value: misc,
+                  onChanged: (value) {
+                    setState(() {
+                      misc = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Other Item Serial No.'),
+                  items: columnHeaders,
+                  value: miscSerial,
+                  onChanged: (value) {
+                    setState(() {
+                      miscSerial = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Equipment'),
+          )
+        ],
       ),
     );
   }

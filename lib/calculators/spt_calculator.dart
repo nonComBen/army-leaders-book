@@ -1,4 +1,8 @@
-int getSptScore(double dist, int ageGroup, bool male) {
+int getSptScore({
+  required double dist,
+  required int ageGroup,
+  required bool male,
+}) {
   if (male) {
     if (dist > 13.0) return 100;
     if (dist < 3.7) return 0;

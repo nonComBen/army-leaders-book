@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'package:leaders_book/methods/download_methods.dart';
 import 'package:pdf/pdf.dart';
@@ -7,9 +5,9 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AcftsPdf {
-  AcftsPdf(
-    this.documents,
-  );
+  AcftsPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 
@@ -40,12 +38,12 @@ class AcftsPdf {
   }
 
   Map<String, int> getAverages() {
-    List<int> mdl = [];
-    List<int> spt = [];
-    List<int> hrp = [];
-    List<int> sdc = [];
-    List<int> plk = [];
-    List<int> run = [];
+    List<int?> mdl = [];
+    List<int?> spt = [];
+    List<int?> hrp = [];
+    List<int?> sdc = [];
+    List<int?> plk = [];
+    List<int?> run = [];
     List<int> total = [];
     for (DocumentSnapshot doc in documents) {
       int events = 0;
@@ -74,22 +72,26 @@ class AcftsPdf {
         events++;
       }
       if (events == 6) {
-        total.add(
-            mdl.last + spt.last + hrp.last + sdc.last + plk.last + run.last);
+        total.add(mdl.last! +
+            spt.last! +
+            hrp.last! +
+            sdc.last! +
+            plk.last! +
+            run.last!);
       }
     }
     return <String, int>{
-      'mdl': (mdl.reduce((value, element) => value + element) / mdl.length)
+      'mdl': (mdl.reduce((value, element) => value! + element!)! / mdl.length)
           .floor(),
-      'spt': (spt.reduce((value, element) => value + element) / spt.length)
+      'spt': (spt.reduce((value, element) => value! + element!)! / spt.length)
           .floor(),
-      'hrp': (hrp.reduce((value, element) => value + element) / hrp.length)
+      'hrp': (hrp.reduce((value, element) => value! + element!)! / hrp.length)
           .floor(),
-      'sdc': (sdc.reduce((value, element) => value + element) / sdc.length)
+      'sdc': (sdc.reduce((value, element) => value! + element!)! / sdc.length)
           .floor(),
-      'plk': (plk.reduce((value, element) => value + element) / plk.length)
+      'plk': (plk.reduce((value, element) => value! + element!)! / plk.length)
           .floor(),
-      'run': (run.reduce((value, element) => value + element) / run.length)
+      'run': (run.reduce((value, element) => value! + element!)! / run.length)
           .floor(),
       'total':
           (total.reduce((value, element) => value + element) / total.length)

@@ -1,11 +1,9 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class Duty {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -18,14 +16,12 @@ class Duty {
   String end;
   String comments;
   String location;
-  String calendarId;
-  String eventId;
 
   Duty({
     this.id,
     this.soldierId,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
     this.name = '',
     this.firstName = '',
@@ -36,8 +32,6 @@ class Duty {
     this.end = '',
     this.comments = '',
     this.location = '',
-    this.calendarId,
-    this.eventId,
   });
 
   Map<String, dynamic> toMap() {
@@ -55,8 +49,6 @@ class Duty {
     map['end'] = end;
     map['comments'] = comments;
     map['location'] = location;
-    map['calendarId'] = null;
-    map['eventId'] = null;
 
     return map;
   }
@@ -67,29 +59,28 @@ class Duty {
     try {
       location = doc['location'];
     } catch (e) {
-      print("Error: $e");
+      FirebaseAnalytics.instance.logEvent(name: 'Location Does Not Exist');
     }
     try {
       users = doc['users'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return Duty(
-        id: doc.id,
-        soldierId: doc['soldierId'],
-        owner: doc['owner'],
-        users: users,
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        duty: doc['duty'],
-        start: doc['start'],
-        end: doc['end'],
-        comments: doc['comments'],
-        location: location,
-        calendarId: null,
-        eventId: null);
+      id: doc.id,
+      soldierId: doc['soldierId'],
+      owner: doc['owner'],
+      users: users,
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      duty: doc['duty'],
+      start: doc['start'],
+      end: doc['end'],
+      comments: doc['comments'],
+      location: location,
+    );
   }
 }

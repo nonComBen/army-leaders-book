@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../classes/iap_connection.dart';
@@ -11,33 +12,39 @@ import './subscription_state.dart';
 import '../models/purchasable_product.dart';
 import '../models/store_state.dart';
 
-class SubscriptionPurchases extends ChangeNotifier {
+final subscriptionPurchasesProvider = Provider<SubscriptionPurchases>((ref) {
+  return SubscriptionPurchases(
+    ref.read(subscriptionStateProvider.notifier),
+    ref.read(iapRepoProvider),
+  );
+});
+
+class SubscriptionPurchases {
   final SubscriptionState subscriptionState;
   final IAPRepo iapRepo;
-  StreamSubscription<List<PurchaseDetails>> _subscription;
+  late StreamSubscription<List<PurchaseDetails>> _subscription;
   final iapConnection = IAPConnection.instance;
   StoreState storeState = StoreState.loading;
   List<PurchasableProduct> products = [];
 
   SubscriptionPurchases(this.subscriptionState, this.iapRepo) {
     if (!kIsWeb) {
-      final purchaseUpdated = iapConnection.purchaseStream;
+      final purchaseUpdated = iapConnection!.purchaseStream;
       _subscription = purchaseUpdated.listen(
         _onPurchaseUpdate,
         onDone: _updateStreamOnDone,
         onError: _updateStreamOnError,
       );
-      iapConnection.restorePurchases();
-      iapRepo.addListener(purchasesUpdate);
+      iapConnection!.restorePurchases();
+      // iapRepo.addListener(purchasesUpdate);
       loadPurchases();
     }
   }
 
   Future<void> loadPurchases() async {
-    final available = await iapConnection.isAvailable();
+    final available = await iapConnection!.isAvailable();
     if (!available) {
       storeState = StoreState.notAvailable;
-      notifyListeners();
       return;
     }
     const ids = <String>{
@@ -45,7 +52,7 @@ class SubscriptionPurchases extends ChangeNotifier {
       storeKeyAndroidTwo,
       storeKeyIOS,
     };
-    final response = await iapConnection.queryProductDetails(ids);
+    final response = await iapConnection!.queryProductDetails(ids);
     for (var element in response.notFoundIDs) {
       // ignore: avoid_print
       print('Purchase $element not found');
@@ -53,23 +60,15 @@ class SubscriptionPurchases extends ChangeNotifier {
     products =
         response.productDetails.map((e) => PurchasableProduct(e)).toList();
     storeState = StoreState.available;
-    notifyListeners();
   }
 
   Future<void> buy(PurchasableProduct product) async {
     final purchaseParam = PurchaseParam(productDetails: product.productDetails);
-    await iapConnection.buyNonConsumable(purchaseParam: purchaseParam);
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
+    await iapConnection!.buyNonConsumable(purchaseParam: purchaseParam);
   }
 
   void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
     purchaseDetailsList.forEach(_handlePurchase);
-    notifyListeners();
   }
 
   void _handlePurchase(PurchaseDetails purchaseDetails) async {
@@ -88,7 +87,7 @@ class SubscriptionPurchases extends ChangeNotifier {
     }
 
     if (purchaseDetails.pendingCompletePurchase) {
-      iapConnection.completePurchase(purchaseDetails);
+      iapConnection!.completePurchase(purchaseDetails);
     }
   }
 
@@ -126,14 +125,13 @@ class SubscriptionPurchases extends ChangeNotifier {
   void _updateStatus(PurchasableProduct product, ProductStatus status) {
     if (product.status != ProductStatus.purchased) {
       product.status = ProductStatus.purchased;
-      notifyListeners();
     }
   }
 
   Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
     var functions = FirebaseFunctions.instance;
     final callable = functions.httpsCallable('verifyPurchase');
-    final results = await callable({
+    final HttpsCallableResult<dynamic> results = await callable({
       'source': purchaseDetails.verificationData.source,
       'verificationData':
           purchaseDetails.verificationData.serverVerificationData,

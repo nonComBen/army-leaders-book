@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:leaders_book/auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../auth_provider.dart';
+import '../auth_service.dart';
 
 enum AuthStatus {
   notSignedIn,
@@ -9,42 +11,38 @@ enum AuthStatus {
   localAuthSignIn
 }
 
-class RootProvider with ChangeNotifier {
-  final AuthService auth;
-  AuthStatus _currentAuthStatus;
-  RootProvider({
-    this.auth,
-  }) {
-    _currentAuthStatus =
-        auth.isSignedIn() ? AuthStatus.localAuthSignIn : AuthStatus.notSignedIn;
-  }
+final rootProvider = StateNotifierProvider<RootService, AuthStatus>((ref) {
+  return RootService(auth: ref.read(authProvider));
+});
 
-  AuthStatus get authStatus {
-    return _currentAuthStatus;
+class RootService extends StateNotifier<AuthStatus> {
+  RootService({required this.auth})
+      : super(auth.isSignedIn()
+            ? AuthStatus.localAuthSignIn
+            : AuthStatus.notSignedIn);
+  final AuthService auth;
+
+  AuthStatus? get authStatus {
+    return state;
   }
 
   void signOut() {
-    _currentAuthStatus = AuthStatus.notSignedIn;
-    notifyListeners();
+    state = AuthStatus.notSignedIn;
   }
 
   void localSignOut() {
-    _currentAuthStatus = AuthStatus.localAuthSignIn;
-    notifyListeners();
+    state = AuthStatus.localAuthSignIn;
   }
 
   void signIn() {
-    _currentAuthStatus = AuthStatus.signedIn;
-    notifyListeners();
+    state = AuthStatus.signedIn;
   }
 
   void linkAnonymous() {
-    _currentAuthStatus = AuthStatus.linkAnonymous;
-    notifyListeners();
+    state = AuthStatus.linkAnonymous;
   }
 
   void createAccout() {
-    _currentAuthStatus = AuthStatus.createAccount;
-    notifyListeners();
+    state = AuthStatus.createAccount;
   }
 }

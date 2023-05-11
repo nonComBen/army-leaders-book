@@ -1,10 +1,8 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class Soldier {
-  String id;
+  String? id;
   String owner;
   List<dynamic> users;
   String rank;
@@ -49,13 +47,15 @@ class Soldier {
   String nokPhone;
   String maritalStatus;
   String comments;
+  List<dynamic> povs;
+  List<dynamic> awards;
 
   Soldier({
     this.id,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
-    this.rankSort,
+    this.rankSort = 0,
     this.promotable = '',
     this.lastName = '',
     this.firstName = '',
@@ -96,6 +96,8 @@ class Soldier {
     this.nokPhone = '',
     this.maritalStatus = '',
     this.comments = '',
+    this.awards = const [],
+    this.povs = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -144,12 +146,15 @@ class Soldier {
     map['nokPhone'] = nokPhone;
     map['maritalStatus'] = maritalStatus;
     map['comments'] = comments;
+    map['povs'] = povs;
+    map['awards'] = awards;
 
     return map;
   }
 
   factory Soldier.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
+    List<dynamic> newPovs = [], newAwards = [];
     String nbcSuit = '',
         nbcMask = '',
         nbcBoot = '',
@@ -172,7 +177,7 @@ class Soldier {
     try {
       users = doc['users'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     try {
       workEmail = doc['workEmail'];
@@ -180,7 +185,7 @@ class Soldier {
       email = doc['email'];
       pebd = doc['pebd'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
     try {
       nbcSuit = doc['nbcSuitSize'];
@@ -192,7 +197,7 @@ class Soldier {
       acuTop = doc['acuTopSize'];
       acuTrouser = doc['acuTrouserSize'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
     try {
       address = doc['address'];
@@ -201,17 +206,24 @@ class Soldier {
       zip = doc['zip'];
       dodId = doc['dodId'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
     try {
       maritalStatus = doc['maritalStatus'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance
+          .logEvent(name: 'Marital Status Does Not Exist');
     }
     try {
       assigned = doc['assigned'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'Assigned Does Not Exist');
+    }
+    try {
+      newPovs = doc['povs'];
+      newAwards = doc['awards'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'povs Does Not Exist');
     }
 
     return Soldier(
@@ -260,6 +272,8 @@ class Soldier {
       nokPhone: doc['nokPhone'],
       maritalStatus: maritalStatus,
       comments: doc['comments'],
+      povs: newPovs,
+      awards: newAwards,
     );
   }
 }

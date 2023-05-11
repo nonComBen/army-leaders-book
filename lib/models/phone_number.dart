@@ -1,10 +1,7 @@
-// ignore_for_file: file_names
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class Phone {
-  String id;
+  String? id;
   String owner;
   String title;
   String name;
@@ -13,7 +10,7 @@ class Phone {
 
   Phone({
     this.id,
-    @required this.owner,
+    required this.owner,
     this.title = '',
     this.name = '',
     this.phone = '',

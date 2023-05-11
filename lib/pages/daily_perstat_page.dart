@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -10,23 +8,35 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/auth_provider.dart';
+import 'package:leaders_book/methods/create_app_bar_actions.dart';
+import 'package:leaders_book/methods/filter_documents.dart';
+import 'package:leaders_book/widgets/padded_text_field.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../../models/perstat.dart';
+import '../models/app_bar_option.dart';
 import '../models/perstat_by_name.dart';
 import '../models/soldier.dart';
 import '../providers/soldiers_provider.dart';
 import '../widgets/formatted_text_button.dart';
+import '../widgets/header_text.dart';
+import '../widgets/my_toast.dart';
+import '../widgets/platform_widgets/platform_button.dart';
+import '../widgets/platform_widgets/platform_icon_button.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
 
-class DailyPerstatPage extends StatefulWidget {
-  const DailyPerstatPage({Key key}) : super(key: key);
+class DailyPerstatPage extends ConsumerStatefulWidget {
+  const DailyPerstatPage({Key? key}) : super(key: key);
 
   static const routeName = '/daily-perstat-page';
 
@@ -34,17 +44,16 @@ class DailyPerstatPage extends StatefulWidget {
   DailyPerstatPageState createState() => DailyPerstatPageState();
 }
 
-class DailyPerstatPageState extends State<DailyPerstatPage> {
-  List<DocumentSnapshot> perstats;
-  List<Soldier> soldiers;
-  List<dynamic> dailies, filteredDailies;
+class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
+  List<DocumentSnapshot> perstats = [];
+  List<Soldier> soldiers = [];
+  List<dynamic> dailies = [], filteredDailies = [];
   List<String> sections = [];
   DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool isExpanded = true, isInitial = true;
-  String _userId;
+  String? _userId;
 
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
   final GlobalKey _globalKey = GlobalKey();
 
   List<String> types = [
@@ -64,8 +73,8 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
     bool approved = await checkPermission(Permission.storage);
     if (!approved || !mounted) return;
     try {
-      RenderRepaintBoundary boundary =
-          _globalKey.currentContext.findRenderObject();
+      RenderRepaintBoundary boundary = _globalKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage();
       var pngBytes = await image.toByteData(format: ui.ImageByteFormat.png);
 
@@ -74,7 +83,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
         WebDownload webDownload = WebDownload(
             type: 'png',
             fileName: 'perstat.png',
-            data: pngBytes.buffer.asUint8List());
+            data: pngBytes!.buffer.asUint8List());
         webDownload.download();
       } else {
         List<String> strings = await getPath();
@@ -82,21 +91,17 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
         String path = strings[0];
 
         File file = File('$path/PERSTAT.png');
-        file.writeAsBytesSync(pngBytes.buffer.asUint8List());
+        file.writeAsBytesSync(pngBytes!.buffer.asUint8List());
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('PERSTAT By Name Downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$path/PERSTAT.png');
-                      },
-                    )
-                  : null,
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            child: MyToast(
+              message: 'PERSTAT By Name Downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$path/PERSTAT.png'),
             ),
           );
         }
@@ -120,7 +125,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
       'End Date',
     ]);
     for (Map<dynamic, dynamic> daily in dailies) {
-      List<String> doc = [
+      List<String?> doc = [
         daily['soldier'],
         daily['assigned'].toString(),
         daily['type'],
@@ -133,7 +138,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -146,24 +151,23 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/PERSTAT (${dateFormat.format(DateTime.now())}).xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Data successfully downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open(
-                          '$dir/PERSTAT (${dateFormat.format(DateTime.now())}).xlsx');
-                    },
-                  )
-                : null,
-          ));
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed: kIsWeb
+                  ? null
+                  : () => OpenFile.open(
+                      '$dir/PERSTAT (${dateFormat.format(DateTime.now())}).xlsx'),
+            ),
+          );
         }
       } catch (e) {
         // ignore: avoid_print
@@ -178,11 +182,11 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          HeaderText(
             text,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.start,
           ),
-          IconButton(
+          PlatformIconButton(
               icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
               onPressed: () {
                 setState(() {
@@ -198,11 +202,12 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+        color: getContrastingBackgroundColor(context),
         child: ListTile(
           title: Text(soldier['soldier']),
           subtitle:
               soldier['end'] == '' ? null : Text('Returns: ${soldier['end']}'),
-          trailing: IconButton(
+          trailing: PlatformIconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
                 editRecord(index, soldier);
@@ -216,9 +221,9 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
     int dailyIndex = dailies.indexOf(soldier);
     int filteredIndex = filteredDailies.indexOf(soldier);
     String type = soldier['type'];
-    String otherType = '';
+    final controller = TextEditingController(text: '');
     if (!types.contains(type)) {
-      otherType = type;
+      controller.text = type;
       type = 'Other';
     }
     Widget title = const Text('Edit Status');
@@ -233,17 +238,11 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
                   content: SingleChildScrollView(
                     child: Column(
                       children: <Widget>[
-                        DropdownButtonFormField(
-                            items: types.map((type) {
-                              return DropdownMenuItem(
-                                value: type,
-                                child: Text(type),
-                              );
-                            }).toList(),
+                        PlatformItemPicker(
+                            items: types,
                             value: type,
-                            decoration:
-                                const InputDecoration(labelText: 'Status'),
-                            onChanged: (value) {
+                            label: const Text('Status'),
+                            onChanged: (dynamic value) {
                               refresh(() {
                                 type = value;
                                 soldier['type'] = value;
@@ -261,13 +260,13 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
                               });
                             }),
                         type == 'Other'
-                            ? TextFormField(
+                            ? PaddedTextField(
+                                label: 'Other Status',
                                 decoration: const InputDecoration(
                                     labelText: 'Other Status'),
-                                initialValue: otherType,
+                                controller: controller,
                                 onChanged: (value) {
                                   refresh(() {
-                                    otherType = value;
                                     soldier['type'] = value;
                                     soldier['typeSort'] = '3';
                                   });
@@ -303,95 +302,92 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
           });
     } else {
       showCupertinoDialog(
-          context: context,
-          builder: (context2) => StatefulBuilder(
-                builder: (context, refresh) => CupertinoAlertDialog(
-                  title: title,
-                  content: SingleChildScrollView(
-                    child: Material(
-                      color: Theme.of(context).dialogBackgroundColor,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: <Widget>[
-                            DropdownButtonFormField(
-                                items: types.map((type) {
-                                  return DropdownMenuItem(
-                                    value: type,
-                                    child: Text(type),
-                                  );
-                                }).toList(),
-                                value: type,
-                                decoration:
-                                    const InputDecoration(labelText: 'Status'),
-                                onChanged: (value) {
-                                  refresh(() {
-                                    type = value;
-                                    soldier['type'] = type;
-                                    if (type == 'PDY') {
-                                      soldier['typeSort'] = '0';
-                                    } else if (type == 'Leave') {
-                                      soldier['typeSort'] = '1';
-                                    } else if (type == 'TDY') {
-                                      soldier['typeSort'] = '2';
-                                    } else if (type == 'FTR') {
-                                      soldier['typeSort'] = '4';
-                                    } else {
-                                      soldier['typeSort'] = '3';
-                                    }
-                                  });
-                                }),
-                            type == 'Other'
-                                ? TextFormField(
-                                    decoration: const InputDecoration(
-                                        labelText: 'Other Status'),
-                                    initialValue: otherType,
-                                    onChanged: (value) {
-                                      refresh(() {
-                                        otherType = value;
-                                        soldier['type'] = value;
-                                        soldier['typeSort'] = '3';
-                                      });
-                                    },
-                                  )
-                                : const SizedBox(),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  actions: <Widget>[
-                    CupertinoDialogAction(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.pop(context2);
-                      },
-                    ),
-                    CupertinoDialogAction(
-                      child: const Text('Ok'),
-                      onPressed: () {
-                        setState(() {
-                          soldier['end'] = '';
-                          filteredDailies[filteredIndex] = soldier;
-                          dailies[dailyIndex] = soldier;
-                          //sortDailies();
+        context: context,
+        builder: (context2) => StatefulBuilder(
+          builder: (context, refresh) => CupertinoAlertDialog(
+            title: title,
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: <Widget>[
+                  PlatformItemPicker(
+                      items: types,
+                      value: type,
+                      label: const Text('Status'),
+                      onChanged: (dynamic value) {
+                        refresh(() {
+                          type = value;
+                          soldier['type'] = type;
+                          if (type == 'PDY') {
+                            soldier['typeSort'] = '0';
+                          } else if (type == 'Leave') {
+                            soldier['typeSort'] = '1';
+                          } else if (type == 'TDY') {
+                            soldier['typeSort'] = '2';
+                          } else if (type == 'FTR') {
+                            soldier['typeSort'] = '4';
+                          } else {
+                            soldier['typeSort'] = '3';
+                          }
                         });
-                        Navigator.pop(context2);
-                      },
-                    )
-                  ],
+                      }),
+                  type == 'Other'
+                      ? PaddedTextField(
+                          label: 'Other Status',
+                          decoration:
+                              const InputDecoration(labelText: 'Other Status'),
+                          controller: controller,
+                          onChanged: (value) {
+                            refresh(() {
+                              soldier['type'] = value;
+                              soldier['typeSort'] = '3';
+                            });
+                          },
+                        )
+                      : const SizedBox(),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: getTextColor(context),
+                  ),
                 ),
-              ));
+                onPressed: () {
+                  Navigator.pop(context2);
+                },
+              ),
+              CupertinoDialogAction(
+                child: Text(
+                  'Ok',
+                  style: TextStyle(
+                    color: getTextColor(context),
+                  ),
+                ),
+                onPressed: () {
+                  setState(() {
+                    soldier['end'] = '';
+                    filteredDailies[filteredIndex] = soldier;
+                    dailies[dailyIndex] = soldier;
+                  });
+                  Navigator.pop(context2);
+                },
+              )
+            ],
+          ),
+        ),
+      );
     }
   }
 
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDailies = List.from(dailies);
-    } else {
-      filteredDailies =
-          dailies.where((element) => element['section'] == section).toList();
-    }
+  void _filterRecords(List<String> sections) {
+    filteredDailies = dailies
+        .where((element) => sections.contains(element['section']))
+        .toList();
+
     setState(() {});
   }
 
@@ -431,14 +427,14 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
 
   sortDailies() {
     filteredDailies.sort((a, b) {
-      int c = a['typeSort'].compareTo(b['typeSort']);
+      int? c = a['typeSort'].compareTo(b['typeSort']);
       if (c == 0) {
         c = a['type'].compareTo(b['type']);
       }
       if (c == 0) {
         c = b['rankSort'].compareTo(a['rankSort']);
       }
-      return c;
+      return c!;
     });
   }
 
@@ -453,12 +449,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   }
 
   buildNewDailies() async {
-    // QuerySnapshot soldierSnapshot = await firestore
-    //     .collection('soldiers')
-    //     .where('users', isNotEqualTo: null)
-    //     .where('users', arrayContains: widget.userId)
-    //     .get();
-    soldiers = Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+    soldiers = ref.read(soldiersProvider);
     QuerySnapshot perstatSnapshot = await firestore
         .collection('perstat')
         .where('users', isNotEqualTo: null)
@@ -467,7 +458,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
     perstats = perstatSnapshot.docs
         .where((doc) => isOverdue(doc['start'], 0) && !isOverdue(doc['end'], 1))
         .toList();
-    List<String> soldierIds = [];
+    List<String?> soldierIds = [];
 
     setState(() {
       for (DocumentSnapshot perstat in perstats) {
@@ -475,13 +466,13 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
         try {
           final soldier =
               soldiers.firstWhere((e) => e.id == perstat['soldierId']);
-          assigned = soldier.assigned ?? true;
+          assigned = soldier.assigned;
         } catch (e) {
           // ignore: avoid_print
           print(e);
         }
         soldierIds.add(perstat['soldierId']);
-        var map = <String, String>{};
+        var map = <String, String?>{};
         map['soldierId'] = perstat['soldierId'];
         map['soldier'] =
             '${perstat['rank']} ${perstat['name']}, ${perstat['firstName']}';
@@ -502,7 +493,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
       }
 
       for (Soldier soldier in soldiers) {
-        bool assigned = true;
+        bool? assigned = true;
         try {
           assigned = soldier.assigned;
         } catch (e) {
@@ -510,7 +501,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
           print(e);
         }
         if (!soldierIds.contains(soldier.id)) {
-          var map = <String, String>{};
+          var map = <String, String?>{};
           map['soldierId'] = soldier.id;
           map['soldier'] =
               '${soldier.rank} ${soldier.lastName}, ${soldier.firstName}';
@@ -531,8 +522,9 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
 
   void submit(BuildContext context) async {
     onWillPop();
-    soldiers ??= Provider.of<SoldiersProvider>(context, listen: false).soldiers;
-    if (perstats == null) {
+    soldiers = ref.read(soldiersProvider);
+    debugPrint(soldiers.length.toString());
+    if (perstats.isEmpty) {
       QuerySnapshot perstatSnapshot = await firestore
           .collection('perstat')
           .where('users', isNotEqualTo: null)
@@ -589,7 +581,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
+    _userId = ref.read(authProvider).currentUser()!.uid;
     if (isInitial) {
       initialize();
       isInitial = false;
@@ -599,14 +591,11 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   @override
   void initState() {
     super.initState();
-    dailies = [];
-    filteredDailies = [];
-    firestore = FirebaseFirestore.instance;
   }
 
   initialize() async {
     DocumentSnapshot snapshot;
-    PerstatByName byName;
+    PerstatByName? byName;
     try {
       snapshot = await firestore.collection('perstatByName').doc(_userId).get();
       byName = PerstatByName.fromSnapshot(snapshot);
@@ -618,7 +607,7 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
       buildNewDailies();
     } else {
       setState(() {
-        dailies = byName.dailies.toList();
+        dailies = byName!.dailies.toList();
         filteredDailies = List.from(dailies);
       });
     }
@@ -627,98 +616,73 @@ class DailyPerstatPageState extends State<DailyPerstatPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    dailies.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < dailies.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: dailies[i]['section'],
-          child: Text(dailies[i]['section']),
-        ));
-      } else if (dailies[i]['section'] != dailies[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: dailies[i]['section'],
-          child: Text(dailies[i]['section']),
-        ));
-      }
-    }
-
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('PERSTAT By Name'),
-        actions: <Widget>[
-          Tooltip(
-            message: 'Refresh',
-            child: IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  dailies.clear();
-                  buildNewDailies();
-                }),
-          ),
-          Tooltip(
-              message: 'Filter Records',
-              child: PopupMenuButton(
-                icon: const Icon(Icons.filter_alt),
-                onSelected: (String result) => _filterRecords(result),
-                itemBuilder: (context) {
-                  return sections;
-                },
-              )),
-          Tooltip(
-              message: kIsWeb ? 'Feature Not Available' : 'Download as Image',
-              child: IconButton(
-                icon: const Icon(Icons.image),
-                onPressed: kIsWeb
-                    ? null
-                    : () {
-                        _downloadPng();
-                      },
-              )),
-          Tooltip(
-              message: 'Download as Excel',
-              child: IconButton(
-                  icon: const Icon(Icons.file_download),
-                  onPressed: _downloadExcel))
+    return PlatformScaffold(
+      title: 'PERSTAT By Name',
+      actions: createAppBarActions(
+        width,
+        [
+          AppBarOption(
+              title: 'Refresh',
+              icon: Icon(kIsWeb || Platform.isAndroid
+                  ? Icons.refresh
+                  : CupertinoIcons.refresh),
+              onPressed: () {
+                dailies.clear();
+                buildNewDailies();
+              }),
+          AppBarOption(
+              title: 'Filter Records',
+              icon: const Icon(Icons.filter_alt),
+              onPressed: () {
+                showFilterOptions(
+                  context,
+                  dailies.map((e) => e['section'].toString()).toList(),
+                  (sections) => _filterRecords(sections),
+                );
+              }),
+          if (!kIsWeb)
+            AppBarOption(
+                title: 'Download Image',
+                icon: Icon(kIsWeb || Platform.isAndroid
+                    ? Icons.image
+                    : CupertinoIcons.photo),
+                onPressed: () => _downloadPng()),
+          AppBarOption(
+              title: 'Download Excel',
+              icon: Icon(kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download),
+              onPressed: () => _downloadExcel()),
         ],
       ),
       body: WillPopScope(
         onWillPop: onWillPop,
-        child: ListView(
-          children: [
-            RepaintBoundary(
-              key: _globalKey,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: width > 932 ? (width - 916) / 2 : 16),
-                child: Card(
-                  child: Container(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: dailyStatuses()),
+        child: Center(
+          heightFactor: 1,
+          child: ListView(
+            children: [
+              RepaintBoundary(
+                key: _globalKey,
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  constraints: const BoxConstraints(maxWidth: 900),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: dailyStatuses(),
                   ),
                 ),
               ),
-            ),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  submit(context);
-                },
-                child: const Text('Update PERSTAT Section'),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformButton(
+                  onPressed: () {
+                    submit(context);
+                  },
+                  child: const Text('Update PERSTAT Section'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

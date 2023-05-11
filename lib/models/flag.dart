@@ -1,11 +1,9 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class Flag {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   List<dynamic> users;
   String rank;
@@ -15,14 +13,14 @@ class Flag {
   String rankSort;
   String date;
   String exp;
-  String type;
+  String? type;
   String comments;
 
   Flag({
     this.id,
     this.soldierId,
-    @required this.owner,
-    @required this.users,
+    required this.owner,
+    required this.users,
     this.rank = '',
     this.name = '',
     this.firstName = '',
@@ -57,7 +55,7 @@ class Flag {
     try {
       users = doc['users'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return Flag(
         id: doc.id,

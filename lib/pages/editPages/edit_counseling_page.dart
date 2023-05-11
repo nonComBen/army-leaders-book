@@ -1,24 +1,34 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../methods/validate.dart';
 import '../../models/counseling.dart';
+import '../../models/soldier.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
+import '../../widgets/stateful_widgets/date_text_field.dart';
 
-class EditCounselingPage extends StatefulWidget {
+class EditCounselingPage extends ConsumerStatefulWidget {
   const EditCounselingPage({
-    Key key,
-    @required this.counseling,
+    Key? key,
+    required this.counseling,
   }) : super(key: key);
   final Counseling counseling;
 
@@ -26,85 +36,83 @@ class EditCounselingPage extends StatefulWidget {
   EditCounselingPageState createState() => EditCounselingPageState();
 }
 
-class EditCounselingPageState extends State<EditCounselingPage> {
+class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
   String _title = 'New Counseling';
-  FirebaseFirestore firestore;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  TextEditingController _dateController;
-  TextEditingController _assessmentController;
-  TextEditingController _indivRemarksController;
-  TextEditingController _keyPointsController;
-  TextEditingController _leaderRespController;
-  TextEditingController _planOfActionController;
-  TextEditingController _purposeController;
-  String _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
-  List<DocumentSnapshot> allSoldiers, lessSoldiers, soldiers;
-  bool removeSoldiers, updated;
-  DateTime _dateTime;
-  RegExp regExp;
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _assessmentController = TextEditingController();
+  final TextEditingController _indivRemarksController = TextEditingController();
+  final TextEditingController _keyPointsController = TextEditingController();
+  final TextEditingController _leaderRespController = TextEditingController();
+  final TextEditingController _planOfActionController = TextEditingController();
+  final TextEditingController _purposeController = TextEditingController();
+  String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort;
+  List<Soldier>? allSoldiers, lessSoldiers;
+  bool removeSoldiers = false, updated = false;
+  DateTime? _dateTime;
+  FToast toast = FToast();
 
-  Future<void> _pickDate(BuildContext context) async {
-    var formatter = DateFormat('yyyy-MM-dd');
-    if (kIsWeb || Platform.isAndroid) {
-      final DateTime picked = await showDatePicker(
-          context: context,
-          initialDate: _dateTime,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2050));
-
-      if (picked != null) {
-        if (mounted) {
-          setState(() {
-            _dateController.text = formatter.format(picked);
-            updated = true;
-          });
-        }
-      }
-    } else {
-      showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _dateTime,
-                minimumDate: DateTime.now().add(const Duration(days: -365 * 5)),
-                maximumDate: DateTime.now().add(const Duration(days: 365 * 5)),
-                onDateTimeChanged: (value) {
-                  _dateTime = value;
-                  _dateController.text = formatter.format(value);
-                  updated = true;
-                },
-              ),
-            );
-          });
-    }
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _assessmentController.dispose();
+    _keyPointsController.dispose();
+    _indivRemarksController.dispose();
+    _leaderRespController.dispose();
+    _planOfActionController.dispose();
+    _purposeController.dispose();
+    super.dispose();
   }
 
-  bool validateAndSave() {
-    final form = _formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      return true;
+  @override
+  void initState() {
+    super.initState();
+
+    allSoldiers = ref.read(soldiersProvider);
+
+    if (widget.counseling.id != null) {
+      _title = '${widget.counseling.rank} ${widget.counseling.name}';
     }
-    return false;
+
+    _soldierId = widget.counseling.soldierId;
+    _rank = widget.counseling.rank;
+    _lastName = widget.counseling.name;
+    _firstName = widget.counseling.firstName;
+    _section = widget.counseling.section;
+    _rankSort = widget.counseling.rankSort;
+
+    _dateController.text = widget.counseling.date;
+    _assessmentController.text = widget.counseling.assessment;
+    _indivRemarksController.text = widget.counseling.indivRemarks;
+    _leaderRespController.text = widget.counseling.leaderResp;
+    _planOfActionController.text = widget.counseling.planOfAction;
+    _purposeController.text = widget.counseling.purpose;
+    _keyPointsController.text = widget.counseling.keyPoints;
+
+    _dateTime = DateTime.tryParse(widget.counseling.date) ?? DateTime.now();
   }
 
   void submit(BuildContext context, String userId) async {
-    if (validateAndSave()) {
+    if (_soldierId == null) {
+      soldierIdIsBlankMessage(context);
+      return;
+    }
+    if (validateAndSave(
+      _formKey,
+      [_dateController.text],
+    )) {
       Counseling saveCounseling = Counseling(
         id: widget.counseling.id,
         soldierId: _soldierId,
         owner: userId,
-        rank: _rank,
-        name: _lastName,
-        firstName: _firstName,
-        section: _section,
-        rankSort: _rankSort,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
         date: _dateController.text,
         assessment: _assessmentController.text,
         indivRemarks: _indivRemarksController.text,
@@ -136,337 +144,149 @@ class EditCounselingPageState extends State<EditCounselingPage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
-  }
-
-  void _removeSoldiers(bool checked, String userId) async {
-    if (lessSoldiers == null) {
-      lessSoldiers = List.from(allSoldiers, growable: true);
-      QuerySnapshot apfts = await firestore
-          .collection('counselings')
-          .where('owner', isEqualTo: userId)
-          .get();
-      if (apfts.docs.isNotEmpty) {
-        for (var doc in apfts.docs) {
-          lessSoldiers
-              .removeWhere((soldierDoc) => soldierDoc.id == doc['soldierId']);
-        }
-      }
-    }
-    if (lessSoldiers.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('All Soldiers have been added')));
-      }
-    }
-
-    setState(() {
-      if (checked && lessSoldiers.isNotEmpty) {
-        _soldierId = null;
-        removeSoldiers = true;
-      } else {
-        _soldierId = null;
-        removeSoldiers = false;
-      }
-    });
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
-  }
-
-  @override
-  void dispose() {
-    _dateController.dispose();
-    _assessmentController.dispose();
-    _keyPointsController.dispose();
-    _indivRemarksController.dispose();
-    _leaderRespController.dispose();
-    _planOfActionController.dispose();
-    _purposeController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    firestore = FirebaseFirestore.instance;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    if (widget.counseling.id != null) {
-      _title = '${widget.counseling.rank} ${widget.counseling.name}';
-    }
-
-    _soldierId = widget.counseling.soldierId;
-    _rank = widget.counseling.rank;
-    _lastName = widget.counseling.name;
-    _firstName = widget.counseling.firstName;
-    _section = widget.counseling.section;
-    _rankSort = widget.counseling.rankSort;
-
-    _dateController = TextEditingController(text: widget.counseling.date);
-    _assessmentController =
-        TextEditingController(text: widget.counseling.assessment);
-    _indivRemarksController =
-        TextEditingController(text: widget.counseling.indivRemarks);
-    _leaderRespController =
-        TextEditingController(text: widget.counseling.leaderResp);
-    _planOfActionController =
-        TextEditingController(text: widget.counseling.planOfAction);
-    _purposeController = TextEditingController(text: widget.counseling.purpose);
-    _keyPointsController =
-        TextEditingController(text: widget.counseling.keyPoints);
-
-    removeSoldiers = false;
-    updated = false;
-
-    _dateTime = DateTime.tryParse(widget.counseling.date) ?? DateTime.now();
-    regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: FutureBuilder(
-                                    future: firestore
-                                        .collection('soldiers')
-                                        .where('users', arrayContains: user.uid)
-                                        .get(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<QuerySnapshot> snapshot) {
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        default:
-                                          allSoldiers = snapshot.data.docs;
-                                          soldiers = removeSoldiers
-                                              ? lessSoldiers
-                                              : allSoldiers;
-                                          soldiers.sort((a, b) => a['lastName']
-                                              .toString()
-                                              .compareTo(
-                                                  b['lastName'].toString()));
-                                          soldiers.sort((a, b) => a['rankSort']
-                                              .toString()
-                                              .compareTo(
-                                                  b['rankSort'].toString()));
-                                          return DropdownButtonFormField<
-                                              String>(
-                                            decoration: const InputDecoration(
-                                                labelText: 'Soldier'),
-                                            items: soldiers.map((doc) {
-                                              return DropdownMenuItem<String>(
-                                                value: doc.id,
-                                                child: Text(
-                                                    '${doc['rank']} ${doc['lastName']}, ${doc['firstName']}'),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              int index = soldiers.indexWhere(
-                                                  (doc) => doc.id == value);
-                                              if (mounted) {
-                                                setState(() {
-                                                  _soldierId = value;
-                                                  _rank =
-                                                      soldiers[index]['rank'];
-                                                  _lastName = soldiers[index]
-                                                      ['lastName'];
-                                                  _firstName = soldiers[index]
-                                                      ['firstName'];
-                                                  _section = soldiers[index]
-                                                      ['section'];
-                                                  _rankSort = soldiers[index]
-                                                          ['rankSort']
-                                                      .toString();
-                                                  updated = true;
-                                                });
-                                              }
-                                            },
-                                            value: _soldierId,
-                                          );
-                                      }
-                                    }),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    8.0, 16.0, 8.0, 8.0),
-                                child: CheckboxListTile(
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                  value: removeSoldiers,
-                                  title: const Text(
-                                      'Remove Soldiers already added'),
-                                  onChanged: (checked) {
-                                    _removeSoldiers(checked, user.uid);
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  keyboardType: TextInputType.datetime,
-                                  controller: _dateController,
-                                  enabled: true,
-                                  validator: (value) =>
-                                      regExp.hasMatch(value) || value.isEmpty
-                                          ? null
-                                          : 'Date must be in yyyy-MM-dd format',
-                                  decoration: InputDecoration(
-                                      labelText: 'Date',
-                                      suffixIcon: IconButton(
-                                          icon: const Icon(Icons.date_range),
-                                          onPressed: () {
-                                            _pickDate(context);
-                                          })),
-                                  onChanged: (value) {
-                                    _dateTime =
-                                        DateTime.tryParse(value) ?? _dateTime;
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 5,
-                              controller: _purposeController,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Purpose of Counseling'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 5,
-                              controller: _keyPointsController,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Key Points of Discussion'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 5,
-                              controller: _planOfActionController,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Plan of Action'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 5,
-                              controller: _indivRemarksController,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Individual Counseled Remarks'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 5,
-                              controller: _leaderRespController,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Leader Responsibilities'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 5,
-                              controller: _assessmentController,
-                              enabled: true,
-                              decoration: const InputDecoration(
-                                  labelText: 'Assessment'),
-                              onChanged: (value) {
-                                updated = true;
-                              },
-                            ),
-                          ),
-                          FormattedElevatedButton(
-                            onPressed: () {
-                              submit(context, user.uid);
-                            },
-                            text: widget.counseling.id == null
-                                ? 'Add Counseling'
-                                : 'Update Counseling',
-                          ),
-                        ],
-                      ),
-                    )),
+    final user = ref.read(authProvider).currentUser()!;
+    toast.context = context;
+    return PlatformScaffold(
+      title: _title,
+      body: FormFrame(
+        formKey: _formKey,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          FormGridView(
+            width: width,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformSoldierPicker(
+                  label: 'Soldier',
+                  soldiers: removeSoldiers ? lessSoldiers! : allSoldiers!,
+                  value: _soldierId,
+                  onChanged: (soldierId) {
+                    final soldier =
+                        allSoldiers!.firstWhere((e) => e.id == soldierId);
+                    setState(() {
+                      _soldierId = soldierId;
+                      _rank = soldier.rank;
+                      _lastName = soldier.lastName;
+                      _firstName = soldier.firstName;
+                      _section = soldier.section;
+                      _rankSort = soldier.rankSort.toString();
+                      updated = true;
+                    });
+                  },
+                ),
               ),
-            )));
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+                child: PlatformCheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: removeSoldiers,
+                  title: const Text('Remove Soldiers already added'),
+                  onChanged: (checked) {
+                    createLessSoldiers(
+                        collection: kCounselingCollection,
+                        userId: user.uid,
+                        allSoldiers: allSoldiers!);
+                  },
+                ),
+              ),
+              DateTextField(
+                controller: _dateController,
+                label: 'Date',
+                minYears: 1,
+                date: _dateTime,
+              ),
+            ],
+          ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            controller: _purposeController,
+            enabled: true,
+            label: 'Purpose of Counseling',
+            decoration:
+                const InputDecoration(labelText: 'Purpose of Counseling'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            controller: _keyPointsController,
+            label: 'Key Points of Discussion',
+            decoration:
+                const InputDecoration(labelText: 'Key Points of Discussion'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            controller: _planOfActionController,
+            label: 'Plan of Action',
+            decoration: const InputDecoration(labelText: 'Plan of Action'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            controller: _indivRemarksController,
+            label: 'Individual Counseled Remarks',
+            decoration: const InputDecoration(
+                labelText: 'Individual Counseled Remarks'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            controller: _leaderRespController,
+            label: 'Leader Responsibilities',
+            decoration:
+                const InputDecoration(labelText: 'Leader Responsibilities'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PaddedTextField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            controller: _assessmentController,
+            label: 'Assessment',
+            decoration: const InputDecoration(labelText: 'Assessment'),
+            onChanged: (value) {
+              updated = true;
+            },
+          ),
+          PlatformButton(
+            onPressed: () {
+              submit(context, user.uid);
+            },
+            child: Text(widget.counseling.id == null
+                ? 'Add Counseling'
+                : 'Update Counseling'),
+          ),
+        ],
+      ),
+    );
   }
 }

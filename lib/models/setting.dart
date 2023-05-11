@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class Setting {
   bool perstat;
   bool apts;
@@ -28,7 +26,7 @@ class Setting {
   List<dynamic> visionNotifications;
   List<dynamic> hearingNotifications;
   List<dynamic> hivNotifications;
-  String owner;
+  String? owner;
 
   Setting({
     this.perstat = true,
@@ -50,15 +48,15 @@ class Setting {
     this.visionMonths = 12,
     this.hearingMonths = 12,
     this.hivMonths = 24,
-    @required this.acftNotifications,
-    @required this.bfNotifications,
-    @required this.weaponsNotifications,
-    @required this.phaNotifications,
-    @required this.dentalNotifications,
-    @required this.visionNotifications,
-    @required this.hearingNotifications,
-    @required this.hivNotifications,
-    @required this.owner,
+    required this.acftNotifications,
+    required this.bfNotifications,
+    required this.weaponsNotifications,
+    required this.phaNotifications,
+    required this.dentalNotifications,
+    required this.visionNotifications,
+    required this.hearingNotifications,
+    required this.hivNotifications,
+    required this.owner,
   });
 
   Map<String, dynamic> toMap() {
@@ -97,17 +95,17 @@ class Setting {
 
   factory Setting.fromMap(Map<String, dynamic> map) {
     return Setting(
-        perstat: map['perstat'],
-        apts: map['apts'],
-        apft: map['apft'],
-        acft: map['acft'],
-        profiles: map['profiles'],
-        bf: map['bf'],
-        weapons: map['weapons'],
-        flags: map['flags'],
-        medpros: map['medpros'],
-        training: map['training'],
-        addNotifications: map['addNotification'],
+        perstat: map['perstat'] ?? true,
+        apts: map['apts'] ?? true,
+        apft: map['apft'] ?? true,
+        acft: map['acft'] ?? true,
+        profiles: map['profiles'] ?? true,
+        bf: map['bf'] ?? true,
+        weapons: map['weapons'] ?? true,
+        flags: map['flags'] ?? false,
+        medpros: map['medpros'] ?? false,
+        training: map['training'] ?? false,
+        addNotifications: map['addNotification'] ?? true,
         acftMonths: map['acftMonths'],
         bfMonths: map['bfMonths'],
         weaponsMonths: map['weaponsMonths'],

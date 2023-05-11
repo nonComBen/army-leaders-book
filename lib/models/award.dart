@@ -1,23 +1,22 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class Award {
-  String id;
-  String owner;
-  List<dynamic> users;
-  String soldierId;
+  String? id;
+  String? owner;
+  List<dynamic>? users;
+  String? soldierId;
   String name;
   String number;
 
-  Award(
-      {this.id,
-      @required this.owner,
-      @required this.users,
-      @required this.soldierId,
-      this.name = '',
-      this.number = ''});
+  Award({
+    this.id,
+    this.owner,
+    this.users,
+    this.soldierId,
+    this.name = '',
+    this.number = '',
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -35,14 +34,32 @@ class Award {
     try {
       users = doc['users'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return Award(
-        id: doc.id,
-        owner: doc['owner'],
-        users: users,
-        soldierId: doc['soldierId'],
-        name: doc['name'],
-        number: doc['number']);
+      id: doc.id,
+      owner: doc['owner'],
+      users: users,
+      soldierId: doc['soldierId'],
+      name: doc['name'],
+      number: doc['number'],
+    );
+  }
+
+  factory Award.fromMap(Map<String, dynamic> map) {
+    List<dynamic> users = [map['owner']];
+    try {
+      users = map['users'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+    }
+    return Award(
+      id: null,
+      owner: map['owner'],
+      users: users,
+      soldierId: map['soldierId'],
+      name: map['name'],
+      number: map['number'],
+    );
   }
 }

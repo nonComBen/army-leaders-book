@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class Counseling {
-  String id;
-  String soldierId;
-  String owner;
+  String? id;
+  String? soldierId;
+  String? owner;
   String rank;
   String name;
   String firstName;
@@ -21,7 +20,7 @@ class Counseling {
   Counseling({
     this.id,
     this.soldierId,
-    @required this.owner,
+    required this.owner,
     this.rank = '',
     this.name = '',
     this.firstName = '',

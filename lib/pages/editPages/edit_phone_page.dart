@@ -1,20 +1,26 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/constants/firestore_collections.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
-class EditPhonePage extends StatefulWidget {
+class EditPhonePage extends ConsumerStatefulWidget {
   const EditPhonePage({
-    Key key,
-    @required this.phone,
+    Key? key,
+    required this.phone,
   }) : super(key: key);
   final Phone phone;
 
@@ -22,21 +28,43 @@ class EditPhonePage extends StatefulWidget {
   EditPhonePageState createState() => EditPhonePageState();
 }
 
-class EditPhonePageState extends State<EditPhonePage> {
+class EditPhonePageState extends ConsumerState<EditPhonePage> {
   String _title = 'New Phone';
-  bool updated;
-  FirebaseFirestore firestore;
+  bool updated = false;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  GlobalKey<FormState> _formKey;
-  GlobalKey<ScaffoldState> _scaffoldState;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  TextEditingController _titleController;
-  TextEditingController _phoneController;
-  TextEditingController _nameController;
-  TextEditingController _locationController;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.phone.id != null) {
+      _title = 'Edit Phone';
+    }
+
+    _titleController.text = widget.phone.title;
+    _nameController.text = widget.phone.name;
+    _phoneController.text = widget.phone.phone;
+    _locationController.text = widget.phone.location;
+  }
 
   bool validateAndSave() {
-    final form = _formKey.currentState;
+    final form = _formKey.currentState!;
     if (form.validate()) {
       form.save();
       return true;
@@ -57,7 +85,7 @@ class EditPhonePageState extends State<EditPhonePage> {
 
       if (widget.phone.id == null) {
         DocumentReference docRef =
-            await firestore.collection('phoneNumbers').add(savePhone.toMap());
+            await firestore.collection(kPhoneCollection).add(savePhone.toMap());
 
         savePhone.id = docRef.id;
         if (mounted) {
@@ -65,7 +93,7 @@ class EditPhonePageState extends State<EditPhonePage> {
         }
       } else {
         firestore
-            .collection('phoneNumbers')
+            .collection(kPhoneCollection)
             .doc(widget.phone.id)
             .set(savePhone.toMap())
             .then((value) {
@@ -76,153 +104,85 @@ class EditPhonePageState extends State<EditPhonePage> {
         });
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text('Form is invalid - dates must be in yyyy-MM-dd format')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'Form is invalid - dates must be in yyyy-MM-dd format',
+        ),
+      );
     }
-  }
-
-  Future<bool> _onBackPressed() {
-    if (!updated) return Future.value(true);
-    return onBackPressed(context);
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _nameController.dispose();
-    _phoneController.dispose();
-    _locationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    firestore = FirebaseFirestore.instance;
-
-    updated = false;
-
-    _formKey = GlobalKey<FormState>();
-    _scaffoldState = GlobalKey<ScaffoldState>();
-
-    if (widget.phone.id != null) {
-      _title = 'Edit Phone';
-    }
-
-    _titleController = TextEditingController(text: widget.phone.title);
-    _nameController = TextEditingController(text: widget.phone.name);
-    _phoneController = TextEditingController(text: widget.phone.phone);
-    _locationController = TextEditingController(text: widget.phone.location);
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-          title: Text(_title),
-        ),
-        body: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            onWillPop: _onBackPressed,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: width > 932 ? (width - 916) / 2 : 16),
-              child: Card(
-                child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    constraints: const BoxConstraints(maxWidth: 900),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          if (user.isAnonymous) const AnonWarningBanner(),
-                          GridView.count(
-                            primary: false,
-                            crossAxisCount: width > 700 ? 2 : 1,
-                            mainAxisSpacing: 1.0,
-                            crossAxisSpacing: 1.0,
-                            childAspectRatio: width > 900
-                                ? 900 / 230
-                                : width > 700
-                                    ? width / 230
-                                    : width / 115,
-                            shrinkWrap: true,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _titleController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Title',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _nameController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'POC',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Phone Number',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: _locationController,
-                                  keyboardType: TextInputType.text,
-                                  enabled: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Location',
-                                  ),
-                                  onChanged: (value) {
-                                    updated = true;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          FormattedElevatedButton(
-                            onPressed: () {
-                              submit(context, user.uid);
-                            },
-                            text: widget.phone.id == null
-                                ? 'Add Phone'
-                                : 'Update Phone',
-                          ),
-                        ],
-                      ),
-                    )),
+    final user = ref.read(authProvider).currentUser()!;
+    return PlatformScaffold(
+      title: _title,
+      body: FormFrame(
+        formKey: _formKey,
+        onWillPop:
+            updated ? () => onBackPressed(context) : () => Future(() => true),
+        children: <Widget>[
+          if (user.isAnonymous) const AnonWarningBanner(),
+          FormGridView(
+            width: width,
+            children: <Widget>[
+              PaddedTextField(
+                controller: _titleController,
+                keyboardType: TextInputType.text,
+                label: 'Title',
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
               ),
-            )));
+              PaddedTextField(
+                controller: _nameController,
+                keyboardType: TextInputType.text,
+                label: 'POC',
+                decoration: const InputDecoration(
+                  labelText: 'POC',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                label: 'Phone Number',
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+              PaddedTextField(
+                controller: _locationController,
+                keyboardType: TextInputType.text,
+                label: 'Location',
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                ),
+                onChanged: (value) {
+                  updated = true;
+                },
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              submit(context, user.uid);
+            },
+            child: Text(widget.phone.id == null ? 'Add Phone' : 'Update Phone'),
+          ),
+        ],
+      ),
+    );
   }
 }

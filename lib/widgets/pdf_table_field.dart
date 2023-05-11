@@ -3,8 +3,8 @@ import 'package:pdf/widgets.dart' as pdf;
 
 class PdfTableField extends pdf.Widget {
   PdfTableField({
-    @required this.text,
-    @required this.width,
+    required this.text,
+    required this.width,
     this.isHeader = false,
   }) {
     SizedBox(

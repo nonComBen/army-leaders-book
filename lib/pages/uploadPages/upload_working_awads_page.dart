@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:io';
 
 import 'package:excel/excel.dart';
@@ -7,40 +5,44 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
+import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/working_award.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
-class UploadWorkingAwardsPage extends StatefulWidget {
+class UploadWorkingAwardsPage extends ConsumerStatefulWidget {
   const UploadWorkingAwardsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   UploadWorkingAwardsPageState createState() => UploadWorkingAwardsPageState();
 }
 
-class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, reason, ach1, ach2, ach3, ach4, citation, path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+class UploadWorkingAwardsPageState
+    extends ConsumerState<UploadWorkingAwardsPage> {
+  late List<String> columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, reason, ach1, ach2, ach3, ach4, citation, path;
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -67,17 +69,14 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
 
   void _saveData(BuildContext context) {
     if (soldierId == '') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Soldier Id must not be blank. To get your Soldiers\' Ids, download their data from the Soldiers page.')));
+      soldierIdIsBlankMessage(context);
       return;
     }
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       List<String> reasons = [
         'Achievement',
@@ -90,7 +89,7 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
       ];
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort;
+        String? rank, name, firstName, section, rankSort;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -156,201 +155,154 @@ class UploadWorkingAwardsPageState extends State<UploadWorkingAwardsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Working Awards'),
-      ),
-      body: Center(
-        child: Card(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    text: 'Pick File',
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Award Reason'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: reason,
-                          onChanged: (value) {
-                            setState(() {
-                              reason = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #1'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: ach1,
-                          onChanged: (value) {
-                            setState(() {
-                              ach1 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #2'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: ach2,
-                          onChanged: (value) {
-                            setState(() {
-                              ach2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #3'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: ach3,
-                          onChanged: (value) {
-                            setState(() {
-                              ach3 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Achievement #4'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: ach4,
-                          onChanged: (value) {
-                            setState(() {
-                              ach4 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Citation'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: citation,
-                          onChanged: (value) {
-                            setState(() {
-                              citation = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
-                    text: 'Upload Working Awards',
-                  )
-                ],
-              ),
+    return PlatformScaffold(
+      title: 'Upload Working Awards',
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Award Reason'),
+                  items: columnHeaders,
+                  value: reason,
+                  onChanged: (value) {
+                    setState(() {
+                      reason = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Achievement #1'),
+                  items: columnHeaders,
+                  value: ach1,
+                  onChanged: (value) {
+                    setState(() {
+                      ach1 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Achievement #2'),
+                  items: columnHeaders,
+                  value: ach2,
+                  onChanged: (value) {
+                    setState(() {
+                      ach2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Achievement #3'),
+                  items: columnHeaders,
+                  value: ach3,
+                  onChanged: (value) {
+                    setState(() {
+                      ach3 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Achievement #4'),
+                  items: columnHeaders,
+                  value: ach4,
+                  onChanged: (value) {
+                    setState(() {
+                      ach4 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Citation'),
+                  items: columnHeaders,
+                  value: citation,
+                  onChanged: (value) {
+                    setState(() {
+                      citation = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Working Awards'),
+          )
+        ],
       ),
     );
   }

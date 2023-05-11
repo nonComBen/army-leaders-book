@@ -1,10 +1,9 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'package:intl/intl.dart';
 
+import 'validate.dart';
+
 bool isOverdue(String date, int days) {
-  RegExp regExp = RegExp(r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$');
-  if (!regExp.hasMatch(date)) {
+  if (!isValidDate(date)) {
     return false;
   }
   var dateTime = DateTime.parse('$date 00:00:00');
@@ -12,7 +11,6 @@ bool isOverdue(String date, int days) {
   try {
     overdue = DateTime.now().isAfter(dateTime.add(Duration(days: days)));
   } catch (e) {
-    print(e);
     return false;
   }
   return overdue;
@@ -23,7 +21,6 @@ String calcRecDate(String date, String exp) {
   var expTime = DateTime.parse('$exp 00:00:00');
 
   int days = expTime.difference(dateTime).inDays + 1;
-  print(days);
 
   days = days * 2;
   if (days > 90) days = 90;

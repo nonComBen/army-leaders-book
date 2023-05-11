@@ -1,20 +1,21 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class UserObj {
-  String userId;
+  String? userId;
   String userRank;
   String userEmail;
   String userUnit;
   String userName;
-  String subToken;
+  String? subToken;
   bool adFree;
   bool tosAgree;
-  DateTime agreeDate;
+  DateTime? agreeDate;
   bool updatedUserArray;
-  DateTime createdDate;
-  DateTime lastLoginDate;
+  bool updatedPovs;
+  bool updatedAwards;
+  DateTime? createdDate;
+  DateTime? lastLoginDate;
 
   UserObj({
     this.userId,
@@ -27,6 +28,8 @@ class UserObj {
     this.tosAgree = false,
     this.agreeDate,
     this.updatedUserArray = false,
+    this.updatedPovs = false,
+    this.updatedAwards = false,
     this.createdDate,
     this.lastLoginDate,
   });
@@ -45,6 +48,8 @@ class UserObj {
     map['updatedUsersArray'] = updatedUserArray;
     map['created'] = createdDate;
     map['lastLogin'] = lastLoginDate;
+    map['updatedPovs'] = updatedPovs;
+    map['updatedAwards'] = updatedAwards;
 
     return map;
   }
@@ -54,26 +59,37 @@ class UserObj {
         createdTimestamp = Timestamp.fromDate(DateTime.now()),
         lastLoginTimestamp = Timestamp.fromDate(DateTime.now());
     String rank = '', userName = '', userUnit = '';
-    bool isUserArrayUpdated = false;
+    bool isUserArrayUpdated = false,
+        isPovsUpdated = false,
+        isAwardsUpdated = false;
 
     try {
       rank = doc['rank'];
       userName = doc['userName'];
       userUnit = doc['userUnit'];
     } catch (e) {
-      print(e);
+      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
     }
 
     try {
       agreeTimestamp = doc['agreeDate'] ?? Timestamp.fromDate(DateTime.now());
-    } on Exception catch (e) {
-      print('Error: $e');
+    } catch (e) {
+      FirebaseAnalytics.instance
+          .logEvent(name: 'AgreeTimeStamp Does Not Exist');
     }
 
     try {
       isUserArrayUpdated = doc['updatedUsersArray'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance
+          .logEvent(name: 'IsUsersArrayUpdated Does Not Exist');
+    }
+
+    try {
+      isPovsUpdated = doc['updatedPovs'];
+      isAwardsUpdated = doc['updatedAwards'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'updatedPovs Does Not Exist');
     }
 
     try {
@@ -81,7 +97,8 @@ class UserObj {
       lastLoginTimestamp =
           doc['lastLogin'] ?? Timestamp.fromDate(DateTime.now());
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance
+          .logEvent(name: 'CreatedTimeStamp Does Not Exist');
     }
 
     return UserObj(
@@ -95,6 +112,8 @@ class UserObj {
       tosAgree: doc['tosAgree'],
       agreeDate: agreeTimestamp.toDate(),
       updatedUserArray: isUserArrayUpdated,
+      updatedPovs: isPovsUpdated,
+      updatedAwards: isAwardsUpdated,
       createdDate: createdTimestamp.toDate(),
       lastLoginDate: lastLoginTimestamp.toDate(),
     );

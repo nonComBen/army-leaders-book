@@ -1,8 +1,9 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:leaders_book/models/award.dart';
+import 'package:leaders_book/models/pov.dart';
 
-void updateUsersArray(String uid) async {
+void updateUsersArray(String? uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<dynamic> users = [];
 
@@ -16,7 +17,7 @@ void updateUsersArray(String uid) async {
         try {
           users = doc['users'];
         } catch (e) {
-          print('Users does not exist: $e');
+          FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
         }
         if (!users.contains(uid)) {
           users.add(uid);
@@ -25,6 +26,58 @@ void updateUsersArray(String uid) async {
       }
     }
   });
+}
+
+void updatePovs(String uid) async {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  List<POV> povs = [];
+  List<String> soldierIds = [];
+  final snapshot =
+      await db.collection('povs').where('users', arrayContains: uid).get();
+  povs = snapshot.docs.map((e) => POV.fromSnapshot(e)).toList();
+  soldierIds = povs.map((e) => e.soldierId!).toList();
+  soldierIds = soldierIds.toSet().toList();
+  for (String id in soldierIds) {
+    List<Map<String, dynamic>> newPovs =
+        povs.where((e) => e.soldierId == id).toList().map((e) {
+      Map<String, dynamic> map = e.toMap();
+      map.remove('owner');
+      map.remove('users');
+      map.remove('soldierId');
+      return map;
+    }).toList();
+    db.collection('soldiers').doc(id).update({'povs': newPovs});
+  }
+  db.collection('users').doc(uid).update({'updatedPovs': true});
+  for (POV pov in povs) {
+    db.doc('povs/${pov.id}').delete();
+  }
+}
+
+void updateAwards(String uid) async {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  List<Award> awards = [];
+  List<String> soldierIds = [];
+  final snapshot =
+      await db.collection('awards').where('users', arrayContains: uid).get();
+  awards = snapshot.docs.map((e) => Award.fromSnapshot(e)).toList();
+  soldierIds = awards.map((e) => e.soldierId!).toList();
+  soldierIds = soldierIds.toSet().toList();
+  for (String id in soldierIds) {
+    List<Map<String, dynamic>> newAwards =
+        awards.where((e) => e.soldierId == id).toList().map((e) {
+      Map<String, dynamic> map = e.toMap();
+      map.remove('owner');
+      map.remove('users');
+      map.remove('soldierId');
+      return map;
+    }).toList();
+    db.collection('soldiers').doc(id).update({'awards': newAwards});
+  }
+  db.collection('users').doc(uid).update({'updatedAwards': true});
+  for (Award award in awards) {
+    db.doc('awards/${award.id}').delete();
+  }
 }
 
 void syncFromWebApp(String uid) async {

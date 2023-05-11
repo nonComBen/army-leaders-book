@@ -1,31 +1,34 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/constants.dart';
 import 'package:leaders_book/models/past_purchase.dart';
 import 'package:leaders_book/models/user.dart';
 import 'package:leaders_book/providers/subscription_state.dart';
-import 'package:provider/provider.dart';
 
-class IAPRepo extends ChangeNotifier {
-  User _user;
-  final BuildContext context;
+final iapRepoProvider = Provider<IAPRepo>((ref) {
+  return IAPRepo(
+    ref.read(subscriptionStateProvider.notifier),
+    ref.read(authProvider).currentUser(),
+  );
+});
 
-  IAPRepo(this.context, this._user) {
+class IAPRepo {
+  User? _user;
+  final SubscriptionState subState;
+
+  IAPRepo(this.subState, this._user) {
     updatePurchases();
     listenToLogin();
   }
 
-  UserObj _userObj;
+  UserObj? _userObj;
   bool hasActiveSubscription = false;
   List<PastPurchase> purchases = [];
 
-  StreamSubscription<User> _userSubscription;
-
   bool get isLoggedIn => _user != null;
-  UserObj get user => _userObj;
+  UserObj? get user => _userObj;
 
   final premiumIds = [
     'N5EIa03V7rSma0LDlko6YzGXuXF3', //bhultquist84
@@ -41,7 +44,7 @@ class IAPRepo extends ChangeNotifier {
   ];
 
   void listenToLogin() {
-    _userSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
       _user = user;
       updatePurchases();
     });
@@ -53,20 +56,19 @@ class IAPRepo extends ChangeNotifier {
       hasActiveSubscription = false;
       return;
     }
-    final subState = Provider.of<SubscriptionState>(context, listen: false);
     final purchaseSnapshot = await FirebaseFirestore.instance
         .collection('purchases')
-        .where('userId', isEqualTo: _user.uid)
+        .where('userId', isEqualTo: _user!.uid)
         .get();
 
     final userSnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .where('userId', isEqualTo: _user.uid)
+        .where('userId', isEqualTo: _user!.uid)
         .get();
 
     _userObj = UserObj.fromSnapshot(userSnapshot.docs.first);
     bool isSubscribed =
-        userSnapshot.docs.first['adFree'] || premiumIds.contains(_user.uid);
+        userSnapshot.docs.first['adFree'] || premiumIds.contains(_user!.uid);
 
     for (DocumentSnapshot doc in purchaseSnapshot.docs) {
       Timestamp expiry = doc['expiryDate'];
@@ -90,13 +92,5 @@ class IAPRepo extends ChangeNotifier {
     if (hasActiveSubscription) {
       subState.subscribe();
     }
-
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _userSubscription?.cancel();
-    super.dispose();
   }
 }

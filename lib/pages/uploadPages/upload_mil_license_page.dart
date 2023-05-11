@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,42 +5,45 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
+import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
 import '../../methods/upload_methods.dart';
 import '../../models/mil_license.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
-class UploadMilLicensePage extends StatefulWidget {
+class UploadMilLicensePage extends ConsumerStatefulWidget {
   const UploadMilLicensePage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   UploadMilLicensePageState createState() => UploadMilLicensePageState();
 }
 
-class UploadMilLicensePageState extends State<UploadMilLicensePage> {
-  FirebaseFirestore firestore;
+class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
+  late FirebaseFirestore firestore;
 
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId, date, exp, license, restrictions, vehicles, path;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+  late List<String> columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId, date, exp, license, restrictions, vehicles, path;
 
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -71,21 +72,18 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
 
   void _saveData(BuildContext context) {
     if (soldierId == '') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Soldier Id must not be blank. To get your Soldiers\' Ids, download their data from the Soldiers page.')));
+      soldierIdIsBlankMessage(context);
       return;
     }
     if (rows.length > 1) {
       firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -158,181 +156,140 @@ class UploadMilLicensePageState extends State<UploadMilLicensePage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Military Licenses'),
-      ),
-      body: Center(
-        child: Card(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    text: 'Pick File',
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: date,
-                          onChanged: (value) {
-                            setState(() {
-                              date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Expiration Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: exp,
-                          onChanged: (value) {
-                            setState(() {
-                              exp = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'License No.'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: license,
-                          onChanged: (value) {
-                            setState(() {
-                              license = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Restrictions'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: restrictions,
-                          onChanged: (value) {
-                            setState(() {
-                              restrictions = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Qualified Vehicles'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: vehicles,
-                          onChanged: (value) {
-                            setState(() {
-                              vehicles = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
-                    text: 'Upload Military Licenses',
-                  )
-                ],
-              ),
+    return PlatformScaffold(
+      title: 'Upload Military Licenses',
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Date'),
+                  items: columnHeaders,
+                  value: date,
+                  onChanged: (value) {
+                    setState(() {
+                      date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Expiration Date'),
+                  items: columnHeaders,
+                  value: exp,
+                  onChanged: (value) {
+                    setState(() {
+                      exp = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('License No.'),
+                  items: columnHeaders,
+                  value: license,
+                  onChanged: (value) {
+                    setState(() {
+                      license = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Restrictions'),
+                  items: columnHeaders,
+                  value: restrictions,
+                  onChanged: (value) {
+                    setState(() {
+                      restrictions = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Qualified Vehicles'),
+                  items: columnHeaders,
+                  value: vehicles,
+                  onChanged: (value) {
+                    setState(() {
+                      vehicles = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Military Licenses'),
+          )
+        ],
       ),
     );
   }

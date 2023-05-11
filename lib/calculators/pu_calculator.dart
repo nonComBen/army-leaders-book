@@ -1,7 +1,9 @@
-// ignore_for_file: file_names
-
 class PuCalculator {
-  int getPuScore(bool male, int ageGroupIndex, int puRaw) {
+  int getPuScore({
+    required bool male,
+    required int ageGroupIndex,
+    required int puRaw,
+  }) {
     if (male) {
       if (puRaw < 1) return 0;
       if (puRaw > 76) return 100;
@@ -13,7 +15,7 @@ class PuCalculator {
     }
   }
 
-  List<int> getBenchmarks(bool male, int ageGroupIndex) {
+  List<int> getBenchmarks({required bool male, required int ageGroupIndex}) {
     return benchmarks[male ? ageGroupIndex : ageGroupIndex + 10];
   }
 

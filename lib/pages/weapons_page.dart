@@ -1,38 +1,42 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/filter_documents.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/setting.dart';
 import '../../models/weapon.dart';
+import '../models/app_bar_option.dart';
+import '../widgets/my_toast.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_weapon_page.dart';
 import 'uploadPages/upload_weapons_page.dart';
 import '../pdf/weapons_pdf.dart';
-import '../providers/notifications_plugin_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class WeaponsPage extends StatefulWidget {
+class WeaponsPage extends ConsumerStatefulWidget {
   const WeaponsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/weapons-page';
@@ -41,41 +45,29 @@ class WeaponsPage extends StatefulWidget {
   WeaponsPageState createState() => WeaponsPageState();
 }
 
-class WeaponsPageState extends State<WeaponsPage> {
-  int _sortColumnIndex, overdueDays, amberDays;
+class WeaponsPageState extends ConsumerState<WeaponsPage> {
+  int _sortColumnIndex = 0, overdueDays = 180, amberDays = 150;
   bool _sortAscending = true,
       _adLoaded = false,
-      isSubscribed,
-      notificationsRefreshed = false,
+      isSubscribed = false,
       isInitial = true;
-  String _userId;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
-  BannerAd myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+  String? _userId;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  late SharedPreferences prefs;
+  BannerAd? myBanner;
+  FToast toast = FToast();
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -92,7 +84,7 @@ class WeaponsPageState extends State<WeaponsPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -100,26 +92,6 @@ class WeaponsPageState extends State<WeaponsPage> {
       initialize();
       isInitial = false;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
-    overdueDays = 180;
-    amberDays = 150;
-
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
   }
 
   void initialize() async {
@@ -155,91 +127,16 @@ class WeaponsPageState extends State<WeaponsPage> {
     super.dispose();
   }
 
-  void refreshNotifications() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    int monthsDue = 6;
-    List<dynamic> daysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      monthsDue = setting.weaponsMonths ?? 6;
-      daysBefore = setting.weaponsNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending.where((pr) => pr.payload == 'WEAPON').toList();
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    int startingId = prefs.getInt('runningId') ?? 0;
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a['date'].toString().compareTo(b['date'].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      if (i == 0) {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      } else if (docs[i]['date'] == docs[i - 1]['date']) {
-        dates.last[0] =
-            '${dates.last[0]}, ${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      } else {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                'Weapon Qual(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                androidAllowWhileIdle: true,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                payload: 'WEAPON',
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
-  }
-
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const UploadWeaponsPage()));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -284,7 +181,7 @@ class WeaponsPageState extends State<WeaponsPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -297,23 +194,17 @@ class WeaponsPageState extends State<WeaponsPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/weaponStats.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/weaponStats.xlsx');
-                      },
-                    )
-                  : null,
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$dir/weaponStats.xlsx'),
             ),
           );
         }
@@ -345,10 +236,12 @@ class WeaponsPageState extends State<WeaponsPage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message:
+              'Downloading PDF files is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -359,7 +252,7 @@ class WeaponsPageState extends State<WeaponsPage> {
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
     WeaponsPdf pdf = WeaponsPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -378,35 +271,32 @@ class WeaponsPageState extends State<WeaponsPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/weaponStats.pdf');
-                  },
-                )));
+      toast.showToast(
+        child: MyToast(
+          message: message,
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/weaponStats.pdf'),
+        ),
+      );
     }
   }
 
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDocs = List.from(documents);
-    } else {
-      filteredDocs =
-          documents.where((element) => element['section'] == section).toList();
-    }
+  void _filterRecords(List<String> sections) {
+    filteredDocs = documents
+        .where((element) => sections.contains(element['section']))
+        .toList();
+
     setState(() {});
   }
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -415,9 +305,11 @@ class WeaponsPageState extends State<WeaponsPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
       return;
     }
     Navigator.push(
@@ -434,7 +326,7 @@ class WeaponsPageState extends State<WeaponsPage> {
         MaterialPageRoute(
             builder: (context) => EditWeaponPage(
                   weapon: Weapon(
-                    owner: _userId,
+                    owner: _userId!,
                     users: [_userId],
                   ),
                 )));
@@ -484,7 +376,7 @@ class WeaponsPageState extends State<WeaponsPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -625,9 +517,9 @@ class WeaponsPageState extends State<WeaponsPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -635,210 +527,146 @@ class WeaponsPageState extends State<WeaponsPage> {
     });
   }
 
-  List<Widget> appBarMenu(BuildContext context, double width) {
-    List<Widget> buttons = <Widget>[];
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    documents.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < documents.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      } else if (documents[i]['section'] != documents[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      }
-    }
-
-    List<Widget> editButton = <Widget>[
-      Tooltip(
-          message: 'Filter Records',
-          child: PopupMenuButton(
-            icon: const Icon(Icons.filter_alt),
-            onSelected: (String result) => _filterRecords(result),
-            itemBuilder: (context) {
-              return sections;
-            },
-          )),
-      Tooltip(
-          message: 'Edit Record',
-          child: IconButton(
-              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
-    ];
-
-    List<PopupMenuEntry<String>> popupItems = [];
-
-    if (width > 600) {
-      buttons.add(
-        Tooltip(
-            message: 'Download as Excel',
-            child: IconButton(
-                icon: const Icon(Icons.file_download),
-                onPressed: () {
-                  _downloadExcel();
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Upload Data',
-            child: IconButton(
-                icon: const Icon(Icons.file_upload),
-                onPressed: () {
-                  _uploadExcel(context);
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'download',
-        child: Text('Download as Excel'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'upload',
-        child: Text('Upload Data'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
-      ));
-    }
-    if (width > 400) {
-      buttons.add(
-        Tooltip(
-            message: 'Delete Record(s)',
-            child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteRecord())),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'delete',
-        child: Text('Delete Record(s)'),
-      ));
-    }
-
-    List<Widget> overflowButton = <Widget>[
-      PopupMenuButton<String>(
-        onSelected: (String result) {
-          if (result == 'upload') {
-            _uploadExcel(context);
-          }
-          if (result == 'download') {
-            _downloadExcel();
-          }
-          if (result == 'delete') {
-            _deleteRecord();
-          }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return popupItems;
-        },
-      )
-    ];
-
-    if (width > 600) {
-      return buttons + editButton;
-    } else if (width <= 400) {
-      return editButton + overflowButton;
-    } else {
-      return buttons + editButton + overflowButton;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Weapon Stats'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner,
-                ),
+    final user = ref.read(authProvider).currentUser()!;
+    final width = MediaQuery.of(context).size.width;
+    toast.context = context;
+    return PlatformScaffold(
+      title: 'Weapon Quals',
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isIOS)
+            AppBarOption(
+              title: 'New Qualification',
+              icon: Icon(
+                CupertinoIcons.add,
+                color: getOnPrimaryColor(context),
               ),
-            Flexible(
-              flex: 1,
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).size.width),
-                      rows: _createRows(
-                          filteredDocs, MediaQuery.of(context).size.width),
+              onPressed: () => _newRecord(context),
+            ),
+          AppBarOption(
+            title: 'Edit Qualification',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _editRecord(),
+          ),
+          AppBarOption(
+            title: 'Delete Qualification',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _deleteRecord(),
+          ),
+          AppBarOption(
+            title: 'Filter Qualifications',
+            icon: Icon(
+              Icons.filter_alt,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => showFilterOptions(
+                context, getSections(documents), _filterRecords),
+          ),
+          AppBarOption(
+            title: 'Download Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadExcel(),
+          ),
+          AppBarOption(
+            title: 'Upload Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.upload
+                  : CupertinoIcons.cloud_upload,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _uploadExcel(context),
+          ),
+          AppBarOption(
+            title: 'Download PDF',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.picture_as_pdf
+                  : CupertinoIcons.doc,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadPdf(),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: TableFrame(
+        children: [
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        filteredDocs, MediaQuery.of(context).size.width),
+                  ),
+                ),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const <Widget>[
+                        Text(
+                          'Blue Text: Failed',
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Amber Text: Due within 30 days',
+                          style: TextStyle(
+                              color: Colors.amber, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Red Text: Overdue',
+                          style: TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.bold),
+                        )
+                      ],
                     ),
                   ),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Blue Text: Failed',
-                            style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Amber Text: Due within 30 days',
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Red Text: Overdue',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                  )
-                ],
+                )
+              ],
+            ),
+          ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
             ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
 }

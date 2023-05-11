@@ -1,10 +1,11 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../methods/theme_methods.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
+
 class PrivacyPolicyPage extends StatelessWidget {
-  const PrivacyPolicyPage({Key key}) : super(key: key);
+  const PrivacyPolicyPage({Key? key}) : super(key: key);
 
   static const routeName = '/privacy-policy-page';
 
@@ -34,18 +35,15 @@ class PrivacyPolicyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Privacy Policy'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: width > 916 ? (width - 900) / 2 : 16),
-        child: Card(
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            constraints: const BoxConstraints(maxWidth: 900),
+    return PlatformScaffold(
+      title: 'Privacy Policy',
+      body: Center(
+        heightFactor: 1,
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: Card(
+            color: getContrastingBackgroundColor(context),
             child: ListView(
               shrinkWrap: true,
               children: <Widget>[

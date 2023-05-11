@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'package:leaders_book/methods/download_methods.dart';
 import 'package:pdf/pdf.dart';
@@ -7,9 +5,9 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PermProfilesPdf {
-  PermProfilesPdf(
-    this.documents,
-  );
+  PermProfilesPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 

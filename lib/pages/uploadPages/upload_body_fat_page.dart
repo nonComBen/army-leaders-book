@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,27 +5,32 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
+import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
 import '../../methods/upload_methods.dart';
 import '../../models/bodyfat.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
-class UploadBodyFatsPage extends StatefulWidget {
+class UploadBodyFatsPage extends ConsumerStatefulWidget {
   const UploadBodyFatsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   UploadBodyFatsPageState createState() => UploadBodyFatsPageState();
 }
 
-class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
+  late List<String> columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       date,
       age,
       height,
@@ -42,18 +45,16 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
       gender,
       heightDouble;
 
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
-
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -88,21 +89,18 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
 
   void _saveData(BuildContext context) {
     if (soldierId == '') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Soldier Id must not be blank. To get your Soldiers\' Ids, download their data from the Soldiers page.')));
+      soldierIdIsBlankMessage(context);
       return;
     }
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         bool passBmi, passBf;
         int ageInt;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
@@ -201,310 +199,238 @@ class UploadBodyFatsPageState extends State<UploadBodyFatsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Body Comp Stats'),
-      ),
-      body: Center(
-        child: Card(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    text: 'Pick File',
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: date,
-                          onChanged: (value) {
-                            setState(() {
-                              date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Gender'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: gender,
-                          onChanged: (value) {
-                            setState(() {
-                              gender = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Age'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: age,
-                          onChanged: (value) {
-                            setState(() {
-                              age = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Height'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: height,
-                          onChanged: (value) {
-                            setState(() {
-                              height = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'Weight'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: weight,
-                          onChanged: (value) {
-                            setState(() {
-                              weight = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'BMI Pass'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: bmiPass,
-                          onChanged: (value) {
-                            setState(() {
-                              bmiPass = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Height to Nearest Half Inch'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: heightDouble,
-                          onChanged: (value) {
-                            setState(() {
-                              heightDouble = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Neck'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: neck,
-                          onChanged: (value) {
-                            setState(() {
-                              neck = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Waist'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: waist,
-                          onChanged: (value) {
-                            setState(() {
-                              waist = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(labelText: 'Hip'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: hip,
-                          onChanged: (value) {
-                            setState(() {
-                              hip = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'BF Percent'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: percent,
-                          onChanged: (value) {
-                            setState(() {
-                              percent = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'BF Pass'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: bfPass,
-                          onChanged: (value) {
-                            setState(() {
-                              bfPass = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
-                    text: 'Upload Body Comp Stats',
-                  )
-                ],
-              ),
+    return PlatformScaffold(
+      title: 'Upload Body Comp Stats',
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Date'),
+                  items: columnHeaders,
+                  value: date,
+                  onChanged: (value) {
+                    setState(() {
+                      date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Gender'),
+                  items: columnHeaders,
+                  value: gender,
+                  onChanged: (value) {
+                    setState(() {
+                      gender = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Age'),
+                  items: columnHeaders,
+                  value: age,
+                  onChanged: (value) {
+                    setState(() {
+                      age = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Height'),
+                  items: columnHeaders,
+                  value: height,
+                  onChanged: (value) {
+                    setState(() {
+                      height = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Weight'),
+                  items: columnHeaders,
+                  value: weight,
+                  onChanged: (value) {
+                    setState(() {
+                      weight = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('BMI Pass'),
+                  items: columnHeaders,
+                  value: bmiPass,
+                  onChanged: (value) {
+                    setState(() {
+                      bmiPass = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Height to Nearest Half Inch'),
+                  items: columnHeaders,
+                  value: heightDouble,
+                  onChanged: (value) {
+                    setState(() {
+                      heightDouble = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Neck'),
+                  items: columnHeaders,
+                  value: neck,
+                  onChanged: (value) {
+                    setState(() {
+                      neck = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Waist'),
+                  items: columnHeaders,
+                  value: waist,
+                  onChanged: (value) {
+                    setState(() {
+                      waist = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Hip'),
+                  items: columnHeaders,
+                  value: hip,
+                  onChanged: (value) {
+                    setState(() {
+                      hip = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('BF Percent'),
+                  items: columnHeaders,
+                  value: percent,
+                  onChanged: (value) {
+                    setState(() {
+                      percent = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('BF Pass'),
+                  items: columnHeaders,
+                  value: bfPass,
+                  onChanged: (value) {
+                    setState(() {
+                      bfPass = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Body Comp Stats'),
+          )
+        ],
       ),
     );
   }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class FormattedTextButton extends StatelessWidget {
-  const FormattedTextButton({Key key, this.label, this.onPressed})
+  const FormattedTextButton(
+      {Key? key, required this.label, required this.onPressed})
       : super(key: key);
   final String label;
-  final Function onPressed;
+  final void Function()? onPressed;
 
   @override
   Widget build(BuildContext context) {

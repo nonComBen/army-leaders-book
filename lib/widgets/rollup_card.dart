@@ -1,74 +1,69 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 class RollupCard extends StatelessWidget {
-  const RollupCard(
-      {Key key, this.title, this.info1, this.info2, this.button, this.button2})
-      : super(key: key);
+  const RollupCard({
+    Key? key,
+    required this.title,
+    required this.info1,
+    required this.info2,
+    required this.button,
+    this.button2,
+  }) : super(key: key);
 
   final String title;
   final Widget info1, info2;
-  final ElevatedButton button, button2;
-
-  Widget _row1() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Expanded(
-            child: info1,
-          ),
-          Expanded(
-            child: info2,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buttonBar() {
-    if (title == 'Profiles') {
-      return ButtonBar(
-        children: <Widget>[button, button2],
-      );
-    } else {
-      return ButtonBar(
-        children: <Widget>[
-          button,
-        ],
-      );
-    }
-  }
+  final Widget? button, button2;
 
   @override
   Widget build(BuildContext context) {
     return Card(
+        color: getContrastingBackgroundColor(context),
         child: Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
-              child: Text(
-                title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 18.0),
-                textAlign: TextAlign.center,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                      color: getTextColor(context),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-            ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: info1,
+                      ),
+                      Expanded(
+                        child: info2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                  child: ButtonBar(
+                layoutBehavior: ButtonBarLayoutBehavior.constrained,
+                children: <Widget>[
+                  button!,
+                  if (button2 != null) button2!,
+                ],
+              ))
+            ],
           ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
-              child: _row1(),
-            ),
-          ),
-          Expanded(child: _buttonBar())
-        ],
-      ),
-    ));
+        ));
   }
 }

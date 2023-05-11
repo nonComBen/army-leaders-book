@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SharedPreferencesProvider with ChangeNotifier {
-  final SharedPreferences prefs;
-  SharedPreferencesProvider(this.prefs);
-
-  SharedPreferences get sharedPrefs {
-    return prefs;
-  }
-}
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError();
+});

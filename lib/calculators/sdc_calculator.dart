@@ -1,4 +1,8 @@
-int getSdcScore(int time, int ageGroup, bool male) {
+int getSdcScore({
+  required int time,
+  required int ageGroup,
+  required bool male,
+}) {
   if (male) {
     if (time < 129) return 100;
     if (time > 416) return 0;

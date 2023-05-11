@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'package:leaders_book/methods/download_methods.dart';
 import 'package:pdf/pdf.dart';
@@ -7,13 +5,13 @@ import 'package:pdf/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EquipmentPdf {
-  EquipmentPdf(
-    this.documents,
-  );
+  EquipmentPdf({
+    required this.documents,
+  });
 
   final List<DocumentSnapshot> documents;
 
-  Widget createLabeledField(String value, String label, double inches) {
+  Widget createLabeledField(String? value, String label, double inches) {
     double width = inches * 72;
     return DecoratedBox(
       decoration: BoxDecoration(

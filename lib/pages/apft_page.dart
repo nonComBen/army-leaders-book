@@ -1,38 +1,43 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/apft.dart';
+import '../methods/create_app_bar_actions.dart';
+import '../methods/filter_documents.dart';
+import '../methods/theme_methods.dart';
+import '../models/app_bar_option.dart';
+import '../widgets/my_toast.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_apft_page.dart';
 import '../pdf/apfts_pdf.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/setting.dart';
 import 'uploadPages/upload_apft_page.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../providers/notifications_plugin_provider.dart';
 import '../providers/tracking_provider.dart';
 
-class ApftPage extends StatefulWidget {
+class ApftPage extends ConsumerStatefulWidget {
   const ApftPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/apft-page';
@@ -41,43 +46,36 @@ class ApftPage extends StatefulWidget {
   ApftPageState createState() => ApftPageState();
 }
 
-class ApftPageState extends State<ApftPage> {
-  int _sortColumnIndex, puAve, suAve, runAve, totalAve, overdueDays, amberDays;
+class ApftPageState extends ConsumerState<ApftPage> {
+  int _sortColumnIndex = 0,
+      puAve = 0,
+      suAve = 0,
+      runAve = 0,
+      totalAve = 0,
+      overdueDays = 180,
+      amberDays = 150;
   bool _sortAscending = true,
       _adLoaded = false,
-      isSubscribed,
+      isSubscribed = false,
       notificationsRefreshed = false,
       isInitial = true;
-  String _userId;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
-  QuerySnapshot snapshot;
-  BannerAd myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+  String? _userId;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  late SharedPreferences prefs;
+  QuerySnapshot? snapshot;
+  BannerAd? myBanner;
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-    print('Provider Subscribed State: $isSubscribed');
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -94,7 +92,7 @@ class ApftPageState extends State<ApftPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -102,26 +100,6 @@ class ApftPageState extends State<ApftPage> {
       initialize();
       isInitial = false;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
-    overdueDays = 180;
-    amberDays = 150;
-
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
   }
 
   void initialize() async {
@@ -144,7 +122,7 @@ class ApftPageState extends State<ApftPage> {
         .collection('settings')
         .where('owner', isEqualTo: _userId)
         .get();
-    DocumentSnapshot doc = snapshot.docs[0];
+    DocumentSnapshot doc = snapshot!.docs[0];
     setState(() {
       overdueDays = doc['acftMonths'] * 30;
       amberDays = overdueDays - 30;
@@ -158,116 +136,20 @@ class ApftPageState extends State<ApftPage> {
     super.dispose();
   }
 
-  void refreshNotifications() async {
-    int monthsDue = 6;
-    List<dynamic> daysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      monthsDue = setting.acftMonths ?? 6;
-      daysBefore = setting.acftNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending.where((pr) => pr.payload == 'APFT').toList();
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    int startingId = prefs.getInt('runningId') ?? 0;
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a['date'].toString().compareTo(b['date'].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      if (i == 0) {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      } else if (docs[i]['date'] == docs[i - 1]['date']) {
-        dates.last[0] =
-            '${dates.last[0]}, ${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      } else {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                'APFT(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                androidAllowWhileIdle: true,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                payload: 'APFT',
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
-  }
-
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadApftPage()));
-      // Widget title = const Text('Upload APFT Stats');
-      // Widget content = SingleChildScrollView(
-      //   child: Container(
-      //     padding: const EdgeInsets.all(8.0),
-      //     child: const Text(
-      //       'To upload your APFT Stats, the file must be in .csv format. Also, there needs to be a Soldier Id column and the Soldier Id '
-      //       'has to match the Soldier Id in the database. To get your Soldier Ids, download the data from Soldiers page. If Excel '
-      //       'gives you an error for Soldier Id, change cell format to Text from General and delete the \'=\'. Date also needs to be in '
-      //       'yyyy-MM-dd or M/d/yy format and aerobic event will default to Run if the event does not match an option in the dropdown menu (case '
-      //       'sensitive).',
-      //     ),
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadApftPage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadApftPage()),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -322,7 +204,7 @@ class ApftPageState extends State<ApftPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -335,28 +217,24 @@ class ApftPageState extends State<ApftPage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/apftStats.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/apftStats.xlsx');
-                      },
-                    )
-                  : null,
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$dir/apftStats.xlsx'),
             ),
           );
         }
       } catch (e) {
-        print('Error: $e');
+        FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
       }
     }
   }
@@ -382,10 +260,14 @@ class ApftPageState extends State<ApftPage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message:
+              'Downloading PDF files is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -396,7 +278,7 @@ class ApftPageState extends State<ApftPage> {
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
     ApftsPdf pdf = ApftsPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -415,36 +297,37 @@ class ApftPageState extends State<ApftPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/apftStats.pdf');
-                  },
-                )));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: MyToast(
+          message: message,
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/apftStats.pdf'),
+        ),
+      );
     }
   }
 
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDocs = List.from(documents);
-    } else {
-      filteredDocs =
-          documents.where((element) => element['section'] == section).toList();
-    }
+  void _filterRecords(List<String> sections) {
+    filteredDocs = documents
+        .where((element) => sections.contains(element['section']))
+        .toList();
     _calcAves();
     setState(() {});
   }
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
+
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -453,29 +336,38 @@ class ApftPageState extends State<ApftPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
+
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditApftPage(
-                  apft: Apft.fromSnapshot(_selectedDocuments[0]),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditApftPage(
+          apft: Apft.fromSnapshot(_selectedDocuments[0]),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditApftPage(
-                  apft: Apft(
-                    owner: _userId,
-                    users: [_userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditApftPage(
+          apft: Apft(
+            owner: _userId!,
+            users: [_userId],
+          ),
+        ),
+      ),
+    );
   }
 
   void _calcAves() {
@@ -489,19 +381,19 @@ class ApftPageState extends State<ApftPage> {
     totalAve = 0;
     for (DocumentSnapshot doc in filteredDocs) {
       if (doc['puScore'] != 0) {
-        puAve += doc['puScore'];
+        puAve += doc['puScore'] as int;
         pu++;
       }
       if (doc['suScore'] != 0) {
-        suAve += doc['suScore'];
+        suAve += doc['suScore'] as int;
         su++;
       }
       if (doc['runScore'] != 0) {
-        runAve += doc['runScore'];
+        runAve += doc['runScore'] as int;
         run++;
       }
       if (doc['puScore'] != 0 && doc['suScore'] != 0 && doc['runScore'] != 0) {
-        totalAve += doc['total'];
+        totalAve += doc['total'] as int;
         total++;
       }
     }
@@ -561,7 +453,7 @@ class ApftPageState extends State<ApftPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -720,9 +612,9 @@ class ApftPageState extends State<ApftPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -730,171 +622,98 @@ class ApftPageState extends State<ApftPage> {
     });
   }
 
-  List<Widget> appBarMenu(BuildContext context, double width) {
-    List<Widget> buttons = <Widget>[];
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    documents.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < documents.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      } else if (documents[i]['section'] != documents[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      }
-    }
-
-    List<Widget> editButton = <Widget>[
-      Tooltip(
-          message: 'Filter Records',
-          child: PopupMenuButton(
-            icon: const Icon(Icons.filter_alt),
-            onSelected: (String result) => _filterRecords(result),
-            itemBuilder: (context) {
-              return sections;
-            },
-          )),
-      Tooltip(
-          message: 'Edit Record',
-          child: IconButton(
-              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
-    ];
-
-    List<PopupMenuEntry<String>> popupItems = [];
-
-    if (width > 600) {
-      buttons.add(
-        Tooltip(
-            message: 'Download as Excel',
-            child: IconButton(
-                icon: const Icon(Icons.file_download),
-                onPressed: () {
-                  _downloadExcel();
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Upload Data',
-            child: IconButton(
-                icon: const Icon(Icons.file_upload),
-                onPressed: () {
-                  _uploadExcel(context);
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'download',
-        child: Text('Download as Excel'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'upload',
-        child: Text('Upload Data'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
-      ));
-    }
-    if (width > 400) {
-      buttons.add(
-        Tooltip(
-            message: 'Delete Record(s)',
-            child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteRecord())),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'delete',
-        child: Text('Delete Record(s)'),
-      ));
-    }
-
-    List<Widget> overflowButton = <Widget>[
-      PopupMenuButton<String>(
-        onSelected: (String result) {
-          if (result == 'upload') {
-            _uploadExcel(context);
-          }
-          if (result == 'download') {
-            _downloadExcel();
-          }
-          if (result == 'delete') {
-            _deleteRecord();
-          }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return popupItems;
-        },
-      )
-    ];
-
-    if (width > 600) {
-      return buttons + editButton;
-    } else if (width <= 400) {
-      return editButton + overflowButton;
-    } else {
-      return buttons + editButton + overflowButton;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('APFT Stats'),
-            actions: appBarMenu(context, width)),
+    final user = ref.read(authProvider).currentUser()!;
+    return PlatformScaffold(
+        title: 'APFT Stats',
+        actions: createAppBarActions(
+          width,
+          [
+            if (!kIsWeb && Platform.isIOS)
+              AppBarOption(
+                title: 'New APFT',
+                icon: Icon(
+                  CupertinoIcons.add,
+                  color: getOnPrimaryColor(context),
+                ),
+                onPressed: () => _newRecord(context),
+              ),
+            AppBarOption(
+              title: 'Edit APFT',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.edit
+                    : CupertinoIcons.pencil,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _editRecord(),
+            ),
+            AppBarOption(
+              title: 'Delete APFT',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.delete
+                    : CupertinoIcons.delete,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _deleteRecord(),
+            ),
+            AppBarOption(
+              title: 'Filter APFTs',
+              icon: Icon(
+                Icons.filter_alt,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => showFilterOptions(
+                  context, getSections(documents), _filterRecords),
+            ),
+            AppBarOption(
+              title: 'Download Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.download
+                    : CupertinoIcons.cloud_download,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _downloadExcel(),
+            ),
+            AppBarOption(
+              title: 'Upload Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.upload
+                    : CupertinoIcons.cloud_upload,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _uploadExcel(context),
+            ),
+            AppBarOption(
+              title: 'Download PDF',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.picture_as_pdf
+                    : CupertinoIcons.doc,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _downloadPdf(),
+            ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {
               _newRecord(context);
             }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        body: TableFrame(
           children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner,
-                ),
-              ),
-            Flexible(
-              flex: 1,
+            Expanded(
               child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -907,6 +726,7 @@ class ApftPageState extends State<ApftPage> {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 850.0),
                     child: Card(
+                      color: getContrastingBackgroundColor(context),
                       child: Column(
                         children: <Widget>[
                           const Padding(
@@ -951,6 +771,7 @@ class ApftPageState extends State<ApftPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -980,6 +801,16 @@ class ApftPageState extends State<ApftPage> {
                 ],
               ),
             ),
+            if (_adLoaded)
+              Container(
+                alignment: Alignment.center,
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
+                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                child: AdWidget(
+                  ad: myBanner!,
+                ),
+              ),
           ],
         ));
   }

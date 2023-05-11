@@ -1,11 +1,16 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TrackingProvider with ChangeNotifier {
+final trackingProvider = Provider<TrackingService>((ref) {
+  return TrackingService(ref.read(sharedPreferencesProvider));
+});
+
+class TrackingService {
   bool _trackingAllowed = false;
   final SharedPreferences prefs;
-  TrackingProvider(this.prefs) {
+  TrackingService(this.prefs) {
     final trackingAllowed = prefs.getBool('trackingAllowed') ?? true;
     _trackingAllowed = trackingAllowed;
   }
@@ -16,12 +21,10 @@ class TrackingProvider with ChangeNotifier {
 
   void allowTracking() {
     _trackingAllowed = true;
-    notifyListeners();
   }
 
   void disallowTracking() {
     _trackingAllowed = false;
-    notifyListeners();
   }
 
   Future<bool> getTrackingFromPermission() async {

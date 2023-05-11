@@ -1,7 +1,5 @@
-// ignore_for_file: file_names
-
 class SuCalculator {
-  int getSuScore(int ageGroupIndex, int suRaw) {
+  int getSuScore({required int ageGroupIndex, required int suRaw}) {
     if (suRaw < 21) return 0;
     if (suRaw > 81) return 100;
     return suTable[suRaw - 21][ageGroupIndex];

@@ -1,62 +1,57 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/models/user.dart';
+import 'package:leaders_book/providers/root_provider.dart';
+import 'package:leaders_book/providers/shared_prefs_provider.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_loading_widget.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../../providers/subscription_purchases.dart';
-import '../../providers/subscription_state.dart';
-import '../methods/date_methods.dart';
-import '../providers/tracking_provider.dart';
-import '../methods/show_on_login.dart';
-import '../../methods/show_snackbar.dart';
-import '../methods/update_methods.dart';
-import '../../methods/validate.dart';
-import '../../models/purchasable_product.dart';
-import '../../models/setting.dart';
-import 'acft_page.dart';
-import 'daily_perstat_page.dart';
-import 'settings_page.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/center_progress_indicator.dart';
-import '../../widgets/main_drawer.dart';
-import '../providers/user_provider.dart';
-import '../widgets/perstat_rollup_card.dart';
-import '../widgets/rollup_card.dart';
-import 'apft_page.dart';
-import 'perstat_page.dart';
-import 'appointments_page.dart';
-import 'temp_profiles_page.dart';
-import 'perm_profile_page.dart';
-import 'bodyfat_page.dart';
-import 'weapons_page.dart';
-import 'flags_page.dart';
-import 'medpros_page.dart';
-import 'training_page.dart';
-import '../providers/root_provider.dart';
-import '../auth_provider.dart';
-import '../providers/notifications_plugin_provider.dart';
-import '../classes/iap_repo.dart';
-import '../methods/custom_alert_dialog.dart';
-import '../providers/shared_prefs_provider.dart';
-import '../widgets/show_by_name_content.dart';
+import '../../../providers/subscription_state.dart';
+import '../../methods/date_methods.dart';
+import '../../methods/theme_methods.dart';
+import '../../providers/tracking_provider.dart';
+import '../../methods/show_on_login.dart';
+import '../../methods/update_methods.dart';
+import '../../../methods/validate.dart';
+import '../../../models/setting.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../acft_page.dart';
+import '../daily_perstat_page.dart';
+import '../../../widgets/anon_warning_banner.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/perstat_rollup_card.dart';
+import '../../widgets/rollup_card.dart';
+import '../apft_page.dart';
+import '../perstat_page.dart';
+import '../appointments_page.dart';
+import '../temp_profiles_page.dart';
+import '../perm_profile_page.dart';
+import '../bodyfat_page.dart';
+import '../weapons_page.dart';
+import '../flags_page.dart';
+import '../medpros_page.dart';
+import '../training_page.dart';
+import '../../classes/iap_repo.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../widgets/show_by_name_content.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({
-    Key key,
+class RollupTab extends ConsumerStatefulWidget {
+  const RollupTab({
+    Key? key,
   }) : super(key: key);
+
+  static const String title = 'Rollup';
 
   @override
   HomePageState createState() => HomePageState();
@@ -74,168 +69,60 @@ enum HomeCard {
   training
 }
 
-class HomePageState extends State<HomePage> with WidgetsBindingObserver {
+class HomePageState extends ConsumerState<RollupTab>
+    with WidgetsBindingObserver {
   final subId = 'ad_free_sub',
       iosSubId = 'premium_sub',
       subIdTwo = 'ad_free_two';
-  final testAd = 'ca-app-pub-3940256099942544/6300978111';
   final androidAd = 'ca-app-pub-2431077176117105/1369522276';
   final iosAd = 'ca-app-pub-2431077176117105/9894231072';
   String subToken = '';
-  bool _storeAvailable,
-      _requireUnlock,
+  bool _requireUnlock = false,
       _localAuthSupported = false,
       _adLoaded = false,
       verified = false,
       isInitial = true,
       isSubscribed = true,
       notificationsInitialized = false;
-  StreamSubscription<List<PurchaseDetails>> _streamSubscription;
-  StreamSubscription<QuerySnapshot> _soldierSubscription;
+  StreamSubscription<List<PurchaseDetails>>? _streamSubscription;
+  StreamSubscription<QuerySnapshot>? _soldierSubscription;
   final _firestore = FirebaseFirestore.instance;
-  Timer timer;
+  Timer? timer;
   final format = DateFormat('yyyy-MM-dd');
-  Setting setting;
-  LocalAuthentication _localAuth;
-  SubscriptionPurchases sp;
-  SubscriptionState subState;
-  BannerAd myBanner;
-  RootProvider _rootProvider;
-  UserObj _userObj;
+  Setting? setting;
+  late LocalAuthentication _localAuth;
+  SubscriptionState? subState;
+  BannerAd? myBanner;
+  late RootService _rootService;
+  UserObj? _userObj;
 
-  final _scaffoldState = GlobalKey<ScaffoldState>();
+  @override
+  void initState() {
+    super.initState();
 
-  void signOut(BuildContext context) {
-    var auth = AuthProvider.of(context).auth;
-    try {
-      _rootProvider.signOut();
-      auth.signOut();
-
-      Provider.of<SubscriptionState>(context, listen: false).unSubscribe();
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  void signOutWarning(BuildContext context) {
-    // ignore: close_sinks
-    Widget title = const Text('Sign Out?');
-    Widget content = Container(
-      padding: const EdgeInsets.all(8.0),
-      child: const Text(
-          'Are you sure you want to sign out? Any data you saved will be lost unless you create an account.'),
-    );
-    customAlertDialog(
-      context: context,
-      title: title,
-      content: content,
-      primaryText: 'Yes',
-      primary: () {
-        signOut(context);
-      },
-      secondaryText: 'Create Account',
-      secondary: () {
-        _rootProvider.linkAnonymous();
-        return false;
-      },
-    );
-  }
-
-  void removeAds() {
-    if (_adLoaded) {
-      myBanner?.dispose();
-      _adLoaded = false;
-    }
-  }
-
-  void subscribe() async {
-    if (_storeAvailable) {
-      PurchasableProduct product;
-      if (Platform.isAndroid) {
-        product =
-            sp.products.firstWhere((element) => element.id == 'ad_free_two');
-      } else {
-        product =
-            sp.products.firstWhere((element) => element.id == 'premium_sub');
-      }
-      await sp.buy(product);
-      print('...Purchse complete');
-    } else {
-      showSnackbar(context, 'Store is not available');
-    }
-  }
-
-  @pragma('vm:entry-point')
-  Future onSelectNotification(BuildContext context, String payload) async {
-    if (payload == 'ACFT') {
-      await Navigator.of(context).pushNamed(AcftPage.routeName);
-    } else if (payload == 'APFT') {
-      await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const ApftPage()));
-    } else if (payload == 'WEAPON') {
-      await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const WeaponsPage()));
-    } else if (payload == 'PHA' ||
-        payload == 'Dental' ||
-        payload == 'Vision' ||
-        payload == 'Hearing' ||
-        payload == 'HIV') {
-      await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const MedProsPage()));
-    } else if (payload == 'BF') {
-      await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const BodyfatPage()));
-    } else {
-      return Future.value(null);
-    }
-  }
-
-  Future onDidReceiveNotification(
-      int id, String title, String body, String payload) async {
-    showCupertinoDialog(
-      context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('Ok'),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop();
-            },
-          )
-        ],
-      ),
-    );
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userObj = Provider.of<UserProvider>(context).user;
+    _userObj = ref.read(userProvider).user;
     if (isInitial && _userObj != null) {
       isInitial = false;
       init();
     }
 
-    isSubscribed =
-        Provider.of<SubscriptionState>(context, listen: false).isSubscribed;
-    print('Provider State Subscribed: $isSubscribed');
+    isSubscribed = ref.watch(subscriptionStateProvider);
 
-    final notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context, listen: false)
-            .notificationsPlugin;
     if (_adLoaded && isSubscribed) {
       removeAds();
     }
     if (!kIsWeb && !_adLoaded && !isSubscribed) {
-      final trackingProvider =
-          Provider.of<TrackingProvider>(context, listen: false);
-      bool trackingAllowed = trackingProvider.trackingAllowed;
+      final trackingService = ref.read(trackingProvider);
+      bool trackingAllowed = trackingService.trackingAllowed;
       if (trackingAllowed) {
-        trackingAllowed = await trackingProvider.getTrackingFromPermission();
+        trackingAllowed = await trackingService.getTrackingFromPermission();
       }
 
       String adUnitId = kIsWeb
@@ -245,69 +132,53 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               : iosAd;
 
       myBanner = BannerAd(
-          adUnitId: adUnitId,
-          size: AdSize.banner,
-          request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-          listener: BannerAdListener(onAdLoaded: (ad) {
+        adUnitId: adUnitId,
+        size: AdSize.banner,
+        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
             _adLoaded = true;
-          }));
+          },
+        ),
+      );
 
-      await myBanner.load();
+      await myBanner!.load();
       _adLoaded = true;
     }
-
-    if (!notificationsInitialized) {
-      notificationsInitialized = true;
-      var initializationSettingsAndroid =
-          const AndroidInitializationSettings('app_icon');
-      var initializationSettingsIos = DarwinInitializationSettings(
-          onDidReceiveLocalNotification: onDidReceiveNotification);
-      var initializationSettings = InitializationSettings(
-          android: initializationSettingsAndroid,
-          iOS: initializationSettingsIos);
-
-      await notificationsPlugin.initialize(initializationSettings,
-          onDidReceiveBackgroundNotificationResponse: (response) =>
-              onSelectNotification,
-          onDidReceiveNotificationResponse: (response) => onSelectNotification);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addObserver(this);
-
-    _requireUnlock = false;
   }
 
   //performs initial async functions
   void init() async {
     PackageInfo packageInfo;
-    final prefs =
-        Provider.of<SharedPreferencesProvider>(context, listen: false).prefs;
+    final prefs = ref.read(sharedPreferencesProvider);
 
     // if old home page overwrote user profile, rewrite
-    if (_userObj.userEmail == 'anonymous@email.com') {
-      final user = AuthProvider.of(context).auth.currentUser();
-      _userObj.userEmail = user.email;
-      _userObj.userName = user.displayName;
-      _userObj.createdDate = user.metadata.creationTime;
-      _firestore.doc('users/${_userObj.userId}').update(_userObj.toMap());
+    if (_userObj!.userEmail == 'anonymous@email.com') {
+      final user = ref.read(authProvider).currentUser()!;
+      _userObj!.userEmail = user.email!;
+      _userObj!.userName = user.displayName ?? 'Anonymous User';
+      _userObj!.createdDate = user.metadata.creationTime;
+      _firestore.doc('users/${_userObj!.userId}').update(_userObj!.toMap());
     }
-    if (!_userObj.tosAgree) {
+    if (!_userObj!.tosAgree) {
       if (mounted) {
-        await showTos(context, _userObj.userId);
+        await showTos(context, _userObj!.userId);
       }
     }
     // update users array if not updated
     try {
-      if (!_userObj.updatedUserArray) {
-        updateUsersArray(_userObj.userId);
+      if (!_userObj!.updatedUserArray) {
+        updateUsersArray(_userObj!.userId);
       }
     } catch (e) {
-      print('Updated Users Array doesn\'t exist');
+      FirebaseAnalytics.instance.logEvent(name: 'Updated Users Array Fail');
+    }
+
+    if (!_userObj!.updatedPovs) {
+      updatePovs(_userObj!.userId!);
+    }
+    if (!_userObj!.updatedAwards) {
+      updateAwards(_userObj!.userId!);
     }
 
 // show change log if new version
@@ -315,13 +186,12 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       packageInfo = await PackageInfo.fromPlatform();
       _localAuth = LocalAuthentication();
       _localAuthSupported = await _localAuth.isDeviceSupported();
-      _storeAvailable = await InAppPurchase.instance.isAvailable();
       if (prefs.getString('Version') == null ||
           packageInfo.version != prefs.getString('Version')) {
         prefs.setString('Version', packageInfo.version);
-        if (mounted) {
-          // showChangeLog(context);
-        }
+        // if (mounted) {
+        //   showChangeLog(context);
+        // }
       }
     }
   }
@@ -346,18 +216,60 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
         timer = Timer.periodic(const Duration(minutes: 10), (_) {
           _requireUnlock = true;
           if (!_localAuthSupported) {
-            signOut(context);
+            signOut();
           }
         });
         break;
       case AppLifecycleState.resumed:
         timer?.cancel();
         if (_requireUnlock) {
-          _rootProvider.localSignOut();
+          _rootService.localSignOut();
         }
         break;
       case AppLifecycleState.detached:
         break;
+    }
+  }
+
+  void signOut() {
+    var auth = ref.read(authProvider);
+    try {
+      _rootService.signOut();
+      auth.signOut();
+
+      ref.read(subscriptionStateProvider.notifier).unSubscribe();
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Sign Out Error');
+    }
+  }
+
+  void signOutWarning(BuildContext context) {
+    // ignore: close_sinks
+    Widget title = const Text('Sign Out?');
+    Widget content = Container(
+      padding: const EdgeInsets.all(8.0),
+      child: const Text(
+          'Are you sure you want to sign out? Any data you saved will be lost unless you create an account.'),
+    );
+    customAlertDialog(
+      context: context,
+      title: title,
+      content: content,
+      primaryText: 'Yes',
+      primary: () {
+        signOut();
+      },
+      secondaryText: 'Create Account',
+      secondary: () {
+        _rootService.linkAnonymous();
+      },
+    );
+  }
+
+  void removeAds() {
+    if (_adLoaded) {
+      myBanner?.dispose();
+      _adLoaded = false;
     }
   }
 
@@ -366,7 +278,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       title: title,
       list: list,
       homeCard: homeCard,
-      setting: setting,
+      setting: setting!,
       width: MediaQuery.of(context).size.width / 3 * 2,
       height: MediaQuery.of(context).size.height / 3,
     );
@@ -382,7 +294,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Widget> homeCards(String userId) {
     List<Widget> list = [];
     if (setting != null) {
-      if (setting.perstat) {
+      if (setting!.perstat) {
         list.add(StreamBuilder(
             stream: _firestore
                 .collection('perstat')
@@ -394,23 +306,29 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int leave = 0;
                   int tdy = 0;
                   int other = 0;
-                  for (DocumentSnapshot doc in snapshot.data.docs) {
+                  for (DocumentSnapshot doc in snapshot.data!.docs) {
                     Object start;
                     if (isValidDate(doc['start'])) {
-                      start = DateTime.parse(doc['start'] + ' 00:00:00');
+                      start =
+                          DateTime.tryParse(doc['start'] + ' 00:00:00') ?? '';
                     } else {
                       start = '';
                     }
                     var end = isValidDate(doc['end'])
-                        ? DateTime.parse(doc['end'] + ' 18:00:00')
+                        ? DateTime.tryParse(doc['end'] + ' 18:00:00') ?? ''
                         : '';
-                    if (start != '' && DateTime.now().isAfter(start)) {
-                      if (end == '' || DateTime.now().isBefore(end)) {
+                    if (start != '' &&
+                        DateTime.now().isAfter(start as DateTime)) {
+                      if (end == '' ||
+                          DateTime.now().isBefore(end as DateTime)) {
                         if (doc['type'] == 'Leave') {
                           leave++;
                         } else if (doc['type'] == 'TDY') {
@@ -426,28 +344,25 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     leave: leave,
                     tdy: tdy,
                     other: other,
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PerstatPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(PerstatPage.routeName),
                       child: const Text('Go to PERSTAT'),
                     ),
-                    button2: ElevatedButton(
-                        child: const Text('By Name'),
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const DailyPerstatPage()))),
+                    button2: PlatformButton(
+                      child: const Text('By Name'),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(DailyPerstatPage.routeName),
+                    ),
                   );
               }
             }));
       }
-      if (setting.apts) {
-        list.add(StreamBuilder(
+      if (setting!.apts) {
+        list.add(
+          StreamBuilder(
             stream: _firestore
                 .collection('appointments')
                 .where('users', isNotEqualTo: null)
@@ -458,14 +373,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int aptsToday = 0;
                   int aptsFuture = 0;
                   List<DocumentSnapshot> todayByName = [];
                   List<DocumentSnapshot> futureByName = [];
-                  for (DocumentSnapshot doc in snapshot.data.docs) {
-                    DateTime start;
+                  for (DocumentSnapshot doc in snapshot.data!.docs) {
+                    DateTime? start;
                     if (isValidDate(doc['date'])) {
                       start = DateTime.parse(doc['date'] + ' 00:00:00');
                     } else {
@@ -507,20 +425,19 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             'Future Apts', futureByName, HomeCard.appointments);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AptsPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(AptsPage.routeName),
                       child: const Text('Go to Appointments'),
                     ),
                   );
               }
-            }));
+            },
+          ),
+        );
       }
-      if (setting.apft) {
+      if (setting!.apft) {
         list.add(StreamBuilder(
             stream: _firestore
                 .collection('apftStats')
@@ -532,20 +449,23 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int apftOverdue = 0;
                   int apftFail = 0;
                   List<DocumentSnapshot> fails = [];
                   List<DocumentSnapshot> overdue = [];
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data.docs) {
+                  for (DocumentSnapshot doc in snapshot.data!.docs) {
                     if (!doc['pass']) {
                       apftFail++;
                       fails.add(doc);
                     }
-                    if (isOverdue(doc['date'], 30 * setting.acftMonths)) {
+                    if (isOverdue(doc['date'], 30 * setting!.acftMonths)) {
                       apftOverdue++;
                       overdue.add(doc);
                     }
@@ -572,18 +492,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         showByName('Failed APFTs', fails, HomeCard.apft);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ApftPage())),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(ApftPage.routeName),
                       child: const Text('Go to APFT'),
                     ),
                   );
               }
             }));
       }
-      if (setting.acft) {
+      if (setting!.acft) {
         list.add(StreamBuilder(
             stream: _firestore
                 .collection('acftStats')
@@ -595,20 +514,23 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int acftOverdue = 0;
                   int acftFail = 0;
                   List<DocumentSnapshot> overdue = [];
                   List<DocumentSnapshot> fails = [];
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data.docs) {
+                  for (DocumentSnapshot doc in snapshot.data!.docs) {
                     if (!doc['pass']) {
                       acftFail++;
                       fails.add(doc);
                     }
-                    if (isOverdue(doc['date'], 30 * setting.acftMonths)) {
+                    if (isOverdue(doc['date'], 30 * setting!.acftMonths)) {
                       acftOverdue++;
                       overdue.add(doc);
                     }
@@ -637,16 +559,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         showByName('Failed ACFTs', fails, HomeCard.acft);
                       },
                     ),
-                    button: ElevatedButton(
+                    button: PlatformButton(
                       onPressed: () =>
-                          Navigator.of(context).pushNamed(AcftPage.routeName),
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(AcftPage.routeName),
                       child: const Text('Go to ACFT'),
                     ),
                   );
               }
             }));
       }
-      if (setting.profiles) {
+      if (setting!.profiles) {
         list.add(StreamBuilder(
             stream: _firestore
                 .collection('profiles')
@@ -658,11 +581,14 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  List<DocumentSnapshot> profiles = snapshot.data.docs;
+                  List<DocumentSnapshot> profiles = snapshot.data!.docs;
                   List<DocumentSnapshot> tempList = profiles
                       .where((doc) => doc['type'] == 'Temporary')
                       .toList();
@@ -697,29 +623,23 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         showByName('Perm Profiles', permList, HomeCard.profile);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TempProfilesPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(TempProfilesPage.routeName),
                       child: const Text('Go to Temp'),
                     ),
-                    button2: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PermProfilesPage(
-                                    userId: userId,
-                                  ))),
+                    button2: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(PermProfilesPage.routeName),
                       child: const Text('Go to Perm'),
                     ),
                   );
               }
             }));
       }
-      if (setting.bf) {
+      if (setting!.bf) {
         list.add(StreamBuilder(
             stream: _firestore
                 .collection('bodyfatStats')
@@ -731,20 +651,23 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int bfOverdue = 0;
                   int bfFail = 0;
                   List<DocumentSnapshot> overdue = [];
                   List<DocumentSnapshot> fails = [];
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data.docs) {
+                  for (DocumentSnapshot doc in snapshot.data!.docs) {
                     if (!doc['passBmi'] && !doc['passBf']) {
                       bfFail++;
                       fails.add(doc);
                     }
-                    if (isOverdue(doc['date'], 30 * setting.bfMonths)) {
+                    if (isOverdue(doc['date'], 30 * setting!.bfMonths)) {
                       bfOverdue++;
                       overdue.add(doc);
                     }
@@ -755,9 +678,10 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       child: Text(
                         'Overdue: $bfOverdue',
                         style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue),
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                        ),
                       ),
                       onPressed: () {
                         showByName(
@@ -775,18 +699,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             'Failed Body Compositions', fails, HomeCard.bf);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const BodyfatPage())),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(BodyfatPage.routeName),
                       child: const Text('Go to Body Comp'),
                     ),
                   );
               }
             }));
       }
-      if (setting.weapons) {
+      if (setting!.weapons) {
         list.add(StreamBuilder(
             stream: _firestore
                 .collection('weaponStats')
@@ -798,20 +721,23 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
                   int weaponsOverdue = 0;
                   int weaponsFail = 0;
                   List<DocumentSnapshot> overdue = [];
                   List<DocumentSnapshot> fails = [];
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data.docs) {
+                  for (DocumentSnapshot doc in snapshot.data!.docs) {
                     if (doc['pass'] != null && !doc['pass']) {
                       weaponsFail++;
                       fails.add(doc);
                     }
-                    if (isOverdue(doc['date'], 30 * setting.weaponsMonths)) {
+                    if (isOverdue(doc['date'], 30 * setting!.weaponsMonths)) {
                       weaponsOverdue++;
                       overdue.add(doc);
                     }
@@ -822,9 +748,10 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       child: Text(
                         'Overdue: $weaponsOverdue',
                         style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue),
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                        ),
                       ),
                       onPressed: () {
                         showByName(
@@ -842,18 +769,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             'Failed Weapons Quals', fails, HomeCard.weapons);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const WeaponsPage())),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(WeaponsPage.routeName),
                       child: const Text('Go to Weapons'),
                     ),
                   );
               }
             }));
       }
-      if (setting.flags) {
+      if (setting!.flags) {
         list.add(StreamBuilder(
             stream: _firestore
                 .collection('flags')
@@ -865,14 +791,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
-                  int flags = snapshot.data.docs.length;
+                  int flags = snapshot.data!.docs.length;
                   int flagsOverdue = 0;
                   List<DocumentSnapshot> overdue = [];
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot ds in snapshot.data.docs) {
+                  for (DocumentSnapshot ds in snapshot.data!.docs) {
                     if (isOverdue(ds['date'], 180)) {
                       flagsOverdue++;
                       overdue.add(ds);
@@ -884,7 +813,10 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       onPressed: null,
                       child: Text(
                         'Active: $flags',
-                        style: const TextStyle(fontSize: 16),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: getTextColor(context),
+                        ),
                       ),
                     ),
                     info2: TextButton(
@@ -897,21 +829,19 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         showByName('Flags > 180 Days', overdue, HomeCard.flags);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => FlagsPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(FlagsPage.routeName),
                       child: const Text('Go to Flags'),
                     ),
                   );
               }
             }));
       }
-      if (setting.medpros) {
-        list.add(StreamBuilder(
+      if (setting!.medpros) {
+        list.add(
+          StreamBuilder(
             stream: _firestore
                 .collection('medpros')
                 .where('users', isNotEqualTo: null)
@@ -922,19 +852,22 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
-                  int medpros = snapshot.data.docs.length;
+                  int medpros = snapshot.data!.docs.length;
                   int medprosOverdue = 0;
                   List<DocumentSnapshot> overdue = [];
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot ds in snapshot.data.docs) {
-                    if (isOverdue(ds['pha'], 30 * setting.phaMonths) ||
-                        isOverdue(ds['dental'], 30 * setting.dentalMonths) ||
-                        isOverdue(ds['vision'], 30 * setting.visionMonths) ||
-                        isOverdue(ds['hearing'], 30 * setting.hearingMonths) ||
-                        isOverdue(ds['hiv'], 30 * setting.hivMonths)) {
+                  for (DocumentSnapshot ds in snapshot.data!.docs) {
+                    if (isOverdue(ds['pha'], 30 * setting!.phaMonths) ||
+                        isOverdue(ds['dental'], 30 * setting!.dentalMonths) ||
+                        isOverdue(ds['vision'], 30 * setting!.visionMonths) ||
+                        isOverdue(ds['hearing'], 30 * setting!.hearingMonths) ||
+                        isOverdue(ds['hiv'], 30 * setting!.hivMonths)) {
                       medprosOverdue++;
                       overdue.add(ds);
                     }
@@ -959,19 +892,21 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             'Overdue MedPros', overdue, HomeCard.medpros);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const MedProsPage())),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(MedProsPage.routeName),
                       child: const Text('Go to Medpros'),
                     ),
                   );
               }
-            }));
+            },
+          ),
+        );
       }
-      if (setting.training) {
-        list.add(StreamBuilder(
+      if (setting!.training) {
+        list.add(
+          StreamBuilder(
             stream: _firestore
                 .collection('training')
                 .where('users', isNotEqualTo: null)
@@ -982,14 +917,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               if (snapshot.hasError) return Text('Error: ${snapshot.error}');
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
-                  return const Card(child: CenterProgressIndicator());
+                  return Card(
+                    color: getContrastingBackgroundColor(context),
+                    child: PlatformLoadingWidget(),
+                  );
                 default:
-                  int training = snapshot.data.docs.length;
+                  int training = snapshot.data!.docs.length;
                   int trainingOverdue = 0;
                   List<DocumentSnapshot> overdue = [];
-                  snapshot.data.docs
+                  snapshot.data!.docs
                       .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot ds in snapshot.data.docs) {
+                  for (DocumentSnapshot ds in snapshot.data!.docs) {
                     if (isOverdue(ds['cyber'], 365) ||
                         isOverdue(ds['opsec'], 365) ||
                         isOverdue(ds['antiTerror'], 365) ||
@@ -1022,18 +960,17 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             'Overdue Trainings', overdue, HomeCard.training);
                       },
                     ),
-                    button: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TrainingPage(
-                                    userId: userId,
-                                  ))),
+                    button: PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(TrainingPage.routeName),
                       child: const Text('Go to Training'),
                     ),
                   );
               }
-            }));
+            },
+          ),
+        );
       }
     }
     return list;
@@ -1042,136 +979,86 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    _rootProvider = Provider.of<RootProvider>(context, listen: false);
-    final user = AuthProvider.of(context).auth.currentUser();
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider<IAPRepo>(
-            create: (context) => IAPRepo(context, user),
-          ),
-          ChangeNotifierProvider<SubscriptionPurchases>(
-            create: (context) => SubscriptionPurchases(
-              context.read<SubscriptionState>(),
-              context.read<IAPRepo>(),
-            ),
-            lazy: false,
-          ),
-        ],
-        builder: (context, child) {
-          sp = context.read<SubscriptionPurchases>();
-          print('IAP State: $isSubscribed');
-          return Scaffold(
-            key: _scaffoldState,
-            appBar: AppBar(
-              title: const Text('Rollup'),
-              actions: <Widget>[
-                Tooltip(
-                  message: 'Settings',
-                  child: IconButton(
-                    icon: const Icon(Icons.settings),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsPage(),
-                      ),
-                    ),
-                  ),
-                ),
-                Tooltip(
-                  message: 'Sign Out',
-                  child: IconButton(
-                      icon: const Icon(Icons.directions_walk),
-                      onPressed: () {
-                        if (user.isAnonymous) {
-                          signOutWarning(context);
-                        } else {
-                          signOut(context);
-                        }
-                      }),
-                ),
+    _rootService = ref.read(rootProvider.notifier);
+    final user = ref.read(authProvider).currentUser();
+    ref.read(iapRepoProvider);
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ListView(
+              primary: true,
+              shrinkWrap: true,
+              children: [
+                if (user!.isAnonymous) const AnonWarningBanner(),
+                StreamBuilder<DocumentSnapshot>(
+                    stream: _firestore
+                        .collection('settings')
+                        .doc(user.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.waiting:
+                          return Card(
+                            color: getContrastingBackgroundColor(context),
+                            child: PlatformLoadingWidget(),
+                          );
+                        default:
+                          if (snapshot.hasData) {
+                            setting = Setting.fromMap(
+                                snapshot.data!.data() as Map<String, dynamic>);
+                          } else {
+                            setting = Setting(
+                              owner: user.uid,
+                              hearingNotifications: [0, 30],
+                              weaponsNotifications: [0, 30],
+                              acftNotifications: [0, 30],
+                              dentalNotifications: [0, 30],
+                              visionNotifications: [0, 30],
+                              bfNotifications: [0, 30],
+                              hivNotifications: [0, 30],
+                              phaNotifications: [0, 30],
+                            );
+                            if (!user.isAnonymous) {
+                              _firestore
+                                  .collection('settings')
+                                  .doc(user.uid)
+                                  .set(setting!.toMap());
+                            }
+                          }
+
+                          return GridView.count(
+                            crossAxisCount: width > 750 ? 2 : 1,
+                            childAspectRatio: width > 750
+                                ? width / 450
+                                : width > 350
+                                    ? width / 225
+                                    : width / 275,
+                            shrinkWrap: true,
+                            primary: false,
+                            crossAxisSpacing: 1.0,
+                            mainAxisSpacing: 1.0,
+                            children: homeCards(user.uid),
+                          );
+                      }
+                    })
               ],
             ),
-            drawer: MainDrawer(
-              subscribe: subscribe,
-              signOut: () => signOut(context),
-              signOutWarning: () => signOutWarning(context),
-            ),
-            body: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: ListView(
-                      primary: true,
-                      shrinkWrap: true,
-                      children: [
-                        if (user.isAnonymous) const AnonWarningBanner(),
-                        StreamBuilder<DocumentSnapshot>(
-                            stream: _firestore
-                                .collection('settings')
-                                .doc(user.uid)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              switch (snapshot.connectionState) {
-                                case ConnectionState.waiting:
-                                  return const Card(
-                                      child: CenterProgressIndicator());
-                                default:
-                                  if (snapshot.hasData) {
-                                    setting =
-                                        Setting.fromMap(snapshot.data.data());
-                                  } else {
-                                    setting = Setting(
-                                      owner: user.uid,
-                                      hearingNotifications: [0, 30],
-                                      weaponsNotifications: [0, 30],
-                                      acftNotifications: [0, 30],
-                                      dentalNotifications: [0, 30],
-                                      visionNotifications: [0, 30],
-                                      bfNotifications: [0, 30],
-                                      hivNotifications: [0, 30],
-                                      phaNotifications: [0, 30],
-                                    );
-                                    if (!user.isAnonymous) {
-                                      _firestore
-                                          .collection('settings')
-                                          .doc(user.uid)
-                                          .set(setting.toMap());
-                                    }
-                                  }
-
-                                  return GridView.count(
-                                    crossAxisCount: width > 700 ? 2 : 1,
-                                    childAspectRatio:
-                                        width > 700 ? width / 450 : width / 225,
-                                    shrinkWrap: true,
-                                    primary: false,
-                                    crossAxisSpacing: 1.0,
-                                    mainAxisSpacing: 1.0,
-                                    children: homeCards(user.uid),
-                                  );
-                              }
-                            })
-                      ],
-                    ),
-                  ),
-                  if (_adLoaded && !isSubscribed)
-                    Container(
-                      alignment: Alignment.center,
-                      width: myBanner.size.width.toDouble(),
-                      height: myBanner.size.height.toDouble(),
-                      constraints:
-                          const BoxConstraints(minHeight: 0, minWidth: 0),
-                      child: AdWidget(
-                        ad: myBanner,
-                      ),
-                    )
-                ],
+          ),
+          if (_adLoaded && !isSubscribed)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
-            ),
-          );
-        });
+            )
+        ],
+      ),
+    );
   }
 }

@@ -1,38 +1,44 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth_provider.dart';
+import '../methods/create_app_bar_actions.dart';
+import '../methods/filter_documents.dart';
 import '../models/acft.dart';
+import '../models/app_bar_option.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_acft_page.dart';
-import '../providers/notifications_plugin_provider.dart';
 import '../providers/subscription_state.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/web_download.dart';
-import '../models/setting.dart';
 import 'uploadPages/upload_acft_page.dart';
 import '../pdf/acft_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../../methods/theme_methods.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../methods/custom_alert_dialog.dart';
 
-class AcftPage extends StatefulWidget {
+class AcftPage extends ConsumerStatefulWidget {
   const AcftPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   static const routeName = '/acft-page';
@@ -41,8 +47,8 @@ class AcftPage extends StatefulWidget {
   AcftPageState createState() => AcftPageState();
 }
 
-class AcftPageState extends State<AcftPage> {
-  int _sortColumnIndex,
+class AcftPageState extends ConsumerState<AcftPage> {
+  int _sortColumnIndex = 0,
       deadliftAve = 0,
       powerThrowAve = 0,
       puAve = 0,
@@ -50,42 +56,30 @@ class AcftPageState extends State<AcftPage> {
       plkAve = 0,
       runAve = 0,
       totalAve = 0,
-      overdueDays,
-      amberDays;
+      overdueDays = 180,
+      amberDays = 150;
   bool _sortAscending = true,
       _adLoaded = false,
-      isSubscribed,
+      isSubscribed = false,
       notificationsRefreshed = false,
       isInitial = true;
-  String _userId;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents, filteredDocs;
-  StreamSubscription _subscriptionUsers;
-  SharedPreferences prefs;
-  NotificationDetails notificationDetails;
-  QuerySnapshot snapshot;
-  BannerAd myBanner;
-  FlutterLocalNotificationsPlugin notificationsPlugin;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+  String? _userId;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [], filteredDocs = [];
+  late StreamSubscription _subscriptionUsers;
+  late SharedPreferences prefs;
+  QuerySnapshot? snapshot;
+  BannerAd? myBanner;
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = AuthProvider.of(context).auth.currentUser().uid;
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
-
-    notificationsPlugin =
-        Provider.of<NotificationsPluginProvider>(context).notificationsPlugin;
-    if (!kIsWeb && !notificationsRefreshed) {
-      notificationsRefreshed = true;
-      refreshNotifications();
-    }
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded && !isSubscribed) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -102,7 +96,7 @@ class AcftPageState extends State<AcftPage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -116,30 +110,17 @@ class AcftPageState extends State<AcftPage> {
   @override
   void initState() {
     super.initState();
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
-    filteredDocs = [];
-    overdueDays = 180;
-    amberDays = 150;
 
     myBanner = BannerAd(
-        adUnitId: kIsWeb
-            ? ''
-            : Platform.isAndroid
-                ? 'ca-app-pub-2431077176117105/1369522276'
-                : 'ca-app-pub-2431077176117105/9894231072',
-        size: AdSize.banner,
-        request: const AdRequest(),
-        listener: const BannerAdListener());
-
-    var androidSpecifics =
-        const AndroidNotificationDetails('channelId', 'channelName');
-    var iosSpecifics = const DarwinNotificationDetails(
-        presentAlert: true, presentSound: false, presentBadge: false);
-    notificationDetails =
-        NotificationDetails(android: androidSpecifics, iOS: iosSpecifics);
+      adUnitId: kIsWeb
+          ? ''
+          : Platform.isAndroid
+              ? 'ca-app-pub-2431077176117105/1369522276'
+              : 'ca-app-pub-2431077176117105/9894231072',
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: const BannerAdListener(),
+    );
   }
 
   void initialize() async {
@@ -162,7 +143,7 @@ class AcftPageState extends State<AcftPage> {
         .collection('settings')
         .where('owner', isEqualTo: _userId)
         .get();
-    DocumentSnapshot doc = snapshot.docs[0];
+    DocumentSnapshot doc = snapshot!.docs[0];
     setState(() {
       overdueDays = doc['acftMonths'] * 30;
       amberDays = overdueDays - 30;
@@ -176,79 +157,6 @@ class AcftPageState extends State<AcftPage> {
     super.dispose();
   }
 
-  void refreshNotifications() async {
-    int monthsDue = 6;
-    List<dynamic> daysBefore = [0, 30];
-    if (snapshot != null && snapshot.docs.isNotEmpty) {
-      Setting setting = Setting.fromMap(snapshot.docs.first.data());
-      if (setting.addNotifications != null && !setting.addNotifications) return;
-      monthsDue = setting.acftMonths ?? 6;
-      daysBefore = setting.acftNotifications ?? [0, 30];
-    }
-
-    //get pending notifications and cancel them
-    List<PendingNotificationRequest> pending =
-        await notificationsPlugin.pendingNotificationRequests();
-    pending = pending.where((pr) => pr.payload == 'ACFT').toList();
-    for (PendingNotificationRequest request in pending) {
-      notificationsPlugin.cancel(request.id);
-    }
-
-    int startingId = prefs.getInt('runningId') ?? 0;
-    List<List<String>> dates = [];
-
-    //create copy of documents
-    List<DocumentSnapshot> docs = List.from(documents);
-    //sort by date
-    docs.sort((a, b) => a['date'].toString().compareTo(b['date'].toString()));
-    //combine Soldiers with like dates
-    for (int i = 0; i < docs.length; i++) {
-      if (i == 0) {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      } else if (docs[i]['date'] == docs[i - 1]['date']) {
-        dates.last[0] =
-            '${dates.last[0]}, ${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}';
-      } else {
-        dates.add([
-          '${docs[i]['rank']} ${docs[i]['name']}, ${docs[i]['firstName']}',
-          docs[i]['date']
-        ]);
-      }
-    }
-
-    //add notifications
-    for (List<String> date in dates) {
-      if (date[1] != '') {
-        DateTime dueDate = DateTime.tryParse(date[1]);
-        dueDate = dueDate.add(Duration(days: 30 * monthsDue, hours: 6));
-        if (dueDate.isAfter(DateTime.now())) {
-          for (int days in daysBefore) {
-            DateTime scheduledDate = dueDate.add(Duration(days: -days));
-            if (scheduledDate.isAfter(DateTime.now())) {
-              notificationsPlugin.zonedSchedule(
-                startingId,
-                'ACFT(s) due in $days days',
-                date[0],
-                scheduledDate,
-                notificationDetails,
-                uiLocalNotificationDateInterpretation:
-                    UILocalNotificationDateInterpretation.absoluteTime,
-                androidAllowWhileIdle: true,
-                payload: 'ACFT',
-              );
-              startingId++;
-            }
-          }
-        }
-      }
-    }
-    if (startingId > 10000000) startingId = 0;
-    prefs.setInt('runningId', startingId);
-  }
-
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
@@ -258,9 +166,12 @@ class AcftPageState extends State<AcftPage> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+          child: const MyToast(
+              message:
+                  'Uploading data is only available for subscribed users.'));
     }
   }
 
@@ -327,7 +238,7 @@ class AcftPageState extends State<AcftPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String path, location;
@@ -340,26 +251,25 @@ class AcftPageState extends State<AcftPage> {
       path = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$path/acftStats.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Data successfully downloaded to $location'),
-            duration: const Duration(seconds: 5),
-            action: Platform.isAndroid
-                ? SnackBarAction(
-                    label: 'Open',
-                    onPressed: () {
-                      OpenFile.open('$path/acftStats.xlsx');
-                    },
-                  )
-                : null,
-          ));
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            toastDuration: const Duration(seconds: 5),
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed:
+                  kIsWeb ? null : () => OpenFile.open('$path/acftStats.xlsx'),
+            ),
+          );
         }
       } catch (e) {
-        print('Error: $e');
+        FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
       }
     }
   }
@@ -382,10 +292,13 @@ class AcftPageState extends State<AcftPage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(
+            message:
+                'Downloading PDF files is only available for subscribed users.'),
+      );
     }
   }
 
@@ -396,7 +309,7 @@ class AcftPageState extends State<AcftPage> {
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
     AcftsPdf pdf = AcftsPdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -415,39 +328,35 @@ class AcftPageState extends State<AcftPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/acftStats.pdf');
-                  },
-                ),
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        toastDuration: const Duration(seconds: 5),
+        child: MyToast(
+          message: message,
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/acftStats.pdf'),
         ),
       );
     }
   }
 
-  void _filterRecords(String section) {
-    if (section == 'All') {
-      filteredDocs = List.from(documents);
-    } else {
-      filteredDocs =
-          documents.where((element) => element['section'] == section).toList();
-    }
+  void _filterRecords(List<String> sections) {
+    filteredDocs = documents
+        .where((element) => sections.contains(element['section']))
+        .toList();
     _calcAves();
     setState(() {});
   }
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(message: 'You must select at least one record'),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
@@ -457,28 +366,35 @@ class AcftPageState extends State<AcftPage> {
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
       //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      FToast toast = FToast();
+      toast.context = context;
+      toast.showToast(
+        child: const MyToast(message: 'You must select exactly one record'),
+      );
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditAcftPage(
-                  acft: Acft.fromSnapshot(_selectedDocuments[0]),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditAcftPage(
+          acft: Acft.fromSnapshot(_selectedDocuments[0]),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditAcftPage(
-                  acft: Acft(
-                    owner: _userId,
-                    users: [_userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditAcftPage(
+          acft: Acft(
+            owner: _userId!,
+            users: [_userId],
+          ),
+        ),
+      ),
+    );
   }
 
   void _calcAves() {
@@ -498,27 +414,27 @@ class AcftPageState extends State<AcftPage> {
     totalAve = 0;
     for (DocumentSnapshot doc in filteredDocs) {
       if (doc['deadliftScore'] != 0) {
-        deadliftAve += doc['deadliftScore'];
+        deadliftAve += doc['deadliftScore'] as int;
         deadlift++;
       }
       if (doc['powerThrowScore'] != 0) {
-        powerThrowAve += doc['powerThrowScore'];
+        powerThrowAve += doc['powerThrowScore'] as int;
         powerThrow++;
       }
       if (doc['puScore'] != 0) {
-        puAve += doc['puScore'];
+        puAve += doc['puScore'] as int;
         pu++;
       }
       if (doc['dragScore'] != 0) {
-        dragAve += doc['dragScore'];
+        dragAve += doc['dragScore'] as int;
         drag++;
       }
       if (doc['legTuckScore'] != 0) {
-        plkAve += doc['legTuckScore'];
+        plkAve += doc['legTuckScore'] as int;
         plank++;
       }
       if (doc['runScore'] != 0) {
-        runAve += doc['runScore'];
+        runAve += doc['runScore'] as int;
         run++;
       }
       if (doc['deadliftScore'] != 0 &&
@@ -527,7 +443,7 @@ class AcftPageState extends State<AcftPage> {
           doc['dragScore'] != 0 &&
           doc['legTuckScore'] != 0 &&
           doc['runScore'] != 0) {
-        totalAve += doc['total'];
+        totalAve += doc['total'] as int;
         total++;
       }
     }
@@ -548,57 +464,82 @@ class AcftPageState extends State<AcftPage> {
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Text('Name'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)),
+        label: const Text('Name'),
+        onSort: (int columnIndex, bool ascending) =>
+            onSortColumn(columnIndex, ascending),
+      ),
     ];
     if (width > 430) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 520) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Total'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 650) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('MDL'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 735) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('SPT'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 830) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('HRP'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 935) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('SDC'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 1030) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('PLK'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 1140) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('2MR'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     return columnList;
   }
@@ -608,7 +549,7 @@ class AcftPageState extends State<AcftPage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -627,122 +568,158 @@ class AcftPageState extends State<AcftPage> {
     TextStyle failTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
+      DataCell(
+        Text(
+          documentSnapshot['rank'],
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
+      DataCell(
+        Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
     ];
     if (width > 430) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['date'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 520) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['total'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['total'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 650) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['deadliftScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['deadliftScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 735) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['powerThrowScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['powerThrowScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 830) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['puScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['puScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 935) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['dragScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['dragScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 1030) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['legTuckScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['legTuckScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 1140) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['runScore'].toString(),
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['runScore'].toString(),
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     return cellList;
   }
@@ -829,9 +806,9 @@ class AcftPageState extends State<AcftPage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -839,173 +816,101 @@ class AcftPageState extends State<AcftPage> {
     });
   }
 
-  List<Widget> appBarMenu(BuildContext context, double width) {
-    List<Widget> buttons = <Widget>[];
-
-    List<PopupMenuEntry<String>> sections = [
-      const PopupMenuItem(
-        value: 'All',
-        child: Text('All'),
-      )
-    ];
-    documents.sort((a, b) => a['section'].compareTo(b['section']));
-    for (int i = 0; i < documents.length; i++) {
-      if (i == 0) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      } else if (documents[i]['section'] != documents[i - 1]['section']) {
-        sections.add(PopupMenuItem(
-          value: documents[i]['section'],
-          child: Text(documents[i]['section']),
-        ));
-      }
-    }
-
-    List<Widget> editButton = <Widget>[
-      Tooltip(
-          message: 'Filter Records',
-          child: PopupMenuButton(
-            icon: const Icon(Icons.filter_alt),
-            onSelected: (String result) => _filterRecords(result),
-            itemBuilder: (context) {
-              return sections;
-            },
-          )),
-      Tooltip(
-          message: 'Edit Record',
-          child: IconButton(
-              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
-    ];
-
-    List<PopupMenuEntry<String>> popupItems = [];
-
-    if (width > 600) {
-      buttons.add(
-        Tooltip(
-            message: 'Download as Excel',
-            child: IconButton(
-                icon: const Icon(Icons.file_download),
-                onPressed: () {
-                  _downloadExcel();
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Upload Data',
-            child: IconButton(
-                icon: const Icon(Icons.file_upload),
-                onPressed: () {
-                  _uploadExcel(context);
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'download',
-        child: Text('Download as Excel'),
-      ));
-      if (!kIsWeb) {
-        popupItems.add(const PopupMenuItem(
-          value: 'upload',
-          child: Text('Upload Data'),
-        ));
-      }
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
-      ));
-    }
-    if (width > 400) {
-      buttons.add(
-        Tooltip(
-            message: 'Delete Record(s)',
-            child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteRecord())),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'delete',
-        child: Text('Delete Record(s)'),
-      ));
-    }
-
-    List<Widget> overflowButton = <Widget>[
-      PopupMenuButton<String>(
-        onSelected: (String result) {
-          if (result == 'upload') {
-            _uploadExcel(context);
-          }
-          if (result == 'download') {
-            _downloadExcel();
-          }
-          if (result == 'delete') {
-            _deleteRecord();
-          }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return popupItems;
-        },
-      )
-    ];
-
-    if (width > 600) {
-      return buttons + editButton;
-    } else if (width <= 400) {
-      return editButton + overflowButton;
-    } else {
-      return buttons + editButton + overflowButton;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = AuthProvider.of(context).auth.currentUser();
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('ACFT Stats'),
-            actions: appBarMenu(context, width)),
+    final user = ref.read(authProvider).currentUser()!;
+    return PlatformScaffold(
+        title: 'ACFT Stats',
+        actions: createAppBarActions(
+          width,
+          [
+            if (!kIsWeb && Platform.isIOS)
+              if (!kIsWeb && Platform.isIOS)
+                AppBarOption(
+                  title: 'New ACFT',
+                  icon: Icon(
+                    kIsWeb || Platform.isAndroid
+                        ? Icons.add
+                        : CupertinoIcons.add,
+                    color: getOnPrimaryColor(context),
+                  ),
+                  onPressed: () => _newRecord(context),
+                ),
+            AppBarOption(
+              title: 'Edit ACFT',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.edit
+                    : CupertinoIcons.pencil,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _editRecord(),
+            ),
+            AppBarOption(
+              title: 'Delete ACFT(s)',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.delete
+                    : CupertinoIcons.delete,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _deleteRecord(),
+            ),
+            AppBarOption(
+              title: 'Filter ACFTs',
+              icon: Icon(
+                Icons.filter_alt,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => showFilterOptions(
+                  context, getSections(documents), _filterRecords),
+            ),
+            AppBarOption(
+              title: 'Download Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.download
+                    : CupertinoIcons.cloud_download,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _downloadExcel(),
+            ),
+            AppBarOption(
+              title: 'Upload Excel',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.upload
+                    : CupertinoIcons.cloud_upload,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _uploadExcel(context),
+            ),
+            AppBarOption(
+              title: 'Download PDF',
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.picture_as_pdf
+                    : CupertinoIcons.doc,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _downloadPdf(),
+            ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {
               _newRecord(context);
             }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        body: TableFrame(
           children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner,
-                ),
-              ),
-            Flexible(
-              flex: 1,
+            Expanded(
               child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
                 children: <Widget>[
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: DataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
@@ -1018,14 +923,13 @@ class AcftPageState extends State<AcftPage> {
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 850.0),
                     child: Card(
+                      color: getContrastingBackgroundColor(context),
                       child: Column(
                         children: <Widget>[
                           const Padding(
                             padding: EdgeInsets.all(4.0),
-                            child: Text(
+                            child: HeaderText(
                               'Average',
-                              style: TextStyle(fontSize: 18),
-                              textAlign: TextAlign.center,
                             ),
                           ),
                           width > 675
@@ -1120,6 +1024,7 @@ class AcftPageState extends State<AcftPage> {
                     ),
                   ),
                   Card(
+                    color: getContrastingBackgroundColor(context),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -1149,6 +1054,16 @@ class AcftPageState extends State<AcftPage> {
                 ],
               ),
             ),
+            if (_adLoaded)
+              Container(
+                alignment: Alignment.center,
+                width: myBanner!.size.width.toDouble(),
+                height: myBanner!.size.height.toDouble(),
+                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+                child: AdWidget(
+                  ad: myBanner!,
+                ),
+              ),
           ],
         ));
   }

@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,27 +5,32 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
+import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
 import '../../methods/upload_methods.dart';
 import '../../models/soldier.dart';
 import '../../models/training.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../widgets/formatted_elevated_button.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/upload_frame.dart';
 
-class UploadTrainingsPage extends StatefulWidget {
+class UploadTrainingsPage extends ConsumerStatefulWidget {
   const UploadTrainingsPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   UploadTrainingsPageState createState() => UploadTrainingsPageState();
 }
 
-class UploadTrainingsPageState extends State<UploadTrainingsPage> {
-  List<String> columnHeaders;
-  List<List<Data>> rows;
-  String soldierId,
+class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
+  late List<String> columnHeaders;
+  late List<List<Data?>> rows;
+  String? soldierId,
       cyber,
       opsec,
       antiTerror,
@@ -54,18 +57,16 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
       add5Date,
       path;
 
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
-
   void _openFileExplorer() async {
     try {
-      var result = await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']);
+      var result = (await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes);
+        var excel = Excel.decodeBytes(result.files.first.bytes!);
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path);
+        var file = File(result.files.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);
@@ -129,21 +130,18 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
 
   void _saveData(BuildContext context) {
     if (soldierId == '') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Soldier Id must not be blank. To get your Soldiers\' Ids, download their data from the Soldiers page.')));
+      soldierIdIsBlankMessage(context);
       return;
     }
     if (rows.length > 1) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      final soldiers =
-          Provider.of<SoldiersProvider>(context, listen: false).soldiers;
+      final soldiers = ref.read(soldiersProvider);
 
-      List<String> soldierIds = soldiers.map((e) => e.id).toList();
+      List<String?> soldierIds = soldiers.map((e) => e.id).toList();
 
       for (int i = 1; i < rows.length; i++) {
-        String rank, name, firstName, section, rankSort, owner;
-        List<dynamic> users;
+        String? rank, name, firstName, section, rankSort, owner;
+        List<dynamic>? users;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -279,543 +277,406 @@ class UploadTrainingsPageState extends State<UploadTrainingsPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      key: _scaffoldState,
-      appBar: AppBar(
-        title: const Text('Upload Training'),
-      ),
-      body: Center(
-        child: Card(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
-                      'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: () {
-                      _openFileExplorer();
-                    },
-                    text: 'Pick File',
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      path,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  GridView.count(
-                    primary: false,
-                    crossAxisCount: width > 700 ? 2 : 1,
-                    mainAxisSpacing: 1.0,
-                    crossAxisSpacing: 1.0,
-                    childAspectRatio: width > 900
-                        ? 900 / 230
-                        : width > 700
-                            ? width / 230
-                            : width / 115,
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SoldierId'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: soldierId,
-                          onChanged: (value) {
-                            setState(() {
-                              soldierId = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Cyber Awareness Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: cyber,
-                          onChanged: (value) {
-                            setState(() {
-                              cyber = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'OPSEC Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: opsec,
-                          onChanged: (value) {
-                            setState(() {
-                              opsec = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Anti-Terror Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: antiTerror,
-                          onChanged: (value) {
-                            setState(() {
-                              antiTerror = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Law of War Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: law,
-                          onChanged: (value) {
-                            setState(() {
-                              law = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Personnel Recovery Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: persRec,
-                          onChanged: (value) {
-                            setState(() {
-                              persRec = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Info Security Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: infoSec,
-                          onChanged: (value) {
-                            setState(() {
-                              infoSec = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'CTIP Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: ctip,
-                          onChanged: (value) {
-                            setState(() {
-                              ctip = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'GAT Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: gat,
-                          onChanged: (value) {
-                            setState(() {
-                              gat = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SERE Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: sere,
-                          onChanged: (value) {
-                            setState(() {
-                              sere = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'TARP Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: tarp,
-                          onChanged: (value) {
-                            setState(() {
-                              tarp = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'EO Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: eo,
-                          onChanged: (value) {
-                            setState(() {
-                              eo = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'ASAP Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: asap,
-                          onChanged: (value) {
-                            setState(() {
-                              asap = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Suicide Prev Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: suicide,
-                          onChanged: (value) {
-                            setState(() {
-                              suicide = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration:
-                              const InputDecoration(labelText: 'SHARP Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: sharp,
-                          onChanged: (value) {
-                            setState(() {
-                              sharp = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 1'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add1,
-                          onChanged: (value) {
-                            setState(() {
-                              add1 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 1 Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add1Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add1Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 2'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add2,
-                          onChanged: (value) {
-                            setState(() {
-                              add2 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 2 Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add2Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add2Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 3'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add3,
-                          onChanged: (value) {
-                            setState(() {
-                              add3 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 3 Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add3Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add3Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 4'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add4,
-                          onChanged: (value) {
-                            setState(() {
-                              add4 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 4 Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add4Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add4Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 5'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add5,
-                          onChanged: (value) {
-                            setState(() {
-                              add5 = value;
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                              labelText: 'Additional Training 5 Date'),
-                          items: columnHeaders.map((header) {
-                            return DropdownMenuItem<String>(
-                              value: header,
-                              child: Text(header),
-                            );
-                          }).toList(),
-                          value: add5Date,
-                          onChanged: (value) {
-                            setState(() {
-                              add5Date = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  FormattedElevatedButton(
-                    onPressed: path == ''
-                        ? null
-                        : () {
-                            _saveData(context);
-                          },
-                    text: 'Upload Training',
-                  )
-                ],
-              ),
+    return PlatformScaffold(
+      title: 'Upload Training',
+      body: UploadFrame(
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'After picking .xlsx file, select the appropriate column header for each field. Leave selection blank to skip a field, but Soldier Id '
+              'cannot be skipped. To get your Soldiers\' Ids, download their data from the Soldiers page.',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
+          PlatformButton(
+            onPressed: () {
+              _openFileExplorer();
+            },
+            child: const Text('Pick File'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              path!,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          GridView.count(
+            primary: false,
+            crossAxisCount: width > 700 ? 2 : 1,
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
+            childAspectRatio: width > 900
+                ? 900 / 230
+                : width > 700
+                    ? width / 230
+                    : width / 115,
+            shrinkWrap: true,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SoldierId'),
+                  items: columnHeaders,
+                  value: soldierId,
+                  onChanged: (value) {
+                    setState(() {
+                      soldierId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Cyber Awareness Date'),
+                  items: columnHeaders,
+                  value: cyber,
+                  onChanged: (value) {
+                    setState(() {
+                      cyber = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('OPSEC Date'),
+                  items: columnHeaders,
+                  value: opsec,
+                  onChanged: (value) {
+                    setState(() {
+                      opsec = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Anti-Terror Date'),
+                  items: columnHeaders,
+                  value: antiTerror,
+                  onChanged: (value) {
+                    setState(() {
+                      antiTerror = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Law of War Date'),
+                  items: columnHeaders,
+                  value: law,
+                  onChanged: (value) {
+                    setState(() {
+                      law = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Personnel Recovery Date'),
+                  items: columnHeaders,
+                  value: persRec,
+                  onChanged: (value) {
+                    setState(() {
+                      persRec = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Info Security Date'),
+                  items: columnHeaders,
+                  value: infoSec,
+                  onChanged: (value) {
+                    setState(() {
+                      infoSec = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('CTIP Date'),
+                  items: columnHeaders,
+                  value: ctip,
+                  onChanged: (value) {
+                    setState(() {
+                      ctip = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('GAT Date'),
+                  items: columnHeaders,
+                  value: gat,
+                  onChanged: (value) {
+                    setState(() {
+                      gat = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SERE Date'),
+                  items: columnHeaders,
+                  value: sere,
+                  onChanged: (value) {
+                    setState(() {
+                      sere = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('TARP Date'),
+                  items: columnHeaders,
+                  value: tarp,
+                  onChanged: (value) {
+                    setState(() {
+                      tarp = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('EO Date'),
+                  items: columnHeaders,
+                  value: eo,
+                  onChanged: (value) {
+                    setState(() {
+                      eo = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('ASAP Date'),
+                  items: columnHeaders,
+                  value: asap,
+                  onChanged: (value) {
+                    setState(() {
+                      asap = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Suicide Prev Date'),
+                  items: columnHeaders,
+                  value: suicide,
+                  onChanged: (value) {
+                    setState(() {
+                      suicide = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('SHARP Date'),
+                  items: columnHeaders,
+                  value: sharp,
+                  onChanged: (value) {
+                    setState(() {
+                      sharp = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 1'),
+                  items: columnHeaders,
+                  value: add1,
+                  onChanged: (value) {
+                    setState(() {
+                      add1 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 1 Date'),
+                  items: columnHeaders,
+                  value: add1Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add1Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 2'),
+                  items: columnHeaders,
+                  value: add2,
+                  onChanged: (value) {
+                    setState(() {
+                      add2 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 2 Date'),
+                  items: columnHeaders,
+                  value: add2Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add2Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 3'),
+                  items: columnHeaders,
+                  value: add3,
+                  onChanged: (value) {
+                    setState(() {
+                      add3 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 3 Date'),
+                  items: columnHeaders,
+                  value: add3Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add3Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 4'),
+                  items: columnHeaders,
+                  value: add4,
+                  onChanged: (value) {
+                    setState(() {
+                      add4 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 4 Date'),
+                  items: columnHeaders,
+                  value: add4Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add4Date = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 5'),
+                  items: columnHeaders,
+                  value: add5,
+                  onChanged: (value) {
+                    setState(() {
+                      add5 = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Additional Training 5 Date'),
+                  items: columnHeaders,
+                  value: add5Date,
+                  onChanged: (value) {
+                    setState(() {
+                      add5Date = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          PlatformButton(
+            onPressed: () {
+              if (path == '') {
+                fileIsBlankMessage(context);
+              }
+              _saveData(context);
+            },
+            child: const Text('Upload Training'),
+          )
+        ],
       ),
     );
   }

@@ -1,97 +1,123 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 
 import '../providers/soldiers_provider.dart';
 
-class PerstatRollupCard extends StatelessWidget {
-  const PerstatRollupCard(
-      {Key key,
-      this.title,
-      this.leave,
-      this.tdy,
-      this.other,
-      this.button,
-      this.button2})
-      : super(key: key);
+class PerstatRollupCard extends ConsumerWidget {
+  const PerstatRollupCard({
+    Key? key,
+    required this.title,
+    required this.leave,
+    required this.tdy,
+    required this.other,
+    required this.button,
+    required this.button2,
+  }) : super(key: key);
 
   final String title;
   final int leave, tdy, other;
-  final ElevatedButton button, button2;
+  final Widget button, button2;
 
   @override
-  Widget build(BuildContext context) {
-    var soldiers = Provider.of<SoldiersProvider>(context).soldiers;
+  Widget build(BuildContext context, WidgetRef ref) {
+    var soldiers = ref.read(soldiersProvider);
     return Card(
-        child: Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                title,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 18.0),
-                textAlign: TextAlign.center,
+      color: getContrastingBackgroundColor(context),
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                    color: getTextColor(context),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text('Assigned: ${soldiers.length}',
-                        textAlign: TextAlign.start,
-                        style: const TextStyle(fontSize: 16.0)),
-                  ),
-                  Expanded(
-                    child: Text('PDY: ${soldiers.length - leave - tdy - other}',
-                        textAlign: TextAlign.end,
-                        style: const TextStyle(fontSize: 16.0)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text('Leave: $leave',
-                        textAlign: TextAlign.start,
-                        style: const TextStyle(fontSize: 16.0)),
+                    child: Text(
+                      'Assigned: ${soldiers.length}',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
+                    ),
                   ),
                   Expanded(
-                    child: Text('TDY: $tdy',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16.0)),
-                  ),
-                  Expanded(
-                    child: Text('Other: $other',
-                        textAlign: TextAlign.end,
-                        style: const TextStyle(fontSize: 16.0)),
+                    child: Text(
+                      'PDY: ${soldiers.length - leave - tdy - other}',
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-          Expanded(
-            child: ButtonBar(
-              children: <Widget>[
-                button2,
-                button,
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      'Leave: $leave',
+                      textAlign: TextAlign.start,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'TDY: $tdy',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Other: $other',
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: getTextColor(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: ButtonBar(
+                layoutBehavior: ButtonBarLayoutBehavior.constrained,
+                children: <Widget>[
+                  button2,
+                  button,
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

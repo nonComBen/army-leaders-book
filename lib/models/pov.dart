@@ -1,13 +1,11 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class POV {
-  String id;
-  String owner;
-  List<dynamic> users;
-  String soldierId;
+  String? id;
+  String? owner;
+  List<dynamic>? users;
+  String? soldierId;
   String year;
   String make;
   String model;
@@ -19,9 +17,9 @@ class POV {
 
   POV({
     this.id,
-    @required this.owner,
-    @required this.users,
-    @required this.soldierId,
+    this.owner,
+    this.users,
+    this.soldierId,
     this.year = '',
     this.make = '',
     this.model = '',
@@ -54,7 +52,7 @@ class POV {
     try {
       users = doc['users'];
     } catch (e) {
-      print('Error: $e');
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return POV(
       id: doc.id,
@@ -69,6 +67,29 @@ class POV {
       regExp: doc['regExp'],
       ins: doc['ins'],
       insExp: doc['insExp'],
+    );
+  }
+
+  factory POV.fromMap(Map<String, dynamic> map) {
+    List<dynamic> users = [map['owner']];
+    try {
+      users = map['users'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+    }
+    return POV(
+      id: null,
+      owner: map['owner'],
+      users: users,
+      soldierId: map['soldierId'],
+      year: map['year'],
+      make: map['make'],
+      model: map['model'],
+      plate: map['plate'],
+      state: map['state'],
+      regExp: map['regExp'],
+      ins: map['ins'],
+      insExp: map['insExp'],
     );
   }
 }

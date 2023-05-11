@@ -1,11 +1,8 @@
-// ignore_for_file: file_names
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 class WorkingEval {
-  String id;
-  String soldierId;
+  String? id;
+  String? soldierId;
   String owner;
   String rank;
   String name;
@@ -26,7 +23,7 @@ class WorkingEval {
   WorkingEval({
     this.id,
     this.soldierId,
-    @required this.owner,
+    required this.owner,
     this.rank = '',
     this.name = '',
     this.firstName = '',

@@ -1,36 +1,40 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
+import '../models/app_bar_option.dart';
 import '../models/phone_number.dart';
+import '../widgets/my_toast.dart';
+import '../widgets/platform_widgets/platform_scaffold.dart';
+import '../widgets/table_frame.dart';
 import 'editPages/edit_phone_page.dart';
 import 'uploadPages/upload_phone_page.dart';
 import '../pdf/phone_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 
-class PhonePage extends StatefulWidget {
+class PhonePage extends ConsumerStatefulWidget {
   const PhonePage({
-    Key key,
-    @required this.userId,
+    Key? key,
   }) : super(key: key);
-  final String userId;
 
   static const routeName = '/phone-page';
 
@@ -38,25 +42,24 @@ class PhonePage extends StatefulWidget {
   PhonePageState createState() => PhonePageState();
 }
 
-class PhonePageState extends State<PhonePage> {
-  int _sortColumnIndex;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed;
-  List<DocumentSnapshot> _selectedDocuments;
-  List<DocumentSnapshot> documents;
-  StreamSubscription _subscription;
-  BannerAd myBanner;
-
-  final GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
+class PhonePageState extends ConsumerState<PhonePage> {
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+  final List<DocumentSnapshot> _selectedDocuments = [];
+  List<DocumentSnapshot> documents = [];
+  late StreamSubscription _subscription;
+  BannerAd? myBanner;
+  late String userId;
+  FToast toast = FToast();
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    isSubscribed = Provider.of<SubscriptionState>(context).isSubscribed;
+    isSubscribed = ref.read(subscriptionStateProvider);
 
     if (!_adLoaded) {
-      bool trackingAllowed =
-          Provider.of<TrackingProvider>(context, listen: false).trackingAllowed;
+      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
       String adUnitId = kIsWeb
           ? ''
@@ -73,7 +76,7 @@ class PhonePageState extends State<PhonePage> {
           }));
 
       if (!kIsWeb && !isSubscribed) {
-        await myBanner.load();
+        await myBanner!.load();
         _adLoaded = true;
       }
     }
@@ -82,41 +85,17 @@ class PhonePageState extends State<PhonePage> {
   @override
   void initState() {
     super.initState();
+    userId = ref.read(authProvider).currentUser()!.uid;
 
-    _sortAscending = false;
-    _sortColumnIndex = 0;
-    _selectedDocuments = [];
-    documents = [];
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('phoneNumbers')
-        .where('owner', isEqualTo: widget.userId)
+        .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
       setState(() {
         documents = updates.docs;
         _selectedDocuments.clear();
       });
-      // for (DocumentChange dc in updates.docChanges) {
-      //   if (dc.type == DocumentChangeType.removed) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       _selectedDocuments.removeWhere((doc) => doc.id == dc.doc.id);
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.added) {
-      //     setState(() {
-      //       documents.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      //   if (dc.type == DocumentChangeType.modified) {
-      //     setState(() {
-      //       documents.removeWhere((doc) => doc.id == dc.doc.id);
-      //       documents.add(dc.doc);
-      //       _selectedDocuments.clear();
-      //     });
-      //   }
-      // }
     });
   }
 
@@ -129,35 +108,16 @@ class PhonePageState extends State<PhonePage> {
 
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const UploadPhonePage()));
-      // Widget title = const Text('Upload Phone Numbers');
-      // Widget content = Container(
-      //   padding: const EdgeInsets.all(8.0),
-      //   child: const Text(
-      //     'To upload your Phone Numbers, the file must be in .csv format.',
-      //   ),
-      // );
-      // customAlertDialog(
-      //   context: context,
-      //   title: title,
-      //   content: content,
-      //   primaryText: 'Continue',
-      //   primary: () {
-      //     Navigator.push(
-      //         context,
-      //         MaterialPageRoute(
-      //             builder: (context) => UploadPhonePage(
-      //                   userId: widget.userId,
-      //                   isSubscribed: isSubscribed,
-      //                 )));
-      //   },
-      //   secondary: () {},
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadPhonePage()),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Uploading data is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message: 'Uploading data is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -179,7 +139,7 @@ class PhonePageState extends State<PhonePage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet.appendRow(docs);
+      sheet!.appendRow(docs);
     }
 
     String dir, location;
@@ -192,23 +152,18 @@ class PhonePageState extends State<PhonePage> {
       dir = strings[0];
       location = strings[1];
       try {
-        var bytes = excel.encode();
+        var bytes = excel.encode()!;
         File('$dir/phoneDirectory.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Data successfully downloaded to $location'),
-              duration: const Duration(seconds: 5),
-              action: Platform.isAndroid
-                  ? SnackBarAction(
-                      label: 'Open',
-                      onPressed: () {
-                        OpenFile.open('$dir/phoneDirectory.xlsx');
-                      },
-                    )
-                  : null,
+          toast.showToast(
+            child: MyToast(
+              message: 'Data successfully downloaded to $location',
+              buttonText: kIsWeb ? null : 'Open',
+              onPressed: kIsWeb
+                  ? null
+                  : () => OpenFile.open('$dir/phoneDirectory.xlsx'),
             ),
           );
         }
@@ -240,10 +195,12 @@ class PhonePageState extends State<PhonePage> {
         },
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-            'Downloading PDF files is only available for subscribed users.'),
-      ));
+      toast.showToast(
+        child: const MyToast(
+          message:
+              'Downloading PDF files is only available for subscribed users.',
+        ),
+      );
     }
   }
 
@@ -254,7 +211,7 @@ class PhonePageState extends State<PhonePage> {
       (a, b) => a['title'].toString().compareTo(b['title'].toString()),
     );
     PhonePdf pdf = PhonePdf(
-      documents,
+      documents: documents,
     );
     String location;
     if (fullPage) {
@@ -273,36 +230,37 @@ class PhonePageState extends State<PhonePage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 5),
-          action: location == ''
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () {
-                    OpenFile.open('$location/phoneNumbers.pdf');
-                  },
-                )));
+      toast.showToast(
+        child: MyToast(
+          message: message,
+          buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => OpenFile.open('$location/phoneNumbers.pdf'),
+        ),
+      );
     }
   }
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      //show snack bar requiring at least one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select at least one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select at least one record',
+        ),
+      );
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, widget.userId, 'Phone Number$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Phone Number$s');
   }
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      //show snack bar requiring one item selected
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You must select exactly one record')));
+      toast.showToast(
+        child: const MyToast(
+          message: 'You must select exactly one record',
+        ),
+      );
       return;
     }
     Navigator.push(
@@ -321,7 +279,7 @@ class PhonePageState extends State<PhonePage> {
         MaterialPageRoute(
             builder: (context) => EditPhonePage(
                   phone: Phone(
-                    owner: widget.userId,
+                    owner: userId,
                   ),
                 )));
   }
@@ -358,7 +316,7 @@ class PhonePageState extends State<PhonePage> {
     newList = snapshot.map((DocumentSnapshot documentSnapshot) {
       return DataRow(
           selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool selected) =>
+          onSelectChanged: (bool? selected) =>
               onSelected(selected, documentSnapshot),
           cells: getCells(documentSnapshot, width));
     }).toList();
@@ -418,9 +376,9 @@ class PhonePageState extends State<PhonePage> {
     });
   }
 
-  void onSelected(bool selected, DocumentSnapshot snapshot) {
+  void onSelected(bool? selected, DocumentSnapshot snapshot) {
     setState(() {
-      if (selected) {
+      if (selected!) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -428,152 +386,111 @@ class PhonePageState extends State<PhonePage> {
     });
   }
 
-  List<Widget> appBarMenu(BuildContext context, double width) {
-    List<Widget> buttons = <Widget>[];
-    List<Widget> editButton = <Widget>[
-      Tooltip(
-          message: 'Edit Record',
-          child: IconButton(
-              icon: const Icon(Icons.edit), onPressed: () => _editRecord())),
-    ];
-
-    List<PopupMenuEntry<String>> popupItems = [];
-
-    if (width > 600) {
-      buttons.add(
-        Tooltip(
-            message: 'Download as Excel',
-            child: IconButton(
-                icon: const Icon(Icons.file_download),
-                onPressed: () {
-                  _downloadExcel();
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Upload Data',
-            child: IconButton(
-                icon: const Icon(Icons.file_upload),
-                onPressed: () {
-                  _uploadExcel(context);
-                })),
-      );
-      buttons.add(
-        Tooltip(
-            message: 'Download as PDF',
-            child: IconButton(
-                icon: const Icon(Icons.picture_as_pdf),
-                onPressed: () {
-                  _downloadPdf();
-                })),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'download',
-        child: Text('Download as Excel'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'upload',
-        child: Text('Upload Data'),
-      ));
-      popupItems.add(const PopupMenuItem(
-        value: 'pdf',
-        child: Text('Download as PDF'),
-      ));
-    }
-    if (width > 400) {
-      buttons.add(
-        Tooltip(
-            message: 'Delete Record(s)',
-            child: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () => _deleteRecord())),
-      );
-    } else {
-      popupItems.add(const PopupMenuItem(
-        value: 'delete',
-        child: Text('Delete Record(s)'),
-      ));
-    }
-
-    List<Widget> overflowButton = <Widget>[
-      PopupMenuButton<String>(
-        onSelected: (String result) {
-          if (result == 'upload') {
-            _uploadExcel(context);
-          }
-          if (result == 'download') {
-            _downloadExcel();
-          }
-          if (result == 'delete') {
-            _deleteRecord();
-          }
-          if (result == 'pdf') {
-            _downloadPdf();
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return popupItems;
-        },
-      )
-    ];
-
-    if (width > 600) {
-      return buttons + editButton;
-    } else if (width <= 400) {
-      return editButton + overflowButton;
-    } else {
-      return buttons + editButton + overflowButton;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final user = AuthProvider.of(context).auth.currentUser();
-    return Scaffold(
-        key: _scaffoldState,
-        appBar: AppBar(
-            title: const Text('Phone Numbers'),
-            actions: appBarMenu(context, MediaQuery.of(context).size.width)),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner,
-                ),
+    final user = ref.read(authProvider).currentUser()!;
+    final width = MediaQuery.of(context).size.width;
+    toast.context = context;
+    return PlatformScaffold(
+      title: 'Contacts',
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isIOS)
+            AppBarOption(
+              title: 'New Contact',
+              icon: Icon(
+                CupertinoIcons.add,
+                color: getOnPrimaryColor(context),
               ),
-            Flexible(
-              flex: 1,
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).size.width),
-                      rows: _createRows(
-                          documents, MediaQuery.of(context).size.width),
-                    ),
-                  )
-                ],
+              onPressed: () => _newRecord(context),
+            ),
+          AppBarOption(
+            title: 'Edit Contact',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _editRecord(),
+          ),
+          AppBarOption(
+            title: 'Delete Contact',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _deleteRecord(),
+          ),
+          AppBarOption(
+            title: 'Download Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadExcel(),
+          ),
+          AppBarOption(
+            title: 'Upload Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.upload
+                  : CupertinoIcons.cloud_upload,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _uploadExcel(context),
+          ),
+          AppBarOption(
+            title: 'Download PDF',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.picture_as_pdf
+                  : CupertinoIcons.doc,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadPdf(),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: TableFrame(
+        children: [
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        documents, MediaQuery.of(context).size.width),
+                  ),
+                )
+              ],
+            ),
+          ),
+          if (_adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner!.size.width.toDouble(),
+              height: myBanner!.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner!,
               ),
             ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
 }

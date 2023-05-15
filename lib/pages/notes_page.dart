@@ -40,47 +40,39 @@ class NotesPageState extends ConsumerState<NotesPage> {
   final List<DocumentSnapshot> _selectedDocuments = [];
   List<DocumentSnapshot> documents = [];
   late StreamSubscription _subscription;
-  BannerAd? myBanner;
+  late BannerAd myBanner;
   late String userId;
   FToast toast = FToast();
-
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-
-    isSubscribed = ref.read(subscriptionStateProvider);
-
-    if (!_adLoaded) {
-      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
-
-      String adUnitId = kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? 'ca-app-pub-2431077176117105/1369522276'
-              : 'ca-app-pub-2431077176117105/9894231072';
-
-      myBanner = BannerAd(
-        adUnitId: adUnitId,
-        size: AdSize.banner,
-        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-        listener: BannerAdListener(
-          onAdLoaded: (ad) {
-            _adLoaded = true;
-          },
-        ),
-      );
-
-      if (!kIsWeb && !isSubscribed) {
-        await myBanner!.load();
-        _adLoaded = true;
-      }
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
+    bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
+
+    String adUnitId = kIsWeb
+        ? ''
+        : Platform.isAndroid
+            ? 'ca-app-pub-2431077176117105/5969152104'
+            : 'ca-app-pub-2431077176117105/5872947783';
+
+    myBanner = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _adLoaded = true;
+          });
+        },
+      ),
+    );
+
+    if (!kIsWeb) {
+      myBanner.load();
+    }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
         .collection('notes')
@@ -101,7 +93,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
   @override
   void dispose() {
     _subscription.cancel();
-    myBanner?.dispose();
+    myBanner.dispose();
     super.dispose();
   }
 
@@ -302,14 +294,14 @@ class NotesPageState extends ConsumerState<NotesPage> {
               ],
             ),
           ),
-          if (_adLoaded)
+          if (!isSubscribed && _adLoaded)
             Container(
               alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
+              width: myBanner.size.width.toDouble(),
+              height: myBanner.size.height.toDouble(),
               constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
               child: AdWidget(
-                ad: myBanner!,
+                ad: myBanner,
               ),
             ),
         ],

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/theme_methods.dart';
+import 'package:leaders_book/providers/tracking_provider.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_expansion_list_tile.dart';
 
 import '../providers/subscription_state.dart';
@@ -289,40 +290,48 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
           ),
         )),
   ];
-  BannerAd? myBanner;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    isSubscribed = ref.read(subscriptionStateProvider);
-  }
+  late BannerAd myBanner;
+  bool _adLoaded = false;
 
   @override
   void initState() {
     super.initState();
 
+    isSubscribed = ref.read(subscriptionStateProvider);
+    bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
+
     myBanner = BannerAd(
-        adUnitId: kIsWeb
-            ? ''
-            : Platform.isAndroid
-                ? 'ca-app-pub-2431077176117105/1369522276'
-                : 'ca-app-pub-2431077176117105/9894231072',
-        size: AdSize.banner,
-        request: const AdRequest(),
-        listener: const BannerAdListener());
+      adUnitId: kIsWeb
+          ? ''
+          : Platform.isAndroid
+              ? 'ca-app-pub-2431077176117105/3345783071'
+              : 'ca-app-pub-2431077176117105/4531945950',
+      size: AdSize.banner,
+      request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _adLoaded = true;
+          });
+        },
+      ),
+    );
+
+    if (!kIsWeb) {
+      myBanner.load();
+    }
   }
 
   @override
   void dispose() {
-    myBanner?.dispose();
+    myBanner.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && !isSubscribed) {
-      myBanner!.load();
+      myBanner.load();
     }
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
@@ -376,14 +385,14 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
                   ],
                 ),
               ),
-              if (!isSubscribed && !kIsWeb)
+              if (!isSubscribed && _adLoaded)
                 Container(
                   alignment: Alignment.center,
-                  width: myBanner!.size.width.toDouble(),
-                  height: myBanner!.size.height.toDouble(),
+                  width: myBanner.size.width.toDouble(),
+                  height: myBanner.size.height.toDouble(),
                   constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                   child: AdWidget(
-                    ad: myBanner!,
+                    ad: myBanner,
                   ),
                 ),
             ],

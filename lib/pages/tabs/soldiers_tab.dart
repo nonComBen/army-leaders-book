@@ -33,46 +33,43 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
   late List<Soldier> _selectedSoldiers;
   late List<Soldier> _filteredSoldiers;
   List<Soldier> soldiers = [];
-  BannerAd? myBanner;
+  late BannerAd myBanner;
   late String _userId;
 
   @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-
+  void initState() {
+    super.initState();
     isSubscribed = ref.read(subscriptionStateProvider);
     _userId = ref.read(authProvider).currentUser()!.uid;
+    bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
 
-    if (!_adLoaded && !isSubscribed) {
-      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
+    String adUnitId = kIsWeb
+        ? ''
+        : Platform.isAndroid
+            ? 'ca-app-pub-2431077176117105/6578451073'
+            : 'ca-app-pub-2431077176117105/5763414374';
 
-      String adUnitId = kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? 'ca-app-pub-2431077176117105/1369522276'
-              : 'ca-app-pub-2431077176117105/9894231072';
-
-      myBanner = BannerAd(
-        adUnitId: adUnitId,
-        size: AdSize.banner,
-        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-        listener: BannerAdListener(
-          onAdLoaded: (ad) {
+    myBanner = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
             _adLoaded = true;
-          },
-        ),
-      );
+          });
+        },
+      ),
+    );
 
-      if (!kIsWeb && !isSubscribed) {
-        await myBanner!.load();
-        _adLoaded = true;
-      }
+    if (!kIsWeb) {
+      myBanner.load();
     }
   }
 
   @override
   void dispose() {
-    myBanner?.dispose();
+    myBanner.dispose();
     super.dispose();
   }
 
@@ -329,11 +326,11 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
                 ),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const <Widget>[
+                      children: <Widget>[
                         Text(
                           'Blue Text: Record is shared with you',
                           style: TextStyle(
@@ -346,14 +343,14 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
               ],
             ),
           ),
-          if (_adLoaded)
+          if (!isSubscribed && _adLoaded)
             Container(
               alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
+              width: myBanner.size.width.toDouble(),
+              height: myBanner.size.height.toDouble(),
               constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
               child: AdWidget(
-                ad: myBanner!,
+                ad: myBanner,
               ),
             ),
         ],

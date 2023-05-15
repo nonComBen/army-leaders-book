@@ -65,37 +65,45 @@ class ApftPageState extends ConsumerState<ApftPage> {
   late StreamSubscription _subscriptionUsers;
   late SharedPreferences prefs;
   QuerySnapshot? snapshot;
-  BannerAd? myBanner;
+  late BannerAd myBanner;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
+
+    bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
+
+    String adUnitId = kIsWeb
+        ? ''
+        : Platform.isAndroid
+            ? 'ca-app-pub-2431077176117105/9531917477'
+            : 'ca-app-pub-2431077176117105/6310209282';
+
+    myBanner = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _adLoaded = true;
+          });
+        },
+      ),
+    );
+
+    if (!kIsWeb) {
+      myBanner.load();
+    }
+  }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userId = ref.read(authProvider).currentUser()!.uid;
-    isSubscribed = ref.read(subscriptionStateProvider);
-
-    if (!_adLoaded) {
-      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
-
-      String adUnitId = kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? 'ca-app-pub-2431077176117105/1369522276'
-              : 'ca-app-pub-2431077176117105/9894231072';
-
-      myBanner = BannerAd(
-          adUnitId: adUnitId,
-          size: AdSize.banner,
-          request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-          listener: BannerAdListener(onAdLoaded: (ad) {
-            _adLoaded = true;
-          }));
-
-      if (!kIsWeb && !isSubscribed) {
-        await myBanner!.load();
-        _adLoaded = true;
-      }
-    }
     if (isInitial) {
       initialize();
       isInitial = false;
@@ -132,7 +140,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
   @override
   void dispose() {
     _subscriptionUsers.cancel();
-    myBanner?.dispose();
+    myBanner.dispose();
     super.dispose();
   }
 
@@ -627,191 +635,187 @@ class ApftPageState extends ConsumerState<ApftPage> {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
-        title: 'APFT Stats',
-        actions: createAppBarActions(
-          width,
-          [
-            if (!kIsWeb && Platform.isIOS)
-              AppBarOption(
-                title: 'New APFT',
-                icon: Icon(
-                  CupertinoIcons.add,
-                  color: getOnPrimaryColor(context),
+      title: 'APFT Stats',
+      actions: createAppBarActions(
+        width,
+        [
+          if (!kIsWeb && Platform.isIOS)
+            AppBarOption(
+              title: 'New APFT',
+              icon: Icon(
+                CupertinoIcons.add,
+                color: getOnPrimaryColor(context),
+              ),
+              onPressed: () => _newRecord(context),
+            ),
+          AppBarOption(
+            title: 'Edit APFT',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _editRecord(),
+          ),
+          AppBarOption(
+            title: 'Delete APFT',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _deleteRecord(),
+          ),
+          AppBarOption(
+            title: 'Filter APFTs',
+            icon: Icon(
+              Icons.filter_alt,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => showFilterOptions(
+                context, getSections(documents), _filterRecords),
+          ),
+          AppBarOption(
+            title: 'Download Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.download
+                  : CupertinoIcons.cloud_download,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadExcel(),
+          ),
+          AppBarOption(
+            title: 'Upload Excel',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.upload
+                  : CupertinoIcons.cloud_upload,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _uploadExcel(context),
+          ),
+          AppBarOption(
+            title: 'Download PDF',
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.picture_as_pdf
+                  : CupertinoIcons.doc,
+              color: getOnPrimaryColor(context),
+            ),
+            onPressed: () => _downloadPdf(),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
+      body: TableFrame(
+        children: [
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                if (user.isAnonymous) const AnonWarningBanner(),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: DataTable(
+                    sortAscending: _sortAscending,
+                    sortColumnIndex: _sortColumnIndex,
+                    columns: _createColumns(MediaQuery.of(context).size.width),
+                    rows: _createRows(
+                        filteredDocs, MediaQuery.of(context).size.width),
+                  ),
                 ),
-                onPressed: () => _newRecord(context),
-              ),
-            AppBarOption(
-              title: 'Edit APFT',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.edit
-                    : CupertinoIcons.pencil,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _editRecord(),
-            ),
-            AppBarOption(
-              title: 'Delete APFT',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.delete
-                    : CupertinoIcons.delete,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _deleteRecord(),
-            ),
-            AppBarOption(
-              title: 'Filter APFTs',
-              icon: Icon(
-                Icons.filter_alt,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => showFilterOptions(
-                  context, getSections(documents), _filterRecords),
-            ),
-            AppBarOption(
-              title: 'Download Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.download
-                    : CupertinoIcons.cloud_download,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadExcel(),
-            ),
-            AppBarOption(
-              title: 'Upload Excel',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.upload
-                    : CupertinoIcons.cloud_upload,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _uploadExcel(context),
-            ),
-            AppBarOption(
-              title: 'Download PDF',
-              icon: Icon(
-                kIsWeb || Platform.isAndroid
-                    ? Icons.picture_as_pdf
-                    : CupertinoIcons.doc,
-                color: getOnPrimaryColor(context),
-              ),
-              onPressed: () => _downloadPdf(),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () {
-              _newRecord(context);
-            }),
-        body: TableFrame(
-          children: [
-            Expanded(
-              child: ListView(
-                children: <Widget>[
-                  if (user.isAnonymous) const AnonWarningBanner(),
-                  Card(
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 850.0),
+                  child: Card(
                     color: getContrastingBackgroundColor(context),
-                    child: DataTable(
-                      sortAscending: _sortAscending,
-                      sortColumnIndex: _sortColumnIndex,
-                      columns:
-                          _createColumns(MediaQuery.of(context).size.width),
-                      rows: _createRows(
-                          filteredDocs, MediaQuery.of(context).size.width),
+                    child: Column(
+                      children: <Widget>[
+                        const Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Text(
+                            'Average',
+                            style: TextStyle(fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text('PU: $puAve'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text('SU: $suAve'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text('Run: $runAve'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Text('Total: $totalAve'),
+                            ),
+                          ],
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Text(
+                            'Zeros are factored out and averages are rounded down.',
+                            style: TextStyle(fontSize: 14),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      ],
                     ),
                   ),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 850.0),
-                    child: Card(
-                      color: getContrastingBackgroundColor(context),
-                      child: Column(
-                        children: <Widget>[
-                          const Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: Text(
-                              'Average',
-                              style: TextStyle(fontSize: 18),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('PU: $puAve'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('SU: $suAve'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('Run: $runAve'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text('Total: $totalAve'),
-                              ),
-                            ],
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: Text(
-                              'Zeros are factored out and averages are rounded down.',
-                              style: TextStyle(fontSize: 14),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        ],
-                      ),
+                ),
+                Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Blue Text: Failed',
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Amber Text: Due within 30 days',
+                          style: TextStyle(
+                              color: Colors.amber, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Red Text: Overdue',
+                          style: TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.bold),
+                        )
+                      ],
                     ),
                   ),
-                  Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(
-                            'Blue Text: Failed',
-                            style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Amber Text: Due within 30 days',
-                            style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Red Text: Overdue',
-                            style: TextStyle(
-                                color: Colors.red, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                  )
-                ],
+                )
+              ],
+            ),
+          ),
+          if (!isSubscribed && _adLoaded)
+            Container(
+              alignment: Alignment.center,
+              width: myBanner.size.width.toDouble(),
+              height: myBanner.size.height.toDouble(),
+              constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+              child: AdWidget(
+                ad: myBanner,
               ),
             ),
-            if (_adLoaded)
-              Container(
-                alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
-                constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
-                child: AdWidget(
-                  ad: myBanner!,
-                ),
-              ),
-          ],
-        ));
+        ],
+      ),
+    );
   }
 }

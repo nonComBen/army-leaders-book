@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/methods/theme_methods.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../methods/create_app_bar_actions.dart';
@@ -323,12 +324,10 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
 
   void confirmDeleteAccount() {
     Widget title = const Text('Delete Account');
-    Widget content = SingleChildScrollView(
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        child: const Text(
-          'Are you sure you want to delete this account? All data associated with this account will also be deleted.',
-        ),
+    Widget content = Container(
+      padding: const EdgeInsets.all(8.0),
+      child: const Text(
+        'Are you sure you want to delete this account? All data associated with this account will also be deleted.',
       ),
     );
     customAlertDialog(
@@ -354,9 +353,12 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
         [
           AppBarOption(
             title: 'Delete Account',
-            icon: Icon(kIsWeb || Platform.isAndroid
-                ? Icons.delete
-                : CupertinoIcons.delete),
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.delete
+                  : CupertinoIcons.delete,
+              color: getOnPrimaryColor(context),
+            ),
             onPressed: confirmDeleteAccount,
           ),
         ],
@@ -378,7 +380,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.content_copy),
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(text: widget.userId));
+                        Clipboard.setData(ClipboardData(text: widget.userId!));
                         toast.showToast(
                           child: const MyToast(
                             message: 'User ID copied to clipboard',

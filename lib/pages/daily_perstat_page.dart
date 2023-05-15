@@ -623,16 +623,22 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
         [
           AppBarOption(
               title: 'Refresh',
-              icon: Icon(kIsWeb || Platform.isAndroid
-                  ? Icons.refresh
-                  : CupertinoIcons.refresh),
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.refresh
+                    : CupertinoIcons.refresh,
+                color: getOnPrimaryColor(context),
+              ),
               onPressed: () {
                 dailies.clear();
                 buildNewDailies();
               }),
           AppBarOption(
               title: 'Filter Records',
-              icon: const Icon(Icons.filter_alt),
+              icon: Icon(
+                Icons.filter_alt,
+                color: getOnPrimaryColor(context),
+              ),
               onPressed: () {
                 showFilterOptions(
                   context,
@@ -643,15 +649,21 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
           if (!kIsWeb)
             AppBarOption(
                 title: 'Download Image',
-                icon: Icon(kIsWeb || Platform.isAndroid
-                    ? Icons.image
-                    : CupertinoIcons.photo),
+                icon: Icon(
+                  kIsWeb || Platform.isAndroid
+                      ? Icons.image
+                      : CupertinoIcons.photo,
+                  color: getOnPrimaryColor(context),
+                ),
                 onPressed: () => _downloadPng()),
           AppBarOption(
               title: 'Download Excel',
-              icon: Icon(kIsWeb || Platform.isAndroid
-                  ? Icons.download
-                  : CupertinoIcons.cloud_download),
+              icon: Icon(
+                kIsWeb || Platform.isAndroid
+                    ? Icons.download
+                    : CupertinoIcons.cloud_download,
+                color: getOnPrimaryColor(context),
+              ),
               onPressed: () => _downloadExcel()),
         ],
       ),

@@ -92,13 +92,39 @@ class HomePageState extends ConsumerState<RollupTab>
   Setting? setting;
   late LocalAuthentication _localAuth;
   SubscriptionState? subState;
-  BannerAd? myBanner;
+  late BannerAd myBanner;
   late RootService _rootService;
   UserObj? _userObj;
 
   @override
   void initState() {
     super.initState();
+
+    final trackingService = ref.read(trackingProvider);
+    bool trackingAllowed = trackingService.trackingAllowed;
+
+    String adUnitId = kIsWeb
+        ? ''
+        : Platform.isAndroid
+            ? androidAd
+            : iosAd;
+
+    myBanner = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _adLoaded = true;
+          });
+        },
+      ),
+    );
+
+    if (!kIsWeb) {
+      myBanner.load();
+    }
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -111,39 +137,6 @@ class HomePageState extends ConsumerState<RollupTab>
     if (isInitial && _userObj != null) {
       isInitial = false;
       init();
-    }
-
-    isSubscribed = ref.watch(subscriptionStateProvider);
-
-    if (_adLoaded && isSubscribed) {
-      removeAds();
-    }
-    if (!kIsWeb && !_adLoaded && !isSubscribed) {
-      final trackingService = ref.read(trackingProvider);
-      bool trackingAllowed = trackingService.trackingAllowed;
-      if (trackingAllowed) {
-        trackingAllowed = await trackingService.getTrackingFromPermission();
-      }
-
-      String adUnitId = kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? androidAd
-              : iosAd;
-
-      myBanner = BannerAd(
-        adUnitId: adUnitId,
-        size: AdSize.banner,
-        request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-        listener: BannerAdListener(
-          onAdLoaded: (ad) {
-            _adLoaded = true;
-          },
-        ),
-      );
-
-      await myBanner!.load();
-      _adLoaded = true;
     }
   }
 
@@ -200,7 +193,7 @@ class HomePageState extends ConsumerState<RollupTab>
   void dispose() async {
     _streamSubscription?.cancel();
     _soldierSubscription?.cancel();
-    myBanner?.dispose();
+    myBanner.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -264,13 +257,6 @@ class HomePageState extends ConsumerState<RollupTab>
         _rootService.linkAnonymous();
       },
     );
-  }
-
-  void removeAds() {
-    if (_adLoaded) {
-      myBanner?.dispose();
-      _adLoaded = false;
-    }
   }
 
   showByName(String title, List<DocumentSnapshot> list, HomeCard homeCard) {
@@ -978,6 +964,7 @@ class HomePageState extends ConsumerState<RollupTab>
 
   @override
   Widget build(BuildContext context) {
+    isSubscribed = ref.watch(subscriptionStateProvider);
     double width = MediaQuery.of(context).size.width;
     _rootService = ref.read(rootProvider.notifier);
     final user = ref.read(authProvider).currentUser();
@@ -1050,11 +1037,11 @@ class HomePageState extends ConsumerState<RollupTab>
           if (_adLoaded && !isSubscribed)
             Container(
               alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
+              width: myBanner.size.width.toDouble(),
+              height: myBanner.size.height.toDouble(),
               constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
               child: AdWidget(
-                ad: myBanner!,
+                ad: myBanner,
               ),
             )
         ],

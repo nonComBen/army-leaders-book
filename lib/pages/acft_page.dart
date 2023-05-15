@@ -69,37 +69,11 @@ class AcftPageState extends ConsumerState<AcftPage> {
   late StreamSubscription _subscriptionUsers;
   late SharedPreferences prefs;
   QuerySnapshot? snapshot;
-  BannerAd? myBanner;
+  late BannerAd myBanner;
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-
-    _userId = ref.read(authProvider).currentUser()!.uid;
-    isSubscribed = ref.read(subscriptionStateProvider);
-
-    if (!_adLoaded && !isSubscribed) {
-      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
-
-      String adUnitId = kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? 'ca-app-pub-2431077176117105/1369522276'
-              : 'ca-app-pub-2431077176117105/9894231072';
-
-      myBanner = BannerAd(
-          adUnitId: adUnitId,
-          size: AdSize.banner,
-          request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-          listener: BannerAdListener(onAdLoaded: (ad) {
-            _adLoaded = true;
-          }));
-
-      if (!kIsWeb && !isSubscribed) {
-        await myBanner!.load();
-        _adLoaded = true;
-      }
-    }
 
     if (isInitial) {
       initialize();
@@ -111,16 +85,29 @@ class AcftPageState extends ConsumerState<AcftPage> {
   void initState() {
     super.initState();
 
+    _userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
+    bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
+
     myBanner = BannerAd(
       adUnitId: kIsWeb
           ? ''
           : Platform.isAndroid
-              ? 'ca-app-pub-2431077176117105/1369522276'
-              : 'ca-app-pub-2431077176117105/9894231072',
+              ? 'ca-app-pub-2431077176117105/4679545565'
+              : 'ca-app-pub-2431077176117105/2367694109',
       size: AdSize.banner,
-      request: const AdRequest(),
-      listener: const BannerAdListener(),
+      request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _adLoaded = true;
+          });
+        },
+      ),
     );
+    if (!kIsWeb) {
+      myBanner.load();
+    }
   }
 
   void initialize() async {
@@ -153,7 +140,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
   @override
   void dispose() {
     _subscriptionUsers.cancel();
-    myBanner?.dispose();
+    myBanner.dispose();
     super.dispose();
   }
 
@@ -1025,11 +1012,11 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   ),
                   Card(
                     color: getContrastingBackgroundColor(context),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
+                        children: <Widget>[
                           Text(
                             'Blue Text: Failed',
                             style: TextStyle(
@@ -1054,14 +1041,14 @@ class AcftPageState extends ConsumerState<AcftPage> {
                 ],
               ),
             ),
-            if (_adLoaded)
+            if (!isSubscribed && _adLoaded)
               Container(
                 alignment: Alignment.center,
-                width: myBanner!.size.width.toDouble(),
-                height: myBanner!.size.height.toDouble(),
+                width: myBanner.size.width.toDouble(),
+                height: myBanner.size.height.toDouble(),
                 constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
                 child: AdWidget(
-                  ad: myBanner!,
+                  ad: myBanner,
                 ),
               ),
           ],

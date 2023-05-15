@@ -49,44 +49,39 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   final List<DocumentSnapshot> _selectedDocuments = [];
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
-  BannerAd? myBanner;
+  late BannerAd myBanner;
   late String userId;
   FToast toast = FToast();
-
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-
-    isSubscribed = ref.read(subscriptionStateProvider);
-
-    if (!_adLoaded) {
-      bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
-
-      String adUnitId = kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? 'ca-app-pub-2431077176117105/1369522276'
-              : 'ca-app-pub-2431077176117105/9894231072';
-
-      myBanner = BannerAd(
-          adUnitId: adUnitId,
-          size: AdSize.banner,
-          request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-          listener: BannerAdListener(onAdLoaded: (ad) {
-            _adLoaded = true;
-          }));
-
-      if (!kIsWeb && !isSubscribed) {
-        await myBanner!.load();
-        _adLoaded = true;
-      }
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     userId = ref.read(authProvider).currentUser()!.uid;
+    isSubscribed = ref.read(subscriptionStateProvider);
+    bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
+
+    String adUnitId = kIsWeb
+        ? ''
+        : Platform.isAndroid
+            ? 'ca-app-pub-2431077176117105/3558035588'
+            : 'ca-app-pub-2431077176117105/8852612140';
+
+    myBanner = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: AdRequest(nonPersonalizedAds: !trackingAllowed),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _adLoaded = true;
+          });
+        },
+      ),
+    );
+
+    if (!kIsWeb) {
+      myBanner.load();
+    }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
         .collection('taskings')
@@ -105,7 +100,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   @override
   void dispose() {
     _subscriptionUsers.cancel();
-    myBanner?.dispose();
+    myBanner.dispose();
     super.dispose();
   }
 
@@ -610,11 +605,11 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
                 ),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const <Widget>[
+                      children: <Widget>[
                         Text(
                           'Red Text: Past Thru Date',
                           style: TextStyle(
@@ -627,14 +622,14 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
               ],
             ),
           ),
-          if (_adLoaded)
+          if (!isSubscribed && _adLoaded)
             Container(
               alignment: Alignment.center,
-              width: myBanner!.size.width.toDouble(),
-              height: myBanner!.size.height.toDouble(),
+              width: myBanner.size.width.toDouble(),
+              height: myBanner.size.height.toDouble(),
               constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
               child: AdWidget(
-                ad: myBanner!,
+                ad: myBanner,
               ),
             ),
         ],

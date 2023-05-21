@@ -14,7 +14,6 @@ class HrAction {
   String dd93;
   String sglv;
   String prr;
-  String frr;
 
   HrAction({
     this.id,
@@ -29,7 +28,6 @@ class HrAction {
     this.dd93 = '',
     this.sglv = '',
     this.prr = '',
-    this.frr = '',
   });
 
   Map<String, dynamic> toMap() {
@@ -45,7 +43,6 @@ class HrAction {
     map['dd93'] = dd93;
     map['sglv'] = sglv;
     map['prr'] = prr;
-    map['frr'] = frr;
 
     return map;
   }
@@ -58,18 +55,18 @@ class HrAction {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return HrAction(
-        id: doc.id,
-        soldierId: doc['soldierId'],
-        owner: doc['owner'],
-        users: users,
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        dd93: doc['dd93'],
-        sglv: doc['sglv'],
-        prr: doc['prr'],
-        frr: doc['frr']);
+      id: doc.id,
+      soldierId: doc['soldierId'],
+      owner: doc['owner'],
+      users: users,
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      dd93: doc['dd93'],
+      sglv: doc['sglv'],
+      prr: doc['prr'],
+    );
   }
 }

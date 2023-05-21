@@ -4,10 +4,10 @@ class BfCalculator {
     required int ageGroupIndex,
     required int height,
   }) {
-    int min, max, percentMax;
+    int min, max, percentMax, heightIndex = height >= 58 ? height - 58 : 0;
 
-    min = heightWeightTable[height - 58][8];
-    max = heightWeightTable[height - 58]
+    min = heightWeightTable[heightIndex][8];
+    max = heightWeightTable[heightIndex]
         [male ? ageGroupIndex : ageGroupIndex + 4];
     percentMax = percentTable[male ? ageGroupIndex : ageGroupIndex + 4];
 

@@ -14,6 +14,7 @@ class UserObj {
   bool updatedUserArray;
   bool updatedPovs;
   bool updatedAwards;
+  bool updatedTraining;
   DateTime? createdDate;
   DateTime? lastLoginDate;
 
@@ -30,6 +31,7 @@ class UserObj {
     this.updatedUserArray = false,
     this.updatedPovs = false,
     this.updatedAwards = false,
+    this.updatedTraining = false,
     this.createdDate,
     this.lastLoginDate,
   });
@@ -50,6 +52,7 @@ class UserObj {
     map['lastLogin'] = lastLoginDate;
     map['updatedPovs'] = updatedPovs;
     map['updatedAwards'] = updatedAwards;
+    map['updatedTraining'] = updatedTraining;
 
     return map;
   }
@@ -61,7 +64,8 @@ class UserObj {
     String rank = '', userName = '', userUnit = '';
     bool isUserArrayUpdated = false,
         isPovsUpdated = false,
-        isAwardsUpdated = false;
+        isAwardsUpdated = false,
+        isTrainingUpdated = false;
 
     try {
       rank = doc['rank'];
@@ -88,6 +92,7 @@ class UserObj {
     try {
       isPovsUpdated = doc['updatedPovs'];
       isAwardsUpdated = doc['updatedAwards'];
+      isTrainingUpdated = doc['updatedTraining'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'updatedPovs Does Not Exist');
     }
@@ -114,6 +119,7 @@ class UserObj {
       updatedUserArray: isUserArrayUpdated,
       updatedPovs: isPovsUpdated,
       updatedAwards: isAwardsUpdated,
+      updatedTraining: isTrainingUpdated,
       createdDate: createdTimestamp.toDate(),
       lastLoginDate: lastLoginTimestamp.toDate(),
     );

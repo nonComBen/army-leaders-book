@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:leaders_book/constants/firestore_collections.dart';
 import 'package:leaders_book/models/award.dart';
 import 'package:leaders_book/models/pov.dart';
+
+import '../models/training.dart';
 
 void updateUsersArray(String? uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
@@ -78,6 +81,45 @@ void updateAwards(String uid) async {
   for (Award award in awards) {
     db.doc('awards/${award.id}').delete();
   }
+}
+
+void updateTraining(String uid) async {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  List<Training> trainings = [];
+  final snapshot = await db
+      .collection(kTrainingCollection)
+      .where('users', arrayContains: uid)
+      .get();
+  if (snapshot.docs.isNotEmpty) {
+    trainings = snapshot.docs.map((e) => Training.fromSnapshot(e)).toList();
+    for (Training training in trainings) {
+      if (training.add1 != '') {
+        training.addTraining!
+            .add({'name': training.add1, 'date': training.add1Date});
+      }
+      if (training.add2 != '') {
+        training.addTraining!
+            .add({'name': training.add2, 'date': training.add2Date});
+      }
+      if (training.add3 != '') {
+        training.addTraining!
+            .add({'name': training.add3, 'date': training.add3Date});
+      }
+      if (training.add4 != '') {
+        training.addTraining!
+            .add({'name': training.add4, 'date': training.add4Date});
+      }
+      if (training.add5 != '') {
+        training.addTraining!
+            .add({'name': training.add5, 'date': training.add5Date});
+      }
+      db
+          .collection(kTrainingCollection)
+          .doc(training.id)
+          .update({'addTraining': training.addTraining});
+    }
+  }
+  db.collection('users').doc(uid).update({'updatedTraining': true});
 }
 
 void syncFromWebApp(String uid) async {

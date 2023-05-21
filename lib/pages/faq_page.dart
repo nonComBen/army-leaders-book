@@ -1,10 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/methods/theme_methods.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_expansion_list_tile.dart';
@@ -135,24 +133,6 @@ class FaqPageState extends ConsumerState<FaqPage> {
       ),
     ),
   ];
-
-  BannerAd? myBanner;
-
-  @override
-  void initState() {
-    super.initState();
-
-    myBanner = BannerAd(
-      adUnitId: kIsWeb
-          ? ''
-          : Platform.isAndroid
-              ? 'ca-app-pub-2431077176117105/1369522276'
-              : 'ca-app-pub-2431077176117105/9894231072',
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: const BannerAdListener(),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

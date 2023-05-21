@@ -70,7 +70,6 @@ void deleteRecord(BuildContext context, List<DocumentSnapshot>? selectedDocs,
     title: title,
     content: content,
     primaryText: 'Yes',
-    secondaryText: 'Cancel',
     primary: () {
       for (DocumentSnapshot doc in selectedDocs!) {
         if (doc['owner'] == userId) {

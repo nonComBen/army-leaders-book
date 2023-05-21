@@ -27,14 +27,16 @@ Future<void> customAlertDialog({
                 FormattedTextButton(
                   onPressed: () {
                     secondary();
-                    Navigator.pop(context);
+                    Future.delayed(const Duration(milliseconds: 200),
+                        () => Navigator.pop(context));
                   },
                   label: secondaryText,
                 ),
               FormattedTextButton(
                 onPressed: () {
                   primary();
-                  Navigator.pop(context);
+                  Future.delayed(const Duration(milliseconds: 200),
+                      () => Navigator.pop(context));
                 },
                 label: primaryText,
               ),
@@ -45,7 +47,7 @@ Future<void> customAlertDialog({
     showCupertinoDialog(
       barrierDismissible: true,
       context: context,
-      builder: (context2) {
+      builder: (ctx) {
         return CupertinoAlertDialog(
           title: title,
           content: content,
@@ -55,24 +57,26 @@ Future<void> customAlertDialog({
                 child: Text(
                   secondaryText,
                   style: TextStyle(
-                    color: getTextColor(context),
+                    color: getTextColor(ctx),
                   ),
                 ),
                 onPressed: () {
                   secondary();
-                  Navigator.pop(context2);
+                  Future.delayed(const Duration(milliseconds: 200),
+                      () => Navigator.pop(ctx));
                 },
               ),
             CupertinoDialogAction(
               child: Text(
                 primaryText,
                 style: TextStyle(
-                  color: getTextColor(context),
+                  color: getTextColor(ctx),
                 ),
               ),
               onPressed: () {
-                Navigator.pop(context2);
                 primary();
+                Future.delayed(const Duration(milliseconds: 200),
+                    () => Navigator.pop(ctx));
               },
             )
           ],

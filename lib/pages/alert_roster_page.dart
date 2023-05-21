@@ -589,14 +589,20 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           if (!kIsWeb && Platform.isAndroid)
             AppBarOption(
               title: 'Text All',
-              icon: const Icon(Icons.sms),
+              icon: Icon(
+                Icons.sms,
+                color: getOnPrimaryColor(context),
+              ),
               onPressed: _textAll,
             ),
           AppBarOption(
             title: 'Download PDF',
-            icon: Icon(kIsWeb || Platform.isAndroid
-                ? Icons.picture_as_pdf
-                : CupertinoIcons.doc),
+            icon: Icon(
+              kIsWeb || Platform.isAndroid
+                  ? Icons.picture_as_pdf
+                  : CupertinoIcons.doc,
+              color: getOnPrimaryColor(context),
+            ),
             onPressed: _downloadPdf,
           ),
         ],

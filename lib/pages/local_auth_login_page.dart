@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/auth_service.dart';
-import 'package:leaders_book/providers/soldiers_provider.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_button.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../providers/user_provider.dart';
 import '../widgets/platform_widgets/platform_text_button.dart';
+import '../../auth_service.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/logo_widget.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class LocalAuthLoginPage extends ConsumerStatefulWidget {
   const LocalAuthLoginPage({Key? key}) : super(key: key);
@@ -62,14 +63,7 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
             constraints: const BoxConstraints(maxWidth: 900),
             child: ListView(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.transparent,
-                    radius: 96.0,
-                    child: Image.asset('assets/icon-512.png'),
-                  ),
-                ),
+                const LogoWidget(),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: PlatformButton(

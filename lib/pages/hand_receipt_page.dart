@@ -7,11 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_scaffold.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -31,6 +28,9 @@ import 'uploadPages/upload_hand_receipt_page.dart';
 import '../pdf/hand_receipt_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../../auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class HandReceiptPage extends ConsumerStatefulWidget {
   const HandReceiptPage({

@@ -1,14 +1,11 @@
-import 'dart:io';
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:intl/intl.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:leaders_book/methods/toast_messages.dart/show_toast.dart';
+import 'package:leaders_book/pages/premium_page.dart';
 import 'package:leaders_book/providers/user_provider.dart';
 
 import '../../auth_provider.dart';
@@ -18,9 +15,7 @@ import '../../methods/theme_methods.dart';
 import '../../pages/privacy_policy_page.dart';
 import '../../pages/tos_page.dart';
 import '../../providers/root_provider.dart';
-import '../../providers/subscription_purchases.dart';
 import '../../methods/home_page_methods.dart';
-import '../../models/purchasable_product.dart';
 import '../../providers/subscription_state.dart';
 import '../../pages/acft_page.dart';
 import '../../pages/actions_tracker_page.dart';
@@ -62,45 +57,6 @@ class OverflowTab extends ConsumerWidget {
   }) : super(key: key);
 
   static const String title = 'Overflow page';
-
-  void subscriptionMessage(BuildContext context, SubscriptionPurchases sp) {
-    DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-    String date = dateFormat.format(
-      DateTime.now().add(
-        const Duration(
-          days: 365,
-        ),
-      ),
-    );
-    String store = Platform.isAndroid ? 'Google Play Store' : 'Apple App Store';
-    Text title = const Text('Premium Subscription');
-    Text content = Text(
-        '- \$1.99 per year*\n- Upload data via Excel file\n- Download pdf files for hard-copy leader\'s book\n- Removes ads\n* Subscription auto-renews on $date unless cancelled through $store');
-    customAlertDialog(
-      context: context,
-      title: title,
-      content: content,
-      primaryText: 'Suscribe',
-      primary: () async {
-        InAppPurchase.instance.isAvailable().then((isAvailable) async {
-          if (isAvailable) {
-            PurchasableProduct product;
-            if (Platform.isAndroid) {
-              product = sp.products
-                  .firstWhere((element) => element.id == 'ad_free_two');
-            } else {
-              product = sp.products
-                  .firstWhere((element) => element.id == 'premium_sub');
-            }
-            await sp.buy(product);
-          } else {
-            showToast(context, 'Store is not available');
-          }
-        });
-      },
-      secondary: () {},
-    );
-  }
 
   void signOut({required AuthService auth, required RootService root}) {
     try {
@@ -146,7 +102,7 @@ class OverflowTab extends ConsumerWidget {
     final isSubscribedAdFree = ref.read(subscriptionStateProvider);
     final auth = ref.read(authProvider);
     final root = ref.read(rootProvider.notifier);
-    final sp = ref.read(subscriptionPurchasesProvider);
+    // final sp = ref.read(subscriptionPurchasesProvider);
     return UploadFrame(
       children: <Widget>[
         const CustomDrawerHeader(),
@@ -362,11 +318,17 @@ class OverflowTab extends ConsumerWidget {
           },
         ),
         PlatformListTile(
-          title: const Text('Subscribe to Premium'),
+          title: const Text('Subscription'),
           leading: const Icon(Icons.subscriptions),
           onTap: () {
             if (!isSubscribedAdFree) {
-              subscriptionMessage(context, sp);
+              if (!kIsWeb) {
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamed(PremiumPage.routeName);
+              } else {
+                showToast(context,
+                    'Subscriptions can onlyl be purchased from the Google Play Store or Apple App Store.');
+              }
             } else {
               showToast(context, 'You are already subscribed to Premium.');
             }

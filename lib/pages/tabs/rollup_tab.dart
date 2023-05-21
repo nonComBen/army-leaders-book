@@ -7,11 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/models/user.dart';
-import 'package:leaders_book/providers/root_provider.dart';
-import 'package:leaders_book/providers/shared_prefs_provider.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_loading_widget.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -45,6 +40,11 @@ import '../training_page.dart';
 import '../../classes/iap_repo.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../widgets/show_by_name_content.dart';
+import '../../auth_provider.dart';
+import '../../models/user.dart';
+import '../../providers/root_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../widgets/platform_widgets/platform_loading_widget.dart';
 
 class RollupTab extends ConsumerStatefulWidget {
   const RollupTab({

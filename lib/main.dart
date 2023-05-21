@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../pages/premium_page.dart';
 import '../../auth_provider.dart';
 import '../../pages/acft_page.dart';
 import '../../pages/actions_tracker_page.dart';
@@ -134,6 +135,7 @@ class MyApp extends ConsumerWidget with WidgetsBindingObserver {
                     const WorkingAwardsPage(),
                 WorkingEvalsPage.routeName: (context) =>
                     const WorkingEvalsPage(),
+                PremiumPage.routeName: (context) => const PremiumPage(),
               },
               home: const RootPage(),
             );

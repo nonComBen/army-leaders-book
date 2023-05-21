@@ -11,6 +11,7 @@ import 'package:leaders_book/models/user.dart';
 import 'package:leaders_book/providers/root_provider.dart';
 import 'package:leaders_book/widgets/center_progress_indicator.dart';
 import 'package:leaders_book/widgets/form_frame.dart';
+import 'package:leaders_book/widgets/logo_widget.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -225,14 +226,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
           : FormFrame(
               formKey: formKey,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.transparent,
-                    radius: 96.0,
-                    child: Image.asset('assets/icon-512.png'),
-                  ),
-                ),
+                const LogoWidget(),
                 PaddedTextField(
                   label: 'Email',
                   decoration: const InputDecoration(

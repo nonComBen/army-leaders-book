@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'validate.dart';
 
 bool isOverdue(String date, int days) {
-  if (!isValidDate(date)) {
+  if (date == '' || !isValidDate(date)) {
     return false;
   }
   var dateTime = DateTime.parse('$date 00:00:00');

@@ -334,23 +334,28 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditTrainingPage(
-                  training: Training.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTrainingPage(
+          training: Training.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditTrainingPage(
-                  training: Training(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTrainingPage(
+          training: Training(
+            owner: userId,
+            users: [userId],
+            addTraining: [],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {

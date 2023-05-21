@@ -173,6 +173,9 @@ class HomePageState extends ConsumerState<RollupTab>
     if (!_userObj!.updatedAwards) {
       updateAwards(_userObj!.userId!);
     }
+    if (!_userObj!.updatedTraining) {
+      updateTraining(_userObj!.userId!);
+    }
 
 // show change log if new version
     if (!kIsWeb) {
@@ -993,7 +996,8 @@ class HomePageState extends ConsumerState<RollupTab>
                             child: PlatformLoadingWidget(),
                           );
                         default:
-                          if (snapshot.hasData) {
+                          if (snapshot.hasData &&
+                              snapshot.data!.data() != null) {
                             setting = Setting.fromMap(
                                 snapshot.data!.data() as Map<String, dynamic>);
                           } else {

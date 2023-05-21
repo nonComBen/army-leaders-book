@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/widgets/more_tiles_header.dart';
 
 import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/validate.dart';
@@ -21,8 +22,6 @@ import '../../methods/theme_methods.dart';
 import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_icon_button.dart';
-import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/award.dart';
@@ -947,121 +946,72 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
               updated = true;
             },
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: PlatformListTile(
-              title: Text(
-                'POVs',
-                style: TextStyle(color: getOnPrimaryColor(context)),
+          MoreTilesHeader(
+            label: 'POVs',
+            onPressed: () => editPov(
+              context: context,
+              pov: POV(
+                owner: user.uid,
+                users: [user.uid],
+                soldierId: widget.soldier.id,
               ),
-              color: getPrimaryColor(context),
-              trailing: PlatformIconButton(
-                icon: Icon(
-                  Icons.add,
-                  color: getOnPrimaryColor(context),
-                ),
-                onPressed: () => editPov(
-                  context: context,
-                  pov: POV(
-                    owner: user.uid,
-                    users: [user.uid],
-                    soldierId: widget.soldier.id,
-                  ),
-                ),
+            ),
+          ),
+          Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FormGridView(
+                width: width,
+                children: _povs
+                    .map(
+                      (pov) => EditDeleteListTile(
+                        title: '${pov.year} ${pov.make} ${pov.model}',
+                        subTitle:
+                            'Reg Exp: ${pov.regExp}, Ins Exp: ${pov.insExp}',
+                        onIconPressed: () =>
+                            deletePov(context, _povs.indexOf(pov)),
+                        onTap: () => editPov(
+                          context: context,
+                          pov: pov,
+                          index: _povs.indexOf(pov),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              )),
+          MoreTilesHeader(
+            label: 'Awards',
+            onPressed: () => editAward(
+              context: context,
+              award: Award(
+                owner: user.uid,
+                users: [user.uid],
+                soldierId: widget.soldier.id,
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: GridView.builder(
-              padding: const EdgeInsets.all(0.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: width > 700 ? 2 : 1,
-                  childAspectRatio: width > 900
-                      ? 900 / 150
-                      : width > 700
-                          ? width / 150
-                          : width / 75),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: _povs.length,
-              itemBuilder: (ibContext, position) {
-                return EditDeleteListTile(
-                  title:
-                      '${_povs[position].year} ${_povs[position].make} ${_povs[position].model}',
-                  subTitle: Text(
-                      'Reg Exp: ${_povs[position].regExp}, Ins Exp: ${_povs[position].insExp}'),
-                  onIconPressed: () {
-                    deletePov(context, position);
-                  },
-                  onTap: () {
-                    editPov(
-                      context: context,
-                      pov: _povs[position],
-                      index: position,
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: PlatformListTile(
-              title: Text(
-                'Awards',
-                style: TextStyle(color: getOnPrimaryColor(context)),
-              ),
-              color: getPrimaryColor(context),
-              trailing: PlatformIconButton(
-                icon: Icon(
-                  Icons.add,
-                  color: getOnPrimaryColor(context),
-                ),
-                onPressed: () => editAward(
-                  context: context,
-                  award: Award(
-                    owner: user.uid,
-                    users: [user.uid],
-                    soldierId: widget.soldier.id,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GridView.builder(
-              padding: const EdgeInsets.all(0.0),
-              primary: false,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: width > 700 ? 2 : 1,
-                childAspectRatio: width > 900
-                    ? 900 / 150
-                    : width > 700
-                        ? width / 150
-                        : width / 75,
-              ),
-              shrinkWrap: true,
-              itemCount: _awards.length,
-              itemBuilder: (ctx, position) {
-                return EditDeleteListTile(
-                  title:
-                      '${_awards[position].name}: ${_awards[position].number}',
-                  onIconPressed: () {
-                    deleteAward(
-                      context,
-                      position,
-                    );
-                  },
-                  onTap: () {
-                    editAward(
-                        context: context,
-                        award: _awards[position],
-                        index: position);
-                  },
-                );
-              },
+            child: FormGridView(
+              width: width,
+              children: _awards
+                  .map(
+                    (award) => EditDeleteListTile(
+                      title: '${award.name}: ${award.number}',
+                      onIconPressed: () {
+                        deleteAward(
+                          context,
+                          _awards.indexOf(award),
+                        );
+                      },
+                      onTap: () {
+                        editAward(
+                            context: context,
+                            award: award,
+                            index: _awards.indexOf(award));
+                      },
+                    ),
+                  )
+                  .toList(),
             ),
           ),
           PlatformButton(

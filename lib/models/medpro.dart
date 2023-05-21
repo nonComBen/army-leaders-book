@@ -100,7 +100,7 @@ class Medpro {
 
   factory Medpro.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
-    List<dynamic>? otherImms = [];
+    List<dynamic> otherImms = [];
     try {
       users = doc['users'];
       otherImms = doc['otherImms'];
@@ -109,34 +109,35 @@ class Medpro {
     }
 
     return Medpro(
-        id: doc.id,
-        soldierId: doc['soldierId'],
-        owner: doc['owner'],
-        users: users,
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        pha: doc['pha'],
-        dental: doc['dental'],
-        vision: doc['vision'],
-        hearing: doc['hearing'],
-        hiv: doc['hiv'],
-        flu: doc['flu'],
-        anthrax: doc['anthrax'],
-        encephalitis: doc['encephalitis'],
-        hepA: doc['hepA'],
-        hepB: doc['hepB'],
-        meningococcal: doc['meningococcal'],
-        mmr: doc['mmr'],
-        polio: doc['polio'],
-        smallPox: doc['smallPox'],
-        tetanus: doc['tetanus'],
-        tuberculin: doc['tuberculin'],
-        typhoid: doc['typhoid'],
-        varicella: doc['varicella'],
-        yellow: doc['yellow'],
-        otherImms: otherImms);
+      id: doc.id,
+      soldierId: doc['soldierId'],
+      owner: doc['owner'],
+      users: users,
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      pha: doc['pha'],
+      dental: doc['dental'],
+      vision: doc['vision'],
+      hearing: doc['hearing'],
+      hiv: doc['hiv'],
+      flu: doc['flu'],
+      anthrax: doc['anthrax'],
+      encephalitis: doc['encephalitis'],
+      hepA: doc['hepA'],
+      hepB: doc['hepB'],
+      meningococcal: doc['meningococcal'],
+      mmr: doc['mmr'],
+      polio: doc['polio'],
+      smallPox: doc['smallPox'],
+      tetanus: doc['tetanus'],
+      tuberculin: doc['tuberculin'],
+      typhoid: doc['typhoid'],
+      varicella: doc['varicella'],
+      yellow: doc['yellow'],
+      otherImms: otherImms,
+    );
   }
 }

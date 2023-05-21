@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../widgets/edit_delete_list_tile.dart';
+import '../../widgets/more_tiles_header.dart';
 import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../methods/theme_methods.dart';
 import '../../auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
@@ -19,13 +20,10 @@ import '../../models/medpro.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
-import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_icon_button.dart';
-import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
@@ -378,76 +376,21 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
             ],
           ),
           const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.0),
-                  color: getPrimaryColor(context)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: HeaderText(
-                      'Other Immunizations',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: getOnPrimaryColor(context)),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformIconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: getOnPrimaryColor(context),
-                        size: 32,
-                      ),
-                      onPressed: () {
-                        _editImm(context, null);
-                      },
-                    ),
-                  )
-                ],
-              ),
-            ),
+          MoreTilesHeader(
+            label: 'Other Immunizations',
+            onPressed: () => _editImm(context, null),
           ),
           if (_otherImms!.isNotEmpty)
             FormGridView(
               width: width,
               children: _otherImms!
                   .map(
-                    (imm) => Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Card(
-                        color: getContrastingBackgroundColor(context),
-                        child: PlatformListTile(
-                          title: Padding(
-                            padding: const EdgeInsets.only(top: 12.0),
-                            child: Text(imm['title']),
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: Text(imm['date']),
-                          ),
-                          trailing: PlatformIconButton(
-                            icon: Icon(
-                              Icons.delete,
-                              color: getTextColor(context),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _otherImms!.removeAt(_otherImms!.indexOf(imm));
-                              });
-                            },
-                          ),
-                          onTap: () {
-                            _editImm(context, _otherImms!.indexOf(imm));
-                          },
-                        ),
-                      ),
+                    (imm) => EditDeleteListTile(
+                      title: imm['title'],
+                      subTitle: imm['date'],
+                      onIconPressed: () =>
+                          deleteImm(context, _otherImms!.indexOf(imm)),
+                      onTap: () => _editImm(context, _otherImms!.indexOf(imm)),
                     ),
                   )
                   .toList(),
@@ -459,6 +402,26 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         height: 0,
       );
     }
+  }
+
+  void deleteImm(BuildContext context, int index) {
+    Widget title = const Text('Delete POV?');
+    Widget content = Container(
+      padding: const EdgeInsets.all(8.0),
+      child: const Text('Are you sure you want to delete this POV?'),
+    );
+    customAlertDialog(
+      context: context,
+      title: title,
+      content: content,
+      primaryText: 'Yes',
+      primary: () {
+        setState(() {
+          _otherImms!.removeAt(index);
+        });
+      },
+      secondary: () {},
+    );
   }
 
   void _editImm(BuildContext context, int? index) {

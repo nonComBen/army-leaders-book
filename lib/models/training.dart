@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/cupertino.dart';
 
 class Training {
   String? id;
@@ -35,6 +36,7 @@ class Training {
   String add4Date;
   String add5;
   String add5Date;
+  List<dynamic>? addTraining;
 
   Training({
     this.id,
@@ -70,6 +72,7 @@ class Training {
     this.add4Date = '',
     this.add5 = '',
     this.add5Date = '',
+    this.addTraining,
   });
 
   Map<String, dynamic> toMap() {
@@ -106,16 +109,23 @@ class Training {
     map['add4Date'] = add4Date;
     map['add5'] = add5;
     map['add5Date'] = add5Date;
+    map['addTraining'] = addTraining;
 
     return map;
   }
 
   factory Training.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
+    List<dynamic> training = [];
     try {
       users = doc['users'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+    }
+    try {
+      training = doc['addTraining'];
+    } catch (e) {
+      debugPrint('Add Training does not exist');
     }
     return Training(
       id: doc.id,
@@ -151,6 +161,7 @@ class Training {
       add4Date: doc['add4Date'],
       add5: doc['add5'],
       add5Date: doc['add5Date'],
+      addTraining: training,
     );
   }
 }

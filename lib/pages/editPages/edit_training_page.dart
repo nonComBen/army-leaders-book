@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../widgets/more_tiles_header.dart';
 import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../methods/custom_modal_bottom_sheet.dart';
+import '../../models/additional_training.dart';
 import '../../models/soldier.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
@@ -15,8 +19,10 @@ import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/training.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
+import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -69,6 +75,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   List<Soldier>? allSoldiers, lessSoldiers;
+  List<AdditionalTraining> _addTraining = [];
   bool removeSoldiers = false, updated = false, addMore = false;
   String? addMoreLess;
   FToast toast = FToast();
@@ -140,6 +147,9 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
     _rankSort = widget.training.rankSort;
     _owner = widget.training.owner;
     _users = widget.training.users;
+    _addTraining = widget.training.addTraining!
+        .map((e) => AdditionalTraining.fromMap(e))
+        .toList();
 
     _cyberController.text = widget.training.cyber;
     _opsecController.text = widget.training.opsec;
@@ -201,6 +211,77 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
     _add5Date = DateTime.tryParse(widget.training.add5Date) ?? DateTime.now();
   }
 
+  void editTraining(
+      {required BuildContext context,
+      required AdditionalTraining training,
+      int? index}) {
+    TextEditingController name = TextEditingController(text: training.name);
+    TextEditingController date = TextEditingController(text: training.date);
+    customModalBottomSheet(
+      context,
+      ListView(
+        children: [
+          HeaderText(
+            index == null ? 'Add Training' : 'Edit Training',
+          ),
+          PaddedTextField(
+            controller: name,
+            keyboardType: TextInputType.text,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Training Name',
+            ),
+            label: 'Training Name',
+          ),
+          PaddedTextField(
+            controller: date,
+            keyboardType: TextInputType.number,
+            enabled: true,
+            decoration: const InputDecoration(
+              labelText: 'Date',
+            ),
+            label: 'Date',
+          ),
+          PlatformButton(
+            onPressed: () {
+              AdditionalTraining saveAward =
+                  AdditionalTraining(name: name.text, date: date.text);
+              setState(() {
+                if (index != null) {
+                  _addTraining[index] = saveAward;
+                } else {
+                  _addTraining.add(saveAward);
+                }
+              });
+              Navigator.of(context).pop();
+            },
+            child: Text(index == null ? 'Add Training' : 'Edit Training'),
+          )
+        ],
+      ),
+    );
+  }
+
+  void deleteTraining(BuildContext context, int index) {
+    Widget title = const Text('Delete Training?');
+    Widget content = Container(
+      padding: const EdgeInsets.all(8.0),
+      child: const Text('Are you sure you want to delete this award?'),
+    );
+    customAlertDialog(
+      context: context,
+      title: title,
+      content: content,
+      primaryText: 'Yes',
+      primary: () {
+        setState(() {
+          _addTraining.removeAt(index);
+        });
+      },
+      secondary: () {},
+    );
+  }
+
   void submit(BuildContext context) async {
     if (_soldierId == null) {
       soldierIdIsBlankMessage(context);
@@ -254,16 +335,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
         asap: _asapController.text,
         suicide: _suicideController.text,
         sharp: _sharpController.text,
-        add1: _add1Controller.text,
-        add1Date: _add1DateController.text,
-        add2: _add2Controller.text,
-        add2Date: _add2DateController.text,
-        add3: _add3Controller.text,
-        add3Date: _add3DateController.text,
-        add4: _add4Controller.text,
-        add4Date: _add4DateController.text,
-        add5: _add5Controller.text,
-        add5Date: _add5DateController.text,
+        addTraining: _addTraining.map((e) => e.toMap()).toList(),
       );
 
       if (widget.training.id == null) {
@@ -496,20 +568,40 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
               ),
             ],
           ),
-          PlatformButton(
-            onPressed: () {
-              setState(() {
-                addMore = !addMore;
-                if (addMore) {
-                  addMoreLess = 'Less Training';
-                } else {
-                  addMoreLess = 'More Training';
-                }
-              });
-            },
-            child: Text(addMoreLess!),
+          MoreTilesHeader(
+            label: 'Additional Training',
+            onPressed: () => editTraining(
+              context: context,
+              training: AdditionalTraining(
+                name: '',
+                date: '',
+              ),
+            ),
           ),
-          if (addMore) addMoreTraining(width),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FormGridView(
+              width: width,
+              children: _addTraining
+                  .map((training) => EditDeleteListTile(
+                        title: '${training.name}: ${training.date}',
+                        onIconPressed: () {
+                          deleteTraining(
+                            context,
+                            _addTraining.indexOf(training),
+                          );
+                        },
+                        onTap: () {
+                          editTraining(
+                            context: context,
+                            training: training,
+                            index: _addTraining.indexOf(training),
+                          );
+                        },
+                      ))
+                  .toList(),
+            ),
+          ),
           PlatformButton(
             onPressed: () {
               submit(context);

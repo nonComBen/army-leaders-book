@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/filter_documents.dart';
 import '../methods/theme_methods.dart';
@@ -111,13 +112,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
         MaterialPageRoute(builder: (context) => const UploadHandReceiptPage()),
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-        child: const MyToast(
-          message: 'Uploading data is only available for subscribed users.',
-        ),
-      );
+      uploadRequiresSub(context);
     }
   }
 
@@ -236,14 +231,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
         },
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-        child: const MyToast(
-          message:
-              'Downloading PDF files is only available for subscribed users.',
-        ),
-      );
+      pdfRequiresSub(context);
     }
   }
 

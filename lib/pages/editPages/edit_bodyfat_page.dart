@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/soldier.dart';
 import '../../widgets/form_frame.dart';

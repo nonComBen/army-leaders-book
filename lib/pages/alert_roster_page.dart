@@ -8,15 +8,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/methods/custom_modal_bottom_sheet.dart';
-import 'package:leaders_book/methods/theme_methods.dart';
-import 'package:leaders_book/widgets/header_text.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_button.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../methods/custom_modal_bottom_sheet.dart';
+import '../../methods/theme_methods.dart';
+import '../../methods/toast_messages/subscription_needed_toast.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/alert_roster_pdf.dart';
@@ -404,14 +405,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
         },
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-        child: const MyToast(
-          message:
-              'Downloading PDF files is only available for subscribed users.',
-        ),
-      );
+      pdfRequiresSub(context);
     }
   }
 

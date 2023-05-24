@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/constants.dart';
 import 'package:leaders_book/models/past_purchase.dart';
 import 'package:leaders_book/models/user.dart';
 import 'package:leaders_book/providers/subscription_state.dart';
@@ -58,6 +57,7 @@ class IAPRepo {
     final purchaseSnapshot = await FirebaseFirestore.instance
         .collection('purchases')
         .where('userId', isEqualTo: _user!.uid)
+        .where('status', isEqualTo: 'ACTIVE')
         .get();
 
     final userSnapshot = await FirebaseFirestore.instance
@@ -77,16 +77,12 @@ class IAPRepo {
     }
 
     purchases = purchaseSnapshot.docs.map((document) {
-      var data = document.data();
-      return PastPurchase.fromJson(data);
+      return PastPurchase.fromJson(document.data());
     }).toList();
 
-    hasActiveSubscription = purchases.any((element) =>
-            (element.productId == storeKeyAndroidOne ||
-                element.productId == storeKeyAndroidTwo ||
-                element.productId == storeKeyIOS) &&
-            element.status != Status.expired) ||
-        isSubscribed;
+    hasActiveSubscription =
+        purchases.any((element) => element.status != Status.expired) ||
+            isSubscribed;
 
     if (hasActiveSubscription) {
       subState.subscribe();

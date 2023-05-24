@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:launch_review/launch_review.dart';
-import 'package:leaders_book/methods/toast_messages.dart/show_toast.dart';
-import 'package:leaders_book/pages/premium_page.dart';
-import 'package:leaders_book/providers/user_provider.dart';
 
+import '../../methods/toast_messages/show_toast.dart';
+import '../../pages/premium_page.dart';
+import '../../providers/user_provider.dart';
 import '../../auth_provider.dart';
 import '../../auth_service.dart';
 import '../../methods/custom_alert_dialog.dart';

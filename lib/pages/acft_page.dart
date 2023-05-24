@@ -35,6 +35,7 @@ import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../methods/custom_alert_dialog.dart';
+import '../methods/toast_messages/subscription_needed_toast.dart';
 
 class AcftPage extends ConsumerStatefulWidget {
   const AcftPage({
@@ -153,12 +154,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-          child: const MyToast(
-              message:
-                  'Uploading data is only available for subscribed users.'));
+      uploadRequiresSub(context);
     }
   }
 
@@ -279,13 +275,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         },
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-        child: const MyToast(
-            message:
-                'Downloading PDF files is only available for subscribed users.'),
-      );
+      pdfRequiresSub(context);
     }
   }
 

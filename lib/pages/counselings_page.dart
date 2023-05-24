@@ -13,6 +13,7 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../auth_provider.dart';
+import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/filter_documents.dart';
 import '../methods/theme_methods.dart';
@@ -108,13 +109,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
         MaterialPageRoute(builder: (context) => const UploadCounselingsPage()),
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-        child: const MyToast(
-          message: 'Uploading data is only available for subscribed users.',
-        ),
-      );
+      uploadRequiresSub(context);
     }
   }
 

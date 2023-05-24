@@ -7,14 +7,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../methods/create_app_bar_actions.dart';
+import '../../auth_provider.dart';
+import '../../methods/toast_messages/subscription_needed_toast.dart';
+import '../../methods/custom_alert_dialog.dart';
 import '../methods/filter_documents.dart';
 import '../methods/theme_methods.dart';
 import '../models/app_bar_option.dart';
@@ -112,13 +113,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
         MaterialPageRoute(builder: (context) => const UploadFlagsPage()),
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-        child: const MyToast(
-          message: 'Uploading data is only available for subscribed users.',
-        ),
-      );
+      uploadRequiresSub(context);
     }
   }
 
@@ -213,14 +208,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
         },
       );
     } else {
-      FToast toast = FToast();
-      toast.context = context;
-      toast.showToast(
-        child: const MyToast(
-          message:
-              'Downloading PDF files is only available for subscribed users.',
-        ),
-      );
+      pdfRequiresSub(context);
     }
   }
 

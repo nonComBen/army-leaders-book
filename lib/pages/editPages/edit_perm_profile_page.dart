@@ -4,13 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/constants/firestore_collections.dart';
-import 'package:leaders_book/methods/create_less_soldiers.dart';
-import 'package:leaders_book/providers/soldiers_provider.dart';
 
+import '../../constants/firestore_collections.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/profile.dart';
 import '../../models/soldier.dart';

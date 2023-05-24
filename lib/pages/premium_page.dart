@@ -12,7 +12,7 @@ import '../../widgets/logo_widget.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/upload_frame.dart';
 import '../../widgets/header_text.dart';
-import '../methods/toast_messages.dart/show_toast.dart';
+import '../methods/toast_messages/show_toast.dart';
 import '../models/purchasable_product.dart';
 import '../providers/subscription_purchases.dart';
 
@@ -59,8 +59,10 @@ class PremiumPage extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: StandardText(
-                'The Premium subscription cost \$1.99 per year and will automatically renew '
-                'on ${dateFormat.format(date)} unless canceled through the $store.'),
+              'The Premium subscription cost \$1.99 per year and will automatically renew '
+              'on ${dateFormat.format(date)} unless canceled through the $store.',
+              textAlign: TextAlign.center,
+            ),
           ),
           PlatformButton(
             onPressed: () async {

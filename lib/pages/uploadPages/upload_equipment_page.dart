@@ -6,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/methods/toast_messages.dart/file_is_blank_message.dart';
-import 'package:leaders_book/methods/toast_messages.dart/soldier_id_is_blank.dart';
 
+import '../../methods/toast_messages/file_is_blank_message.dart';
+import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/equipment.dart';
 import '../../models/soldier.dart';

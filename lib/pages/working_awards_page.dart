@@ -9,12 +9,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/auth_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../providers/subscription_state.dart';
 import '../methods/create_app_bar_actions.dart';
+import '../../auth_provider.dart';
+import '../methods/toast_messages/subscription_needed_toast.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/filter_documents.dart';
@@ -108,11 +109,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
           MaterialPageRoute(
               builder: (context) => const UploadWorkingAwardsPage()));
     } else {
-      toast.showToast(
-        child: const MyToast(
-          message: 'Uploading data is only available for subscribed users.',
-        ),
-      );
+      uploadRequiresSub(context);
     }
   }
 

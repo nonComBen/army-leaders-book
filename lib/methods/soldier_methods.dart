@@ -15,6 +15,7 @@ import '../pages/uploadPages/upload_soldiers_page.dart';
 import '../pdf/soldiers_pdf.dart';
 import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../methods/toast_messages/subscription_needed_toast.dart';
 import 'custom_alert_dialog.dart';
 import 'custom_modal_bottom_sheet.dart';
 import 'download_methods.dart';
@@ -214,13 +215,7 @@ uploadExcel(BuildContext context, bool isSubscribed) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => const UploadSoldierPage()));
   } else {
-    FToast toast = FToast();
-    toast.init(context);
-    toast.showToast(
-      child: const MyToast(
-          message:
-              'Uploading Soldiers is only available for subscribed users.'),
-    );
+    uploadRequiresSub(context);
   }
 }
 
@@ -325,13 +320,7 @@ void downloadPdf(BuildContext context, bool isSubscribed,
       },
     );
   } else {
-    FToast toast = FToast();
-    toast.context = context;
-    toast.showToast(
-      child: const MyToast(
-          message:
-              'Downloading PDF files is only available for subscribed users.'),
-    );
+    pdfRequiresSub(context);
   }
 }
 

@@ -66,7 +66,10 @@ void main() async {
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   await FirebaseAppCheck.instance.activate(
-      webRecaptchaSiteKey: '6LcxDyQdAAAAAJN3xGUZ3M4uZIiEyFehxLcZG4QV');
+    webRecaptchaSiteKey: '6LcxDyQdAAAAAJN3xGUZ3M4uZIiEyFehxLcZG4QV',
+    appleProvider: AppleProvider.appAttest,
+    androidProvider: AndroidProvider.playIntegrity,
+  );
 
   final sharedPreferences = await SharedPreferences.getInstance();
 

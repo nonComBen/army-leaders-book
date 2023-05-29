@@ -25,13 +25,13 @@ class SubscriptionPurchases {
   late StreamSubscription<List<PurchaseDetails>> _subscription;
   final iapConnection = IAPConnection.instance;
   StoreState storeState = StoreState.loading;
-  List<PurchasableProduct> products = [];
+  List<PurchasableProduct> _products = [];
 
   SubscriptionPurchases(this.subscriptionState, this.iapRepo) {
     if (!kIsWeb) {
       final purchaseUpdated = iapConnection!.purchaseStream;
       _subscription = purchaseUpdated.listen(
-        _onPurchaseUpdate,
+        (purchaseDetails) => _onPurchaseUpdate(purchaseDetails),
         onDone: _updateStreamOnDone,
         onError: _updateStreamOnError,
       );
@@ -39,6 +39,10 @@ class SubscriptionPurchases {
       // iapRepo.addListener(purchasesUpdate);
       loadPurchases();
     }
+  }
+
+  List<PurchasableProduct> get products {
+    return _products;
   }
 
   Future<void> loadPurchases() async {
@@ -54,17 +58,16 @@ class SubscriptionPurchases {
     };
     final response = await iapConnection!.queryProductDetails(ids);
     for (var element in response.notFoundIDs) {
-      // ignore: avoid_print
-      print('Purchase $element not found');
+      debugPrint('Purchase $element not found');
     }
-    products =
+    _products =
         response.productDetails.map((e) => PurchasableProduct(e)).toList();
     storeState = StoreState.available;
   }
 
   Future<void> buy(PurchasableProduct product) async {
     final purchaseParam = PurchaseParam(productDetails: product.productDetails);
-    await iapConnection!.buyNonConsumable(purchaseParam: purchaseParam);
+    iapConnection!.buyNonConsumable(purchaseParam: purchaseParam);
   }
 
   void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {
@@ -78,16 +81,14 @@ class SubscriptionPurchases {
       try {
         validPurchase = await _verifyPurchase(purchaseDetails);
       } on Exception catch (e) {
-        // ignore: avoid_print
-        print('Error: $e');
+        debugPrint('Error: $e');
       }
       if (validPurchase) {
         subscriptionState.subscribe();
       }
     }
-
     if (purchaseDetails.pendingCompletePurchase) {
-      iapConnection!.completePurchase(purchaseDetails);
+      await iapConnection!.completePurchase(purchaseDetails);
     }
   }
 
@@ -103,8 +104,8 @@ class SubscriptionPurchases {
     var subscriptions = <PurchasableProduct>[];
     // Get a list of purchasable products for the subscription and upgrade.
     // This should be 1 per type.
-    if (products.isNotEmpty) {
-      subscriptions = products.toList();
+    if (_products.isNotEmpty) {
+      subscriptions = _products.toList();
     }
 
     // Set the subscription in the counter logic and show/hide purchased on the

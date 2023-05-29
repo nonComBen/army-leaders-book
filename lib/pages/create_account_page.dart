@@ -6,9 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/auth_service.dart';
-import 'package:leaders_book/models/user.dart';
-import 'package:leaders_book/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../auth_provider.dart';
@@ -20,6 +17,10 @@ import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/platform_widgets/platform_text_button.dart';
+import '../../auth_service.dart';
+import '../../models/user.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/logo_widget.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({
@@ -107,14 +108,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
       body: FormFrame(
         formKey: formKey,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: 96.0,
-              child: Image.asset('assets/icon-512.png'),
-            ),
-          ),
+          const LogoWidget(),
           PaddedTextField(
             controller: _emailController,
             label: 'Email',

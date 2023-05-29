@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:leaders_book/providers/root_provider.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 
 import '../../methods/create_app_bar_actions.dart';
@@ -40,12 +44,17 @@ class AndroidHomePage extends ConsumerStatefulWidget
   ConsumerState<AndroidHomePage> createState() => _AndroidHomePageState();
 }
 
-class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
+class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
+    with WidgetsBindingObserver {
   int index = 0;
   late String userId;
-  bool isSubscribed = false;
+  bool isSubscribed = false,
+      _requireUnlock = false,
+      _localAuthSupported = false;
+  Timer? timer;
   late List<Soldier> soldiers, selectedSoldiers;
   late FilteredSoldiers filteredSoldiers;
+  late RootService _rootService;
   List<Widget> pages = const [
     RollupTab(),
     SoldiersPage(),
@@ -85,6 +94,46 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
           );
         }
       });
+    }
+  }
+
+  //signs out or locks user after 10 minutes of inactivity
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.paused:
+        final localAuth = LocalAuthentication();
+        _localAuthSupported = await localAuth.isDeviceSupported();
+        timer = Timer.periodic(const Duration(minutes: 10), (_) {
+          _requireUnlock = true;
+          if (!_localAuthSupported) {
+            signOut();
+          }
+        });
+        break;
+      case AppLifecycleState.resumed:
+        timer?.cancel();
+        if (_requireUnlock) {
+          _rootService.localSignOut();
+        }
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  void signOut() {
+    var auth = ref.read(authProvider);
+    try {
+      _rootService.signOut();
+      auth.signOut();
+
+      ref.read(subscriptionStateProvider.notifier).unSubscribe();
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Sign Out Error');
     }
   }
 
@@ -170,6 +219,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    _rootService = ref.read(rootProvider.notifier);
     soldiers = ref.watch(soldiersProvider);
     selectedSoldiers = ref.watch(selectedSoldiersProvider);
     filteredSoldiers = ref.read(filteredSoldiersProvider.notifier);
@@ -231,11 +281,16 @@ class IOSHomePage extends ConsumerStatefulWidget implements PlatformHomePage {
   ConsumerState<IOSHomePage> createState() => _IOSHomePageState();
 }
 
-class _IOSHomePageState extends ConsumerState<IOSHomePage> {
+class _IOSHomePageState extends ConsumerState<IOSHomePage>
+    with WidgetsBindingObserver {
   late String userId;
-  bool isSubscribed = false;
+  bool isSubscribed = false,
+      _requireUnlock = false,
+      _localAuthSupported = false;
+  Timer? timer;
   late List<Soldier> soldiers, selectedSoldiers;
   late FilteredSoldiers filteredSoldiers;
+  late RootService _rootService;
   final RateMyApp _rateMyApp = RateMyApp(
     minDays: 7,
     minLaunches: 5,
@@ -246,6 +301,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
   @override
   void initState() {
     super.initState();
+    _rootService = ref.read(rootProvider.notifier);
 
     _rateMyApp.init().then((_) {
       if (_rateMyApp.shouldOpenDialog) {
@@ -264,6 +320,46 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage> {
         );
       }
     });
+  }
+
+  //signs out or locks user after 10 minutes of inactivity
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.paused:
+        final localAuth = LocalAuthentication();
+        _localAuthSupported = await localAuth.isDeviceSupported();
+        timer = Timer.periodic(const Duration(minutes: 10), (_) {
+          _requireUnlock = true;
+          if (!_localAuthSupported) {
+            signOut();
+          }
+        });
+        break;
+      case AppLifecycleState.resumed:
+        timer?.cancel();
+        if (_requireUnlock) {
+          _rootService.localSignOut();
+        }
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  void signOut() {
+    var auth = ref.read(authProvider);
+    try {
+      _rootService.signOut();
+      auth.signOut();
+
+      ref.read(subscriptionStateProvider.notifier).unSubscribe();
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Sign Out Error');
+    }
   }
 
   List<AppBarOption> getOptions() {

@@ -7,12 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/models/user.dart';
-import 'package:leaders_book/providers/root_provider.dart';
-import 'package:leaders_book/providers/shared_prefs_provider.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_loading_widget.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -45,6 +39,10 @@ import '../training_page.dart';
 import '../../classes/iap_repo.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../widgets/show_by_name_content.dart';
+import '../../auth_provider.dart';
+import '../../models/user.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../widgets/platform_widgets/platform_loading_widget.dart';
 
 class RollupTab extends ConsumerStatefulWidget {
   const RollupTab({
@@ -77,9 +75,7 @@ class HomePageState extends ConsumerState<RollupTab>
   final androidAd = 'ca-app-pub-2431077176117105/1369522276';
   final iosAd = 'ca-app-pub-2431077176117105/9894231072';
   String subToken = '';
-  bool _requireUnlock = false,
-      _localAuthSupported = false,
-      _adLoaded = false,
+  bool _adLoaded = false,
       verified = false,
       isInitial = true,
       isSubscribed = true,
@@ -87,13 +83,10 @@ class HomePageState extends ConsumerState<RollupTab>
   StreamSubscription<List<PurchaseDetails>>? _streamSubscription;
   StreamSubscription<QuerySnapshot>? _soldierSubscription;
   final _firestore = FirebaseFirestore.instance;
-  Timer? timer;
   final format = DateFormat('yyyy-MM-dd');
   Setting? setting;
-  late LocalAuthentication _localAuth;
   SubscriptionState? subState;
   late BannerAd myBanner;
-  late RootService _rootService;
   UserObj? _userObj;
 
   @override
@@ -180,8 +173,6 @@ class HomePageState extends ConsumerState<RollupTab>
 // show change log if new version
     if (!kIsWeb) {
       packageInfo = await PackageInfo.fromPlatform();
-      _localAuth = LocalAuthentication();
-      _localAuthSupported = await _localAuth.isDeviceSupported();
       if (prefs.getString('Version') == null ||
           packageInfo.version != prefs.getString('Version')) {
         prefs.setString('Version', packageInfo.version);
@@ -199,67 +190,6 @@ class HomePageState extends ConsumerState<RollupTab>
     myBanner.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  //signs out or locks user after 10 minutes of inactivity
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    switch (state) {
-      case AppLifecycleState.inactive:
-        break;
-      case AppLifecycleState.paused:
-        timer = Timer.periodic(const Duration(minutes: 10), (_) {
-          _requireUnlock = true;
-          if (!_localAuthSupported) {
-            signOut();
-          }
-        });
-        break;
-      case AppLifecycleState.resumed:
-        timer?.cancel();
-        if (_requireUnlock) {
-          _rootService.localSignOut();
-        }
-        break;
-      case AppLifecycleState.detached:
-        break;
-    }
-  }
-
-  void signOut() {
-    var auth = ref.read(authProvider);
-    try {
-      _rootService.signOut();
-      auth.signOut();
-
-      ref.read(subscriptionStateProvider.notifier).unSubscribe();
-    } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Sign Out Error');
-    }
-  }
-
-  void signOutWarning(BuildContext context) {
-    // ignore: close_sinks
-    Widget title = const Text('Sign Out?');
-    Widget content = Container(
-      padding: const EdgeInsets.all(8.0),
-      child: const Text(
-          'Are you sure you want to sign out? Any data you saved will be lost unless you create an account.'),
-    );
-    customAlertDialog(
-      context: context,
-      title: title,
-      content: content,
-      primaryText: 'Yes',
-      primary: () {
-        signOut();
-      },
-      secondaryText: 'Create Account',
-      secondary: () {
-        _rootService.linkAnonymous();
-      },
-    );
   }
 
   showByName(String title, List<DocumentSnapshot> list, HomeCard homeCard) {
@@ -969,7 +899,6 @@ class HomePageState extends ConsumerState<RollupTab>
   Widget build(BuildContext context) {
     isSubscribed = ref.watch(subscriptionStateProvider);
     double width = MediaQuery.of(context).size.width;
-    _rootService = ref.read(rootProvider.notifier);
     final user = ref.read(authProvider).currentUser();
     ref.read(iapRepoProvider);
     return Container(

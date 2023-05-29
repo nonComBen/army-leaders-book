@@ -12,7 +12,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/toast_messages.dart/soldier_id_is_blank.dart';
+import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/equipment.dart';
 import '../../widgets/anon_warning_banner.dart';

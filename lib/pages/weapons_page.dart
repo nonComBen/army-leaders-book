@@ -7,15 +7,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../methods/toast_messages/subscription_needed_toast.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
@@ -138,11 +139,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const UploadWeaponsPage()));
     } else {
-      toast.showToast(
-        child: const MyToast(
-          message: 'Uploading data is only available for subscribed users.',
-        ),
-      );
+      uploadRequiresSub(context);
     }
   }
 
@@ -242,12 +239,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
         },
       );
     } else {
-      toast.showToast(
-        child: const MyToast(
-          message:
-              'Downloading PDF files is only available for subscribed users.',
-        ),
-      );
+      pdfRequiresSub(context);
     }
   }
 

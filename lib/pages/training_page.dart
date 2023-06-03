@@ -141,16 +141,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
       'ASAP',
       'Suicide Prevention',
       'SHARP',
-      'Additional 1',
-      'Additional 1 Date',
-      'Additional 2',
-      'Additional 2 Date',
-      'Additional 3',
-      'Additional 3 Date',
-      'Additional 4',
-      'Additional 4 Date',
-      'Additional 5',
-      'Additional 5 Date'
+      'Additional Training',
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -174,16 +165,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
       docs.add(doc['asap']);
       docs.add(doc['suicide']);
       docs.add(doc['sharp']);
-      docs.add(doc['add1']);
-      docs.add(doc['add1Date']);
-      docs.add(doc['add2']);
-      docs.add(doc['add2Date']);
-      docs.add(doc['add3']);
-      docs.add(doc['add3Date']);
-      docs.add(doc['add4']);
-      docs.add(doc['add4Date']);
-      docs.add(doc['add5']);
-      docs.add(doc['add5Date']);
+      docs.add(doc['addTraining'].toString());
 
       docsList.add(docs);
     }
@@ -264,7 +246,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
     TrainingPdf pdf = TrainingPdf(
-      documents: documents,
+      trainings: documents.map((e) => Training.fromSnapshot(e)).toList(),
     );
     String location;
     if (fullPage) {

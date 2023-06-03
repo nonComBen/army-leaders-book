@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/methods/theme_methods.dart';
+import 'package:leaders_book/providers/user_provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../methods/create_app_bar_actions.dart';
@@ -42,30 +43,24 @@ class EditUserPage extends ConsumerStatefulWidget {
 class EditUserPageState extends ConsumerState<EditUserPage> {
   bool updated = false;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  late UserObj user;
+  UserObj? user;
   FToast toast = FToast();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _rankController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _unitController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final _rankController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _unitController = TextEditingController();
+  final _emailController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    init();
-  }
-
-  void init() async {
-    DocumentSnapshot doc = await firestore.doc('users/${widget.userId}').get();
-    user = UserObj.fromSnapshot(doc);
-    _rankController.text = user.userRank;
-    _nameController.text = user.userName;
-    _unitController.text = user.userUnit;
-    _emailController.text = user.userEmail;
-    setState(() {});
+    user = ref.read(userProvider).user;
+    _rankController.text = user!.userRank;
+    _nameController.text = user!.userName;
+    _unitController.text = user!.userUnit;
+    _emailController.text = user!.userEmail;
   }
 
   Future<void> deleteAccount(BuildContext context) async {
@@ -297,21 +292,18 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
 
   submit(BuildContext context) {
     if (validateAndSave()) {
-      UserObj saveUser = UserObj(
-        userId: widget.userId,
-        userRank: _rankController.text,
-        userName: _nameController.text,
-        userUnit: _unitController.text,
-        userEmail: _emailController.text,
-        subToken: user.subToken,
-        tosAgree: user.tosAgree,
-        agreeDate: user.agreeDate,
-      );
+      Map<String, dynamic> saveUser = {
+        'userId': widget.userId,
+        'userRank': _rankController.text,
+        'userName': _nameController.text,
+        'userUnit': _unitController.text,
+        'userEmail': _emailController.text,
+      };
 
       firestore
           .collection('users')
           .doc(widget.userId)
-          .set(saveUser.toMap(), SetOptions(merge: true));
+          .set(saveUser, SetOptions(merge: true));
       Navigator.pop(context);
     } else {
       toast.showToast(

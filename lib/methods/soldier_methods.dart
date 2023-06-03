@@ -4,9 +4,12 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../pages/editPages/edit_soldier_page.dart';
+import '../../providers/filtered_soldiers_provider.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/my_toast.dart';
 import '../models/soldier.dart';
 import '../pages/manage_users_page.dart';
 import '../pages/share_soldier_page.dart';
@@ -15,15 +18,12 @@ import '../pages/uploadPages/upload_soldiers_page.dart';
 import '../pdf/soldiers_pdf.dart';
 import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../methods/toast_messages/subscription_needed_toast.dart';
 import 'custom_alert_dialog.dart';
 import 'custom_modal_bottom_sheet.dart';
 import 'download_methods.dart';
+import 'open_file.dart';
+import 'toast_messages/subscription_needed_toast.dart';
 import 'web_download.dart';
-import '../../pages/editPages/edit_soldier_page.dart';
-import '../../providers/filtered_soldiers_provider.dart';
-import '../../widgets/header_text.dart';
-import '../../widgets/my_toast.dart';
 
 List<String> getSections(List<Soldier> soldiers) {
   soldiers.sort(
@@ -197,8 +197,7 @@ void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
           toastDuration: const Duration(seconds: 5),
           child: MyToast(
             message: 'Data successfully downloaded to $loc',
-            onPressed:
-                kIsWeb ? null : () => OpenFile.open('$dir/soldiers.xlsx'),
+            onPressed: kIsWeb ? null : () => openFile('$dir/soldiers.xlsx'),
             buttonText: kIsWeb ? null : 'Open',
           ),
         );
@@ -347,8 +346,7 @@ void completePdfDownload(BuildContext context, bool fullPage,
       toastDuration: const Duration(seconds: 5),
       child: MyToast(
         message: message,
-        onPressed:
-            kIsWeb ? null : () => OpenFile.open('$location/soldiers.pdf'),
+        onPressed: kIsWeb ? null : () => openFile('$location/soldiers.pdf'),
         buttonText: kIsWeb ? null : 'Open',
       ),
     );

@@ -1,37 +1,37 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../providers/subscription_state.dart';
-import '../methods/create_app_bar_actions.dart';
 import '../../auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
+import '../../models/tasking.dart';
+import '../../providers/subscription_state.dart';
+import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/filter_documents.dart';
+import '../methods/open_file.dart';
 import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/tasking.dart';
 import '../models/app_bar_option.dart';
+import '../pdf/taskings_pdf.dart';
+import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
 import 'editPages/edit_tasking_page.dart';
 import 'uploadPages/upload_taskings_page.dart';
-import '../pdf/taskings_pdf.dart';
-import '../providers/tracking_provider.dart';
-import '../widgets/anon_warning_banner.dart';
 
 class TaskingsPage extends ConsumerStatefulWidget {
   const TaskingsPage({
@@ -177,8 +177,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
             child: MyToast(
               message: 'Data successfully downloaded to $location',
               buttonText: kIsWeb ? null : 'Open',
-              onPressed:
-                  kIsWeb ? null : () => OpenFile.open('$dir/taskings.xlsx'),
+              onPressed: kIsWeb ? null : () => openFile('$dir/taskings.xlsx'),
             ),
           );
         }
@@ -244,8 +243,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
         child: MyToast(
           message: message,
           buttonText: kIsWeb ? null : 'Open',
-          onPressed:
-              kIsWeb ? null : () => OpenFile.open('$location/taskings.pdf'),
+          onPressed: kIsWeb ? null : () => openFile('$location/taskings.pdf'),
         ),
       );
     }

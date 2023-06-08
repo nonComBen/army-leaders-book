@@ -12,30 +12,30 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
+import '../../models/soldier.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../providers/subscription_state.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../methods/create_app_bar_actions.dart';
+import '../methods/download_methods.dart';
+import '../methods/open_file.dart';
+import '../models/alert_soldier.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/alert_roster_pdf.dart';
-import '../../providers/subscription_state.dart';
-import '../methods/download_methods.dart';
-import '../models/alert_soldier.dart';
-import '../../models/soldier.dart';
-import '../../widgets/anon_warning_banner.dart';
 import '../providers/soldiers_provider.dart';
-import '../widgets/formatted_text_button.dart';
 import '../widgets/alert_tile.dart';
+import '../widgets/formatted_text_button.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
-import '../../auth_provider.dart';
-import '../../methods/custom_alert_dialog.dart';
-import '../../providers/shared_prefs_provider.dart';
-import 'package:open_file/open_file.dart';
 
 class AlertRosterPage extends ConsumerStatefulWidget {
   const AlertRosterPage({Key? key}) : super(key: key);
@@ -439,7 +439,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           message: message,
           buttonText: kIsWeb ? null : 'Open',
           onPressed:
-              kIsWeb ? null : () => OpenFile.open('$location/alertRoster.pdf'),
+              kIsWeb ? null : () => openFile('$location/alertRoster.pdf'),
         ),
       );
     }

@@ -1,35 +1,35 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../auth_provider.dart';
 import '../../providers/subscription_state.dart';
 import '../methods/create_app_bar_actions.dart';
-import '../../auth_provider.dart';
-import '../methods/toast_messages/subscription_needed_toast.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/filter_documents.dart';
+import '../methods/open_file.dart';
 import '../methods/theme_methods.dart';
+import '../methods/toast_messages/subscription_needed_toast.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../models/working_award.dart';
+import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
 import 'editPages/edit_working_award_page.dart';
 import 'uploadPages/upload_working_awads_page.dart';
-import '../providers/tracking_provider.dart';
-import '../widgets/anon_warning_banner.dart';
 
 class WorkingAwardsPage extends ConsumerStatefulWidget {
   const WorkingAwardsPage({
@@ -173,9 +173,8 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
             child: MyToast(
               message: 'Data successfully downloaded to $location',
               buttonText: kIsWeb ? null : 'Open',
-              onPressed: kIsWeb
-                  ? null
-                  : () => OpenFile.open('$dir/workingAwards.xlsx'),
+              onPressed:
+                  kIsWeb ? null : () => openFile('$dir/workingAwards.xlsx'),
             ),
           );
         }

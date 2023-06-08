@@ -16,14 +16,14 @@ import 'package:leaders_book/methods/create_app_bar_actions.dart';
 import 'package:leaders_book/methods/filter_documents.dart';
 import 'package:leaders_book/widgets/padded_text_field.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
-import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../models/perstat.dart';
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
+import '../methods/open_file.dart';
 import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
-import '../../models/perstat.dart';
 import '../models/app_bar_option.dart';
 import '../models/perstat_by_name.dart';
 import '../models/soldier.dart';
@@ -100,8 +100,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
             child: MyToast(
               message: 'PERSTAT By Name Downloaded to $location',
               buttonText: kIsWeb ? null : 'Open',
-              onPressed:
-                  kIsWeb ? null : () => OpenFile.open('$path/PERSTAT.png'),
+              onPressed: kIsWeb ? null : () => openFile('$path/PERSTAT.png'),
             ),
           );
         }
@@ -164,7 +163,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
               buttonText: kIsWeb ? null : 'Open',
               onPressed: kIsWeb
                   ? null
-                  : () => OpenFile.open(
+                  : () => openFile(
                       '$dir/PERSTAT (${dateFormat.format(DateTime.now())}).xlsx'),
             ),
           );

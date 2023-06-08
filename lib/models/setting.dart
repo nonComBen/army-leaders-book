@@ -114,14 +114,14 @@ class Setting {
         visionMonths: map['visionMonths'],
         hearingMonths: map['hearingMonths'],
         hivMonths: map['hivMonths'],
-        acftNotifications: map['acftNotifications'],
-        bfNotifications: map['bfNotifications'],
-        weaponsNotifications: map['weaponsNotifications'],
-        phaNotifications: map['phaNotifications'],
-        dentalNotifications: map['dentalNotifications'],
-        visionNotifications: map['visionNotifications'],
-        hearingNotifications: map['hearingNotifications'],
-        hivNotifications: map['hivNotifications'],
+        acftNotifications: map['acftNotifications'] ?? [],
+        bfNotifications: map['bfNotifications'] ?? [],
+        weaponsNotifications: map['weaponsNotifications'] ?? [],
+        phaNotifications: map['phaNotifications'] ?? [],
+        dentalNotifications: map['dentalNotifications'] ?? [],
+        visionNotifications: map['visionNotifications'] ?? [],
+        hearingNotifications: map['hearingNotifications'] ?? [],
+        hivNotifications: map['hivNotifications'] ?? [],
         owner: map['owner']);
   }
 }

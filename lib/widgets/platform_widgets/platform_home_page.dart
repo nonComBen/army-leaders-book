@@ -2,29 +2,32 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/providers/root_provider.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 
+import '../../auth_provider.dart';
 import '../../methods/create_app_bar_actions.dart';
 import '../../methods/delete_methods.dart';
 import '../../methods/soldier_methods.dart';
 import '../../methods/theme_methods.dart';
+import '../../methods/update_user.dart';
 import '../../models/app_bar_option.dart';
 import '../../models/soldier.dart';
 import '../../pages/editPages/edit_soldier_page.dart';
-import '../../pages/tabs/rollup_tab.dart';
 import '../../pages/tabs/overflow_tab.dart';
+import '../../pages/tabs/rollup_tab.dart';
 import '../../pages/tabs/soldiers_tab.dart';
-import '../../auth_provider.dart';
 import '../../providers/filtered_soldiers_provider.dart';
+import '../../providers/root_provider.dart';
 import '../../providers/selected_soldiers_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../providers/subscription_state.dart';
+import '../../providers/user_provider.dart';
 
 abstract class PlatformHomePage extends StatefulWidget {
   factory PlatformHomePage() {
@@ -75,6 +78,10 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
   @override
   void initState() {
     super.initState();
+    User? firebaseUser = ref.read(authProvider).currentUser();
+    userId = firebaseUser!.uid;
+
+    _rootService = ref.read(rootProvider.notifier);
 
     if (!kIsWeb) {
       _rateMyApp.init().then((_) {
@@ -95,6 +102,8 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         }
       });
     }
+
+    updateUser(firebaseUser, ref.read(userProvider).user);
   }
 
   //signs out or locks user after 10 minutes of inactivity
@@ -219,12 +228,10 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    _rootService = ref.read(rootProvider.notifier);
     soldiers = ref.watch(soldiersProvider);
     selectedSoldiers = ref.watch(selectedSoldiersProvider);
     filteredSoldiers = ref.read(filteredSoldiersProvider.notifier);
     isSubscribed = ref.watch(subscriptionStateProvider);
-    userId = ref.read(authProvider).currentUser()!.uid;
     return Scaffold(
       appBar: AppBar(
           title: Text(titles[index]),
@@ -301,6 +308,9 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
   @override
   void initState() {
     super.initState();
+    User? firebaseUser = ref.read(authProvider).currentUser();
+    userId = firebaseUser!.uid;
+
     _rootService = ref.read(rootProvider.notifier);
 
     _rateMyApp.init().then((_) {
@@ -320,6 +330,8 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         );
       }
     });
+
+    updateUser(firebaseUser, ref.read(userProvider).user);
   }
 
   //signs out or locks user after 10 minutes of inactivity
@@ -458,7 +470,6 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    userId = ref.read(authProvider).currentUser()!.uid;
     isSubscribed = ref.watch(subscriptionStateProvider);
     soldiers = ref.watch(soldiersProvider);
     selectedSoldiers = ref.watch(selectedSoldiersProvider);

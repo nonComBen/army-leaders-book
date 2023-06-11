@@ -103,9 +103,6 @@ class LoginPageState extends ConsumerState<LoginPage> {
         const Duration(minutes: 1),
       ),
     )) {
-      FirebaseFirestore.instance.doc('users/${user.uid}').update(
-          {'lastLogin': DateTime.now(), 'created': user.metadata.creationTime});
-
       ref.read(userProvider).loadUser(user.uid);
       return;
     }

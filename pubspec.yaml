@@ -28,10 +28,12 @@ dependencies:
   firebase_core: ^2.13.0
   firebase_crashlytics: ^3.3.1
   firebase_messaging: ^14.6.1
+  flutter_local_notifications: ^14.1.1
   flutter_riverpod: ^2.3.6
   fluttertoast: ^8.2.2
   google_mobile_ads: ^3.0.0
   google_sign_in: ^6.1.2
+  http: ^1.0.0
   in_app_purchase: ^3.1.7
   intl: ^0.18.1
   launch_review: ^3.0.1

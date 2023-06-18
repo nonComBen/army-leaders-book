@@ -6,17 +6,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/models/user.dart';
-import 'package:leaders_book/providers/root_provider.dart';
-import 'package:leaders_book/widgets/center_progress_indicator.dart';
-import 'package:leaders_book/widgets/form_frame.dart';
-import 'package:leaders_book/widgets/logo_widget.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../auth_provider.dart';
+import '../../models/user.dart';
+import '../../providers/root_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../widgets/center_progress_indicator.dart';
+import '../../widgets/form_frame.dart';
+import '../../widgets/logo_widget.dart';
 import '../apple_sign_in_available.dart';
 import '../methods/show_on_login.dart';
 import '../providers/soldiers_provider.dart';
@@ -97,6 +98,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
 
   void createAccount(User user) async {
     ref.read(soldiersProvider.notifier).loadSoldiers(user.uid);
+    ref.read(settingsProvider.notifier).init(user.uid);
 
     if (user.metadata.creationTime!.isBefore(
       DateTime.now().subtract(

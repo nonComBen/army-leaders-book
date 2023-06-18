@@ -7,13 +7,16 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/set_notifications.dart';
 import '../../models/soldier.dart';
+import '../../providers/settings_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/weapon.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -138,6 +141,13 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
         badge: _badgeController.text,
         pass: pass,
         qualType: _qualType!,
+      );
+
+      setDateNotifications(
+        setting: ref.read(settingsProvider.notifier).settings,
+        map: saveWeapon.toMap(),
+        user: ref.read(userProvider).user!,
+        topic: 'Weapons Qualification',
       );
 
       if (widget.weapon.id == null) {

@@ -1,38 +1,42 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../auth_provider.dart';
+import '../../calculators/hrp_calculator.dart';
+import '../../calculators/mdl_calculator.dart';
+import '../../calculators/plk_calculator.dart';
+import '../../calculators/sdc_calculator.dart';
+import '../../calculators/spt_calculator.dart';
+import '../../calculators/twomr_calculator.dart';
 import '../../constants/firestore_collections.dart';
-import '../../methods/theme_methods.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/on_back_pressed.dart';
+import '../../methods/set_notifications.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/validate.dart';
+import '../../models/acft.dart';
 import '../../models/soldier.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../calculators/twomr_calculator.dart';
-import '../../calculators/plk_calculator.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/acft.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../calculators/hrp_calculator.dart';
-import '../../calculators/mdl_calculator.dart';
-import '../../calculators/sdc_calculator.dart';
-import '../../calculators/spt_calculator.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
 
 class EditAcftPage extends ConsumerStatefulWidget {
   const EditAcftPage({
@@ -67,6 +71,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   final TextEditingController _runRawController = TextEditingController();
   String _ageGroup = '17-21', _gender = 'Male', _runType = 'Run';
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  late User user;
   List<dynamic>? _users;
   int? _total,
       _mdlScore,
@@ -133,6 +138,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   @override
   void initState() {
     super.initState();
+    user = ref.read(authProvider).currentUser()!;
     allSoldiers = ref.read(soldiersProvider);
 
     _runType = widget.acft.altEvent;
@@ -394,24 +400,27 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         pass: pass,
       );
 
-      if (widget.acft.id == null) {
-        await firestore.collection(kAcftCollection).add(saveAcft.toMap());
+      setDateNotifications(
+        setting: ref.read(settingsProvider.notifier).settings,
+        map: saveAcft.toMap(),
+        user: ref.read(userProvider).user!,
+        topic: 'ACFT',
+      );
 
-        if (mounted) {
-          Navigator.pop(context);
-        }
+      if (widget.acft.id == null) {
+        firestore.collection(kAcftCollection).add(saveAcft.toMap());
       } else {
         firestore
             .collection(kAcftCollection)
             .doc(widget.acft.id)
             .set(saveAcft.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
+            .then((value) {})
+            .catchError((e) {
           // ignore: avoid_print
           print('Error $e thrown while updating ACFT');
         });
       }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(
@@ -424,7 +433,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = ref.read(authProvider).currentUser()!;
     toast.context = context;
     return PlatformScaffold(
       title: _title,

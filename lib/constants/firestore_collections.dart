@@ -23,6 +23,6 @@ const String kSoldierCollection = 'soldiers';
 const String kTaskingCollection = 'taskings';
 const String kTrainingCollection = 'training';
 const String kUsersCollection = 'users';
-const String kWeaponCollection = 'weaponsStats';
+const String kWeaponCollection = 'weaponStats';
 const String kWorkingAwardsCollection = 'workingAwards';
 const String kWorkingEvalsCollection = 'workingEvals';

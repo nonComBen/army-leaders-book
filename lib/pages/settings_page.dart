@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../models/setting.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../methods/on_back_pressed.dart';
 import '../methods/theme_methods.dart';
 import '../providers/theme_provider.dart';
-import '../../models/setting.dart';
 import '../widgets/header_text.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/padded_text_field.dart';
@@ -127,19 +127,11 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
 
     setState(() {
       if (doc != null) {
-        setting = Setting.fromMap(doc.data() as Map<String, dynamic>);
+        setting = Setting.fromMap(doc.data() as Map<String, dynamic>, userId);
         updated = false;
       } else {
         setting = Setting(
           owner: userId,
-          hearingNotifications: [0, 30],
-          weaponsNotifications: [0, 30],
-          acftNotifications: [0, 30],
-          dentalNotifications: [0, 30],
-          visionNotifications: [0, 30],
-          bfNotifications: [0, 30],
-          hivNotifications: [0, 30],
-          phaNotifications: [0, 30],
         );
         updated = true;
       }

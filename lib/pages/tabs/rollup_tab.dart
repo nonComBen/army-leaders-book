@@ -23,6 +23,7 @@ import '../../methods/show_on_login.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/update_methods.dart';
 import '../../models/user.dart';
+import '../../providers/settings_provider.dart';
 import '../../providers/shared_prefs_provider.dart';
 import '../../providers/tracking_provider.dart';
 import '../../providers/user_provider.dart';
@@ -84,7 +85,7 @@ class HomePageState extends ConsumerState<RollupTab>
   StreamSubscription<QuerySnapshot>? _soldierSubscription;
   final _firestore = FirebaseFirestore.instance;
   final format = DateFormat('yyyy-MM-dd');
-  Setting? setting;
+  late Setting setting;
   SubscriptionState? subState;
   late BannerAd myBanner;
   UserObj? _userObj;
@@ -197,7 +198,7 @@ class HomePageState extends ConsumerState<RollupTab>
       title: title,
       list: list,
       homeCard: homeCard,
-      setting: setting!,
+      setting: setting,
       width: MediaQuery.of(context).size.width / 3 * 2,
       height: MediaQuery.of(context).size.height / 3,
     );
@@ -212,691 +213,678 @@ class HomePageState extends ConsumerState<RollupTab>
 
   List<Widget> homeCards(String userId) {
     List<Widget> list = [];
-    if (setting != null) {
-      if (setting!.perstat) {
-        list.add(StreamBuilder(
-            stream: _firestore
-                .collection('perstat')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int leave = 0;
-                  int tdy = 0;
-                  int other = 0;
-                  for (DocumentSnapshot doc in snapshot.data!.docs) {
-                    Object start;
-                    if (isValidDate(doc['start'])) {
-                      start =
-                          DateTime.tryParse(doc['start'] + ' 00:00:00') ?? '';
-                    } else {
-                      start = '';
-                    }
-                    var end = isValidDate(doc['end'])
-                        ? DateTime.tryParse(doc['end'] + ' 18:00:00') ?? ''
-                        : '';
-                    if (start != '' &&
-                        DateTime.now().isAfter(start as DateTime)) {
-                      if (end == '' ||
-                          DateTime.now().isBefore(end as DateTime)) {
-                        if (doc['type'] == 'Leave') {
-                          leave++;
-                        } else if (doc['type'] == 'TDY') {
-                          tdy++;
-                        } else {
-                          other++;
-                        }
+    if (setting.perstat) {
+      list.add(
+        StreamBuilder(
+          stream: _firestore
+              .collection('perstat')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int leave = 0;
+                int tdy = 0;
+                int other = 0;
+                for (DocumentSnapshot doc in snapshot.data!.docs) {
+                  Object start;
+                  if (isValidDate(doc['start'])) {
+                    start = DateTime.tryParse(doc['start'] + ' 00:00:00') ?? '';
+                  } else {
+                    start = '';
+                  }
+                  var end = isValidDate(doc['end'])
+                      ? DateTime.tryParse(doc['end'] + ' 18:00:00') ?? ''
+                      : '';
+                  if (start != '' &&
+                      DateTime.now().isAfter(start as DateTime)) {
+                    if (end == '' || DateTime.now().isBefore(end as DateTime)) {
+                      if (doc['type'] == 'Leave') {
+                        leave++;
+                      } else if (doc['type'] == 'TDY') {
+                        tdy++;
+                      } else {
+                        other++;
                       }
                     }
                   }
-                  return PerstatRollupCard(
-                    title: 'PERSTAT',
-                    leave: leave,
-                    tdy: tdy,
-                    other: other,
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(PerstatPage.routeName),
-                      child: const Text('Go to PERSTAT'),
-                    ),
-                    button2: PlatformButton(
-                      child: const Text('By Name'),
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(DailyPerstatPage.routeName),
-                    ),
-                  );
-              }
-            }));
-      }
-      if (setting!.apts) {
-        list.add(
-          StreamBuilder(
-            stream: _firestore
-                .collection('appointments')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int aptsToday = 0;
-                  int aptsFuture = 0;
-                  List<DocumentSnapshot> todayByName = [];
-                  List<DocumentSnapshot> futureByName = [];
-                  for (DocumentSnapshot doc in snapshot.data!.docs) {
-                    DateTime? start;
-                    if (isValidDate(doc['date'])) {
-                      start = DateTime.parse(doc['date'] + ' 00:00:00');
-                    } else {
-                      start = null;
-                    }
-                    var today = format.format(DateTime.now());
-                    if (doc['date'] == today) {
-                      aptsToday++;
-                      todayByName.add(doc);
-                    } else if (start != null && start.isAfter(DateTime.now())) {
-                      aptsFuture++;
-                      futureByName.add(doc);
-                    }
+                }
+                return PerstatRollupCard(
+                  title: 'PERSTAT',
+                  leave: leave,
+                  tdy: tdy,
+                  other: other,
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(PerstatPage.routeName),
+                    child: const Text('Go to PERSTAT'),
+                  ),
+                  button2: PlatformButton(
+                    child: const Text('By Name'),
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(DailyPerstatPage.routeName),
+                  ),
+                );
+            }
+          },
+        ),
+      );
+    }
+    if (setting.apts) {
+      list.add(
+        StreamBuilder(
+          stream: _firestore
+              .collection('appointments')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int aptsToday = 0;
+                int aptsFuture = 0;
+                List<DocumentSnapshot> todayByName = [];
+                List<DocumentSnapshot> futureByName = [];
+                for (DocumentSnapshot doc in snapshot.data!.docs) {
+                  DateTime? start;
+                  if (isValidDate(doc['date'])) {
+                    start = DateTime.parse(doc['date'] + ' 00:00:00');
+                  } else {
+                    start = null;
                   }
-                  todayByName.sort((a, b) => a['start'].compareTo(b['start']));
-                  futureByName.sort((a, b) => a['start'].compareTo(b['start']));
-                  futureByName.sort((a, b) => a['date'].compareTo(b['date']));
-                  return RollupCard(
-                    title: 'Appointments',
-                    info1: TextButton(
-                      child: Text('Apts Today: $aptsToday',
-                          style: const TextStyle(
-                              color: Colors.blue,
-                              fontSize: 16,
-                              decoration: TextDecoration.underline)),
-                      onPressed: () {
-                        showByName(
-                            'Apts Today', todayByName, HomeCard.appointments);
-                      },
-                    ),
-                    info2: TextButton(
-                      child: Text('Future Apts: $aptsFuture',
-                          style: const TextStyle(
-                              color: Colors.blue,
-                              fontSize: 16,
-                              decoration: TextDecoration.underline)),
-                      onPressed: () {
-                        showByName(
-                            'Future Apts', futureByName, HomeCard.appointments);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(AptsPage.routeName),
-                      child: const Text('Go to Appointments'),
-                    ),
-                  );
-              }
-            },
-          ),
-        );
-      }
-      if (setting!.apft) {
-        list.add(StreamBuilder(
-            stream: _firestore
-                .collection('apftStats')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int apftOverdue = 0;
-                  int apftFail = 0;
-                  List<DocumentSnapshot> fails = [];
-                  List<DocumentSnapshot> overdue = [];
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data!.docs) {
-                    if (!doc['pass']) {
-                      apftFail++;
-                      fails.add(doc);
-                    }
-                    if (isOverdue(doc['date'], 30 * setting!.acftMonths)) {
-                      apftOverdue++;
-                      overdue.add(doc);
-                    }
+                  var today = format.format(DateTime.now());
+                  if (doc['date'] == today) {
+                    aptsToday++;
+                    todayByName.add(doc);
+                  } else if (start != null && start.isAfter(DateTime.now())) {
+                    aptsFuture++;
+                    futureByName.add(doc);
                   }
-                  return RollupCard(
-                    title: 'APFT Stats',
-                    info1: TextButton(
-                      child: Text('Overdue: $apftOverdue',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName('Overdue APFTs', overdue, HomeCard.apft);
-                      },
-                    ),
-                    info2: TextButton(
-                      child: Text('Failed: $apftFail',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName('Failed APFTs', fails, HomeCard.apft);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(ApftPage.routeName),
-                      child: const Text('Go to APFT'),
-                    ),
-                  );
-              }
-            }));
-      }
-      if (setting!.acft) {
-        list.add(StreamBuilder(
-            stream: _firestore
-                .collection('acftStats')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int acftOverdue = 0;
-                  int acftFail = 0;
-                  List<DocumentSnapshot> overdue = [];
-                  List<DocumentSnapshot> fails = [];
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data!.docs) {
-                    if (!doc['pass']) {
-                      acftFail++;
-                      fails.add(doc);
-                    }
-                    if (isOverdue(doc['date'], 30 * setting!.acftMonths)) {
-                      acftOverdue++;
-                      overdue.add(doc);
-                    }
+                }
+                todayByName.sort((a, b) => a['start'].compareTo(b['start']));
+                futureByName.sort((a, b) => a['start'].compareTo(b['start']));
+                futureByName.sort((a, b) => a['date'].compareTo(b['date']));
+                return RollupCard(
+                  title: 'Appointments',
+                  info1: TextButton(
+                    child: Text('Apts Today: $aptsToday',
+                        style: const TextStyle(
+                            color: Colors.blue,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline)),
+                    onPressed: () {
+                      showByName(
+                          'Apts Today', todayByName, HomeCard.appointments);
+                    },
+                  ),
+                  info2: TextButton(
+                    child: Text('Future Apts: $aptsFuture',
+                        style: const TextStyle(
+                            color: Colors.blue,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline)),
+                    onPressed: () {
+                      showByName(
+                          'Future Apts', futureByName, HomeCard.appointments);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(AptsPage.routeName),
+                    child: const Text('Go to Appointments'),
+                  ),
+                );
+            }
+          },
+        ),
+      );
+    }
+    if (setting.apft) {
+      list.add(StreamBuilder(
+          stream: _firestore
+              .collection('apftStats')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int apftOverdue = 0;
+                int apftFail = 0;
+                List<DocumentSnapshot> fails = [];
+                List<DocumentSnapshot> overdue = [];
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                for (DocumentSnapshot doc in snapshot.data!.docs) {
+                  if (!doc['pass']) {
+                    apftFail++;
+                    fails.add(doc);
                   }
-                  return RollupCard(
-                    title: 'ACFT Stats',
-                    info1: TextButton(
-                      child: Text(
-                        'Overdue: $acftOverdue',
+                  if (isOverdue(doc['date'], 30 * setting.acftMonths)) {
+                    apftOverdue++;
+                    overdue.add(doc);
+                  }
+                }
+                return RollupCard(
+                  title: 'APFT Stats',
+                  info1: TextButton(
+                    child: Text('Overdue: $apftOverdue',
                         style: const TextStyle(
                             fontSize: 16,
                             decoration: TextDecoration.underline,
-                            color: Colors.blue),
-                      ),
-                      onPressed: () {
-                        showByName('Overdue ACFTs', overdue, HomeCard.acft);
-                      },
-                    ),
-                    info2: TextButton(
-                      child: Text('Failed: $acftFail',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName('Failed ACFTs', fails, HomeCard.acft);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(AcftPage.routeName),
-                      child: const Text('Go to ACFT'),
-                    ),
-                  );
-              }
-            }));
-      }
-      if (setting!.profiles) {
-        list.add(StreamBuilder(
-            stream: _firestore
-                .collection('profiles')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  List<DocumentSnapshot> profiles = snapshot.data!.docs;
-                  List<DocumentSnapshot> tempList = profiles
-                      .where((doc) => doc['type'] == 'Temporary')
-                      .toList();
-                  List<DocumentSnapshot> permList = profiles
-                      .where((doc) => doc['type'] == 'Permanent')
-                      .toList();
-                  int profilesTemp = tempList.length;
-                  int profilesPerm = permList.length;
-                  return RollupCard(
-                    title: 'Profiles',
-                    info1: TextButton(
-                      child: Text(
-                        'Temporary: $profilesTemp',
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName('Overdue APFTs', overdue, HomeCard.apft);
+                    },
+                  ),
+                  info2: TextButton(
+                    child: Text('Failed: $apftFail',
                         style: const TextStyle(
                             fontSize: 16,
                             decoration: TextDecoration.underline,
-                            color: Colors.blue),
-                      ),
-                      onPressed: () {
-                        showByName('Temp Profiles', tempList, HomeCard.profile);
-                      },
-                    ),
-                    info2: TextButton(
-                      child: Text(
-                        'Permanent: $profilesPerm',
-                        style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue),
-                      ),
-                      onPressed: () {
-                        showByName('Perm Profiles', permList, HomeCard.profile);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(TempProfilesPage.routeName),
-                      child: const Text('Go to Temp'),
-                    ),
-                    button2: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(PermProfilesPage.routeName),
-                      child: const Text('Go to Perm'),
-                    ),
-                  );
-              }
-            }));
-      }
-      if (setting!.bf) {
-        list.add(StreamBuilder(
-            stream: _firestore
-                .collection('bodyfatStats')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int bfOverdue = 0;
-                  int bfFail = 0;
-                  List<DocumentSnapshot> overdue = [];
-                  List<DocumentSnapshot> fails = [];
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data!.docs) {
-                    if (!doc['passBmi'] && !doc['passBf']) {
-                      bfFail++;
-                      fails.add(doc);
-                    }
-                    if (isOverdue(doc['date'], 30 * setting!.bfMonths)) {
-                      bfOverdue++;
-                      overdue.add(doc);
-                    }
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName('Failed APFTs', fails, HomeCard.apft);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(ApftPage.routeName),
+                    child: const Text('Go to APFT'),
+                  ),
+                );
+            }
+          }));
+    }
+    if (setting.acft) {
+      list.add(StreamBuilder(
+          stream: _firestore
+              .collection('acftStats')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int acftOverdue = 0;
+                int acftFail = 0;
+                List<DocumentSnapshot> overdue = [];
+                List<DocumentSnapshot> fails = [];
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                for (DocumentSnapshot doc in snapshot.data!.docs) {
+                  if (!doc['pass']) {
+                    acftFail++;
+                    fails.add(doc);
                   }
-                  return RollupCard(
-                    title: 'Body Comp',
-                    info1: TextButton(
-                      child: Text(
-                        'Overdue: $bfOverdue',
-                        style: const TextStyle(
+                  if (isOverdue(doc['date'], 30 * setting.acftMonths)) {
+                    acftOverdue++;
+                    overdue.add(doc);
+                  }
+                }
+                return RollupCard(
+                  title: 'ACFT Stats',
+                  info1: TextButton(
+                    child: Text(
+                      'Overdue: $acftOverdue',
+                      style: const TextStyle(
                           fontSize: 16,
                           decoration: TextDecoration.underline,
-                          color: Colors.blue,
-                        ),
-                      ),
-                      onPressed: () {
-                        showByName(
-                            'Overdue Body Compositions', overdue, HomeCard.bf);
-                      },
+                          color: Colors.blue),
                     ),
-                    info2: TextButton(
-                      child: Text('Failed: $bfFail',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName(
-                            'Failed Body Compositions', fails, HomeCard.bf);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(BodyfatPage.routeName),
-                      child: const Text('Go to Body Comp'),
-                    ),
-                  );
-              }
-            }));
-      }
-      if (setting!.weapons) {
-        list.add(StreamBuilder(
-            stream: _firestore
-                .collection('weaponStats')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int weaponsOverdue = 0;
-                  int weaponsFail = 0;
-                  List<DocumentSnapshot> overdue = [];
-                  List<DocumentSnapshot> fails = [];
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot doc in snapshot.data!.docs) {
-                    if (doc['pass'] != null && !doc['pass']) {
-                      weaponsFail++;
-                      fails.add(doc);
-                    }
-                    if (isOverdue(doc['date'], 30 * setting!.weaponsMonths)) {
-                      weaponsOverdue++;
-                      overdue.add(doc);
-                    }
-                  }
-                  return RollupCard(
-                    title: 'Weapon Stats',
-                    info1: TextButton(
-                      child: Text(
-                        'Overdue: $weaponsOverdue',
+                    onPressed: () {
+                      showByName('Overdue ACFTs', overdue, HomeCard.acft);
+                    },
+                  ),
+                  info2: TextButton(
+                    child: Text('Failed: $acftFail',
                         style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName('Failed ACFTs', fails, HomeCard.acft);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(AcftPage.routeName),
+                    child: const Text('Go to ACFT'),
+                  ),
+                );
+            }
+          }));
+    }
+    if (setting.profiles) {
+      list.add(StreamBuilder(
+          stream: _firestore
+              .collection('profiles')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                List<DocumentSnapshot> profiles = snapshot.data!.docs;
+                List<DocumentSnapshot> tempList = profiles
+                    .where((doc) => doc['type'] == 'Temporary')
+                    .toList();
+                List<DocumentSnapshot> permList = profiles
+                    .where((doc) => doc['type'] == 'Permanent')
+                    .toList();
+                int profilesTemp = tempList.length;
+                int profilesPerm = permList.length;
+                return RollupCard(
+                  title: 'Profiles',
+                  info1: TextButton(
+                    child: Text(
+                      'Temporary: $profilesTemp',
+                      style: const TextStyle(
                           fontSize: 16,
                           decoration: TextDecoration.underline,
-                          color: Colors.blue,
-                        ),
-                      ),
-                      onPressed: () {
-                        showByName(
-                            'Overdue Weapon Quals', overdue, HomeCard.weapons);
-                      },
+                          color: Colors.blue),
                     ),
-                    info2: TextButton(
-                      child: Text('Failed: $weaponsFail',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName(
-                            'Failed Weapons Quals', fails, HomeCard.weapons);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(WeaponsPage.routeName),
-                      child: const Text('Go to Weapons'),
-                    ),
-                  );
-              }
-            }));
-      }
-      if (setting!.flags) {
-        list.add(StreamBuilder(
-            stream: _firestore
-                .collection('flags')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int flags = snapshot.data!.docs.length;
-                  int flagsOverdue = 0;
-                  List<DocumentSnapshot> overdue = [];
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot ds in snapshot.data!.docs) {
-                    if (isOverdue(ds['date'], 180)) {
-                      flagsOverdue++;
-                      overdue.add(ds);
-                    }
-                  }
-                  return RollupCard(
-                    title: 'Flags',
-                    info1: TextButton(
-                      onPressed: null,
-                      child: Text(
-                        'Active: $flags',
-                        style: TextStyle(
+                    onPressed: () {
+                      showByName('Temp Profiles', tempList, HomeCard.profile);
+                    },
+                  ),
+                  info2: TextButton(
+                    child: Text(
+                      'Permanent: $profilesPerm',
+                      style: const TextStyle(
                           fontSize: 16,
-                          color: getTextColor(context),
-                        ),
-                      ),
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue),
                     ),
-                    info2: TextButton(
-                      child: Text('> 180 Days: $flagsOverdue',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName('Flags > 180 Days', overdue, HomeCard.flags);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(FlagsPage.routeName),
-                      child: const Text('Go to Flags'),
-                    ),
-                  );
-              }
-            }));
-      }
-      if (setting!.medpros) {
-        list.add(
-          StreamBuilder(
-            stream: _firestore
-                .collection('medpros')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int medpros = snapshot.data!.docs.length;
-                  int medprosOverdue = 0;
-                  List<DocumentSnapshot> overdue = [];
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot ds in snapshot.data!.docs) {
-                    if (isOverdue(ds['pha'], 30 * setting!.phaMonths) ||
-                        isOverdue(ds['dental'], 30 * setting!.dentalMonths) ||
-                        isOverdue(ds['vision'], 30 * setting!.visionMonths) ||
-                        isOverdue(ds['hearing'], 30 * setting!.hearingMonths) ||
-                        isOverdue(ds['hiv'], 30 * setting!.hivMonths)) {
-                      medprosOverdue++;
-                      overdue.add(ds);
-                    }
+                    onPressed: () {
+                      showByName('Perm Profiles', permList, HomeCard.profile);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(TempProfilesPage.routeName),
+                    child: const Text('Go to Temp'),
+                  ),
+                  button2: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(PermProfilesPage.routeName),
+                    child: const Text('Go to Perm'),
+                  ),
+                );
+            }
+          }));
+    }
+    if (setting.bf) {
+      list.add(StreamBuilder(
+          stream: _firestore
+              .collection('bodyfatStats')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int bfOverdue = 0;
+                int bfFail = 0;
+                List<DocumentSnapshot> overdue = [];
+                List<DocumentSnapshot> fails = [];
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                for (DocumentSnapshot doc in snapshot.data!.docs) {
+                  if (!doc['passBmi'] && !doc['passBf']) {
+                    bfFail++;
+                    fails.add(doc);
                   }
-                  return RollupCard(
-                    title: 'Medpros',
-                    info1: TextButton(
-                      onPressed: null,
-                      child: Text(
-                        'Records: $medpros',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    info2: TextButton(
-                      child: Text('Overdue: $medprosOverdue',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName(
-                            'Overdue MedPros', overdue, HomeCard.medpros);
-                      },
-                    ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(MedProsPage.routeName),
-                      child: const Text('Go to Medpros'),
-                    ),
-                  );
-              }
-            },
-          ),
-        );
-      }
-      if (setting!.training) {
-        list.add(
-          StreamBuilder(
-            stream: _firestore
-                .collection('training')
-                .where('users', isNotEqualTo: null)
-                .where('users', arrayContains: userId)
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return Card(
-                    color: getContrastingBackgroundColor(context),
-                    child: PlatformLoadingWidget(),
-                  );
-                default:
-                  int training = snapshot.data!.docs.length;
-                  int trainingOverdue = 0;
-                  List<DocumentSnapshot> overdue = [];
-                  snapshot.data!.docs
-                      .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                  for (DocumentSnapshot ds in snapshot.data!.docs) {
-                    if (isOverdue(ds['cyber'], 365) ||
-                        isOverdue(ds['opsec'], 365) ||
-                        isOverdue(ds['antiTerror'], 365) ||
-                        isOverdue(ds['lawOfWar'], 365) ||
-                        isOverdue(ds['persRec'], 365) ||
-                        isOverdue(ds['infoSec'], 365) ||
-                        isOverdue(ds['ctip'], 365) ||
-                        isOverdue(ds['gat'], 365)) {
-                      trainingOverdue++;
-                      overdue.add(ds);
-                    }
+                  if (isOverdue(doc['date'], 30 * setting.bfMonths)) {
+                    bfOverdue++;
+                    overdue.add(doc);
                   }
-                  return RollupCard(
-                    title: 'Training',
-                    info1: TextButton(
-                      onPressed: null,
-                      child: Text(
-                        'Records: $training',
-                        style: const TextStyle(fontSize: 16),
+                }
+                return RollupCard(
+                  title: 'Body Comp',
+                  info1: TextButton(
+                    child: Text(
+                      'Overdue: $bfOverdue',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        decoration: TextDecoration.underline,
+                        color: Colors.blue,
                       ),
                     ),
-                    info2: TextButton(
-                      child: Text('Overdue: $trainingOverdue',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName(
-                            'Overdue Trainings', overdue, HomeCard.training);
-                      },
+                    onPressed: () {
+                      showByName(
+                          'Overdue Body Compositions', overdue, HomeCard.bf);
+                    },
+                  ),
+                  info2: TextButton(
+                    child: Text('Failed: $bfFail',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName(
+                          'Failed Body Compositions', fails, HomeCard.bf);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(BodyfatPage.routeName),
+                    child: const Text('Go to Body Comp'),
+                  ),
+                );
+            }
+          }));
+    }
+    if (setting.weapons) {
+      list.add(StreamBuilder(
+          stream: _firestore
+              .collection('weaponStats')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int weaponsOverdue = 0;
+                int weaponsFail = 0;
+                List<DocumentSnapshot> overdue = [];
+                List<DocumentSnapshot> fails = [];
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                for (DocumentSnapshot doc in snapshot.data!.docs) {
+                  if (doc['pass'] != null && !doc['pass']) {
+                    weaponsFail++;
+                    fails.add(doc);
+                  }
+                  if (isOverdue(doc['date'], 30 * setting.weaponsMonths)) {
+                    weaponsOverdue++;
+                    overdue.add(doc);
+                  }
+                }
+                return RollupCard(
+                  title: 'Weapon Stats',
+                  info1: TextButton(
+                    child: Text(
+                      'Overdue: $weaponsOverdue',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        decoration: TextDecoration.underline,
+                        color: Colors.blue,
+                      ),
                     ),
-                    button: PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(TrainingPage.routeName),
-                      child: const Text('Go to Training'),
+                    onPressed: () {
+                      showByName(
+                          'Overdue Weapon Quals', overdue, HomeCard.weapons);
+                    },
+                  ),
+                  info2: TextButton(
+                    child: Text('Failed: $weaponsFail',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName(
+                          'Failed Weapons Quals', fails, HomeCard.weapons);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(WeaponsPage.routeName),
+                    child: const Text('Go to Weapons'),
+                  ),
+                );
+            }
+          }));
+    }
+    if (setting.flags) {
+      list.add(StreamBuilder(
+          stream: _firestore
+              .collection('flags')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int flags = snapshot.data!.docs.length;
+                int flagsOverdue = 0;
+                List<DocumentSnapshot> overdue = [];
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                for (DocumentSnapshot ds in snapshot.data!.docs) {
+                  if (isOverdue(ds['date'], 180)) {
+                    flagsOverdue++;
+                    overdue.add(ds);
+                  }
+                }
+                return RollupCard(
+                  title: 'Flags',
+                  info1: TextButton(
+                    onPressed: null,
+                    child: Text(
+                      'Active: $flags',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: getTextColor(context),
+                      ),
                     ),
-                  );
-              }
-            },
-          ),
-        );
-      }
+                  ),
+                  info2: TextButton(
+                    child: Text('> 180 Days: $flagsOverdue',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName('Flags > 180 Days', overdue, HomeCard.flags);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(FlagsPage.routeName),
+                    child: const Text('Go to Flags'),
+                  ),
+                );
+            }
+          }));
+    }
+    if (setting.medpros) {
+      list.add(
+        StreamBuilder(
+          stream: _firestore
+              .collection('medpros')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int medpros = snapshot.data!.docs.length;
+                int medprosOverdue = 0;
+                List<DocumentSnapshot> overdue = [];
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                for (DocumentSnapshot ds in snapshot.data!.docs) {
+                  if (isOverdue(ds['pha'], 30 * setting.phaMonths) ||
+                      isOverdue(ds['dental'], 30 * setting.dentalMonths) ||
+                      isOverdue(ds['vision'], 30 * setting.visionMonths) ||
+                      isOverdue(ds['hearing'], 30 * setting.hearingMonths) ||
+                      isOverdue(ds['hiv'], 30 * setting.hivMonths)) {
+                    medprosOverdue++;
+                    overdue.add(ds);
+                  }
+                }
+                return RollupCard(
+                  title: 'Medpros',
+                  info1: TextButton(
+                    onPressed: null,
+                    child: Text(
+                      'Records: $medpros',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  info2: TextButton(
+                    child: Text('Overdue: $medprosOverdue',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName('Overdue MedPros', overdue, HomeCard.medpros);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(MedProsPage.routeName),
+                    child: const Text('Go to Medpros'),
+                  ),
+                );
+            }
+          },
+        ),
+      );
+    }
+    if (setting.training) {
+      list.add(
+        StreamBuilder(
+          stream: _firestore
+              .collection('training')
+              .where('users', isNotEqualTo: null)
+              .where('users', arrayContains: userId)
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Card(
+                  color: getContrastingBackgroundColor(context),
+                  child: PlatformLoadingWidget(),
+                );
+              default:
+                int training = snapshot.data!.docs.length;
+                int trainingOverdue = 0;
+                List<DocumentSnapshot> overdue = [];
+                snapshot.data!.docs
+                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
+                for (DocumentSnapshot ds in snapshot.data!.docs) {
+                  if (isOverdue(ds['cyber'], 365) ||
+                      isOverdue(ds['opsec'], 365) ||
+                      isOverdue(ds['antiTerror'], 365) ||
+                      isOverdue(ds['lawOfWar'], 365) ||
+                      isOverdue(ds['persRec'], 365) ||
+                      isOverdue(ds['infoSec'], 365) ||
+                      isOverdue(ds['ctip'], 365) ||
+                      isOverdue(ds['gat'], 365)) {
+                    trainingOverdue++;
+                    overdue.add(ds);
+                  }
+                }
+                return RollupCard(
+                  title: 'Training',
+                  info1: TextButton(
+                    onPressed: null,
+                    child: Text(
+                      'Records: $training',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  info2: TextButton(
+                    child: Text('Overdue: $trainingOverdue',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue)),
+                    onPressed: () {
+                      showByName(
+                          'Overdue Trainings', overdue, HomeCard.training);
+                    },
+                  ),
+                  button: PlatformButton(
+                    onPressed: () => Navigator.of(context, rootNavigator: true)
+                        .pushNamed(TrainingPage.routeName),
+                    child: const Text('Go to Training'),
+                  ),
+                );
+            }
+          },
+        ),
+      );
     }
     return list;
   }
 
   @override
   Widget build(BuildContext context) {
+    setting = ref.watch(settingsProvider) ?? Setting(owner: _userObj!.userId);
     isSubscribed = ref.watch(subscriptionStateProvider);
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser();
@@ -912,58 +900,19 @@ class HomePageState extends ConsumerState<RollupTab>
               shrinkWrap: true,
               children: [
                 if (user!.isAnonymous) const AnonWarningBanner(),
-                StreamBuilder<DocumentSnapshot>(
-                    stream: _firestore
-                        .collection('settings')
-                        .doc(user.uid)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.waiting:
-                          return Card(
-                            color: getContrastingBackgroundColor(context),
-                            child: PlatformLoadingWidget(),
-                          );
-                        default:
-                          if (snapshot.hasData &&
-                              snapshot.data!.data() != null) {
-                            setting = Setting.fromMap(
-                                snapshot.data!.data() as Map<String, dynamic>);
-                          } else {
-                            setting = Setting(
-                              owner: user.uid,
-                              hearingNotifications: [0, 30],
-                              weaponsNotifications: [0, 30],
-                              acftNotifications: [0, 30],
-                              dentalNotifications: [0, 30],
-                              visionNotifications: [0, 30],
-                              bfNotifications: [0, 30],
-                              hivNotifications: [0, 30],
-                              phaNotifications: [0, 30],
-                            );
-                            if (!user.isAnonymous) {
-                              _firestore
-                                  .collection('settings')
-                                  .doc(user.uid)
-                                  .set(setting!.toMap());
-                            }
-                          }
-
-                          return GridView.count(
-                            crossAxisCount: width > 750 ? 2 : 1,
-                            childAspectRatio: width > 750
-                                ? width / 450
-                                : width > 350
-                                    ? width / 225
-                                    : width / 275,
-                            shrinkWrap: true,
-                            primary: false,
-                            crossAxisSpacing: 1.0,
-                            mainAxisSpacing: 1.0,
-                            children: homeCards(user.uid),
-                          );
-                      }
-                    })
+                GridView.count(
+                  crossAxisCount: width > 750 ? 2 : 1,
+                  childAspectRatio: width > 750
+                      ? width / 450
+                      : width > 350
+                          ? width / 225
+                          : width / 275,
+                  shrinkWrap: true,
+                  primary: false,
+                  crossAxisSpacing: 1.0,
+                  mainAxisSpacing: 1.0,
+                  children: homeCards(user.uid),
+                ),
               ],
             ),
           ),

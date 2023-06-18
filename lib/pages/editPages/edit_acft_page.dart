@@ -166,7 +166,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     _runScore = widget.acft.runScore;
 
     _mdlRaw = int.tryParse(widget.acft.deadliftRaw) ?? 0;
-    _sptRaw = int.tryParse(widget.acft.powerThrowRaw) as double? ?? 0;
+    _sptRaw = double.tryParse(widget.acft.powerThrowRaw) ?? 0;
     _hrpRaw = int.tryParse(widget.acft.puRaw) ?? 0;
     if (widget.acft.dragRaw.characters.contains(":")) {
       _sdcMins = int.tryParse(widget.acft.dragRaw

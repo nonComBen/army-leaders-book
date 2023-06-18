@@ -308,8 +308,6 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
   @override
   void initState() {
     super.initState();
-    User? firebaseUser = ref.read(authProvider).currentUser();
-    userId = firebaseUser!.uid;
 
     _rootService = ref.read(rootProvider.notifier);
 
@@ -330,6 +328,8 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         );
       }
     });
+    User? firebaseUser = ref.read(authProvider).currentUser();
+    userId = firebaseUser!.uid;
 
     updateUser(firebaseUser, ref.read(userProvider).user);
   }

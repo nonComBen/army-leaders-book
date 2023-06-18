@@ -19,18 +19,23 @@ class BfCalculator {
     required double height,
     required double cirValue,
   }) {
+    double safeHeight = height < 58
+        ? 58
+        : height > 80
+            ? 80
+            : height;
     if (male) {
       if (cirValue < 10.5) {
         return 0;
       }
       return maleBfTable[maleCirValues.indexOf(cirValue)]
-          [heights.indexOf(height)];
+          [heights.indexOf(safeHeight)];
     } else {
       if (cirValue < 34.5) {
         return 0;
       }
       return femaleBfTable[femaleCirValues.indexOf(cirValue)]
-          [heights.indexOf(height)];
+          [heights.indexOf(safeHeight)];
     }
   }
 

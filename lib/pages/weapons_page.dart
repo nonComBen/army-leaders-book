@@ -13,7 +13,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
-import '../../models/setting.dart';
 import '../../models/weapon.dart';
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
@@ -28,6 +27,7 @@ import '../methods/toast_messages/subscription_needed_toast.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/weapons_pdf.dart';
+import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
 import '../widgets/my_toast.dart';
@@ -117,13 +117,9 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
         _selectedDocuments.clear();
       });
     });
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection(Setting.collectionName)
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot.docs[0];
+    final setting = ref.read(settingsProvider);
     setState(() {
-      overdueDays = doc['weaponsMonths'] * 30;
+      overdueDays = setting!.weaponsMonths * 30;
       amberDays = overdueDays - 30;
     });
   }

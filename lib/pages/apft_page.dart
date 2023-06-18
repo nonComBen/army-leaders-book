@@ -17,7 +17,6 @@ import '../../auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/apft.dart';
-import '../../models/setting.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../methods/create_app_bar_actions.dart';
@@ -30,6 +29,7 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/apfts_pdf.dart';
+import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
@@ -128,13 +128,9 @@ class ApftPageState extends ConsumerState<ApftPage> {
 
       _calcAves();
     });
-    snapshot = await FirebaseFirestore.instance
-        .collection(Setting.collectionName)
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot!.docs[0];
+    final setting = ref.read(settingsProvider);
     setState(() {
-      overdueDays = doc['acftMonths'] * 30;
+      overdueDays = setting!.acftMonths * 30;
       amberDays = overdueDays - 30;
     });
   }

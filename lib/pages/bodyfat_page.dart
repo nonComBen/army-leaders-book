@@ -15,7 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/bodyfat.dart';
-import '../../models/setting.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../auth_provider.dart';
@@ -29,6 +28,7 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/bodyfats_pdf.dart';
+import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
@@ -119,13 +119,9 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
         _selectedDocuments.clear();
       });
     });
-    snapshot = await FirebaseFirestore.instance
-        .collection(Setting.collectionName)
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot!.docs[0];
+    final setting = ref.read(settingsProvider);
     setState(() {
-      overdueDays = doc['bfMonths'] * 30;
+      overdueDays = setting!.bfMonths * 30;
       amberDays = overdueDays - 30;
     });
   }

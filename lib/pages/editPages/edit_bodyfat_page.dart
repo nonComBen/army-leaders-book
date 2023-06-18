@@ -61,7 +61,8 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
       bfPass = true,
       removeSoldiers = false,
       updated = false,
-      underweight = false;
+      underweight = false,
+      isNewVersion = false;
   String _gender = 'Male';
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
@@ -170,19 +171,32 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
   calcBf() {
     int maxPercent = bfCalculator.percentTable[
         _gender == 'Male' ? ageGroupIndex() : ageGroupIndex() + 4];
+    int weight = int.tryParse(_weightController.text) ?? 0;
     double neck = double.tryParse(_neckController.text) ?? 0;
     double waist = double.tryParse(_waistController.text) ?? 0;
     double hip = double.tryParse(_hipController.text) ?? 0;
     neck = roundToPointFive(neck);
     waist = roundToPointFive(waist);
     hip = roundToPointFive(hip);
-    double cirValue = _gender == 'Male' ? waist - neck : hip + waist - neck;
 
-    int bfPercent = bfCalculator.getBfPercent(
-      cirValue: cirValue,
-      height: heightDouble!,
-      male: _gender == 'Male',
-    );
+    late double cirValue;
+    late int bfPercent;
+    if (!isNewVersion) {
+      cirValue = _gender == 'Male' ? waist - neck : hip + waist - neck;
+      bfPercent = bfCalculator.getBfPercent(
+        cirValue: cirValue,
+        height: heightDouble!,
+        male: _gender == 'Male',
+      );
+    } else {
+      cirValue = waist;
+      bfPercent = bfCalculator.getNewBfPercent(
+        male: _gender == 'Male',
+        weight: weight,
+        cirValue: cirValue,
+      );
+    }
+
     _percentController.text = bfPercent.toString();
     setState(() {
       bfPass = bfPercent <= maxPercent;
@@ -257,17 +271,33 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
 
   List<Widget> tapes() {
     List<Widget> tapes = [
-      PaddedTextField(
-        controller: _neckController,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        label: 'Neck',
-        decoration: const InputDecoration(
-          labelText: 'Neck',
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: PlatformSelectionWidget(
+          titles: const [Text('Old Version'), Text('New Version')],
+          values: const [false, true],
+          groupValue: isNewVersion,
+          onChanged: (value) {
+            FocusScope.of(context).unfocus();
+            setState(() {
+              isNewVersion = value! as bool;
+              calcBf();
+            });
+          },
         ),
-        onChanged: (value) {
-          calcBf();
-        },
       ),
+      if (!isNewVersion)
+        PaddedTextField(
+          controller: _neckController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          label: 'Neck',
+          decoration: const InputDecoration(
+            labelText: 'Neck',
+          ),
+          onChanged: (value) {
+            calcBf();
+          },
+        ),
       PaddedTextField(
         controller: _waistController,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -280,7 +310,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         },
       ),
     ];
-    if (_gender == 'Female') {
+    if (_gender == 'Female' && !isNewVersion) {
       tapes.add(
         PaddedTextField(
           controller: _hipController,
@@ -500,6 +530,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                 onChanged: (value) {
                   updated = true;
                   calcBmi();
+                  calcBf();
                 },
               ),
               Padding(

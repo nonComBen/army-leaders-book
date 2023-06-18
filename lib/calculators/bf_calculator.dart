@@ -14,6 +14,16 @@ class BfCalculator {
     return [min, max, percentMax];
   }
 
+  int getNewBfPercent({
+    required bool male,
+    required int weight,
+    required double cirValue,
+  }) {
+    double weightSolution = (male ? 0.12 : 0.015) * weight;
+    double circSolution = (male ? 1.99 : 1.27) * cirValue;
+    return ((male ? -26.97 : -9.15) - weightSolution + circSolution).round();
+  }
+
   int getBfPercent({
     required bool male,
     required double height,

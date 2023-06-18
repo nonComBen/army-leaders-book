@@ -5,17 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
-import '../../methods/theme_methods.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/mil_license.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -160,7 +159,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
 
       if (widget.milLic.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kMilLicenseCollection)
+            .collection(MilLic.collectionName)
             .add(saveMilLic.toMap());
 
         saveMilLic.id = docRef.id;
@@ -169,7 +168,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
         }
       } else {
         firestore
-            .collection(kMilLicenseCollection)
+            .collection(MilLic.collectionName)
             .doc(widget.milLic.id)
             .set(saveMilLic.toMap())
             .then((value) {
@@ -305,7 +304,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kMilLicenseCollection,
+                      collection: MilLic.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

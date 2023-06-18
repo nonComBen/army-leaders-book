@@ -11,14 +11,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/methods/create_app_bar_actions.dart';
-import 'package:leaders_book/methods/filter_documents.dart';
-import 'package:leaders_book/widgets/padded_text_field.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../auth_provider.dart';
+import '../../methods/create_app_bar_actions.dart';
+import '../../methods/filter_documents.dart';
 import '../../models/perstat.dart';
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
 import '../methods/open_file.dart';
@@ -443,14 +443,17 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
       date: dateFormat.format(DateTime.now()),
       dailies: dailies,
     );
-    firestore.collection('perstatByName').doc(_userId).set(byName.toMap());
+    firestore
+        .collection(PerstatByName.collectionName)
+        .doc(_userId)
+        .set(byName.toMap());
     return Future.value(true);
   }
 
   buildNewDailies() async {
     soldiers = ref.read(soldiersProvider);
     QuerySnapshot perstatSnapshot = await firestore
-        .collection('perstat')
+        .collection(Perstat.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .get();
@@ -525,7 +528,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     debugPrint(soldiers.length.toString());
     if (perstats.isEmpty) {
       QuerySnapshot perstatSnapshot = await firestore
-          .collection('perstat')
+          .collection(Perstat.collectionName)
           .where('users', isNotEqualTo: null)
           .where('users', arrayContains: _userId)
           .get();
@@ -568,7 +571,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
             start: dateFormat.format(DateTime.now()),
             type: daily['type'],
           );
-          firestore.collection('perstat').add(perstat.toMap());
+          firestore.collection(Perstat.collectionName).add(perstat.toMap());
         }
       }
     }
@@ -596,7 +599,10 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     DocumentSnapshot snapshot;
     PerstatByName? byName;
     try {
-      snapshot = await firestore.collection('perstatByName').doc(_userId).get();
+      snapshot = await firestore
+          .collection(PerstatByName.collectionName)
+          .doc(_userId)
+          .get();
       byName = PerstatByName.fromSnapshot(snapshot);
     } catch (e) {
       // ignore: avoid_print

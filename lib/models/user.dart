@@ -39,6 +39,8 @@ class UserObj {
     this.deviceTokens = const [],
   });
 
+  static const String collectionName = 'users';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['userId'] = userId;

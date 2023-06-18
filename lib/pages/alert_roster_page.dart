@@ -87,7 +87,10 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     DocumentSnapshot snapshot;
     AlertSoldiers? alertSoldiers;
     try {
-      snapshot = await firestore.collection('alertSoldiers').doc(_userId).get();
+      snapshot = await firestore
+          .collection(AlertSoldiers.collectionName)
+          .doc(_userId)
+          .get();
       alertSoldiers = AlertSoldiers.fromSnapshot(snapshot);
     } catch (e) {
       FirebaseAnalytics.instance
@@ -565,7 +568,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     AlertSoldiers alertSoldiers = AlertSoldiers(
         _userId, _userId, _soldiers.map((e) => e!.toMap()).toList());
     firestore
-        .collection('alertSoldiers')
+        .collection(AlertSoldiers.collectionName)
         .doc(_userId)
         .set(alertSoldiers.toMap());
     return Future.value(true);

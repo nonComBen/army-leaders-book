@@ -65,7 +65,9 @@ void setDateNotifications({
           topic: topic,
           users: map['users']);
 
-      firestore.collection('notifications').add(notification.toMap());
+      firestore
+          .collection(Notification.collectionName)
+          .add(notification.toMap());
     }
   }
 }

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
@@ -138,7 +137,7 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
 
       if (widget.profile.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kProfilesCollection)
+            .collection(TempProfile.collectionName)
             .add(saveProfile.toMap());
 
         saveProfile.id = docRef.id;
@@ -147,7 +146,7 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
         }
       } else {
         firestore
-            .collection(kProfilesCollection)
+            .collection(TempProfile.collectionName)
             .doc(widget.profile.id)
             .set(saveProfile.toMap())
             .then((value) {
@@ -306,7 +305,7 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kProfilesCollection,
+                      collection: TempProfile.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                       profileType: 'Permanent',

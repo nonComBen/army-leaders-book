@@ -40,6 +40,8 @@ class HandReceiptItem {
     this.comments = '',
   });
 
+  static const String collectionName = 'handReceipt';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

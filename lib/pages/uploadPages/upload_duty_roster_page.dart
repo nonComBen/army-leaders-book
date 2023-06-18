@@ -116,7 +116,7 @@ class UploadDutyRosterPageState extends ConsumerState<UploadDutyRosterPage> {
             location: saveLoc,
           );
 
-          firestore.collection('dutyRoster').add(duty.toMap());
+          firestore.collection(Duty.collectionName).add(duty.toMap());
         }
       }
       Navigator.pop(context);

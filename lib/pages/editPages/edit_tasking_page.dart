@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/soldier.dart';
 import '../../models/tasking.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -120,11 +119,11 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
       DocumentReference docRef;
       if (widget.tasking.id == null) {
         docRef = await firestore
-            .collection(kTaskingCollection)
+            .collection(Tasking.collectionName)
             .add(saveTasking.toMap());
       } else {
         docRef =
-            firestore.collection(kTaskingCollection).doc(widget.tasking.id);
+            firestore.collection(Tasking.collectionName).doc(widget.tasking.id);
         docRef.update(saveTasking.toMap());
       }
       if (mounted) {
@@ -187,7 +186,7 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kTaskingCollection,
+                      collection: Tasking.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

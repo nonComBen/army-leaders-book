@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/constants/firestore_collections.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
@@ -84,8 +83,9 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
       );
 
       if (widget.phone.id == null) {
-        DocumentReference docRef =
-            await firestore.collection(kPhoneCollection).add(savePhone.toMap());
+        DocumentReference docRef = await firestore
+            .collection(Phone.collectionName)
+            .add(savePhone.toMap());
 
         savePhone.id = docRef.id;
         if (mounted) {
@@ -93,7 +93,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
         }
       } else {
         firestore
-            .collection(kPhoneCollection)
+            .collection(Phone.collectionName)
             .doc(widget.phone.id)
             .set(savePhone.toMap())
             .then((value) {

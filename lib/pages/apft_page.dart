@@ -17,6 +17,7 @@ import '../../auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/apft.dart';
+import '../../models/setting.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../methods/create_app_bar_actions.dart';
@@ -114,7 +115,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
   void initialize() async {
     prefs = await SharedPreferences.getInstance();
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('apftStats')
+        .collection(Apft.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -128,7 +129,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
       _calcAves();
     });
     snapshot = await FirebaseFirestore.instance
-        .collection('settings')
+        .collection(Setting.collectionName)
         .where('owner', isEqualTo: _userId)
         .get();
     DocumentSnapshot doc = snapshot!.docs[0];

@@ -131,7 +131,7 @@ class UploadMilLicensePageState extends ConsumerState<UploadMilLicensePage> {
             vehicles: saveVehicles,
           );
 
-          firestore.collection('milLic').add(milLic.toMap());
+          firestore.collection(MilLic.collectionName).add(milLic.toMap());
         }
       }
       Navigator.pop(context);

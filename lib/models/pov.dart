@@ -30,6 +30,8 @@ class POV {
     this.insExp = '',
   });
 
+  static const String collectionName = 'povs';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

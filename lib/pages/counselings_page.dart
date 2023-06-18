@@ -83,7 +83,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
     }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('counselings')
+        .collection(Counseling.collectionName)
         .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {

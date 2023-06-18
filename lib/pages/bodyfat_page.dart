@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/bodyfat.dart';
+import '../../models/setting.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../auth_provider.dart';
@@ -107,7 +108,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
     prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('bodyfatStats')
+        .collection(Bodyfat.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -119,7 +120,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
       });
     });
     snapshot = await FirebaseFirestore.instance
-        .collection('settings')
+        .collection(Setting.collectionName)
         .where('owner', isEqualTo: _userId)
         .get();
     DocumentSnapshot doc = snapshot!.docs[0];

@@ -56,6 +56,8 @@ class Equipment {
     this.otherSerial = '',
   });
 
+  static const String collectionName = 'equipment';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

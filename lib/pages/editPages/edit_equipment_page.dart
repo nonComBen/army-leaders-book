@@ -5,16 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
-import '../../methods/theme_methods.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/equipment.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -165,7 +164,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
 
       if (widget.equipment.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kEquipmentCollection)
+            .collection(Equipment.collectionName)
             .add(saveEquipment.toMap());
 
         saveEquipment.id = docRef.id;
@@ -174,7 +173,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
         }
       } else {
         firestore
-            .collection(kEquipmentCollection)
+            .collection(Equipment.collectionName)
             .doc(widget.equipment.id)
             .set(saveEquipment.toMap())
             .then((value) {
@@ -294,7 +293,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                        collection: kEquipmentCollection,
+                        collection: Equipment.collectionName,
                         userId: user.uid,
                         allSoldiers: allSoldiers!);
                   },

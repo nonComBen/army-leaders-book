@@ -5,27 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/appointment.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../widgets/stateful_widgets/time_text_field.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/appointment.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
-import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditAppointmentPage extends ConsumerStatefulWidget {
   const EditAppointmentPage({
@@ -151,10 +150,12 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
 
       DocumentReference docRef;
       if (widget.apt.id == null) {
-        docRef =
-            await firestore.collection(kAptsCollection).add(saveApt.toMap());
+        docRef = await firestore
+            .collection(Appointment.collectionName)
+            .add(saveApt.toMap());
       } else {
-        docRef = firestore.collection(kAptsCollection).doc(widget.apt.id);
+        docRef =
+            firestore.collection(Appointment.collectionName).doc(widget.apt.id);
         docRef.set(saveApt.toMap());
       }
       if (mounted) {
@@ -217,7 +218,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                        collection: kAptsCollection,
+                        collection: Appointment.collectionName,
                         userId: user.uid,
                         allSoldiers: allSoldiers!);
                   },

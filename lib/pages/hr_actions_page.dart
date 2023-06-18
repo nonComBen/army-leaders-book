@@ -84,7 +84,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('hrActions')
+        .collection(HrAction.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

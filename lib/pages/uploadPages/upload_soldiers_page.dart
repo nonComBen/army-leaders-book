@@ -303,11 +303,11 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
 
       if (saveSoldierId != null) {
         firestore
-            .collection('soldiers')
+            .collection(Soldier.collectionName)
             .doc(saveSoldierId)
             .set(soldier.toMap(), SetOptions(merge: true));
       } else {
-        firestore.collection('soldiers').add(soldier.toMap());
+        firestore.collection(Soldier.collectionName).add(soldier.toMap());
       }
     }
     Navigator.pop(context);

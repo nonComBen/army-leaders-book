@@ -34,6 +34,8 @@ class TempProfile {
     this.comments = '',
   });
 
+  static const String collectionName = 'profiles';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

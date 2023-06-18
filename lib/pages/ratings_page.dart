@@ -86,7 +86,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('ratings')
+        .collection(Rating.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

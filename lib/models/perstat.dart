@@ -34,6 +34,8 @@ class Perstat {
     this.location = '',
   });
 
+  static const String collectionName = 'perstat';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

@@ -85,7 +85,7 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('dutyRoster')
+        .collection(Duty.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

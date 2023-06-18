@@ -30,6 +30,8 @@ class HrAction {
     this.prr = '',
   });
 
+  static const String collectionName = 'hrActions';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

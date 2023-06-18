@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
+import '../../providers/settings_provider.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
@@ -114,7 +115,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
   void initialize() async {
     prefs = await SharedPreferences.getInstance();
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('acftStats')
+        .collection(Acft.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -127,13 +128,9 @@ class AcftPageState extends ConsumerState<AcftPage> {
 
       _calcAves();
     });
-    snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot!.docs[0];
+    final setting = ref.read(settingsProvider);
     setState(() {
-      overdueDays = doc['acftMonths'] * 30;
+      overdueDays = setting!.acftMonths * 30;
       amberDays = overdueDays - 30;
     });
   }

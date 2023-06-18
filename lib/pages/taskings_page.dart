@@ -85,7 +85,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('taskings')
+        .collection(Tasking.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

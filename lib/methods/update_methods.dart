@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:leaders_book/constants/firestore_collections.dart';
-import 'package:leaders_book/models/award.dart';
-import 'package:leaders_book/models/pov.dart';
 
+import '../../models/award.dart';
+import '../../models/pov.dart';
+import '../../models/soldier.dart';
+import '../../models/user.dart';
 import '../models/training.dart';
 
 void updateUsersArray(String? uid) async {
@@ -11,7 +12,7 @@ void updateUsersArray(String? uid) async {
   List<dynamic> users = [];
 
   db
-      .collection('soldiers')
+      .collection(Soldier.collectionName)
       .where('owner', isEqualTo: uid)
       .get()
       .then((snapshot) {
@@ -35,8 +36,10 @@ void updatePovs(String uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<POV> povs = [];
   List<String> soldierIds = [];
-  final snapshot =
-      await db.collection('povs').where('users', arrayContains: uid).get();
+  final snapshot = await db
+      .collection(POV.collectionName)
+      .where('users', arrayContains: uid)
+      .get();
   povs = snapshot.docs.map((e) => POV.fromSnapshot(e)).toList();
   soldierIds = povs.map((e) => e.soldierId!).toList();
   soldierIds = soldierIds.toSet().toList();
@@ -49,9 +52,9 @@ void updatePovs(String uid) async {
       map.remove('soldierId');
       return map;
     }).toList();
-    db.collection('soldiers').doc(id).update({'povs': newPovs});
+    db.collection(Soldier.collectionName).doc(id).update({'povs': newPovs});
   }
-  db.collection('users').doc(uid).update({'updatedPovs': true});
+  db.collection(UserObj.collectionName).doc(uid).update({'updatedPovs': true});
   for (POV pov in povs) {
     db.doc('povs/${pov.id}').delete();
   }
@@ -61,8 +64,10 @@ void updateAwards(String uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<Award> awards = [];
   List<String> soldierIds = [];
-  final snapshot =
-      await db.collection('awards').where('users', arrayContains: uid).get();
+  final snapshot = await db
+      .collection(Award.collectionName)
+      .where('users', arrayContains: uid)
+      .get();
   awards = snapshot.docs.map((e) => Award.fromSnapshot(e)).toList();
   soldierIds = awards.map((e) => e.soldierId!).toList();
   soldierIds = soldierIds.toSet().toList();
@@ -75,9 +80,12 @@ void updateAwards(String uid) async {
       map.remove('soldierId');
       return map;
     }).toList();
-    db.collection('soldiers').doc(id).update({'awards': newAwards});
+    db.collection(Soldier.collectionName).doc(id).update({'awards': newAwards});
   }
-  db.collection('users').doc(uid).update({'updatedAwards': true});
+  db
+      .collection(UserObj.collectionName)
+      .doc(uid)
+      .update({'updatedAwards': true});
   for (Award award in awards) {
     db.doc('awards/${award.id}').delete();
   }
@@ -87,7 +95,7 @@ void updateTraining(String uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
   List<Training> trainings = [];
   final snapshot = await db
-      .collection(kTrainingCollection)
+      .collection(Training.collectionName)
       .where('users', arrayContains: uid)
       .get();
   if (snapshot.docs.isNotEmpty) {
@@ -114,12 +122,15 @@ void updateTraining(String uid) async {
             .add({'name': training.add5, 'date': training.add5Date});
       }
       db
-          .collection(kTrainingCollection)
+          .collection(Training.collectionName)
           .doc(training.id)
           .update({'addTraining': training.addTraining});
     }
   }
-  db.collection('users').doc(uid).update({'updatedTraining': true});
+  db
+      .collection(UserObj.collectionName)
+      .doc(uid)
+      .update({'updatedTraining': true});
 }
 
 void syncFromWebApp(String uid) async {
@@ -128,7 +139,7 @@ void syncFromWebApp(String uid) async {
     'users': [uid]
   };
   db
-      .collection('soldiers')
+      .collection(Soldier.collectionName)
       .where('owner', isEqualTo: uid)
       .where('users', isEqualTo: null)
       .get()

@@ -84,7 +84,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
     }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('phoneNumbers')
+        .collection(Phone.collectionName)
         .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {

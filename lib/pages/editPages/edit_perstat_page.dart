@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/perstat.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -163,11 +162,11 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
       DocumentReference docRef;
       if (widget.perstat.id == null) {
         docRef = await firestore
-            .collection(kPerstatCollection)
+            .collection(Perstat.collectionName)
             .add(savePerstat.toMap());
       } else {
         docRef =
-            firestore.collection(kPerstatCollection).doc(widget.perstat.id);
+            firestore.collection(Perstat.collectionName).doc(widget.perstat.id);
         docRef.update(savePerstat.toMap());
       }
       if (mounted) {
@@ -230,7 +229,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kPerstatCollection,
+                      collection: Perstat.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

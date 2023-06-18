@@ -85,7 +85,7 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('equipment')
+        .collection(Equipment.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

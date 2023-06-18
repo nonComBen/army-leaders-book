@@ -167,7 +167,7 @@ class UploadBodyFatsPageState extends ConsumerState<UploadBodyFatsPage> {
             passBf: passBf,
           );
 
-          firestore.collection('bodyfatStats').add(bf.toMap());
+          firestore.collection(Bodyfat.collectionName).add(bf.toMap());
         }
       }
       Navigator.pop(context);

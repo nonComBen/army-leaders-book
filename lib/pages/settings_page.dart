@@ -117,7 +117,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
 
   void initialize() async {
     QuerySnapshot snapshot = await firestore
-        .collection('settings')
+        .collection(Setting.collectionName)
         .where('owner', isEqualTo: userId)
         .get();
     DocumentSnapshot? doc;
@@ -332,7 +332,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       owner: userId,
     );
 
-    firestore.collection('settings').doc(userId).set(
+    firestore.collection(Setting.collectionName).doc(userId).set(
           saveSetting.toMap(),
           SetOptions(merge: true),
         );

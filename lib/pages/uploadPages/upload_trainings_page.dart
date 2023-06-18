@@ -233,7 +233,7 @@ class UploadTrainingsPageState extends ConsumerState<UploadTrainingsPage> {
             add5Date: saveAdd5Date,
           );
 
-          firestore.collection('training').add(training.toMap());
+          firestore.collection(Training.collectionName).add(training.toMap());
         }
       }
       Navigator.pop(context);

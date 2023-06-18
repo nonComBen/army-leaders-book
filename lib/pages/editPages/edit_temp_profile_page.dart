@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/profile.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -123,10 +122,14 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
 
       DocumentReference docRef;
       if (widget.profile.id == null) {
-        firestore.collection(kProfilesCollection).add(saveProfile.toMap());
+        firestore
+            .collection(TempProfile.collectionName)
+            .add(saveProfile.toMap());
         Navigator.pop(context);
       } else {
-        docRef = firestore.collection('profiles').doc(widget.profile.id);
+        docRef = firestore
+            .collection(TempProfile.collectionName)
+            .doc(widget.profile.id);
         docRef.set(saveProfile.toMap());
         if (mounted) {
           Navigator.pop(context);
@@ -189,7 +192,7 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                        collection: kProfilesCollection,
+                        collection: TempProfile.collectionName,
                         userId: user.uid,
                         allSoldiers: allSoldiers!,
                         profileType: 'Temporary');

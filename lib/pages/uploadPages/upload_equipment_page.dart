@@ -177,7 +177,7 @@ class UploadEquipmentPageState extends ConsumerState<UploadEquipmentPage> {
             otherSerial: saveMiscSerial,
           );
 
-          firestore.collection('equipment').add(equipment.toMap());
+          firestore.collection(Equipment.collectionName).add(equipment.toMap());
         }
       }
       Navigator.pop(context);

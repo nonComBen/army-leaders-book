@@ -13,6 +13,8 @@ class Note {
     this.comments = '',
   });
 
+  static const String collectionName = 'notes';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

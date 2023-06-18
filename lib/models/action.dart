@@ -34,6 +34,8 @@ class ActionObj {
     this.remarks = '',
   });
 
+  static const String collectionName = 'actions';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

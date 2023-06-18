@@ -5,17 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../methods/set_notifications.dart';
-import '../../models/soldier.dart';
-import '../../providers/settings_provider.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/set_notifications.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/soldier.dart';
 import '../../models/weapon.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
@@ -152,7 +151,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
 
       if (widget.weapon.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kWeaponCollection)
+            .collection(Weapon.collectionName)
             .add(saveWeapon.toMap());
 
         saveWeapon.id = docRef.id;
@@ -161,7 +160,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
         }
       } else {
         firestore
-            .collection(kWeaponCollection)
+            .collection(Weapon.collectionName)
             .doc(widget.weapon.id)
             .set(saveWeapon.toMap())
             .then((value) {
@@ -228,7 +227,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kWeaponCollection,
+                      collection: Weapon.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

@@ -83,7 +83,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
     }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('workingAwards')
+        .collection(WorkingAward.collectionName)
         .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {

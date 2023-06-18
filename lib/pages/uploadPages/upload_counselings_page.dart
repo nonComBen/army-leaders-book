@@ -138,7 +138,9 @@ class UploadCounselingsPageState extends ConsumerState<UploadCounselingsPage> {
             purpose: savePurpose,
           );
 
-          firestore.collection('counselings').add(counseling.toMap());
+          firestore
+              .collection(Counseling.collectionName)
+              .add(counseling.toMap());
         }
       }
       Navigator.pop(context);

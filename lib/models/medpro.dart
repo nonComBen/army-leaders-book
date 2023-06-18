@@ -64,6 +64,8 @@ class Medpro {
     this.otherImms,
   });
 
+  static const String collectionName = 'medpros';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

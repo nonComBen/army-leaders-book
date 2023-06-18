@@ -134,7 +134,7 @@ class UploadFlagsPageState extends ConsumerState<UploadFlagsPage> {
             comments: saveComments,
           );
 
-          firestore.collection('flags').add(flag.toMap());
+          firestore.collection(Flag.collectionName).add(flag.toMap());
         }
       }
       Navigator.pop(context);

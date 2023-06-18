@@ -12,8 +12,10 @@ class UserService {
   UserService();
 
   void loadUser(String userId) {
-    final userStream =
-        FirebaseFirestore.instance.collection('users').doc(userId).snapshots();
+    final userStream = FirebaseFirestore.instance
+        .collection(UserObj.collectionName)
+        .doc(userId)
+        .snapshots();
     userStream.listen((event) {
       _user = UserObj.fromSnapshot(event);
     });

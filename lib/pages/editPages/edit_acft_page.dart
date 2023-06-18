@@ -13,7 +13,6 @@ import '../../calculators/plk_calculator.dart';
 import '../../calculators/sdc_calculator.dart';
 import '../../calculators/spt_calculator.dart';
 import '../../calculators/twomr_calculator.dart';
-import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/set_notifications.dart';
@@ -408,10 +407,10 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       );
 
       if (widget.acft.id == null) {
-        firestore.collection(kAcftCollection).add(saveAcft.toMap());
+        firestore.collection(Acft.collectionName).add(saveAcft.toMap());
       } else {
         firestore
-            .collection(kAcftCollection)
+            .collection(Acft.collectionName)
             .doc(widget.acft.id)
             .set(saveAcft.toMap())
             .then((value) {})
@@ -478,7 +477,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                   onChanged: (checked) async {
                     lessSoldiers ??= await createLessSoldiers(
                       userId: user.uid,
-                      collection: kAcftCollection,
+                      collection: Acft.collectionName,
                       allSoldiers: allSoldiers,
                     );
                     setState(() {

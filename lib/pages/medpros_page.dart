@@ -106,7 +106,7 @@ class MedProsPageState extends ConsumerState<MedProsPage> {
     prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('medpros')
+        .collection(Medpro.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();

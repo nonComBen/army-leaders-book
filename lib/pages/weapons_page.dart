@@ -13,6 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
+import '../../models/setting.dart';
 import '../../models/weapon.dart';
 import '../../providers/subscription_state.dart';
 import '../auth_provider.dart';
@@ -105,7 +106,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
     prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('weaponStats')
+        .collection(Weapon.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -117,7 +118,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
       });
     });
     QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('settings')
+        .collection(Setting.collectionName)
         .where('owner', isEqualTo: _userId)
         .get();
     DocumentSnapshot doc = snapshot.docs[0];

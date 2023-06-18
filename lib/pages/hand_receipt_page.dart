@@ -85,7 +85,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('handReceipt')
+        .collection(HandReceiptItem.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

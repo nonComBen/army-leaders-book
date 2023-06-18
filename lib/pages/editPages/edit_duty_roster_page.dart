@@ -5,25 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../widgets/form_frame.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/duty.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/my_toast.dart';
-import '../../widgets/platform_widgets/platform_soldier_picker.dart';
-import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/duty.dart';
-import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
+import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditDutyRosterPage extends ConsumerStatefulWidget {
   const EditDutyRosterPage({
@@ -121,11 +120,10 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
       DocumentReference docRef;
       if (widget.duty.id == null) {
         docRef = await firestore
-            .collection(kDutyRosterCollection)
+            .collection(Duty.collectionName)
             .add(saveDuty.toMap());
       } else {
-        docRef =
-            firestore.collection(kDutyRosterCollection).doc(widget.duty.id);
+        docRef = firestore.collection(Duty.collectionName).doc(widget.duty.id);
         docRef.update(saveDuty.toMap());
       }
       if (mounted) {
@@ -188,7 +186,7 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                        collection: kDutyRosterCollection,
+                        collection: Duty.collectionName,
                         userId: user.uid,
                         allSoldiers: allSoldiers!);
                   },

@@ -5,32 +5,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../auth_provider.dart';
+import '../../calculators/pu_calculator.dart';
+import '../../calculators/run_calculator.dart';
+import '../../calculators/su_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/apft.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/apft.dart';
-import '../../calculators/pu_calculator.dart';
-import '../../calculators/su_calculator.dart';
-import '../../calculators/run_calculator.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
-import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditApftPage extends ConsumerStatefulWidget {
   const EditApftPage({
@@ -274,8 +273,9 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
       );
 
       if (widget.apft.id == null) {
-        DocumentReference docRef =
-            await firestore.collection(kApftCollection).add(saveApft.toMap());
+        DocumentReference docRef = await firestore
+            .collection(Apft.collectionName)
+            .add(saveApft.toMap());
 
         saveApft.id = docRef.id;
         if (mounted) {
@@ -283,7 +283,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
         }
       } else {
         firestore
-            .collection(kApftCollection)
+            .collection(Apft.collectionName)
             .doc(widget.apft.id)
             .set(saveApft.toMap())
             .then((value) {
@@ -350,7 +350,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kApftCollection,
+                      collection: Apft.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

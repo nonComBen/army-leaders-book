@@ -116,7 +116,7 @@ class UploadTaskingsPageState extends ConsumerState<UploadTaskingsPage> {
             location: saveLoc,
           );
 
-          firestore.collection('taskings').add(tasking.toMap());
+          firestore.collection(Tasking.collectionName).add(tasking.toMap());
         }
       }
       Navigator.pop(context);

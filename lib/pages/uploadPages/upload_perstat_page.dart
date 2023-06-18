@@ -116,7 +116,7 @@ class UploadPerstatPageState extends ConsumerState<UploadPerstatPage> {
             location: saveLoc,
           );
 
-          firestore.collection('perstat').add(perstat.toMap());
+          firestore.collection(Perstat.collectionName).add(perstat.toMap());
         }
       }
       Navigator.pop(context);

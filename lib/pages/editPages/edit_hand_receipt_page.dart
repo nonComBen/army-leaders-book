@@ -5,17 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../methods/custom_alert_dialog.dart';
-import '../../methods/theme_methods.dart';
 import '../../auth_provider.dart';
+import '../../methods/create_less_soldiers.dart';
+import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/hand_receipt_item.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -254,7 +253,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
 
       if (widget.item.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kHandReceiptCollection)
+            .collection(HandReceiptItem.collectionName)
             .add(saveHRItem.toMap());
 
         saveHRItem.id = docRef.id;
@@ -263,7 +262,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
         }
       } else {
         firestore
-            .collection(kHandReceiptCollection)
+            .collection(HandReceiptItem.collectionName)
             .doc(widget.item.id)
             .set(saveHRItem.toMap())
             .then((value) {
@@ -330,7 +329,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kHandReceiptCollection,
+                      collection: HandReceiptItem.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

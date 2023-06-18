@@ -35,6 +35,8 @@ class Counseling {
     this.purpose = '',
   });
 
+  static const String collectionName = 'counselings';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

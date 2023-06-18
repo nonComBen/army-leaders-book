@@ -86,7 +86,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('profiles')
+        .collection(TempProfile.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .where('type', isEqualTo: 'Temporary')

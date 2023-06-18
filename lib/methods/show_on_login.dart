@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:leaders_book/widgets/formatted_text_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../methods/custom_alert_dialog.dart';
+import '../../models/user.dart';
+import '../../widgets/formatted_text_button.dart';
 
 Widget headerText(String text) {
   return Padding(
@@ -209,7 +211,10 @@ Future<void> showTos(BuildContext context, String? userId) async {
     content: content,
     primaryText: 'Agree',
     primary: () {
-      FirebaseFirestore.instance.collection('users').doc(userId).update(
+      FirebaseFirestore.instance
+          .collection(UserObj.collectionName)
+          .doc(userId)
+          .update(
         {
           'tosAgree': true,
           'agreeDate': DateTime.now(),

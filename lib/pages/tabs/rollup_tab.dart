@@ -22,7 +22,16 @@ import '../../methods/date_methods.dart';
 import '../../methods/show_on_login.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/update_methods.dart';
+import '../../models/acft.dart';
+import '../../models/apft.dart';
+import '../../models/appointment.dart';
+import '../../models/bodyfat.dart';
+import '../../models/flag.dart';
+import '../../models/medpro.dart';
+import '../../models/perstat.dart';
+import '../../models/training.dart';
 import '../../models/user.dart';
+import '../../models/weapon.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/shared_prefs_provider.dart';
 import '../../providers/tracking_provider.dart';
@@ -217,7 +226,7 @@ class HomePageState extends ConsumerState<RollupTab>
       list.add(
         StreamBuilder(
           stream: _firestore
-              .collection('perstat')
+              .collection(Perstat.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -282,7 +291,7 @@ class HomePageState extends ConsumerState<RollupTab>
       list.add(
         StreamBuilder(
           stream: _firestore
-              .collection('appointments')
+              .collection(Appointment.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -357,7 +366,7 @@ class HomePageState extends ConsumerState<RollupTab>
     if (setting.apft) {
       list.add(StreamBuilder(
           stream: _firestore
-              .collection('apftStats')
+              .collection(Apft.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -421,7 +430,7 @@ class HomePageState extends ConsumerState<RollupTab>
     if (setting.acft) {
       list.add(StreamBuilder(
           stream: _firestore
-              .collection('acftStats')
+              .collection(Acft.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -487,7 +496,7 @@ class HomePageState extends ConsumerState<RollupTab>
     if (setting.profiles) {
       list.add(StreamBuilder(
           stream: _firestore
-              .collection('profiles')
+              .collection(TempProfilesPage.routeName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -555,7 +564,7 @@ class HomePageState extends ConsumerState<RollupTab>
     if (setting.bf) {
       list.add(StreamBuilder(
           stream: _firestore
-              .collection('bodyfatStats')
+              .collection(Bodyfat.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -624,7 +633,7 @@ class HomePageState extends ConsumerState<RollupTab>
     if (setting.weapons) {
       list.add(StreamBuilder(
           stream: _firestore
-              .collection('weaponStats')
+              .collection(Weapon.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -693,7 +702,7 @@ class HomePageState extends ConsumerState<RollupTab>
     if (setting.flags) {
       list.add(StreamBuilder(
           stream: _firestore
-              .collection('flags')
+              .collection(Flag.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -753,7 +762,7 @@ class HomePageState extends ConsumerState<RollupTab>
       list.add(
         StreamBuilder(
           stream: _firestore
-              .collection('medpros')
+              .collection(Medpro.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),
@@ -816,7 +825,7 @@ class HomePageState extends ConsumerState<RollupTab>
       list.add(
         StreamBuilder(
           stream: _firestore
-              .collection('training')
+              .collection(Training.collectionName)
               .where('users', isNotEqualTo: null)
               .where('users', arrayContains: userId)
               .snapshots(),

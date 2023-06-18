@@ -86,7 +86,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('appointments')
+        .collection(Appointment.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

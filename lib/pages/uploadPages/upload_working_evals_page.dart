@@ -145,7 +145,7 @@ class UploadWorkingEvalsPageState
             performance: savePerformance,
           );
 
-          firestore.collection('workingEvals').add(eval.toMap());
+          firestore.collection(WorkingEval.collectionName).add(eval.toMap());
         }
       }
       Navigator.pop(context);

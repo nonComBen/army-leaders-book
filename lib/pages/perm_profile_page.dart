@@ -85,7 +85,7 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('profiles')
+        .collection(TempProfile.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .where('type', isEqualTo: 'Permanent')

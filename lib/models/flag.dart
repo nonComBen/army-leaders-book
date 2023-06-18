@@ -32,6 +32,8 @@ class Flag {
     this.comments = '',
   });
 
+  static const String collectionName = 'flags';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

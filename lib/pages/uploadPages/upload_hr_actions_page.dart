@@ -113,7 +113,7 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
             prr: savePrr,
           );
 
-          firestore.collection('hrActions').add(hrAction.toMap());
+          firestore.collection(HrAction.collectionName).add(hrAction.toMap());
         }
       }
       Navigator.pop(context);

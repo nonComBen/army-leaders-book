@@ -17,6 +17,8 @@ class Phone {
     this.location = '',
   });
 
+  static const String collectionName = 'phoneNumbers';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

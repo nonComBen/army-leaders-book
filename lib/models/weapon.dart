@@ -38,6 +38,8 @@ class Weapon {
     this.qualType = 'Day',
   });
 
+  static const String collectionName = 'weaponStats';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

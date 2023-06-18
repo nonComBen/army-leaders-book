@@ -131,7 +131,7 @@ class UploadWeaponsPageState extends ConsumerState<UploadWeaponsPage> {
             qualType: saveType,
           );
 
-          firestore.collection('weaponStats').add(weaponObj.toMap());
+          firestore.collection(Weapon.collectionName).add(weaponObj.toMap());
         }
       }
       Navigator.pop(context);

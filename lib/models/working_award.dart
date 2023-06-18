@@ -33,6 +33,8 @@ class WorkingAward {
     this.citation = '',
   });
 
+  static const String collectionName = 'workingAwards';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

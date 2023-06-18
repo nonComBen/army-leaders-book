@@ -87,7 +87,7 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('milLic')
+        .collection(MilLic.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

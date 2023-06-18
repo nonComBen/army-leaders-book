@@ -80,7 +80,7 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
           location: saveLoc,
         );
 
-        firestore.collection('phoneNumbers').add(phoneObj.toMap());
+        firestore.collection(Phone.collectionName).add(phoneObj.toMap());
       }
     }
     Navigator.pop(context);

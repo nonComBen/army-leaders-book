@@ -158,7 +158,7 @@ class UploadAppointmentsPageState
             location: saveLoc,
           );
 
-          firestore.collection('appointments').add(apt.toMap());
+          firestore.collection(Appointment.collectionName).add(apt.toMap());
         }
       }
       Navigator.pop(context);

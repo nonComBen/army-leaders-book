@@ -34,6 +34,8 @@ class Duty {
     this.location = '',
   });
 
+  static const String collectionName = 'dutyRoster';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

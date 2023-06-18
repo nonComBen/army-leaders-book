@@ -100,6 +100,8 @@ class Soldier {
     this.povs = const [],
   });
 
+  static const String collectionName = 'soldiers';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

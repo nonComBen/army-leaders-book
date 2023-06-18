@@ -5,21 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../widgets/edit_delete_list_tile.dart';
-import '../../widgets/more_tiles_header.dart';
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/medpro.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
+import '../../widgets/more_tiles_header.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -260,7 +259,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
 
       if (widget.medpro.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kMedprosCollection)
+            .collection(Medpro.collectionName)
             .add(saveMedpros.toMap());
 
         saveMedpros.id = docRef.id;
@@ -269,7 +268,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         }
       } else {
         firestore
-            .collection(kMedprosCollection)
+            .collection(Medpro.collectionName)
             .doc(widget.medpro.id)
             .set(saveMedpros.toMap())
             .then((value) {
@@ -521,7 +520,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kMedprosCollection,
+                      collection: Medpro.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

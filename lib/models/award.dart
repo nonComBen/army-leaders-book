@@ -18,6 +18,8 @@ class Award {
     this.number = '',
   });
 
+  static const String collectionName = 'awards';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

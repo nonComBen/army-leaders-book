@@ -208,7 +208,7 @@ class UploadMedProsPageState extends ConsumerState<UploadMedProsPage> {
             otherImms: [],
           );
 
-          firestore.collection('medpros').add(medpro.toMap());
+          firestore.collection(Medpro.collectionName).add(medpro.toMap());
         }
       }
       Navigator.pop(context);

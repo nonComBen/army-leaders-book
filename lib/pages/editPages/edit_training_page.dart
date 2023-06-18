@@ -5,24 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../widgets/more_tiles_header.dart';
-import '../../constants/firestore_collections.dart';
+import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
-import '../../models/additional_training.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/additional_training.dart';
+import '../../models/soldier.dart';
 import '../../models/training.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
+import '../../widgets/more_tiles_header.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -340,7 +339,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
 
       if (widget.training.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kTrainingCollection)
+            .collection(Training.collectionName)
             .add(saveTraining.toMap());
 
         saveTraining.id = docRef.id;
@@ -349,7 +348,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
         }
       } else {
         firestore
-            .collection(kTrainingCollection)
+            .collection(Training.collectionName)
             .doc(widget.training.id)
             .set(saveTraining.toMap())
             .then((value) {
@@ -489,7 +488,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kTrainingCollection,
+                      collection: Training.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

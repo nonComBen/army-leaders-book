@@ -86,7 +86,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('perstat')
+        .collection(Perstat.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

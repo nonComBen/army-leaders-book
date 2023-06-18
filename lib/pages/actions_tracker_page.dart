@@ -92,7 +92,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('actions')
+        .collection(ActionObj.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();

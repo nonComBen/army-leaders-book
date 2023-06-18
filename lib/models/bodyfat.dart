@@ -48,6 +48,8 @@ class Bodyfat {
     this.passBf = true,
   });
 
+  static const String collectionName = 'bodyfatStats';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

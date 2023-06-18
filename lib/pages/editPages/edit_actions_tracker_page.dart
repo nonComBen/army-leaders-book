@@ -5,24 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
-import '../../providers/soldiers_provider.dart';
+import '../../models/action.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/action.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
-import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 
 class EditActionsTrackerPage extends ConsumerStatefulWidget {
   const EditActionsTrackerPage({
@@ -127,7 +126,7 @@ class EditActionsTrackerPageState
 
       if (widget.action.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kActionsCollection)
+            .collection(ActionObj.collectionName)
             .add(saveAction.toMap());
 
         saveAction.id = docRef.id;
@@ -136,7 +135,7 @@ class EditActionsTrackerPageState
         }
       } else {
         firestore
-            .collection(kActionsCollection)
+            .collection(ActionObj.collectionName)
             .doc(widget.action.id)
             .set(saveAction.toMap())
             .then((value) {
@@ -204,7 +203,7 @@ class EditActionsTrackerPageState
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                        collection: kActionsCollection,
+                        collection: ActionObj.collectionName,
                         userId: user.uid,
                         allSoldiers: allSoldiers!);
                   },

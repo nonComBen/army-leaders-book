@@ -60,6 +60,8 @@ class Acft {
     this.pass = true,
   });
 
+  static const String collectionName = 'acftStats';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

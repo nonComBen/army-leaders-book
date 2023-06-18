@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../auth_provider.dart';
-import '../../methods/theme_methods.dart';
+import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
+import '../../models/soldier.dart';
 import '../../models/working_eval.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -136,7 +135,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
 
       if (widget.eval.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kWorkingEvalsCollection)
+            .collection(WorkingEval.collectionName)
             .add(saveEval.toMap());
 
         saveEval.id = docRef.id;
@@ -145,7 +144,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
         }
       } else {
         firestore
-            .collection(kWorkingEvalsCollection)
+            .collection(WorkingEval.collectionName)
             .doc(widget.eval.id)
             .set(saveEval.toMap())
             .then((value) {
@@ -210,7 +209,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                      collection: kWorkingEvalsCollection,
+                      collection: WorkingEval.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );

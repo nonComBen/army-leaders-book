@@ -7,7 +7,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../auth_provider.dart';
 import '../../calculators/bf_calculator.dart';
-import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/set_notifications.dart';
@@ -364,7 +363,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
 
       if (widget.bodyfat.id == null) {
         DocumentReference docRef = await firestore
-            .collection(kBodyfatCollection)
+            .collection(Bodyfat.collectionName)
             .add(saveBodyfat.toMap());
 
         saveBodyfat.id = docRef.id;
@@ -373,7 +372,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         }
       } else {
         firestore
-            .collection(kBodyfatCollection)
+            .collection(Bodyfat.collectionName)
             .doc(widget.bodyfat.id)
             .set(saveBodyfat.toMap())
             .then((value) {
@@ -440,7 +439,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) {
                     createLessSoldiers(
-                        collection: kBodyfatCollection,
+                        collection: Bodyfat.collectionName,
                         userId: user.uid,
                         allSoldiers: allSoldiers!);
                   },

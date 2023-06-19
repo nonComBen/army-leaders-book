@@ -115,7 +115,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
+    bool approved = await checkPermission(context, Permission.storage);
     if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
@@ -214,7 +214,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
+    bool approved = await checkPermission(context, Permission.storage);
     if (!approved) return;
     documents.sort(
       (a, b) => a['start'].toString().compareTo(b['start'].toString()),

@@ -114,7 +114,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
   }
 
   void _downloadExcel() async {
-    if (!await checkPermission(Permission.storage)) return;
+    if (!await checkPermission(context, Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/toast_messages/show_toast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pdf;
 import 'package:permission_handler/permission_handler.dart';
@@ -25,21 +27,22 @@ Future<List<String>> getPath() async {
   return [newPath, location];
 }
 
-Future<bool> checkPermission(Permission permission) async {
+Future<bool> checkPermission(
+    BuildContext context, Permission permission) async {
   if (kIsWeb || Platform.isIOS) {
-    return true;
+    return Future.delayed(Duration.zero, () => true);
   }
-  var status = await permission.status;
-  if (!status.isGranted) {
-    var requestStatus = await permission.request();
-    if (requestStatus.isGranted) {
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return true;
+  bool allowed = false;
+  allowed = await permission.status.isGranted;
+  if (!allowed) {
+    allowed = await permission.request().isGranted;
   }
+  if (!allowed) {
+    // ignore: use_build_context_synchronously
+    showToast(
+        context, 'You must allow access to Files and Media to download files.');
+  }
+  return allowed;
 }
 
 Future<String> pdfDownload(pdf.Document pdf, String filename) async {

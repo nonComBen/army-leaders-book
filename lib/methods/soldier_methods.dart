@@ -75,138 +75,141 @@ void selectFilters(BuildContext context, List<String> sections,
 }
 
 void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
-  bool approved = await checkPermission(Permission.storage);
-  if (!approved) return;
-  List<List<dynamic>> docsList = [];
-  docsList.add([
-    'Soldier Id',
-    'Rank',
-    'Rank Sort',
-    'Last Name',
-    'First Name',
-    'Middle Initial',
-    'Assigned',
-    'Supervisor',
-    'Section',
-    'DoD ID',
-    'Date of Rank',
-    'MOS',
-    'Duty Position',
-    'Paragraph/Line No.',
-    'Duty MOS',
-    'Loss Date',
-    'ETS',
-    'BASD',
-    'PEBD',
-    'Gain Date',
-    'Civ Ed Level',
-    'Mil Ed Level',
-    'CBRN Suit Size',
-    'CBRN Mask Size',
-    'CBRN Boot Size',
-    'CBRN Glove Size',
-    'Hat Size',
-    'Boot Size',
-    'OCP Top Size',
-    'OCP Trouser Size',
-    'Address',
-    'City',
-    'State',
-    'Zip Code',
-    'Phone Number',
-    'Work Phone',
-    'Email Address',
-    'Work Email',
-    'Next of Kin',
-    'Next of Kin Phone',
-    'Marital Status',
-    'Comments',
-  ]);
-  for (Soldier soldier in soldiers) {
-    List<dynamic> docs = [
-      soldier.id,
-      soldier.rank,
-      soldier.rankSort,
-      soldier.lastName,
-      soldier.firstName,
-      soldier.mi,
-      soldier.assigned.toString(),
-      soldier.supervisor,
-      soldier.section,
-      soldier.dodId,
-      soldier.dor,
-      soldier.mos,
-      soldier.duty,
-      soldier.paraLn,
-      soldier.reqMos,
-      soldier.lossDate,
-      soldier.ets,
-      soldier.basd,
-      soldier.pebd,
-      soldier.gainDate,
-      soldier.civEd,
-      soldier.milEd,
-      soldier.nbcSuitSize,
-      soldier.nbcMaskSize,
-      soldier.nbcBootSize,
-      soldier.nbcGloveSize,
-      soldier.hatSize,
-      soldier.bootSize,
-      soldier.acuTopSize,
-      soldier.acuTrouserSize,
-      soldier.address,
-      soldier.city,
-      soldier.state,
-      soldier.zip,
-      soldier.phone,
-      soldier.workPhone,
-      soldier.email,
-      soldier.workEmail,
-      soldier.nok,
-      soldier.nokPhone,
-      soldier.maritalStatus,
-      soldier.comments
-    ];
+  checkPermission(context, Permission.storage).then((approved) {
+    if (!approved) {
+      return;
+    }
+    List<List<dynamic>> docsList = [];
+    docsList.add([
+      'Soldier Id',
+      'Rank',
+      'Rank Sort',
+      'Last Name',
+      'First Name',
+      'Middle Initial',
+      'Assigned',
+      'Supervisor',
+      'Section',
+      'DoD ID',
+      'Date of Rank',
+      'MOS',
+      'Duty Position',
+      'Paragraph/Line No.',
+      'Duty MOS',
+      'Loss Date',
+      'ETS',
+      'BASD',
+      'PEBD',
+      'Gain Date',
+      'Civ Ed Level',
+      'Mil Ed Level',
+      'CBRN Suit Size',
+      'CBRN Mask Size',
+      'CBRN Boot Size',
+      'CBRN Glove Size',
+      'Hat Size',
+      'Boot Size',
+      'OCP Top Size',
+      'OCP Trouser Size',
+      'Address',
+      'City',
+      'State',
+      'Zip Code',
+      'Phone Number',
+      'Work Phone',
+      'Email Address',
+      'Work Email',
+      'Next of Kin',
+      'Next of Kin Phone',
+      'Marital Status',
+      'Comments',
+    ]);
+    for (Soldier soldier in soldiers) {
+      List<dynamic> docs = [
+        soldier.id,
+        soldier.rank,
+        soldier.rankSort,
+        soldier.lastName,
+        soldier.firstName,
+        soldier.mi,
+        soldier.assigned.toString(),
+        soldier.supervisor,
+        soldier.section,
+        soldier.dodId,
+        soldier.dor,
+        soldier.mos,
+        soldier.duty,
+        soldier.paraLn,
+        soldier.reqMos,
+        soldier.lossDate,
+        soldier.ets,
+        soldier.basd,
+        soldier.pebd,
+        soldier.gainDate,
+        soldier.civEd,
+        soldier.milEd,
+        soldier.nbcSuitSize,
+        soldier.nbcMaskSize,
+        soldier.nbcBootSize,
+        soldier.nbcGloveSize,
+        soldier.hatSize,
+        soldier.bootSize,
+        soldier.acuTopSize,
+        soldier.acuTrouserSize,
+        soldier.address,
+        soldier.city,
+        soldier.state,
+        soldier.zip,
+        soldier.phone,
+        soldier.workPhone,
+        soldier.email,
+        soldier.workEmail,
+        soldier.nok,
+        soldier.nokPhone,
+        soldier.maritalStatus,
+        soldier.comments
+      ];
 
-    docsList.add(docs);
-  }
+      docsList.add(docs);
+    }
 
-  var excel = Excel.createExcel();
-  var sheet = excel.sheets[excel.getDefaultSheet()];
-  for (var docs in docsList) {
-    sheet!.appendRow(docs);
-  }
+    var excel = Excel.createExcel();
+    var sheet = excel.sheets[excel.getDefaultSheet()];
+    for (var docs in docsList) {
+      sheet!.appendRow(docs);
+    }
 
-  String dir, loc;
-  if (kIsWeb) {
-    WebDownload webDownload = WebDownload(
-        type: 'xlsx', fileName: 'soldiers.xlsx', data: excel.encode());
-    webDownload.download();
-  } else {
-    getPath().then((dirs) {
-      dir = dirs[0];
-      loc = dirs[1];
-      try {
-        var bytes = excel.encode()!;
-        File('$dir/soldiers.xlsx')
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(bytes);
-        FToast toast = FToast();
-        toast.context = context;
-        toast.showToast(
-          toastDuration: const Duration(seconds: 5),
-          child: MyToast(
-            message: 'Data successfully downloaded to $loc',
-            onPressed: kIsWeb ? null : () => openFile('$dir/soldiers.xlsx'),
-            buttonText: kIsWeb ? null : 'Open',
-          ),
-        );
-      } catch (e) {
-        // ignore: avoid_print
-        print('Error: $e');
-      }
-    });
-  }
+    String dir, loc;
+    if (kIsWeb) {
+      WebDownload webDownload = WebDownload(
+          type: 'xlsx', fileName: 'soldiers.xlsx', data: excel.encode());
+      webDownload.download();
+    } else {
+      getPath().then((dirs) {
+        dir = dirs[0];
+        loc = dirs[1];
+        try {
+          var bytes = excel.encode()!;
+          File('$dir/soldiers.xlsx')
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(bytes);
+          FToast toast = FToast();
+          toast.context = context;
+          toast.showToast(
+            toastDuration: const Duration(seconds: 5),
+            child: MyToast(
+              message: 'Data successfully downloaded to $loc',
+              onPressed: kIsWeb ? null : () => openFile('$dir/soldiers.xlsx'),
+              buttonText: kIsWeb ? null : 'Open',
+            ),
+          );
+        } catch (e) {
+          // ignore: avoid_print
+          print('Error: $e');
+        }
+      });
+    }
+  });
 }
 
 uploadExcel(BuildContext context, bool isSubscribed) {
@@ -325,7 +328,7 @@ void downloadPdf(BuildContext context, bool isSubscribed,
 
 void completePdfDownload(BuildContext context, bool fullPage,
     List<Soldier> selectedSoldiers, String userId) async {
-  bool approved = await checkPermission(Permission.storage);
+  bool approved = await checkPermission(context, Permission.storage);
   if (!approved) return;
   SoldierPdf soldierPdf =
       SoldierPdf(soldiers: selectedSoldiers, userId: userId);

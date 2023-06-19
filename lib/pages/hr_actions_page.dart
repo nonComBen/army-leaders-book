@@ -118,7 +118,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
+    bool approved = await checkPermission(context, Permission.storage);
     if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
@@ -211,7 +211,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
+    bool approved = await checkPermission(context, Permission.storage);
     if (!approved) return;
     documents.sort(
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),

@@ -70,7 +70,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   ];
 
   void _downloadPng() async {
-    bool approved = await checkPermission(Permission.storage);
+    bool approved = await checkPermission(context, Permission.storage);
     if (!approved || !mounted) return;
     try {
       RenderRepaintBoundary boundary = _globalKey.currentContext!
@@ -112,7 +112,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
+    bool approved = await checkPermission(context, Permission.storage);
     if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([dateFormat.format(DateTime.now())]);

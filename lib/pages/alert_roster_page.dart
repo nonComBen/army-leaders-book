@@ -413,7 +413,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
+    bool approved = await checkPermission(context, Permission.storage);
     if (!approved) return;
     AlertRosterPdf pdf = AlertRosterPdf(
       documents: _soldiers,

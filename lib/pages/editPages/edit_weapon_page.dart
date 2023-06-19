@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/set_notifications.dart';
+import '../../methods/set_date_notifications.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/soldier.dart';

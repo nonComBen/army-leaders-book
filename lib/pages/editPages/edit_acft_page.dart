@@ -15,7 +15,7 @@ import '../../calculators/spt_calculator.dart';
 import '../../calculators/twomr_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/set_notifications.dart';
+import '../../methods/set_date_notifications.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/validate.dart';
 import '../../models/acft.dart';

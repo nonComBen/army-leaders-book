@@ -9,14 +9,11 @@ import '../../auth_provider.dart';
 import '../../calculators/bf_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/set_date_notifications.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/bodyfat.dart';
 import '../../models/soldier.dart';
-import '../../providers/settings_provider.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../providers/user_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -384,12 +381,12 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         passBf: bfPass,
       );
 
-      setDateNotifications(
-        setting: ref.read(settingsProvider.notifier).settings,
-        map: saveBodyfat.toMap(),
-        user: ref.read(userProvider).user!,
-        topic: 'Body Composition',
-      );
+      // setDateNotifications(
+      //   setting: ref.read(settingsProvider.notifier).settings,
+      //   map: saveBodyfat.toMap(),
+      //   user: ref.read(userProvider).user!,
+      //   topic: 'Body Composition',
+      // );
 
       if (widget.bodyfat.id == null) {
         DocumentReference docRef = await firestore

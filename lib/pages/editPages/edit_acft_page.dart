@@ -15,14 +15,11 @@ import '../../calculators/spt_calculator.dart';
 import '../../calculators/twomr_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/on_back_pressed.dart';
-import '../../methods/set_date_notifications.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/validate.dart';
 import '../../models/acft.dart';
 import '../../models/soldier.dart';
-import '../../providers/settings_provider.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../providers/user_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -399,12 +396,12 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         pass: pass,
       );
 
-      setDateNotifications(
-        setting: ref.read(settingsProvider.notifier).settings,
-        map: saveAcft.toMap(),
-        user: ref.read(userProvider).user!,
-        topic: 'ACFT',
-      );
+      // setDateNotifications(
+      //   setting: ref.read(settingsProvider.notifier).settings,
+      //   map: saveAcft.toMap(),
+      //   user: ref.read(userProvider).user!,
+      //   topic: 'ACFT',
+      // );
 
       if (widget.acft.id == null) {
         firestore.collection(Acft.collectionName).add(saveAcft.toMap());

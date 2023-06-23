@@ -4,9 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/methods/set_medros_notifications.dart';
-import 'package:leaders_book/providers/settings_provider.dart';
-import 'package:leaders_book/providers/user_provider.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
@@ -260,11 +257,11 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         otherImms: _otherImms,
       );
 
-      setMedprosNotifications(
-        setting: ref.read(settingsProvider)!,
-        medpro: saveMedpros,
-        user: ref.read(userProvider).user!,
-      );
+      // setMedprosNotifications(
+      //   setting: ref.read(settingsProvider)!,
+      //   medpro: saveMedpros,
+      //   user: ref.read(userProvider).user!,
+      // );
 
       if (widget.medpro.id == null) {
         DocumentReference docRef = await firestore

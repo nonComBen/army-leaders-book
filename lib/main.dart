@@ -5,8 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/providers/notification_launch_details_provider.dart';
 
 import '../../pages/premium_page.dart';
 import '../../auth_provider.dart';
@@ -43,6 +45,7 @@ import '../../widgets/platform_widgets/platform_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import '../apple_sign_in_available.dart';
+import 'methods/notifications_initializations.dart';
 import 'pages/faq_page.dart';
 import 'pages/privacy_policy_page.dart';
 import 'pages/tos_page.dart';
@@ -73,22 +76,28 @@ void main() async {
 
   final sharedPreferences = await SharedPreferences.getInstance();
 
+  final launchDetails = await initializeLocalNotifications();
+
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
-      child: MyApp(),
+      child: MyApp(
+        launchDetails: launchDetails,
+      ),
     ),
   );
 }
 
 class MyApp extends ConsumerWidget with WidgetsBindingObserver {
-  MyApp({Key? key}) : super(key: key);
+  MyApp({Key? key, this.launchDetails}) : super(key: key);
+  final NotificationAppLaunchDetails? launchDetails;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.read(appleSignInAvailableProvider).check();
+    ref.read(notificationLaunchDetailsProvider).setLaunchDetails(launchDetails);
     return StreamBuilder(
       stream: ref.read(authProvider).onAuthStateChanged,
       builder: (BuildContext context, AsyncSnapshot<User?> firebaseUser) {

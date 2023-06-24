@@ -123,6 +123,10 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
     _ageController.text = widget.bodyfat.age.toString();
     _heightDoubleController.text = heightDouble.toString();
 
+    if (!bmiPass && widget.bodyfat.neck == '') {
+      isNewVersion = true;
+    }
+
     _dateTime = DateTime.tryParse(widget.bodyfat.date) ?? DateTime.now();
   }
 

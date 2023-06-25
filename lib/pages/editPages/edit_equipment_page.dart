@@ -163,26 +163,16 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
       );
 
       if (widget.equipment.id == null) {
-        DocumentReference docRef = await firestore
+        firestore
             .collection(Equipment.collectionName)
             .add(saveEquipment.toMap());
-
-        saveEquipment.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
             .collection(Equipment.collectionName)
             .doc(widget.equipment.id)
-            .set(saveEquipment.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Bodyfat');
-        });
+            .set(saveEquipment.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

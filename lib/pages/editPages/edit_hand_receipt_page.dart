@@ -252,26 +252,16 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
       );
 
       if (widget.item.id == null) {
-        DocumentReference docRef = await firestore
+        firestore
             .collection(HandReceiptItem.collectionName)
             .add(saveHRItem.toMap());
-
-        saveHRItem.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
             .collection(HandReceiptItem.collectionName)
             .doc(widget.item.id)
-            .set(saveHRItem.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Hand Receipt');
-        });
+            .set(saveHRItem.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

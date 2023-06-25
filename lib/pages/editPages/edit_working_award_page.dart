@@ -133,26 +133,16 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
       );
 
       if (widget.award.id == null) {
-        DocumentReference docRef = await firestore
+        firestore
             .collection(WorkingAward.collectionName)
             .add(saveAward.toMap());
-
-        saveAward.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
             .collection(WorkingAward.collectionName)
             .doc(widget.award.id)
-            .set(saveAward.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveAward.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

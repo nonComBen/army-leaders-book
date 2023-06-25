@@ -117,18 +117,15 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
         location: _locController.text,
       );
 
-      DocumentReference docRef;
       if (widget.duty.id == null) {
-        docRef = await firestore
-            .collection(Duty.collectionName)
-            .add(saveDuty.toMap());
+        firestore.collection(Duty.collectionName).add(saveDuty.toMap());
       } else {
-        docRef = firestore.collection(Duty.collectionName).doc(widget.duty.id);
-        docRef.update(saveDuty.toMap());
+        firestore
+            .collection(Duty.collectionName)
+            .doc(widget.duty.id)
+            .update(saveDuty.toMap());
       }
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(

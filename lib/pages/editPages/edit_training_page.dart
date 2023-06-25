@@ -338,26 +338,14 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       );
 
       if (widget.training.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Training.collectionName)
-            .add(saveTraining.toMap());
-
-        saveTraining.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Training.collectionName).add(saveTraining.toMap());
       } else {
         firestore
             .collection(Training.collectionName)
             .doc(widget.training.id)
-            .set(saveTraining.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveTraining.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

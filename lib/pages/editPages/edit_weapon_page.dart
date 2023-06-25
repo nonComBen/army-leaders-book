@@ -4,14 +4,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/local_notification_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/soldier.dart';
 import '../../models/weapon.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
@@ -120,6 +125,35 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
       _formKey,
       [_dateController.text],
     )) {
+      final setting = ref.read(settingsProvider);
+      List<int> notificationIds = [];
+      if (_dateController.text != '' && setting!.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        if (widget.weapon.notificationIds != null &&
+            widget.weapon.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.weapon.notificationIds!);
+        }
+        final dueDate = getDueDate(_dateController.text, setting.weaponsMonths);
+        DateFormat formatter = DateFormat('yyyy-MM-dd');
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        for (int days in setting.weaponsNotifications) {
+          notificationIds.add(id);
+          notificationService.scheduleNotification(
+            dateTime: dueDate.subtract(Duration(days: days)),
+            id: id,
+            title: '$_rank $_lastName\'s Weapon Qual Due',
+            body:
+                '$_rank $_lastName\'s Weapon Qual Due in $days on ${formatter.format(dueDate)}',
+            payload: 'Weapons',
+          );
+          id++;
+        }
+        prefs.setInt('notificationId', id);
+      }
+
       Weapon saveWeapon = Weapon(
         id: widget.weapon.id,
         soldierId: _soldierId,
@@ -147,26 +181,14 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
       // );
 
       if (widget.weapon.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Weapon.collectionName)
-            .add(saveWeapon.toMap());
-
-        saveWeapon.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Weapon.collectionName).add(saveWeapon.toMap());
       } else {
         firestore
             .collection(Weapon.collectionName)
             .doc(widget.weapon.id)
-            .set(saveWeapon.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Weapon');
-        });
+            .set(saveWeapon.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

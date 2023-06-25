@@ -40,6 +40,7 @@ class _DateTextFieldState extends State<DateTextField> {
     if (widget.date != null) {
       _date = widget.date!;
     }
+    widget.controller.text = dateFormat.format(_date);
   }
 
   @override

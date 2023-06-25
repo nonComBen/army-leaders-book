@@ -125,26 +125,18 @@ class EditActionsTrackerPageState
       );
 
       if (widget.action.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(ActionObj.collectionName)
-            .add(saveAction.toMap());
-
-        saveAction.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(ActionObj.collectionName).add(saveAction.toMap());
       } else {
-        firestore
-            .collection(ActionObj.collectionName)
-            .doc(widget.action.id)
-            .set(saveAction.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Action');
-        });
+        try {
+          firestore
+              .collection(ActionObj.collectionName)
+              .doc(widget.action.id)
+              .set(saveAction.toMap());
+        } on Exception catch (e) {
+          debugPrint('Error updating Actions Tracker: $e');
+        }
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         toastDuration: const Duration(seconds: 5),

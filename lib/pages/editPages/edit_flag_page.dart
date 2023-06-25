@@ -132,26 +132,14 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
       );
 
       if (widget.flag.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Flag.collectionName)
-            .add(saveFlag.toMap());
-
-        saveFlag.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Flag.collectionName).add(saveFlag.toMap());
       } else {
         firestore
             .collection(Flag.collectionName)
             .doc(widget.flag.id)
-            .set(saveFlag.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveFlag.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

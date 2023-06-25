@@ -114,26 +114,14 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
       );
 
       if (widget.hrAction.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(HrAction.collectionName)
-            .add(saveHrAction.toMap());
-
-        saveHrAction.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(HrAction.collectionName).add(saveHrAction.toMap());
       } else {
         firestore
             .collection(HrAction.collectionName)
             .doc(widget.hrAction.id)
-            .set(saveHrAction.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Hr Metrics');
-        });
+            .set(saveHrAction.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

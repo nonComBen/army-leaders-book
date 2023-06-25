@@ -122,26 +122,16 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
       );
 
       if (widget.counseling.id == null) {
-        DocumentReference docRef = await firestore
+        firestore
             .collection(Counseling.collectionName)
             .add(saveCounseling.toMap());
-
-        saveCounseling.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
             .collection(Counseling.collectionName)
             .doc(widget.counseling.id)
-            .set(saveCounseling.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveCounseling.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

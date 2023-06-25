@@ -120,21 +120,17 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
         comments: _commentsController.text,
       );
 
-      DocumentReference docRef;
       if (widget.profile.id == null) {
         firestore
             .collection(TempProfile.collectionName)
             .add(saveProfile.toMap());
-        Navigator.pop(context);
       } else {
-        docRef = firestore
+        firestore
             .collection(TempProfile.collectionName)
-            .doc(widget.profile.id);
-        docRef.set(saveProfile.toMap());
-        if (mounted) {
-          Navigator.pop(context);
-        }
+            .doc(widget.profile.id)
+            .set(saveProfile.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

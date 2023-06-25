@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:leaders_book/models/user.dart';
 
 import '../models/notification.dart';
 import '../models/setting.dart';
+import '../models/user.dart';
 
 List<int> getDays(String topic, Setting setting) {
   switch (topic) {

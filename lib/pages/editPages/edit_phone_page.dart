@@ -83,26 +83,14 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
       );
 
       if (widget.phone.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Phone.collectionName)
-            .add(savePhone.toMap());
-
-        savePhone.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Phone.collectionName).add(savePhone.toMap());
       } else {
         firestore
             .collection(Phone.collectionName)
             .doc(widget.phone.id)
-            .set(savePhone.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Phone');
-        });
+            .set(savePhone.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       FToast toast = FToast();
       toast.context = context;

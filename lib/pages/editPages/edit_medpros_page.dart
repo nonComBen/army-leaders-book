@@ -4,15 +4,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
+import '../../methods/local_notification_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/medpro.dart';
+import '../../models/setting.dart';
 import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/edit_delete_list_tile.dart';
@@ -89,6 +95,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       _smallPoxDate,
       _anthraxDate;
   FToast toast = FToast();
+  Setting? setting;
 
   @override
   void dispose() {
@@ -257,6 +264,44 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         otherImms: _otherImms,
       );
 
+      setting = ref.read(settingsProvider);
+      List<int> notificationIds = [];
+      DateFormat formatter = DateFormat('yyyy-MM-dd');
+      if (setting!.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        if (widget.medpro.notificationIds != null &&
+            widget.medpro.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.medpro.notificationIds!);
+        }
+
+        List<String> topics = ['PHA', 'Dental', 'Vision', 'Hearing', 'HIV'];
+        for (String topic in topics) {
+          final notificationMedpro = getNotificationMedpro(topic);
+          if (notificationMedpro.date != '') {
+            final dueDate =
+                getDueDate(notificationMedpro.date, notificationMedpro.months);
+
+            for (int days in notificationMedpro.notifications) {
+              notificationIds.add(id);
+              notificationService.scheduleNotification(
+                dateTime: dueDate.subtract(Duration(days: days)),
+                id: id,
+                title: '$_rank $_lastName\'s $topic Due',
+                body:
+                    '$_rank $_lastName\'s $topic Due in $days on ${formatter.format(dueDate)}',
+                payload: 'Medpros',
+              );
+              id++;
+            }
+          }
+        }
+        prefs.setInt('notificationId', id);
+      }
+
       // setMedprosNotifications(
       //   setting: ref.read(settingsProvider)!,
       //   medpro: saveMedpros,
@@ -264,32 +309,57 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       // );
 
       if (widget.medpro.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Medpro.collectionName)
-            .add(saveMedpros.toMap());
-
-        saveMedpros.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Medpro.collectionName).add(saveMedpros.toMap());
       } else {
         firestore
             .collection(Medpro.collectionName)
             .doc(widget.medpro.id)
-            .set(saveMedpros.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveMedpros.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
           message: 'Form is invalid - dates must be in yyyy-MM-dd format',
         ),
       );
+    }
+  }
+
+  NotificationMedpro getNotificationMedpro(String topic) {
+    switch (topic) {
+      case 'PHA':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'Dental':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'Vision':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'Hearing':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'HIV':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      default:
+        return NotificationMedpro();
     }
   }
 

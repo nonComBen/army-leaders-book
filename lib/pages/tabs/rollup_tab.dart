@@ -894,10 +894,10 @@ class HomePageState extends ConsumerState<RollupTab>
 
   @override
   Widget build(BuildContext context) {
-    setting = ref.watch(settingsProvider) ?? Setting(owner: _userObj!.userId);
+    final user = ref.read(authProvider).currentUser();
+    setting = ref.watch(settingsProvider) ?? Setting(owner: user!.uid);
     isSubscribed = ref.watch(subscriptionStateProvider);
     double width = MediaQuery.of(context).size.width;
-    final user = ref.read(authProvider).currentUser();
     ref.read(iapRepoProvider);
     return Container(
       padding: const EdgeInsets.all(16.0),

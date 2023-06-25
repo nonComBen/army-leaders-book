@@ -504,20 +504,14 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
       );
 
       if (widget.soldier.id == null) {
-        firestore
-            .collection('soldiers')
-            .add(saveSoldier.toMap())
-            .then((docRef) {
-          saveSoldier.id = docRef.id;
-          Navigator.pop(context);
-        });
+        firestore.collection('soldiers').add(saveSoldier.toMap());
       } else {
         firestore
             .collection('soldiers')
             .doc(widget.soldier.id)
-            .set(saveSoldier.toMap())
-            .then((value) => Navigator.of(context).pop());
+            .set(saveSoldier.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       MyToast myToast = const MyToast(
         message:

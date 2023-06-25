@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 
 class Bodyfat {
   String? id;
@@ -23,6 +23,7 @@ class Bodyfat {
   String hip;
   String percent;
   bool passBf;
+  List<dynamic>? notificationIds;
 
   Bodyfat({
     this.id,
@@ -46,6 +47,7 @@ class Bodyfat {
     this.hip = '',
     this.percent = '',
     this.passBf = true,
+    this.notificationIds,
   });
 
   static const String collectionName = 'bodyfatStats';
@@ -72,38 +74,43 @@ class Bodyfat {
     map['passBf'] = passBf;
     map['gender'] = gender;
     map['heightDouble'] = heightDouble;
+    map['notificationIds'] = notificationIds;
 
     return map;
   }
 
   factory Bodyfat.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
+    List<dynamic>? notificationIds;
     try {
       users = doc['users'];
+      notificationIds = doc['notificationIds'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+      debugPrint('Users or notificationIds does not exist');
     }
     return Bodyfat(
-        id: doc.id,
-        soldierId: doc['soldierId'],
-        owner: doc['owner'],
-        users: users,
-        rank: doc['rank'],
-        name: doc['name'],
-        firstName: doc['firstName'],
-        section: doc['section'],
-        rankSort: doc['rankSort'],
-        age: doc['age'],
-        gender: doc['gender'] ?? 'Male',
-        date: doc['date'],
-        height: doc['height'],
-        heightDouble: doc['heightDouble'],
-        weight: doc['weight'],
-        passBmi: doc['passBmi'],
-        neck: doc['neck'],
-        waist: doc['waist'],
-        hip: doc['hip'],
-        percent: doc['percent'],
-        passBf: doc['passBf']);
+      id: doc.id,
+      soldierId: doc['soldierId'],
+      owner: doc['owner'],
+      users: users,
+      rank: doc['rank'],
+      name: doc['name'],
+      firstName: doc['firstName'],
+      section: doc['section'],
+      rankSort: doc['rankSort'],
+      age: doc['age'],
+      gender: doc['gender'] ?? 'Male',
+      date: doc['date'],
+      height: doc['height'],
+      heightDouble: doc['heightDouble'],
+      weight: doc['weight'],
+      passBmi: doc['passBmi'],
+      neck: doc['neck'],
+      waist: doc['waist'],
+      hip: doc['hip'],
+      percent: doc['percent'],
+      passBf: doc['passBf'],
+      notificationIds: notificationIds,
+    );
   }
 }

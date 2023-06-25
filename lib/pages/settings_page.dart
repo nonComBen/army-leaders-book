@@ -518,15 +518,18 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     'Notifications',
                   ),
                 ),
-                PlatformCheckboxListTile(
+                Padding(
                   padding: const EdgeInsets.all(8.0),
-                  title: const Text('Receive Notifications'),
-                  onChanged: (value) {
-                    setState(() {
-                      addNotification = value!;
-                    });
-                  },
-                  value: addNotification,
+                  child: PlatformCheckboxListTile(
+                    padding: const EdgeInsets.all(8.0),
+                    title: const Text('Receive Notifications'),
+                    onChanged: (value) {
+                      setState(() {
+                        addNotification = value!;
+                      });
+                    },
+                    value: addNotification,
+                  ),
                 ),
                 const Text(
                   'APFT/ACFT',

@@ -136,26 +136,16 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
       );
 
       if (widget.profile.id == null) {
-        DocumentReference docRef = await firestore
+        firestore
             .collection(TempProfile.collectionName)
             .add(saveProfile.toMap());
-
-        saveProfile.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
             .collection(TempProfile.collectionName)
             .doc(widget.profile.id)
-            .set(saveProfile.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveProfile.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

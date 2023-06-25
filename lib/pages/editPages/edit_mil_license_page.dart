@@ -158,26 +158,14 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       );
 
       if (widget.milLic.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(MilLic.collectionName)
-            .add(saveMilLic.toMap());
-
-        saveMilLic.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(MilLic.collectionName).add(saveMilLic.toMap());
       } else {
         firestore
             .collection(MilLic.collectionName)
             .doc(widget.milLic.id)
-            .set(saveMilLic.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveMilLic.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

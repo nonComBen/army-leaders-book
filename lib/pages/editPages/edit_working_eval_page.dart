@@ -134,26 +134,14 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
       );
 
       if (widget.eval.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(WorkingEval.collectionName)
-            .add(saveEval.toMap());
-
-        saveEval.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(WorkingEval.collectionName).add(saveEval.toMap());
       } else {
         firestore
             .collection(WorkingEval.collectionName)
             .doc(widget.eval.id)
-            .set(saveEval.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveEval.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

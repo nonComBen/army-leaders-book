@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/providers/notification_launch_details_provider.dart';
+import 'package:leaders_book/providers/notification_provider.dart';
 
 import '../../pages/premium_page.dart';
 import '../../auth_provider.dart';
@@ -97,7 +97,7 @@ class MyApp extends ConsumerWidget with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.read(appleSignInAvailableProvider).check();
-    ref.read(notificationLaunchDetailsProvider).setLaunchDetails(launchDetails);
+    ref.read(notificationProvider).setLaunchDetails(launchDetails);
     return StreamBuilder(
       stream: ref.read(authProvider).onAuthStateChanged,
       builder: (BuildContext context, AsyncSnapshot<User?> firebaseUser) {

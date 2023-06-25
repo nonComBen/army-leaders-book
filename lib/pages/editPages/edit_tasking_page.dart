@@ -116,19 +116,15 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
         comments: _commentsController.text,
         location: _locController.text,
       );
-      DocumentReference docRef;
       if (widget.tasking.id == null) {
-        docRef = await firestore
-            .collection(Tasking.collectionName)
-            .add(saveTasking.toMap());
+        firestore.collection(Tasking.collectionName).add(saveTasking.toMap());
       } else {
-        docRef =
-            firestore.collection(Tasking.collectionName).doc(widget.tasking.id);
-        docRef.update(saveTasking.toMap());
+        firestore
+            .collection(Tasking.collectionName)
+            .doc(widget.tasking.id)
+            .update(saveTasking.toMap());
       }
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(

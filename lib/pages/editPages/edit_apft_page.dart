@@ -273,26 +273,18 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
       );
 
       if (widget.apft.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Apft.collectionName)
-            .add(saveApft.toMap());
-
-        saveApft.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Apft.collectionName).add(saveApft.toMap());
       } else {
-        firestore
-            .collection(Apft.collectionName)
-            .doc(widget.apft.id)
-            .set(saveApft.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating APFT');
-        });
+        try {
+          firestore
+              .collection(Apft.collectionName)
+              .doc(widget.apft.id)
+              .set(saveApft.toMap());
+        } on Exception catch (e) {
+          debugPrint('Error updating APFT: $e');
+        }
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

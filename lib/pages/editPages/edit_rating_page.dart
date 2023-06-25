@@ -142,26 +142,14 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
       );
 
       if (widget.rating.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Rating.collectionName)
-            .add(saveRating.toMap());
-
-        saveRating.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Rating.collectionName).add(saveRating.toMap());
       } else {
         firestore
             .collection(Rating.collectionName)
             .doc(widget.rating.id)
-            .set(saveRating.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Rating');
-        });
+            .set(saveRating.toMap());
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

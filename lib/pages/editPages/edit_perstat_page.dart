@@ -159,19 +159,16 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
         comments: _commentsController.text,
         location: _locController.text,
       );
-      DocumentReference docRef;
+
       if (widget.perstat.id == null) {
-        docRef = await firestore
-            .collection(Perstat.collectionName)
-            .add(savePerstat.toMap());
+        firestore.collection(Perstat.collectionName).add(savePerstat.toMap());
       } else {
-        docRef =
-            firestore.collection(Perstat.collectionName).doc(widget.perstat.id);
-        docRef.update(savePerstat.toMap());
+        firestore
+            .collection(Perstat.collectionName)
+            .doc(widget.perstat.id)
+            .update(savePerstat.toMap());
       }
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(

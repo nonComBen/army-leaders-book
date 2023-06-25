@@ -148,19 +148,15 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
         location: _locController.text,
       );
 
-      DocumentReference docRef;
       if (widget.apt.id == null) {
-        docRef = await firestore
-            .collection(Appointment.collectionName)
-            .add(saveApt.toMap());
+        firestore.collection(Appointment.collectionName).add(saveApt.toMap());
       } else {
-        docRef =
-            firestore.collection(Appointment.collectionName).doc(widget.apt.id);
-        docRef.set(saveApt.toMap());
+        firestore
+            .collection(Appointment.collectionName)
+            .doc(widget.apt.id)
+            .set(saveApt.toMap());
       }
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(

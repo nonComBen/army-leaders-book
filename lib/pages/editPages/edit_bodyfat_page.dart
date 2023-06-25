@@ -4,15 +4,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../calculators/bf_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/local_notification_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/bodyfat.dart';
 import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
@@ -361,6 +366,34 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
       _formKey,
       [_dateController.text],
     )) {
+      final setting = ref.read(settingsProvider);
+      List<int> notificationIds = [];
+      if (_dateController.text != '' && setting!.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        if (widget.bodyfat.notificationIds != null &&
+            widget.bodyfat.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.bodyfat.notificationIds!);
+        }
+        final dueDate = getDueDate(_dateController.text, setting.bfMonths);
+        DateFormat formatter = DateFormat('yyyy-MM-dd');
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        for (int days in setting.bfNotifications) {
+          notificationIds.add(id);
+          notificationService.scheduleNotification(
+            dateTime: dueDate.subtract(Duration(days: days)),
+            id: id,
+            title: '$_rank $_lastName\'s Height/Weight Due',
+            body:
+                '$_rank $_lastName\'s Height/Weight Due in $days on ${formatter.format(dueDate)}',
+            payload: 'Bodyfat',
+          );
+          id++;
+        }
+        prefs.setInt('notificationId', id);
+      }
       Bodyfat saveBodyfat = Bodyfat(
         id: widget.bodyfat.id,
         soldierId: _soldierId,
@@ -383,6 +416,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         hip: _hipController.text,
         percent: _percentController.text,
         passBf: bfPass,
+        notificationIds: notificationIds,
       );
 
       // setDateNotifications(
@@ -393,26 +427,18 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
       // );
 
       if (widget.bodyfat.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(Bodyfat.collectionName)
-            .add(saveBodyfat.toMap());
-
-        saveBodyfat.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Bodyfat.collectionName).add(saveBodyfat.toMap());
       } else {
-        firestore
-            .collection(Bodyfat.collectionName)
-            .doc(widget.bodyfat.id)
-            .set(saveBodyfat.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Bodyfat');
-        });
+        try {
+          firestore
+              .collection(Bodyfat.collectionName)
+              .doc(widget.bodyfat.id)
+              .set(saveBodyfat.toMap());
+        } on Exception catch (e) {
+          debugPrint('Error updating Body Comp: $e');
+        }
       }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(

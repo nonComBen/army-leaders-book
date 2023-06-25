@@ -18,6 +18,7 @@ class Weapon {
   String badge;
   String qualType;
   bool pass;
+  List<dynamic>? notificationIds;
 
   Weapon({
     this.id,
@@ -36,6 +37,7 @@ class Weapon {
     this.badge = '',
     this.pass = true,
     this.qualType = 'Day',
+    this.notificationIds,
   });
 
   static const String collectionName = 'weaponStats';
@@ -57,14 +59,17 @@ class Weapon {
     map['badge'] = badge;
     map['pass'] = pass;
     map['qualType'] = qualType;
+    map['notificationIds'] = notificationIds;
 
     return map;
   }
 
   factory Weapon.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
+    List<dynamic>? notificationIds;
     try {
       users = doc['users'];
+      notificationIds = doc['notificationIds'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
@@ -85,6 +90,7 @@ class Weapon {
       badge: doc['badge'],
       pass: doc['pass'],
       qualType: doc['qualType'],
+      notificationIds: notificationIds,
     );
   }
 }

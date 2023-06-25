@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 import '../../auth_provider.dart';
 import '../../calculators/hrp_calculator.dart';
@@ -14,11 +15,15 @@ import '../../calculators/sdc_calculator.dart';
 import '../../calculators/spt_calculator.dart';
 import '../../calculators/twomr_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/local_notification_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/validate.dart';
 import '../../models/acft.dart';
 import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
@@ -97,7 +102,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       plkPass = true,
       runPass = true;
   final List<String> _runTypes = ['Run', 'Walk', 'Row', 'Bike', 'Swim'];
-  DateTime? _dateTime;
+  late DateTime _dateTime;
   FToast toast = FToast();
 
   List<String> ageGroups = [
@@ -366,6 +371,35 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       _formKey,
       [_dateController.text],
     )) {
+      final setting = ref.read(settingsProvider);
+      List<int> notificationIds = [];
+      if (_dateController.text != '' && setting!.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        if (widget.acft.notificationIds != null &&
+            widget.acft.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.acft.notificationIds!);
+        }
+        final dueDate = getDueDate(_dateController.text, setting.acftMonths);
+        DateFormat formatter = DateFormat('yyyy-MM-dd');
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        for (int days in setting.acftNotifications) {
+          notificationIds.add(id);
+          notificationService.scheduleNotification(
+            dateTime: dueDate.subtract(Duration(days: days)),
+            id: id,
+            title: '$_rank $_lastName\'s ACFT Due',
+            body:
+                '$_rank $_lastName\'s ACFT Due in $days on ${formatter.format(dueDate)}',
+            payload: 'ACFT',
+          );
+          id++;
+        }
+        prefs.setInt('notificationId', id);
+      }
+
       Acft saveAcft = Acft(
         id: widget.acft.id,
         soldierId: _soldierId,
@@ -406,15 +440,14 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       if (widget.acft.id == null) {
         firestore.collection(Acft.collectionName).add(saveAcft.toMap());
       } else {
-        firestore
-            .collection(Acft.collectionName)
-            .doc(widget.acft.id)
-            .set(saveAcft.toMap())
-            .then((value) {})
-            .catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating ACFT');
-        });
+        try {
+          firestore
+              .collection(Acft.collectionName)
+              .doc(widget.acft.id)
+              .set(saveAcft.toMap());
+        } on Exception catch (e) {
+          debugPrint('Error updating ACFT: $e');
+        }
       }
       Navigator.pop(context);
     } else {

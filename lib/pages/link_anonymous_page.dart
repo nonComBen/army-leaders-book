@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../widgets/form_frame.dart';
@@ -70,7 +70,7 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
       try {
         await auth.linkEmailAccount(
             _emailController.text, _passwordController.text, user!);
-        UserObj userObj = UserObj(
+        Leader userObj = Leader(
           userId: user!.uid,
           userRank: _rankController.text,
           userName: _nameController.text,
@@ -81,7 +81,7 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
           agreeDate: DateTime.now(),
         );
         FirebaseFirestore.instance
-            .collection(UserObj.collectionName)
+            .collection(Leader.collectionName)
             .doc(user!.uid)
             .set(userObj.toMap(), SetOptions(merge: true));
         ref.read(rootProvider.notifier).signIn();

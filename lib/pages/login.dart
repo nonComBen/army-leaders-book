@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../auth_provider.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../../providers/root_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/center_progress_indicator.dart';
@@ -108,7 +108,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       ref.read(userProvider).loadUser(user.uid);
       return;
     }
-    final userObj = UserObj(
+    final userObj = Leader(
       userId: user.uid,
       userEmail: user.email ?? 'anonymous@email.com',
       userName: user.displayName ?? '',

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../../widgets/formatted_text_button.dart';
 
 Widget headerText(String text) {
@@ -212,7 +212,7 @@ Future<void> showTos(BuildContext context, String? userId) async {
     primaryText: 'Agree',
     primary: () {
       FirebaseFirestore.instance
-          .collection(UserObj.collectionName)
+          .collection(Leader.collectionName)
           .doc(userId)
           .update(
         {

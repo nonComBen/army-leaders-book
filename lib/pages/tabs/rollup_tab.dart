@@ -31,7 +31,7 @@ import '../../models/flag.dart';
 import '../../models/medpro.dart';
 import '../../models/perstat.dart';
 import '../../models/training.dart';
-import '../../models/user.dart';
+import '../../models/leader.dart';
 import '../../models/weapon.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/shared_prefs_provider.dart';
@@ -98,7 +98,7 @@ class HomePageState extends ConsumerState<RollupTab>
   late Setting setting;
   SubscriptionState? subState;
   late BannerAd myBanner;
-  UserObj? _userObj;
+  Leader? _userObj;
 
   @override
   void initState() {

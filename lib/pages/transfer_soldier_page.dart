@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
 import '../../models/soldier.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
@@ -185,7 +185,7 @@ class TransferSoldierPageState extends State<TransferSoldierPage> {
           ),
           FutureBuilder<DocumentSnapshot>(
             future:
-                firestore.collection(UserObj.collectionName).doc(userId).get(),
+                firestore.collection(Leader.collectionName).doc(userId).get(),
             builder: (BuildContext context,
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.hasError) {

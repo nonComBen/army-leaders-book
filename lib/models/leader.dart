@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 
-class UserObj {
+class Leader {
   String? userId;
   String userRank;
   String userEmail;
@@ -20,7 +20,7 @@ class UserObj {
   DateTime? lastLoginDate;
   List<dynamic> deviceTokens;
 
-  UserObj({
+  Leader({
     this.userId,
     this.userRank = '',
     this.userName = '',
@@ -63,7 +63,7 @@ class UserObj {
     return map;
   }
 
-  factory UserObj.fromSnapshot(DocumentSnapshot doc) {
+  factory Leader.fromSnapshot(DocumentSnapshot doc) {
     Timestamp agreeTimestamp = Timestamp.fromDate(DateTime.now()),
         createdTimestamp = Timestamp.fromDate(DateTime.now()),
         lastLoginTimestamp = Timestamp.fromDate(DateTime.now());
@@ -118,7 +118,7 @@ class UserObj {
       debugPrint('Error: $e');
     }
 
-    return UserObj(
+    return Leader(
       userId: doc.id,
       userRank: rank,
       userName: userName,

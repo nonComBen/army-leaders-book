@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../auth_service.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/logo_widget.dart';
@@ -73,7 +73,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
       try {
         User user = (await auth.createUserWithEmailAndPassword(
             _emailController.text, _passwordController.text))!;
-        final userObj = UserObj(
+        final userObj = Leader(
           userId: user.uid,
           userEmail: user.email!,
           userName: user.displayName ?? '',

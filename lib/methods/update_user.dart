@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
-import '../models/user.dart';
+import '../models/leader.dart';
 
-void updateUser(User firebaseUser, UserObj? user) async {
+void updateUser(User firebaseUser, Leader? user) async {
   List<dynamic> tokens = [];
   String? currentToken = await FirebaseMessaging.instance.getToken();
   if (user != null && !kIsWeb) {

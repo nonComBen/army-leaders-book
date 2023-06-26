@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
 import 'package:leaders_book/models/past_purchase.dart';
-import 'package:leaders_book/models/user.dart';
+import 'package:leaders_book/models/leader.dart';
 import 'package:leaders_book/providers/subscription_state.dart';
 
 final iapRepoProvider = Provider<IAPRepo>((ref) {
@@ -22,12 +22,12 @@ class IAPRepo {
     listenToLogin();
   }
 
-  UserObj? _userObj;
+  Leader? _userObj;
   bool hasActiveSubscription = false;
   List<PastPurchase> purchases = [];
 
   bool get isLoggedIn => _user != null;
-  UserObj? get user => _userObj;
+  Leader? get user => _userObj;
 
   final premiumIds = [
     'N5EIa03V7rSma0LDlko6YzGXuXF3', //bhultquist84
@@ -66,7 +66,7 @@ class IAPRepo {
         .where('userId', isEqualTo: _user!.uid)
         .get();
 
-    _userObj = UserObj.fromSnapshot(userSnapshot.docs.first);
+    _userObj = Leader.fromSnapshot(userSnapshot.docs.first);
     bool isSubscribed =
         userSnapshot.docs.first['adFree'] || premiumIds.contains(_user!.uid);
 

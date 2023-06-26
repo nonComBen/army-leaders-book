@@ -3,7 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../models/notification.dart';
 import '../models/setting.dart';
-import '../models/user.dart';
+import '../models/leader.dart';
 
 List<int> getDays(String topic, Setting setting) {
   switch (topic) {
@@ -51,7 +51,7 @@ int getDueMonths(String topic, Setting setting) {
   }
 }
 
-Future<List<String?>> getDeviceTokens(UserObj user) async {
+Future<List<String?>> getDeviceTokens(Leader user) async {
   List<String?> result = user.deviceTokens.map((e) => e.toString()).toList();
   if (result.isEmpty) {
     result = [await FirebaseMessaging.instance.getToken()];
@@ -60,7 +60,7 @@ Future<List<String?>> getDeviceTokens(UserObj user) async {
 }
 
 void updateNotification({
-  required UserObj user,
+  required Leader user,
   required List<String?> tokens,
   required List<DocumentSnapshot> docs,
   required String notificationDate,

@@ -4,13 +4,13 @@ import 'package:intl/intl.dart';
 import '../../methods/validate.dart';
 import '../../models/medpro.dart';
 import '../models/setting.dart';
-import '../models/user.dart';
+import '../models/leader.dart';
 import 'notification_methods.dart';
 
 void setMedprosNotifications({
   required Setting setting,
   required Medpro medpro,
-  required UserObj user,
+  required Leader user,
 }) async {
   String soldier = '${medpro.rank} ${medpro.name}';
   List<String?> tokens = await getDeviceTokens(user);

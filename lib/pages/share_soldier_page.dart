@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
 import '../../models/soldier.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -145,7 +145,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
             ),
             FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 future: firestore
-                    .collection(UserObj.collectionName)
+                    .collection(Leader.collectionName)
                     .where(lookUpMethod == 'User ID' ? 'userId' : 'userEmail',
                         isEqualTo: userId)
                     .get(),

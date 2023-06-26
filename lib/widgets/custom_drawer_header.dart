@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/models/user.dart';
+import 'package:leaders_book/models/leader.dart';
 
 import '../../methods/theme_methods.dart';
 import '../../providers/user_provider.dart';
@@ -15,7 +15,7 @@ class CustomDrawerHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    UserObj? user = ref.watch(userProvider).user;
+    Leader? user = ref.watch(userProvider).user;
     if (user == null) {
       ref
           .read(userProvider)

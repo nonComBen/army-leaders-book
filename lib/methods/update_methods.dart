@@ -4,7 +4,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../models/award.dart';
 import '../../models/pov.dart';
 import '../../models/soldier.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../models/training.dart';
 
 void updateUsersArray(String? uid) async {
@@ -54,7 +54,7 @@ void updatePovs(String uid) async {
     }).toList();
     db.collection(Soldier.collectionName).doc(id).update({'povs': newPovs});
   }
-  db.collection(UserObj.collectionName).doc(uid).update({'updatedPovs': true});
+  db.collection(Leader.collectionName).doc(uid).update({'updatedPovs': true});
   for (POV pov in povs) {
     db.doc('povs/${pov.id}').delete();
   }
@@ -82,10 +82,7 @@ void updateAwards(String uid) async {
     }).toList();
     db.collection(Soldier.collectionName).doc(id).update({'awards': newAwards});
   }
-  db
-      .collection(UserObj.collectionName)
-      .doc(uid)
-      .update({'updatedAwards': true});
+  db.collection(Leader.collectionName).doc(uid).update({'updatedAwards': true});
   for (Award award in awards) {
     db.doc('awards/${award.id}').delete();
   }
@@ -128,7 +125,7 @@ void updateTraining(String uid) async {
     }
   }
   db
-      .collection(UserObj.collectionName)
+      .collection(Leader.collectionName)
       .doc(uid)
       .update({'updatedTraining': true});
 }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/theme_methods.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/platform_widgets/platform_icon_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
@@ -186,7 +186,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                           .toList();
                       return StreamBuilder<DocumentSnapshot>(
                         stream: _firestore
-                            .collection(UserObj.collectionName)
+                            .collection(Leader.collectionName)
                             .doc(users[i])
                             .snapshots(),
                         builder: (context, snapshot) {

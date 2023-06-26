@@ -16,7 +16,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../methods/create_app_bar_actions.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/app_bar_option.dart';
-import '../../models/user.dart';
+import '../../models/leader.dart';
 import '../../auth_provider.dart';
 import '../../providers/root_provider.dart';
 import '../../widgets/form_frame.dart';
@@ -43,7 +43,7 @@ class EditUserPage extends ConsumerStatefulWidget {
 class EditUserPageState extends ConsumerState<EditUserPage> {
   bool updated = false;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  UserObj? user;
+  Leader? user;
   FToast toast = FToast();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();

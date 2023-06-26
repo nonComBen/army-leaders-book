@@ -3,13 +3,13 @@ import 'package:intl/intl.dart';
 import 'package:leaders_book/methods/validate.dart';
 
 import '../../models/setting.dart';
-import '../../models/user.dart';
+import '../models/leader.dart';
 import 'notification_methods.dart';
 
 void setDateNotifications({
   required Setting setting,
   required Map<String, dynamic> map,
-  required UserObj user,
+  required Leader user,
   required String topic,
 }) async {
   if (!isValidDate(map['date']) || map['date'] == '') {

@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:leaders_book/methods/local_notification_methods.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
@@ -11,7 +14,11 @@ import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/hr_action.dart';
+import '../../models/setting.dart';
 import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
@@ -49,6 +56,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
   bool removeSoldiers = false, updated = false;
   DateTime? _dd93Date, _sglvDate, _prrDate;
   FToast toast = FToast();
+  Setting? setting;
 
   @override
   void dispose() {
@@ -98,6 +106,42 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
       _formKey,
       [_dd93Controller.text, _sglvController.text, _prrController.text],
     )) {
+      setting = ref.read(settingsProvider);
+      List<int> notificationIds = [];
+      DateFormat formatter = DateFormat('yyyy-MM-dd');
+      if (!kIsWeb && setting!.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        if (widget.hrAction.notificationIds.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.hrAction.notificationIds);
+        }
+
+        List<String> topics = ['DD93', 'SGLV', 'PRR'];
+        for (String topic in topics) {
+          final date = getDate(topic);
+          if (date != '') {
+            DateTime dueDate = getDueDate(date, setting!.hrActionMonths);
+
+            for (int days in setting!.hrActionNotifications) {
+              notificationIds.add(id);
+              notificationService.scheduleNotification(
+                dateTime: dueDate.subtract(Duration(days: days)),
+                id: id,
+                title: '$_rank $_lastName\'s $topic Due',
+                body:
+                    '$_rank $_lastName\'s $topic Due in $days on ${formatter.format(dueDate)}',
+                payload: 'HR Metrics',
+              );
+              id++;
+            }
+          }
+        }
+        prefs.setInt('notificationId', id);
+      }
+
       HrAction saveHrAction = HrAction(
         id: widget.hrAction.id,
         soldierId: _soldierId,
@@ -128,6 +172,17 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
           message: 'Form is invalid - dates must be in yyyy-MM-dd format',
         ),
       );
+    }
+  }
+
+  String getDate(String topic) {
+    switch (topic) {
+      case 'DD93':
+        return _dd93Controller.text;
+      case 'SGLV':
+        return _sglvController.text;
+      default:
+        return _prrController.text;
     }
   }
 

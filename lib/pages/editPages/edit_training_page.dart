@@ -243,13 +243,13 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
           ),
           PlatformButton(
             onPressed: () {
-              AdditionalTraining saveAward =
+              AdditionalTraining saveTraining =
                   AdditionalTraining(name: name.text, date: date.text);
               setState(() {
                 if (index != null) {
-                  _addTraining[index] = saveAward;
+                  _addTraining[index] = saveTraining;
                 } else {
-                  _addTraining.add(saveAward);
+                  _addTraining.add(saveTraining);
                 }
               });
               Navigator.of(context).pop();
@@ -265,7 +265,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
     Widget title = const Text('Delete Training?');
     Widget content = Container(
       padding: const EdgeInsets.all(8.0),
-      child: const Text('Are you sure you want to delete this award?'),
+      child: const Text('Are you sure you want to delete this training?'),
     );
     customAlertDialog(
       context: context,

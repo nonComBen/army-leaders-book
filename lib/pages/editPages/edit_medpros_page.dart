@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -232,42 +233,10 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         _anthraxController.text,
       ],
     )) {
-      Medpro saveMedpros = Medpro(
-        id: widget.medpro.id,
-        soldierId: _soldierId,
-        owner: _owner!,
-        users: _users!,
-        rank: _rank!,
-        name: _lastName!,
-        firstName: _firstName!,
-        section: _section!,
-        rankSort: _rankSort!,
-        pha: _phaController.text,
-        dental: _dentalController.text,
-        vision: _visionController.text,
-        hearing: _hearingController.text,
-        hiv: _hivController.text,
-        flu: _fluController.text,
-        anthrax: _anthraxController.text,
-        encephalitis: _encephalitisController.text,
-        hepA: _hepAController.text,
-        hepB: _hepBController.text,
-        meningococcal: _meningController.text,
-        mmr: _mmrController.text,
-        polio: _polioController.text,
-        smallPox: _smallPoxController.text,
-        tetanus: _tetanusController.text,
-        tuberculin: _tuberculinController.text,
-        typhoid: _typhoidController.text,
-        varicella: _varicellaController.text,
-        yellow: _yellowController.text,
-        otherImms: _otherImms,
-      );
-
       setting = ref.read(settingsProvider);
       List<int> notificationIds = [];
       DateFormat formatter = DateFormat('yyyy-MM-dd');
-      if (setting!.addNotifications) {
+      if (!kIsWeb && setting!.addNotifications) {
         final notificationService = ref.read(notificationProvider);
         final prefs = ref.read(sharedPreferencesProvider);
         int id = prefs.getInt('notificationId') ?? 0;
@@ -307,6 +276,38 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       //   medpro: saveMedpros,
       //   user: ref.read(userProvider).user!,
       // );
+      Medpro saveMedpros = Medpro(
+        id: widget.medpro.id,
+        soldierId: _soldierId,
+        owner: _owner!,
+        users: _users!,
+        rank: _rank!,
+        name: _lastName!,
+        firstName: _firstName!,
+        section: _section!,
+        rankSort: _rankSort!,
+        pha: _phaController.text,
+        dental: _dentalController.text,
+        vision: _visionController.text,
+        hearing: _hearingController.text,
+        hiv: _hivController.text,
+        flu: _fluController.text,
+        anthrax: _anthraxController.text,
+        encephalitis: _encephalitisController.text,
+        hepA: _hepAController.text,
+        hepB: _hepBController.text,
+        meningococcal: _meningController.text,
+        mmr: _mmrController.text,
+        polio: _polioController.text,
+        smallPox: _smallPoxController.text,
+        tetanus: _tetanusController.text,
+        tuberculin: _tuberculinController.text,
+        typhoid: _typhoidController.text,
+        varicella: _varicellaController.text,
+        yellow: _yellowController.text,
+        otherImms: _otherImms,
+        notificationIds: notificationIds,
+      );
 
       if (widget.medpro.id == null) {
         firestore.collection(Medpro.collectionName).add(saveMedpros.toMap());

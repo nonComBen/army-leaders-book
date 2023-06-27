@@ -14,6 +14,7 @@ class HrAction {
   String dd93;
   String sglv;
   String prr;
+  List<dynamic> notificationIds;
 
   HrAction({
     this.id,
@@ -28,6 +29,7 @@ class HrAction {
     this.dd93 = '',
     this.sglv = '',
     this.prr = '',
+    this.notificationIds = const [],
   });
 
   static const String collectionName = 'hrActions';
@@ -45,30 +47,40 @@ class HrAction {
     map['dd93'] = dd93;
     map['sglv'] = sglv;
     map['prr'] = prr;
+    map['notificationIds'] = notificationIds;
 
     return map;
   }
 
   factory HrAction.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
+    List<dynamic> notificationIds = [];
     try {
       users = doc['users'];
+      notificationIds = doc['notificationIds'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
     return HrAction(
-      id: doc.id,
-      soldierId: doc['soldierId'],
-      owner: doc['owner'],
-      users: users,
-      rank: doc['rank'],
-      name: doc['name'],
-      firstName: doc['firstName'],
-      section: doc['section'],
-      rankSort: doc['rankSort'],
-      dd93: doc['dd93'],
-      sglv: doc['sglv'],
-      prr: doc['prr'],
-    );
+        id: doc.id,
+        soldierId: doc['soldierId'],
+        owner: doc['owner'],
+        users: users,
+        rank: doc['rank'],
+        name: doc['name'],
+        firstName: doc['firstName'],
+        section: doc['section'],
+        rankSort: doc['rankSort'],
+        dd93: doc['dd93'],
+        sglv: doc['sglv'],
+        prr: doc['prr'],
+        notificationIds: notificationIds);
   }
+}
+
+class NotificationHrAction {
+  String date;
+  List<dynamic> notifications;
+
+  NotificationHrAction({required this.date, required this.notifications});
 }

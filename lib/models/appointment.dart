@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 
 class Appointment {
   String? id;
@@ -18,6 +18,7 @@ class Appointment {
   String comments;
   String owner;
   String location;
+  List<dynamic> reminders;
 
   Appointment({
     this.id,
@@ -36,6 +37,7 @@ class Appointment {
     this.comments = '',
     required this.owner,
     this.location = '',
+    this.reminders = const [],
   });
 
   static const String collectionName = 'appointments';
@@ -59,6 +61,7 @@ class Appointment {
     map['eventId'] = null;
     map['calendarId'] = null;
     map['location'] = location;
+    map['reminders'] = reminders;
 
     return map;
   }
@@ -66,11 +69,13 @@ class Appointment {
   factory Appointment.fromSnapshot(DocumentSnapshot doc) {
     String location = '';
     List<dynamic> users = [doc['owner']];
+    List<dynamic> reminders = [];
     try {
       location = doc['location'];
       users = doc['users'];
+      reminders = doc['reminders'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+      debugPrint('Users or Location or Reminders does not exist');
     }
     //soldierId is null - only use for sharing
     return Appointment(
@@ -90,6 +95,7 @@ class Appointment {
       comments: doc['comments'],
       owner: doc['owner'],
       location: location,
+      reminders: reminders,
     );
   }
 }

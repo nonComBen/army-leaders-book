@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -368,7 +369,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
     )) {
       final setting = ref.read(settingsProvider);
       List<int> notificationIds = [];
-      if (_dateController.text != '' && setting!.addNotifications) {
+      if (!kIsWeb && _dateController.text != '' && setting!.addNotifications) {
         final notificationService = ref.read(notificationProvider);
         final prefs = ref.read(sharedPreferencesProvider);
         if (widget.bodyfat.notificationIds != null &&

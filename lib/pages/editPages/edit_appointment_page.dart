@@ -1,21 +1,32 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:leaders_book/models/reminder.dart';
+import 'package:leaders_book/widgets/more_tiles_header.dart';
+import 'package:leaders_book/widgets/platform_widgets/platform_selection_widget.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/appointment.dart';
 import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
+import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -64,6 +75,8 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
   DateTime? _dateTime;
   TimeOfDay? _startTime, _endTime;
   FToast toast = FToast();
+  late List<Reminder> _reminders;
+  List<int> notificationIdsToCancel = [];
 
   @override
   void dispose() {
@@ -95,6 +108,9 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
     _status = widget.apt.status;
     _owner = widget.apt.owner;
     _users = widget.apt.users;
+    _reminders = widget.apt.reminders
+        .map((e) => Reminder.fromMap(e as Map<String, dynamic>))
+        .toList();
 
     _startController.text = widget.apt.start;
     _endController.text = widget.apt.end;
@@ -129,6 +145,31 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
       _formKey,
       [_dateController.text],
     )) {
+      final notificationService = ref.read(notificationProvider);
+      notificationService.cancelPreviousNotifications(notificationIdsToCancel);
+      if (!kIsWeb &&
+          _dateController.text != '' &&
+          _startController.text != '') {
+        DateFormat formatter = DateFormat('yyyy-MM-dd hh:mm');
+        DateTime aptDate =
+            DateTime.tryParse(_dateController.text) ?? DateTime.now();
+        int hour = int.tryParse(_startController.text.substring(0, 2)) ?? 0;
+        int minute = int.tryParse(_startController.text.substring(2)) ?? 0;
+        aptDate =
+            DateTime(aptDate.year, aptDate.month, aptDate.day, hour, minute);
+        debugPrint('Appointment Date Time: $aptDate');
+        for (Reminder reminder in _reminders) {
+          notificationService.scheduleNotification(
+            dateTime: aptDate.subtract(Duration(minutes: reminder.minutes)),
+            id: reminder.id!,
+            title: '$_rank $_lastName\'s Appointment',
+            body:
+                '$_rank $_lastName has an appointment in ${(reminder.minutes / getConversionRate(reminder.unitOfMeasure)).floor()} ${reminder.unitOfMeasure} at ${formatter.format(aptDate)}',
+            payload: 'Appointment',
+          );
+        }
+      }
+
       Appointment saveApt = Appointment(
         id: widget.apt.id,
         users: _users!,
@@ -146,6 +187,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
         comments: _commentsController.text,
         owner: _owner!,
         location: _locController.text,
+        reminders: _reminders.map((e) => e.toMap()).toList(),
       );
 
       if (widget.apt.id == null) {
@@ -163,6 +205,102 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
           message: 'Form is invalid - dates must be in yyyy-MM-dd format',
         ),
       );
+    }
+  }
+
+  void editReminder(
+      {required BuildContext context, required Reminder reminder, int? index}) {
+    String unit = reminder.unitOfMeasure;
+    TextEditingController minutes = TextEditingController(
+        text: (reminder.minutes / getConversionRate(reminder.unitOfMeasure))
+            .floor()
+            .toString());
+    final prefs = ref.read(sharedPreferencesProvider);
+    int id = prefs.getInt('notificationId') ?? 0;
+    customModalBottomSheet(
+      context,
+      StatefulBuilder(builder: (context, refresh) {
+        return ListView(
+          children: [
+            HeaderText(
+              index == null ? 'Add Reminder' : 'Edit Reminder',
+            ),
+            PlatformSelectionWidget(
+              titles: const [Text('Minutes'), Text('Hours'), Text('Days')],
+              values: const ['Minutes', 'Hours', 'Days'],
+              onChanged: (value) => refresh(() {
+                unit = value.toString();
+              }),
+            ),
+            PaddedTextField(
+              controller: minutes,
+              keyboardType: TextInputType.number,
+              enabled: true,
+              decoration: InputDecoration(
+                labelText: unit,
+              ),
+              label: unit,
+            ),
+            PlatformButton(
+              onPressed: () {
+                if (reminder.id != null) {
+                  notificationIdsToCancel.add(reminder.id!);
+                }
+                Reminder saveReminder = Reminder(
+                  id: id,
+                  minutes: (int.tryParse(minutes.text) ?? 0) *
+                      getConversionRate(unit),
+                  unitOfMeasure: unit,
+                );
+                setState(() {
+                  debugPrint('Minutes: ${saveReminder.minutes}');
+                  debugPrint('Unit: ${saveReminder.unitOfMeasure}');
+                  if (index != null) {
+                    _reminders[index] = saveReminder;
+                  } else {
+                    _reminders.add(saveReminder);
+                  }
+                });
+                prefs.setInt('notificationId', id + 1);
+                Navigator.of(context).pop();
+              },
+              child: Text(index == null ? 'Add Reminder' : 'Edit Reminder'),
+            )
+          ],
+        );
+      }),
+    );
+  }
+
+  void deleteReminder(BuildContext context, int index) {
+    Widget title = const Text('Delete Reminder?');
+    Widget content = Container(
+      padding: const EdgeInsets.all(8.0),
+      child: const Text('Are you sure you want to delete this reminder?'),
+    );
+    customAlertDialog(
+      context: context,
+      title: title,
+      content: content,
+      primaryText: 'Yes',
+      primary: () {
+        setState(() {
+          notificationIdsToCancel.add(_reminders[index].id!);
+          _reminders.removeAt(index);
+        });
+      },
+      secondary: () {},
+    );
+  }
+
+  int getConversionRate(String unit) {
+    switch (unit) {
+      case 'Hours':
+        return 60;
+      case 'Days':
+        return 1440;
+      default:
+        return 1;
     }
   }
 
@@ -277,6 +415,38 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
               ),
             ],
           ),
+          if (!kIsWeb)
+            MoreTilesHeader(
+                label: 'Reminders',
+                onPressed: () {
+                  editReminder(context: context, reminder: Reminder());
+                }),
+          if (!kIsWeb)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: FormGridView(
+                width: width,
+                children: _reminders
+                    .map((reminder) => EditDeleteListTile(
+                          title:
+                              '${(reminder.minutes / getConversionRate(reminder.unitOfMeasure)).floor()} ${reminder.unitOfMeasure} Prior',
+                          onIconPressed: () {
+                            deleteReminder(
+                              context,
+                              _reminders.indexOf(reminder),
+                            );
+                          },
+                          onTap: () {
+                            editReminder(
+                              context: context,
+                              reminder: reminder,
+                              index: _reminders.indexOf(reminder),
+                            );
+                          },
+                        ))
+                    .toList(),
+              ),
+            ),
           PaddedTextField(
             keyboardType: TextInputType.multiline,
             maxLines: 2,

@@ -18,6 +18,7 @@ class Setting {
   int visionMonths;
   int hearingMonths;
   int hivMonths;
+  int hrActionMonths;
   List<dynamic> acftNotifications;
   List<dynamic> bfNotifications;
   List<dynamic> weaponsNotifications;
@@ -26,6 +27,7 @@ class Setting {
   List<dynamic> visionNotifications;
   List<dynamic> hearingNotifications;
   List<dynamic> hivNotifications;
+  List<dynamic> hrActionNotifications;
   String? owner;
 
   Setting({
@@ -48,6 +50,7 @@ class Setting {
     this.visionMonths = 12,
     this.hearingMonths = 12,
     this.hivMonths = 24,
+    this.hrActionMonths = 12,
     this.acftNotifications = const [0, 30],
     this.bfNotifications = const [0, 30],
     this.weaponsNotifications = const [0, 30],
@@ -56,6 +59,7 @@ class Setting {
     this.visionNotifications = const [0, 30],
     this.hearingNotifications = const [0, 30],
     this.hivNotifications = const [0, 30],
+    this.hrActionNotifications = const [0, 30],
     required this.owner,
   });
 
@@ -83,6 +87,7 @@ class Setting {
     map['visionMonths'] = visionMonths;
     map['hearingMonths'] = hearingMonths;
     map['hivMonths'] = hivMonths;
+    map['hrActionMonths'] = hrActionMonths;
     map['acftNotifications'] = acftNotifications;
     map['bfNotifications'] = bfNotifications;
     map['weaponsNotifications'] = weaponsNotifications;
@@ -91,6 +96,7 @@ class Setting {
     map['visionNotifications'] = visionNotifications;
     map['hearingNotifications'] = hearingNotifications;
     map['hivNotifications'] = hivNotifications;
+    map['hrActionNotifications'] = hrActionNotifications;
 
     return map;
   }
@@ -117,14 +123,16 @@ class Setting {
           visionMonths: map['visionMonths'],
           hearingMonths: map['hearingMonths'],
           hivMonths: map['hivMonths'],
-          acftNotifications: map['acftNotifications'] ?? [],
-          bfNotifications: map['bfNotifications'] ?? [],
-          weaponsNotifications: map['weaponsNotifications'] ?? [],
-          phaNotifications: map['phaNotifications'] ?? [],
-          dentalNotifications: map['dentalNotifications'] ?? [],
-          visionNotifications: map['visionNotifications'] ?? [],
-          hearingNotifications: map['hearingNotifications'] ?? [],
-          hivNotifications: map['hivNotifications'] ?? [],
+          hrActionMonths: map['hrActionMonths'] ?? 12,
+          acftNotifications: map['acftNotifications'] ?? [0, 30],
+          bfNotifications: map['bfNotifications'] ?? [0, 30],
+          weaponsNotifications: map['weaponsNotifications'] ?? [0, 30],
+          phaNotifications: map['phaNotifications'] ?? [0, 30],
+          dentalNotifications: map['dentalNotifications'] ?? [0, 30],
+          visionNotifications: map['visionNotifications'] ?? [0, 30],
+          hearingNotifications: map['hearingNotifications'] ?? [0, 30],
+          hivNotifications: map['hivNotifications'] ?? [0, 30],
+          hrActionNotifications: map['hrActionNotifications'] ?? [0, 30],
           owner: map['owner']);
     } else {
       return Setting(

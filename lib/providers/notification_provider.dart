@@ -15,6 +15,12 @@ class NotificationService {
   NotificationAppLaunchDetails? _notificationAppLaunchDetails;
   bool _notificationsAllowed = false;
 
+  static const String acftPayload = 'ACFT';
+  static const String bfPayload = 'Bodyfat';
+  static const String weaponPayload = 'Weapons';
+  static const String medprosPayload = 'Medpros';
+  static const String hrMetricsPayload = 'HR Metrics';
+
   NotificationAppLaunchDetails? launchDetails() {
     return _notificationAppLaunchDetails;
   }

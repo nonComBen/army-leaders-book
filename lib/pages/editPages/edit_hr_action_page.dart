@@ -133,7 +133,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
                 title: '$_rank $_lastName\'s $topic Due',
                 body:
                     '$_rank $_lastName\'s $topic Due in $days on ${formatter.format(dueDate)}',
-                payload: 'HR Metrics',
+                payload: NotificationService.hrMetricsPayload,
               );
               id++;
             }
@@ -155,6 +155,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
         dd93: _dd93Controller.text,
         sglv: _sglvController.text,
         prr: _prrController.text,
+        notificationIds: notificationIds,
       );
 
       if (widget.hrAction.id == null) {

@@ -389,7 +389,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
             title: '$_rank $_lastName\'s Height/Weight Due',
             body:
                 '$_rank $_lastName\'s Height/Weight Due in $days on ${formatter.format(dueDate)}',
-            payload: 'Bodyfat',
+            payload: NotificationService.bfPayload,
           );
           id++;
         }

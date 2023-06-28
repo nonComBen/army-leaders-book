@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
-import 'package:leaders_book/models/profile.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../methods/validate.dart';
@@ -28,11 +27,14 @@ import '../../models/apft.dart';
 import '../../models/appointment.dart';
 import '../../models/bodyfat.dart';
 import '../../models/flag.dart';
+import '../../models/leader.dart';
 import '../../models/medpro.dart';
 import '../../models/perstat.dart';
+import '../../models/profile.dart';
 import '../../models/training.dart';
-import '../../models/leader.dart';
 import '../../models/weapon.dart';
+import '../../pages/hr_actions_page.dart';
+import '../../providers/notification_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/shared_prefs_provider.dart';
 import '../../providers/tracking_provider.dart';
@@ -103,7 +105,6 @@ class HomePageState extends ConsumerState<RollupTab>
   @override
   void initState() {
     super.initState();
-
     final trackingService = ref.read(trackingProvider);
     bool trackingAllowed = trackingService.trackingAllowed;
 
@@ -201,6 +202,21 @@ class HomePageState extends ConsumerState<RollupTab>
     myBanner.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  String getRouteName(String payload) {
+    switch (payload) {
+      case NotificationService.acftPayload:
+        return AcftPage.routeName;
+      case NotificationService.bfPayload:
+        return BodyfatPage.routeName;
+      case NotificationService.weaponPayload:
+        return WeaponsPage.routeName;
+      case NotificationService.medprosPayload:
+        return MedProsPage.routeName;
+      default:
+        return HrActionsPage.routeName;
+    }
   }
 
   showByName(String title, List<DocumentSnapshot> list, HomeCard homeCard) {

@@ -262,7 +262,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                 title: '$_rank $_lastName\'s $topic Due',
                 body:
                     '$_rank $_lastName\'s $topic Due in $days on ${formatter.format(dueDate)}',
-                payload: 'Medpros',
+                payload: NotificationService.medprosPayload,
               );
               id++;
             }

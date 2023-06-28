@@ -148,10 +148,18 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
             title: '$_rank $_lastName\'s Weapon Qual Due',
             body:
                 '$_rank $_lastName\'s Weapon Qual Due in $days on ${formatter.format(dueDate)}',
-            payload: 'Weapons',
+            payload: NotificationService.weaponPayload,
           );
           id++;
         }
+        //Test
+        notificationService.scheduleNotification(
+            dateTime: DateTime.now().add(const Duration(seconds: 10)),
+            id: id++,
+            title: 'Test Weapon',
+            body: 'Test Weapon Notification Body',
+            payload: NotificationService.weaponPayload);
+
         prefs.setInt('notificationId', id);
       }
 
@@ -172,6 +180,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
         badge: _badgeController.text,
         pass: pass,
         qualType: _qualType!,
+        notificationIds: notificationIds,
       );
 
       // setDateNotifications(

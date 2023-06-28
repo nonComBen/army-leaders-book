@@ -429,6 +429,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         total: _total!,
         altEvent: _runType,
         pass: pass,
+        notificationIds: notificationIds,
       );
 
       // setDateNotifications(

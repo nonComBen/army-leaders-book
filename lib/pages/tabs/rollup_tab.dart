@@ -188,9 +188,9 @@ class HomePageState extends ConsumerState<RollupTab>
       if (prefs.getString('Version') == null ||
           packageInfo.version != prefs.getString('Version')) {
         prefs.setString('Version', packageInfo.version);
-        // if (mounted) {
-        //   showChangeLog(context);
-        // }
+        if (mounted) {
+          showChangeLog(context);
+        }
       }
     }
   }
@@ -884,11 +884,13 @@ class HomePageState extends ConsumerState<RollupTab>
                     ),
                   ),
                   info2: TextButton(
-                    child: Text('Overdue: $trainingOverdue',
-                        style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue)),
+                    child: Text(
+                      'Overdue: $trainingOverdue',
+                      style: const TextStyle(
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue),
+                    ),
                     onPressed: () {
                       showByName(
                           'Overdue Trainings', overdue, HomeCard.training);

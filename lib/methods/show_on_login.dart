@@ -227,13 +227,11 @@ Future<void> showTos(BuildContext context, String? userId) async {
 List<Widget> androidNewText() {
   return [
     const Text(
-      '4.2.2 (11 September 2022)\n',
+      '4.3.4 (29 June 2023)\n',
       style: TextStyle(fontWeight: FontWeight.bold),
     ),
     const Text(
-        '[New] Changed the color theme to black and yellow with dark theme the default. Fixed theme setting not saving.'),
-    const Text(
-        '[New] Changed downloading and uploading from csv to Excel format. Solved issue with uploading not working.'),
+        '[New] Added notifications for ACFT, Body Comp, Weapons, Medpros, HR Metrics, and Appointments. See FAQ page for instructions.'),
     const Text('[Fix] Bug fixes'),
   ];
 }
@@ -241,13 +239,11 @@ List<Widget> androidNewText() {
 List<Widget> iosNewText() {
   return [
     const Text(
-      '4.2.2 (11 September July 2022)\n',
+      '4.3.4 (29 June 2023)\n',
       style: TextStyle(fontWeight: FontWeight.bold),
     ),
     const Text(
-        '[New] Changed the color theme to black and yellow with dark theme the default. Fixed theme setting not saving.'),
-    const Text(
-        '[New] Changed downloading and uploading from csv to Excel format. Solved issue with uploading not working.'),
+        '[New] Added notifications for ACFT, Body Comp, Weapons, Medpros, HR Metrics, and Appointments. See FAQ page for instructions.'),
     const Text('[Fix] Bug fixes'),
   ];
 }

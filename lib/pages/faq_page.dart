@@ -132,6 +132,26 @@ class FaqPageState extends ConsumerState<FaqPage> {
         ),
       ),
     ),
+    Faq(
+      false,
+      'How do I get notified when my Soldier is due?',
+      Container(
+        padding: const EdgeInsets.all(16.0),
+        alignment: Alignment.centerLeft,
+        child: const Text(
+          'Notifications are available for ACFT, Body Composition, Weapons, Medpros, HR Metrics, '
+          'and Appointments. Notifications are scheduled for your device when you add/update a record '
+          'based on when the metric is due and when you want to be notified. You can adjust when the '
+          'metric is due and when you want to be notified in the Settings page. Appointment reminder '
+          'details are added when adding/updating the appointment. To add notifications to metrics that were '
+          'added before version 4.3.4, just view and update each record. Since the notifications are '
+          'stored in the app\'s memory on your device, if you uninstall and reinstall the app or want '
+          'notifications on another device, you will have to update the records again to get the notifications.',
+          textAlign: TextAlign.start,
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    ),
   ];
 
   @override

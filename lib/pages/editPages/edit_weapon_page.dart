@@ -153,12 +153,12 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
           id++;
         }
         //Test
-        notificationService.scheduleNotification(
-            dateTime: DateTime.now().add(const Duration(seconds: 10)),
-            id: id++,
-            title: 'Test Weapon',
-            body: 'Test Weapon Notification Body',
-            payload: NotificationService.weaponPayload);
+        // notificationService.scheduleNotification(
+        //     dateTime: DateTime.now().add(const Duration(seconds: 10)),
+        //     id: id++,
+        //     title: 'Test Weapon',
+        //     body: 'Test Weapon Notification Body',
+        //     payload: NotificationService.weaponPayload);
 
         prefs.setInt('notificationId', id);
       }

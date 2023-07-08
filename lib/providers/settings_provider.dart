@@ -18,6 +18,7 @@ class SettingsService extends StateNotifier<Setting?> {
   }
 
   void init(String userId) {
+    state = Setting(owner: userId);
     Stream<DocumentSnapshot<Map<String, dynamic>>> settingsStream =
         FirebaseFirestore.instance
             .collection(Setting.collectionName)

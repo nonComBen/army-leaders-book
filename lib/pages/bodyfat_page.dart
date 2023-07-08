@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/models/setting.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -119,9 +120,9 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
         _selectedDocuments.clear();
       });
     });
-    final setting = ref.read(settingsProvider);
+    final setting = ref.read(settingsProvider) ?? Setting(owner: _userId);
     setState(() {
-      overdueDays = setting!.bfMonths * 30;
+      overdueDays = setting.bfMonths * 30;
       amberDays = overdueDays - 30;
     });
   }

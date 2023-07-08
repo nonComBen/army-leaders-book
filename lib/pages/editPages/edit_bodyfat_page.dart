@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/models/setting.dart';
 
 import '../../auth_provider.dart';
 import '../../calculators/bf_calculator.dart';
@@ -367,9 +368,9 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
       _formKey,
       [_dateController.text],
     )) {
-      final setting = ref.read(settingsProvider);
+      final setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
       List<int> notificationIds = [];
-      if (!kIsWeb && _dateController.text != '' && setting!.addNotifications) {
+      if (!kIsWeb && _dateController.text != '' && setting.addNotifications) {
         final notificationService = ref.read(notificationProvider);
         final prefs = ref.read(sharedPreferencesProvider);
         if (widget.bodyfat.notificationIds != null &&

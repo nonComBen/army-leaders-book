@@ -106,7 +106,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
       _formKey,
       [_dd93Controller.text, _sglvController.text, _prrController.text],
     )) {
-      setting = ref.read(settingsProvider);
+      setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
       List<int> notificationIds = [];
       DateFormat formatter = DateFormat('yyyy-MM-dd');
       if (!kIsWeb && setting!.addNotifications) {

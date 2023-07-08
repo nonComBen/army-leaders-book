@@ -233,7 +233,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         _anthraxController.text,
       ],
     )) {
-      setting = ref.read(settingsProvider);
+      setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
       List<int> notificationIds = [];
       DateFormat formatter = DateFormat('yyyy-MM-dd');
       if (!kIsWeb && setting!.addNotifications) {

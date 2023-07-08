@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/models/setting.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -117,9 +118,10 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
         _selectedDocuments.clear();
       });
     });
-    final setting = ref.read(settingsProvider);
+    final setting = ref.read(settingsProvider) ?? Setting(owner: _userId);
+    debugPrint('Weapon Months: ${setting.weaponsMonths}');
     setState(() {
-      overdueDays = setting!.weaponsMonths * 30;
+      overdueDays = setting.weaponsMonths * 30;
       amberDays = overdueDays - 30;
     });
   }

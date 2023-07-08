@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/models/setting.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
@@ -126,9 +127,9 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
       _formKey,
       [_dateController.text],
     )) {
-      final setting = ref.read(settingsProvider);
+      final setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
       List<int> notificationIds = [];
-      if (!kIsWeb && _dateController.text != '' && setting!.addNotifications) {
+      if (!kIsWeb && _dateController.text != '' && setting.addNotifications) {
         final notificationService = ref.read(notificationProvider);
         final prefs = ref.read(sharedPreferencesProvider);
         if (widget.weapon.notificationIds != null &&
@@ -290,6 +291,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                 controller: _typeController,
                 keyboardType: TextInputType.text,
                 label: 'Weapon',
+                textCapitalization: TextCapitalization.characters,
                 decoration: const InputDecoration(
                   labelText: 'Weapon',
                 ),
@@ -299,7 +301,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
               ),
               PaddedTextField(
                 controller: _hitsController,
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.number,
                 label: 'Hits',
                 decoration: const InputDecoration(
                   labelText: 'Hits',
@@ -310,7 +312,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
               ),
               PaddedTextField(
                 controller: _maxController,
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.number,
                 label: 'Maximum',
                 decoration: const InputDecoration(
                   labelText: 'Maximum',
@@ -323,6 +325,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                 controller: _badgeController,
                 keyboardType: TextInputType.text,
                 label: 'Badge',
+                textCapitalization: TextCapitalization.words,
                 decoration: const InputDecoration(
                   labelText: 'Badge',
                 ),

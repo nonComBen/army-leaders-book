@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../auth_provider.dart';
@@ -84,6 +85,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   late Setting setting;
   late SharedPreferences prefs;
+  DocumentSnapshot? doc;
 
   final TextEditingController acftController = TextEditingController();
   final TextEditingController bfController = TextEditingController();
@@ -134,15 +136,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
         .collection(Setting.collectionName)
         .where('owner', isEqualTo: userId)
         .get();
-    DocumentSnapshot? doc;
     if (snapshot.docs.isNotEmpty) {
       doc = snapshot.docs.firstWhere((doc) => doc.id == userId);
     }
 
     setState(() {
       if (doc != null) {
-        setting = Setting.fromMap(doc.data() as Map<String, dynamic>, userId);
-        updated = false;
+        setting = Setting.fromMap(doc!.data() as Map<String, dynamic>, userId);
       } else {
         setting = Setting(
           owner: userId,
@@ -360,10 +360,20 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       owner: userId,
     );
 
-    firestore.collection(Setting.collectionName).doc(userId).set(
+    firestore
+        .collection(Setting.collectionName)
+        .doc(userId)
+        .set(
           saveSetting.toMap(),
           SetOptions(merge: true),
-        );
+        )
+        .then(
+      (value) {
+        if (doc == null) {
+          ref.read(settingsProvider.notifier).init(userId);
+        }
+      },
+    );
 
     Navigator.pop(context);
   }

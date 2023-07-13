@@ -92,9 +92,9 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
     removeSoldiers = false;
     updated = false;
 
-    _dd93Date = DateTime.tryParse(widget.hrAction.dd93) ?? DateTime.now();
-    _sglvDate = DateTime.tryParse(widget.hrAction.sglv) ?? DateTime.now();
-    _prrDate = DateTime.tryParse(widget.hrAction.prr) ?? DateTime.now();
+    _dd93Date = DateTime.tryParse(widget.hrAction.dd93);
+    _sglvDate = DateTime.tryParse(widget.hrAction.sglv);
+    _prrDate = DateTime.tryParse(widget.hrAction.prr);
   }
 
   void submit(BuildContext context) async {

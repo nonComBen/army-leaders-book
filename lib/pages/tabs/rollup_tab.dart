@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../methods/validate.dart';
 import '../../../models/setting.dart';
@@ -36,7 +35,6 @@ import '../../models/weapon.dart';
 import '../../pages/hr_actions_page.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/settings_provider.dart';
-import '../../providers/shared_prefs_provider.dart';
 import '../../providers/tracking_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/perstat_rollup_card.dart';
@@ -147,9 +145,6 @@ class HomePageState extends ConsumerState<RollupTab>
 
   //performs initial async functions
   void init() async {
-    PackageInfo packageInfo;
-    final prefs = ref.read(sharedPreferencesProvider);
-
     // if old home page overwrote user profile, rewrite
     if (_userObj!.userEmail == 'anonymous@email.com') {
       final user = ref.read(authProvider).currentUser()!;
@@ -183,16 +178,18 @@ class HomePageState extends ConsumerState<RollupTab>
     }
 
 // show change log if new version
-    if (!kIsWeb) {
-      packageInfo = await PackageInfo.fromPlatform();
-      if (prefs.getString('Version') == null ||
-          packageInfo.version != prefs.getString('Version')) {
-        prefs.setString('Version', packageInfo.version);
-        if (mounted) {
-          showChangeLog(context);
-        }
-      }
-    }
+    // if (!kIsWeb) {
+    //   PackageInfo packageInfo;
+    //   final prefs = ref.read(sharedPreferencesProvider);
+    //   packageInfo = await PackageInfo.fromPlatform();
+    //   if (prefs.getString('Version') == null ||
+    //       packageInfo.version != prefs.getString('Version')) {
+    //     prefs.setString('Version', packageInfo.version);
+    //     if (mounted) {
+    //       showChangeLog(context);
+    //     }
+    //   }
+    // }
   }
 
   @override

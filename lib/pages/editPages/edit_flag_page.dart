@@ -102,8 +102,8 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
     _expController.text = widget.flag.exp;
     _commentsController.text = widget.flag.comments;
 
-    _dateTime = DateTime.tryParse(widget.flag.date) ?? DateTime.now();
-    _expDate = DateTime.tryParse(widget.flag.exp) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.flag.date);
+    _expDate = DateTime.tryParse(widget.flag.exp);
   }
 
   void submit(BuildContext context) async {

@@ -91,8 +91,8 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
     _expController.text = widget.profile.exp;
     _commentsController.text = widget.profile.comments;
 
-    _dateTime = DateTime.tryParse(widget.profile.date) ?? DateTime.now();
-    _expDate = DateTime.tryParse(widget.profile.exp) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.profile.date);
+    _expDate = DateTime.tryParse(widget.profile.exp);
   }
 
   void submit(BuildContext context) async {

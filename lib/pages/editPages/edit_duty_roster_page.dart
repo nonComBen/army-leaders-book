@@ -87,8 +87,8 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
     _commentsController.text = widget.duty.comments;
     _locController.text = widget.duty.location;
 
-    _start = DateTime.tryParse(widget.duty.start) ?? DateTime.now();
-    _end = DateTime.tryParse(widget.duty.end) ?? DateTime.now();
+    _start = DateTime.tryParse(widget.duty.start);
+    _end = DateTime.tryParse(widget.duty.end);
   }
 
   void submit(BuildContext context) async {

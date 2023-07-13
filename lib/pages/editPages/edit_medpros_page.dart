@@ -180,28 +180,25 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       expanded = false;
     }
 
-    _phaDate = DateTime.tryParse(widget.medpro.pha) ?? DateTime.now();
-    _dentalDate = DateTime.tryParse(widget.medpro.dental) ?? DateTime.now();
-    _visionDate = DateTime.tryParse(widget.medpro.vision) ?? DateTime.now();
-    _hearingDate = DateTime.tryParse(widget.medpro.hearing) ?? DateTime.now();
-    _hivDate = DateTime.tryParse(widget.medpro.hiv) ?? DateTime.now();
-    _fluDate = DateTime.tryParse(widget.medpro.flu) ?? DateTime.now();
-    _mmrDate = DateTime.tryParse(widget.medpro.mmr) ?? DateTime.now();
-    _varicellaDate =
-        DateTime.tryParse(widget.medpro.varicella) ?? DateTime.now();
-    _polioDate = DateTime.tryParse(widget.medpro.polio) ?? DateTime.now();
-    _tuberDate = DateTime.tryParse(widget.medpro.tuberculin) ?? DateTime.now();
-    _tetanusDate = DateTime.tryParse(widget.medpro.tetanus) ?? DateTime.now();
-    _hepADate = DateTime.tryParse(widget.medpro.hepA) ?? DateTime.now();
-    _hepBDate = DateTime.tryParse(widget.medpro.hepB) ?? DateTime.now();
-    _encephalitisDate =
-        DateTime.tryParse(widget.medpro.encephalitis) ?? DateTime.now();
-    _meningDate =
-        DateTime.tryParse(widget.medpro.meningococcal) ?? DateTime.now();
-    _typhoidDate = DateTime.tryParse(widget.medpro.typhoid) ?? DateTime.now();
-    _yellowDate = DateTime.tryParse(widget.medpro.yellow) ?? DateTime.now();
-    _smallPoxDate = DateTime.tryParse(widget.medpro.smallPox) ?? DateTime.now();
-    _anthraxDate = DateTime.tryParse(widget.medpro.anthrax) ?? DateTime.now();
+    _phaDate = DateTime.tryParse(widget.medpro.pha);
+    _dentalDate = DateTime.tryParse(widget.medpro.dental);
+    _visionDate = DateTime.tryParse(widget.medpro.vision);
+    _hearingDate = DateTime.tryParse(widget.medpro.hearing);
+    _hivDate = DateTime.tryParse(widget.medpro.hiv);
+    _fluDate = DateTime.tryParse(widget.medpro.flu);
+    _mmrDate = DateTime.tryParse(widget.medpro.mmr);
+    _varicellaDate = DateTime.tryParse(widget.medpro.varicella);
+    _polioDate = DateTime.tryParse(widget.medpro.polio);
+    _tuberDate = DateTime.tryParse(widget.medpro.tuberculin);
+    _tetanusDate = DateTime.tryParse(widget.medpro.tetanus);
+    _hepADate = DateTime.tryParse(widget.medpro.hepA);
+    _hepBDate = DateTime.tryParse(widget.medpro.hepB);
+    _encephalitisDate = DateTime.tryParse(widget.medpro.encephalitis);
+    _meningDate = DateTime.tryParse(widget.medpro.meningococcal);
+    _typhoidDate = DateTime.tryParse(widget.medpro.typhoid);
+    _yellowDate = DateTime.tryParse(widget.medpro.yellow);
+    _smallPoxDate = DateTime.tryParse(widget.medpro.smallPox);
+    _anthraxDate = DateTime.tryParse(widget.medpro.anthrax);
   }
 
   void submit(BuildContext context) async {

@@ -126,8 +126,8 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       qualVehicles = widget.milLic.vehicles.toList();
     }
 
-    _dateTime = DateTime.tryParse(widget.milLic.date) ?? DateTime.now();
-    _expDate = DateTime.tryParse(widget.milLic.exp) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.milLic.date);
+    _expDate = DateTime.tryParse(widget.milLic.exp);
   }
 
   void submit(BuildContext context) async {

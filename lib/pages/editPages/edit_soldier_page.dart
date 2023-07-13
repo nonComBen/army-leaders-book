@@ -172,12 +172,12 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _povs = widget.soldier.povs.map((e) => POV.fromMap(e)).toList();
     _awards = widget.soldier.awards.map((e) => Award.fromMap(e)).toList();
 
-    _dorDate = DateTime.tryParse(widget.soldier.dor) ?? DateTime.now();
-    _lossDate = DateTime.tryParse(widget.soldier.lossDate) ?? DateTime.now();
-    _etsDate = DateTime.tryParse(widget.soldier.ets) ?? DateTime.now();
-    _gainDate = DateTime.tryParse(widget.soldier.gainDate) ?? DateTime.now();
-    _basdDate = DateTime.tryParse(widget.soldier.basd) ?? DateTime.now();
-    _pebdDate = DateTime.tryParse(widget.soldier.pebd) ?? DateTime.now();
+    _dorDate = DateTime.tryParse(widget.soldier.dor);
+    _lossDate = DateTime.tryParse(widget.soldier.lossDate);
+    _etsDate = DateTime.tryParse(widget.soldier.ets);
+    _gainDate = DateTime.tryParse(widget.soldier.gainDate);
+    _basdDate = DateTime.tryParse(widget.soldier.basd);
+    _pebdDate = DateTime.tryParse(widget.soldier.pebd);
   }
 
   @override
@@ -638,10 +638,11 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                 onChanged: (_) => updated = true,
               ),
               DateTextField(
-                  label: 'Date of Rank',
-                  date: _dorDate,
-                  minYears: 20,
-                  controller: _dorController),
+                label: 'Date of Rank',
+                date: _dorDate,
+                minYears: 20,
+                controller: _dorController,
+              ),
               PaddedTextField(
                 label: 'MOS',
                 decoration: const InputDecoration(

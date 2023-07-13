@@ -91,7 +91,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
     _purposeController.text = widget.counseling.purpose;
     _keyPointsController.text = widget.counseling.keyPoints;
 
-    _dateTime = DateTime.tryParse(widget.counseling.date) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.counseling.date);
   }
 
   void submit(BuildContext context, String userId) async {

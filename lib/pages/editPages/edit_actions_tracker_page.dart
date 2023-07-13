@@ -88,10 +88,8 @@ class EditActionsTrackerPageState
     _statusDateController.text = widget.action.statusDate;
     _remarksController.text = widget.action.remarks;
 
-    _dateTime =
-        DateTime.tryParse(widget.action.dateSubmitted) ?? DateTime.now();
-    _statusDateTime =
-        DateTime.tryParse(widget.action.statusDate) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.action.dateSubmitted);
+    _statusDateTime = DateTime.tryParse(widget.action.statusDate);
   }
 
   void submit(BuildContext context) async {

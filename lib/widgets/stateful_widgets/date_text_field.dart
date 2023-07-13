@@ -15,7 +15,7 @@ class DateTextField extends StatefulWidget {
   const DateTextField({
     super.key,
     required this.label,
-    required this.date,
+    this.date,
     this.minYears = 5,
     this.maxYears = 1,
     required this.controller,
@@ -39,8 +39,8 @@ class _DateTextFieldState extends State<DateTextField> {
     super.initState();
     if (widget.date != null) {
       _date = widget.date!;
+      widget.controller.text = dateFormat.format(widget.date!);
     }
-    widget.controller.text = dateFormat.format(_date);
   }
 
   @override

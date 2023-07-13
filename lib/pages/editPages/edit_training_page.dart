@@ -188,26 +188,25 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       addMoreLess = 'More Training';
     }
 
-    _cyberDate = DateTime.tryParse(widget.training.cyber) ?? DateTime.now();
-    _opsecDate = DateTime.tryParse(widget.training.opsec) ?? DateTime.now();
-    _antiTerrorDate =
-        DateTime.tryParse(widget.training.antiTerror) ?? DateTime.now();
-    _lawDate = DateTime.tryParse(widget.training.lawOfWar) ?? DateTime.now();
-    _persRecDate = DateTime.tryParse(widget.training.persRec) ?? DateTime.now();
-    _infoSecDate = DateTime.tryParse(widget.training.infoSec) ?? DateTime.now();
-    _ctipDate = DateTime.tryParse(widget.training.ctip) ?? DateTime.now();
-    _gatDate = DateTime.tryParse(widget.training.gat) ?? DateTime.now();
-    _sereDate = DateTime.tryParse(widget.training.sere) ?? DateTime.now();
-    _tarpDate = DateTime.tryParse(widget.training.tarp) ?? DateTime.now();
-    _eoDate = DateTime.tryParse(widget.training.eo) ?? DateTime.now();
-    _asapDate = DateTime.tryParse(widget.training.asap) ?? DateTime.now();
-    _sharpDate = DateTime.tryParse(widget.training.sharp) ?? DateTime.now();
-    _suicideDate = DateTime.tryParse(widget.training.suicide) ?? DateTime.now();
-    _add1Date = DateTime.tryParse(widget.training.add1Date) ?? DateTime.now();
-    _add2Date = DateTime.tryParse(widget.training.add2Date) ?? DateTime.now();
-    _add3Date = DateTime.tryParse(widget.training.add3Date) ?? DateTime.now();
-    _add4Date = DateTime.tryParse(widget.training.add4Date) ?? DateTime.now();
-    _add5Date = DateTime.tryParse(widget.training.add5Date) ?? DateTime.now();
+    _cyberDate = DateTime.tryParse(widget.training.cyber);
+    _opsecDate = DateTime.tryParse(widget.training.opsec);
+    _antiTerrorDate = DateTime.tryParse(widget.training.antiTerror);
+    _lawDate = DateTime.tryParse(widget.training.lawOfWar);
+    _persRecDate = DateTime.tryParse(widget.training.persRec);
+    _infoSecDate = DateTime.tryParse(widget.training.infoSec);
+    _ctipDate = DateTime.tryParse(widget.training.ctip);
+    _gatDate = DateTime.tryParse(widget.training.gat);
+    _sereDate = DateTime.tryParse(widget.training.sere);
+    _tarpDate = DateTime.tryParse(widget.training.tarp);
+    _eoDate = DateTime.tryParse(widget.training.eo);
+    _asapDate = DateTime.tryParse(widget.training.asap);
+    _sharpDate = DateTime.tryParse(widget.training.sharp);
+    _suicideDate = DateTime.tryParse(widget.training.suicide);
+    _add1Date = DateTime.tryParse(widget.training.add1Date);
+    _add2Date = DateTime.tryParse(widget.training.add2Date);
+    _add3Date = DateTime.tryParse(widget.training.add3Date);
+    _add4Date = DateTime.tryParse(widget.training.add4Date);
+    _add5Date = DateTime.tryParse(widget.training.add5Date);
   }
 
   void editTraining(

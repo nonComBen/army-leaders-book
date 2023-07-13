@@ -87,8 +87,8 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
     _commentsController.text = widget.tasking.comments;
     _locController.text = widget.tasking.location;
 
-    _start = DateTime.tryParse(widget.tasking.start) ?? DateTime.now();
-    _end = DateTime.tryParse(widget.tasking.end) ?? DateTime.now();
+    _start = DateTime.tryParse(widget.tasking.start);
+    _end = DateTime.tryParse(widget.tasking.end);
   }
 
   void submit(BuildContext context) async {

@@ -104,7 +104,7 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
     su = widget.profile.su;
     run = widget.profile.run;
 
-    _dateTime = DateTime.tryParse(widget.profile.date) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.profile.date);
   }
 
   void submit(BuildContext context) async {

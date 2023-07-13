@@ -124,8 +124,8 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     _commentsController.text = widget.perstat.comments;
     _locController.text = widget.perstat.location;
 
-    _start = DateTime.tryParse(_startController.text) ?? DateTime.now();
-    _end = DateTime.tryParse(_endController.text) ?? DateTime.now();
+    _start = DateTime.tryParse(_startController.text);
+    _end = DateTime.tryParse(_endController.text);
   }
 
   void submit(BuildContext context) async {

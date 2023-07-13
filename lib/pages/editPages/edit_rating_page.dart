@@ -110,8 +110,8 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
     _srController.text = widget.rating.sr;
     _reviewerController.text = widget.rating.reviewer;
 
-    _lastDate = DateTime.tryParse(widget.rating.last) ?? DateTime.now();
-    _nextDate = DateTime.tryParse(widget.rating.next) ?? DateTime.now();
+    _lastDate = DateTime.tryParse(widget.rating.last);
+    _nextDate = DateTime.tryParse(widget.rating.next);
   }
 
   void submit(BuildContext context) async {

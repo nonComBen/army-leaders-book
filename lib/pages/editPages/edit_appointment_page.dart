@@ -119,7 +119,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
     _commentsController.text = widget.apt.comments;
     _locController.text = widget.apt.location;
 
-    _dateTime = DateTime.tryParse(_dateController.text) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(_dateController.text);
     if (widget.apt.start.length == 4) {
       _startTime = TimeOfDay(
           hour: int.tryParse(widget.apt.start.substring(0, 2)) ?? 9,

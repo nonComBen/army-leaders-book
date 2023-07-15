@@ -278,11 +278,13 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditTempProfilePage(
-                  profile: TempProfile.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTempProfilePage(
+          profile: TempProfile.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
@@ -311,13 +313,13 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 430) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 575) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('Exp Date'),
           onSort: (int columnIndex, bool ascending) =>
@@ -353,13 +355,13 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
         style: exp ? expTextStyle : const TextStyle(),
       )),
     ];
-    if (width > 430) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['date'],
         style: exp ? expTextStyle : const TextStyle(),
       )));
     }
-    if (width > 575) {
+    if (width > 550) {
       cellList.add(DataCell(Text(
         documentSnapshot['exp'],
         style: exp ? expTextStyle : const TextStyle(),
@@ -508,6 +510,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

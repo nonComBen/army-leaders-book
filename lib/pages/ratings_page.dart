@@ -282,23 +282,27 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditRatingPage(
-                  rating: Rating.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditRatingPage(
+          rating: Rating.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditRatingPage(
-                  rating: Rating(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditRatingPage(
+          rating: Rating(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -577,6 +581,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

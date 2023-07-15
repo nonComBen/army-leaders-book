@@ -254,13 +254,13 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 510) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
@@ -288,10 +288,10 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['date'])));
     }
-    if (width > 510) {
+    if (width > 500) {
       cellList.add(DataCell(Text(documentSnapshot['section'])));
     }
     return cellList;
@@ -426,6 +426,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

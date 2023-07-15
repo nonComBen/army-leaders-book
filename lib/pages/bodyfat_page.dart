@@ -362,13 +362,13 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 530) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Height'),
           onSort: (int columnIndex, bool ascending) =>
@@ -434,7 +434,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                     : const TextStyle(),
       )),
     ];
-    if (width > 435) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['date'],
         style: fail
@@ -446,7 +446,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                     : const TextStyle(),
       )));
     }
-    if (width > 530) {
+    if (width > 500) {
       cellList.add(DataCell(Text(
         documentSnapshot['height'],
         style: fail
@@ -638,6 +638,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                   Card(
                     color: getContrastingBackgroundColor(context),
                     child: DataTable(
+                      checkboxHorizontalMargin: 8.0,
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
                       columns:

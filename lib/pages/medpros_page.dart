@@ -373,13 +373,13 @@ class MedProsPageState extends ConsumerState<MedProsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('PHA'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('Dental'),
           onSort: (int columnIndex, bool ascending) =>
@@ -425,10 +425,10 @@ class MedProsPageState extends ConsumerState<MedProsPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['pha'])));
     }
-    if (width > 560) {
+    if (width > 550) {
       cellList.add(DataCell(Text(documentSnapshot['dental'])));
     }
     if (width > 685) {
@@ -601,6 +601,7 @@ class MedProsPageState extends ConsumerState<MedProsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

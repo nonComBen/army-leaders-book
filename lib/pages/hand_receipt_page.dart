@@ -305,24 +305,28 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditHandReceiptPage(
-                  item: HandReceiptItem.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditHandReceiptPage(
+          item: HandReceiptItem.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditHandReceiptPage(
-                  item: HandReceiptItem(
-                    owner: userId,
-                    users: [userId],
-                    subComponents: [],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditHandReceiptPage(
+          item: HandReceiptItem(
+            owner: userId,
+            users: [userId],
+            subComponents: [],
+          ),
+        ),
+      ),
+    );
   }
 
   void _copyRecord() {
@@ -375,7 +379,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 595) {
+    if (width > 560) {
       columnList.add(DataColumn(
           label: const Expanded(
             flex: 1,
@@ -417,7 +421,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
     if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['location'])));
     }
-    if (width > 595) {
+    if (width > 560) {
       cellList.add(DataCell(Text(documentSnapshot['serial'])));
     }
     if (width > 685) {
@@ -586,6 +590,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

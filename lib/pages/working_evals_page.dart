@@ -224,24 +224,28 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWorkingEvalPage(
-                  eval: WorkingEval.fromSnapshot(
-                    _selectedDocuments[0],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWorkingEvalPage(
+          eval: WorkingEval.fromSnapshot(
+            _selectedDocuments[0],
+          ),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWorkingEvalPage(
-                  eval: WorkingEval(
-                    owner: userId,
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWorkingEvalPage(
+          eval: WorkingEval(
+            owner: userId,
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -252,15 +256,19 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Text('Name'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)),
+        label: const Text('Name'),
+        onSort: (int columnIndex, bool ascending) =>
+            onSortColumn(columnIndex, ascending),
+      ),
     ];
     if (width > 380) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     return columnList;
   }
@@ -414,6 +422,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

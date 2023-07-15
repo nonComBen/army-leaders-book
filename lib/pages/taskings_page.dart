@@ -312,23 +312,27 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditTaskingPage(
-                  tasking: Tasking.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTaskingPage(
+          tasking: Tasking.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditTaskingPage(
-                  tasking: Tasking(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTaskingPage(
+          tasking: Tasking(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -343,13 +347,13 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Start'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 570) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('End'),
           onSort: (int columnIndex, bool ascending) =>
@@ -399,7 +403,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
             : const TextStyle(),
       )),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['start'],
         style: overdue
@@ -407,7 +411,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
             : const TextStyle(),
       )));
     }
-    if (width > 570) {
+    if (width > 550) {
       cellList.add(DataCell(Text(
         documentSnapshot['end'],
         style: overdue
@@ -586,6 +590,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

@@ -317,23 +317,27 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditEquipmentPage(
-                  equipment: Equipment.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditEquipmentPage(
+          equipment: Equipment.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditEquipmentPage(
-                  equipment: Equipment(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditEquipmentPage(
+          equipment: Equipment(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -580,6 +584,7 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

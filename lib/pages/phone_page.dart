@@ -250,24 +250,28 @@ class PhonePageState extends ConsumerState<PhonePage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPhonePage(
-                  phone: Phone.fromSnapshot(
-                    _selectedDocuments[0],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPhonePage(
+          phone: Phone.fromSnapshot(
+            _selectedDocuments[0],
+          ),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPhonePage(
-                  phone: Phone(
-                    owner: userId,
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPhonePage(
+          phone: Phone(
+            owner: userId,
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -282,7 +286,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 425) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Phone No'),
           onSort: (int columnIndex, bool ascending) =>
@@ -315,7 +319,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
       DataCell(Text(documentSnapshot['title'])),
       DataCell(Text(documentSnapshot['name'])),
     ];
-    if (width > 425) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['phone'])));
     }
     if (width > 525) {
@@ -455,6 +459,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

@@ -324,23 +324,27 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditDutyRosterPage(
-                  duty: Duty.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditDutyRosterPage(
+          duty: Duty.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditDutyRosterPage(
-                  duty: Duty(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditDutyRosterPage(
+          duty: Duty(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -355,13 +359,13 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Start'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('End'),
           onSort: (int columnIndex, bool ascending) =>
@@ -405,7 +409,7 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
             : const TextStyle(),
       )),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['start'],
         style: overdue
@@ -413,7 +417,7 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
             : const TextStyle(),
       )));
     }
-    if (width > 560) {
+    if (width > 550) {
       cellList.add(DataCell(Text(
         documentSnapshot['end'],
         style: overdue
@@ -577,6 +581,7 @@ class DutyRosterPageState extends ConsumerState<DutyRosterPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

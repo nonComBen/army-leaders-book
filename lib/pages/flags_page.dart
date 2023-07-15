@@ -320,7 +320,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 415) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
@@ -368,7 +368,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
         style: amber ? amberTextStyle : const TextStyle(),
       )),
     ];
-    if (width > 415) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['date'],
         style: amber ? amberTextStyle : const TextStyle(),
@@ -537,6 +537,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
                   Card(
                     color: getContrastingBackgroundColor(context),
                     child: DataTable(
+                      checkboxHorizontalMargin: 8.0,
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
                       columns:

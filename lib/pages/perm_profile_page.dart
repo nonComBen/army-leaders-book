@@ -285,23 +285,27 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPermProfilePage(
-                  profile: PermProfile.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPermProfilePage(
+          profile: PermProfile.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPermProfilePage(
-                  profile: PermProfile(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPermProfilePage(
+          profile: PermProfile(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -312,39 +316,55 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
             onSortColumn(columnIndex, ascending),
       ),
       DataColumn(
-          label: const Text('Name'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)),
+        label: const Text('Name'),
+        onSort: (int columnIndex, bool ascending) =>
+            onSortColumn(columnIndex, ascending),
+      ),
     ];
     if (width > 395) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Shaving'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 500) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('PU'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 650) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('SU'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 735) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Run'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     if (width > 875) {
-      columnList.add(DataColumn(
+      columnList.add(
+        DataColumn(
           label: const Text('Alt Event'),
           onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
     }
     return columnList;
   }
@@ -369,19 +389,47 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
     if (width > 395) {
-      cellList.add(DataCell(Text(documentSnapshot['shaving'].toString())));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['shaving'].toString(),
+          ),
+        ),
+      );
     }
     if (width > 500) {
-      cellList.add(DataCell(Text(documentSnapshot['pu'].toString())));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['pu'].toString(),
+          ),
+        ),
+      );
     }
     if (width > 650) {
-      cellList.add(DataCell(Text(documentSnapshot['su'].toString())));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['su'].toString(),
+          ),
+        ),
+      );
     }
     if (width > 735) {
-      cellList.add(DataCell(Text(documentSnapshot['run'].toString())));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['run'].toString(),
+          ),
+        ),
+      );
     }
     if (width > 875) {
-      cellList.add(DataCell(Text(documentSnapshot['altEvent'])));
+      cellList.add(
+        DataCell(
+          Text(documentSnapshot['altEvent']),
+        ),
+      );
     }
     return cellList;
   }
@@ -544,6 +592,7 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

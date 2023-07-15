@@ -322,7 +322,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 480) {
+    if (width > 420) {
       columnList.add(DataColumn(
           label: const Text('Action'),
           onSort: (int columnIndex, bool ascending) =>
@@ -373,7 +373,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
         style: const TextStyle(),
       )),
     ];
-    if (width > 480) {
+    if (width > 420) {
       cellList.add(DataCell(Text(
         documentSnapshot['action'],
         style: const TextStyle(),
@@ -558,6 +558,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

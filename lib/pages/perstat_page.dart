@@ -350,7 +350,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 415) {
+    if (width > 400) {
       list.add(DataColumn(
           label: const Text('Start'),
           onSort: (int columnIndex, bool ascending) =>
@@ -407,7 +407,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
             : const TextStyle(),
       )),
     ];
-    if (width > 415) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['start'],
         style: overdue
@@ -594,6 +594,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

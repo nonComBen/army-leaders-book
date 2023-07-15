@@ -283,23 +283,27 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditHrActionPage(
-                  hrAction: HrAction.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditHrActionPage(
+          hrAction: HrAction.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditHrActionPage(
-                  hrAction: HrAction(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditHrActionPage(
+          hrAction: HrAction(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -314,13 +318,13 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('DD93'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('SGLV'),
           onSort: (int columnIndex, bool ascending) =>
@@ -354,10 +358,10 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['dd93'])));
     }
-    if (width > 560) {
+    if (width > 550) {
       cellList.add(DataCell(Text(documentSnapshot['sglv'])));
     }
     if (width > 700) {
@@ -511,6 +515,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

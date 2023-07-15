@@ -216,24 +216,28 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWorkingAwardPage(
-                  award: WorkingAward.fromSnapshot(
-                    _selectedDocuments[0],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWorkingAwardPage(
+          award: WorkingAward.fromSnapshot(
+            _selectedDocuments[0],
+          ),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWorkingAwardPage(
-                  award: WorkingAward(
-                    owner: userId,
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWorkingAwardPage(
+          award: WorkingAward(
+            owner: userId,
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -248,7 +252,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 420) {
       columnList.add(DataColumn(
           label: const Text('Reason'),
           onSort: (int columnIndex, bool ascending) =>
@@ -282,7 +286,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 435) {
+    if (width > 420) {
       cellList.add(DataCell(Text(documentSnapshot['awardReason'])));
     }
     if (width > 550) {
@@ -425,6 +429,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

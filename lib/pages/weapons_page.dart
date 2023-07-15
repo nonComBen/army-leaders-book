@@ -310,23 +310,27 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWeaponPage(
-                  weapon: Weapon.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWeaponPage(
+          weapon: Weapon.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWeaponPage(
-                  weapon: Weapon(
-                    owner: _userId!,
-                    users: [_userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWeaponPage(
+          weapon: Weapon(
+            owner: _userId!,
+            users: [_userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -341,13 +345,13 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 535) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Score'),
           onSort: (int columnIndex, bool ascending) =>
@@ -392,74 +396,94 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
     TextStyle failTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
+      DataCell(
+        Text(
+          documentSnapshot['rank'],
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
+      DataCell(
+        Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
     ];
-    if (width > 435) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+    if (width > 400) {
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['date'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
-    if (width > 535) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['score'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+    if (width > 500) {
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['score'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 650) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['max'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['max'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 800) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['type'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['type'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     return cellList;
   }
@@ -616,6 +640,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

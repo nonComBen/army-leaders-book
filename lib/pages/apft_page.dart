@@ -407,13 +407,13 @@ class ApftPageState extends ConsumerState<ApftPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 430) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 515) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Total'),
           onSort: (int columnIndex, bool ascending) =>
@@ -485,7 +485,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                     : const TextStyle(),
       )),
     ];
-    if (width > 430) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['date'],
         style: fail
@@ -497,7 +497,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                     : const TextStyle(),
       )));
     }
-    if (width > 515) {
+    if (width > 500) {
       cellList.add(DataCell(Text(
         documentSnapshot['total'].toString(),
         style: fail
@@ -705,6 +705,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

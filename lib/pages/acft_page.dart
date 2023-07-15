@@ -442,7 +442,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
             onSortColumn(columnIndex, ascending),
       ),
     ];
-    if (width > 430) {
+    if (width > 400) {
       columnList.add(
         DataColumn(
           label: const Text('Date'),
@@ -451,7 +451,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 520) {
+    if (width > 500) {
       columnList.add(
         DataColumn(
           label: const Text('Total'),
@@ -566,7 +566,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       ),
     ];
-    if (width > 430) {
+    if (width > 400) {
       cellList.add(
         DataCell(
           Text(
@@ -582,7 +582,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 520) {
+    if (width > 500) {
       cellList.add(
         DataCell(
           Text(
@@ -885,6 +885,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   Card(
                     color: getContrastingBackgroundColor(context),
                     child: DataTable(
+                      checkboxHorizontalMargin: 8.0,
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
                       columns:

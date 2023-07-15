@@ -342,13 +342,13 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Cyber'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('OPSEC'),
           onSort: (int columnIndex, bool ascending) =>
@@ -388,10 +388,10 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['cyber'])));
     }
-    if (width > 560) {
+    if (width > 550) {
       cellList.add(DataCell(Text(documentSnapshot['opsec'])));
     }
     if (width > 685) {
@@ -557,6 +557,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
                 Card(
                   color: getContrastingBackgroundColor(context),
                   child: DataTable(
+                    checkboxHorizontalMargin: 8.0,
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

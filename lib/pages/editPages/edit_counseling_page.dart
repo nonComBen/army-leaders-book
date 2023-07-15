@@ -185,11 +185,15 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: Counseling.collectionName,
-                        userId: user.uid,
-                        allSoldiers: allSoldiers!);
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Counseling.collectionName,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

@@ -181,11 +181,15 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: Duty.collectionName,
-                        userId: user.uid,
-                        allSoldiers: allSoldiers!);
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Duty.collectionName,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

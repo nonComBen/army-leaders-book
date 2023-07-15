@@ -317,12 +317,15 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
                       collection: HandReceiptItem.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -339,7 +342,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
               ),
               PaddedTextField(
                 controller: _modelController,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 label: 'Model #',
                 decoration: const InputDecoration(
                   labelText: 'Model #',

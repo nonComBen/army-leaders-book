@@ -508,7 +508,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) async {
-                    lessSoldiers ??= await createLessSoldiers(
+                    lessSoldiers = await createLessSoldiers(
                       userId: user.uid,
                       collection: Acft.collectionName,
                       allSoldiers: allSoldiers,

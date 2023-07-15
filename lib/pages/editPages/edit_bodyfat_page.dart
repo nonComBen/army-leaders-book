@@ -496,11 +496,15 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: Bodyfat.collectionName,
-                        userId: user.uid,
-                        allSoldiers: allSoldiers!);
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Bodyfat.collectionName,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

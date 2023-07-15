@@ -196,12 +196,15 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
                       collection: WorkingAward.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

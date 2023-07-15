@@ -139,7 +139,9 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       _formKey,
       [_dateController.text, _expController.text],
     )) {
-      if (qualVehicles!.last == '') qualVehicles!.removeLast();
+      if (qualVehicles!.isNotEmpty && qualVehicles!.last == '') {
+        qualVehicles!.removeLast();
+      }
       MilLic saveMilLic = MilLic(
         id: widget.milLic.id,
         soldierId: _soldierId,
@@ -290,12 +292,15 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
                       collection: MilLic.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

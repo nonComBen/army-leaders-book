@@ -255,12 +255,15 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
                       collection: Weapon.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

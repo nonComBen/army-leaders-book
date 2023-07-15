@@ -293,13 +293,16 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
                       collection: TempProfile.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                       profileType: 'Permanent',
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

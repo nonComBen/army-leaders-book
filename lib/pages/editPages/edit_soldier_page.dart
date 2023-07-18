@@ -758,7 +758,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
               PaddedTextField(
                 label: 'Hat Size',
                 decoration: const InputDecoration(
-                  labelText: 'Hit Size',
+                  labelText: 'Hat Size',
                 ),
                 controller: _hatController,
                 keyboardType: TextInputType.text,

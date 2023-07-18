@@ -319,7 +319,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 550) {
+    if (width > 580) {
       columnList.add(DataColumn(
           label: const Text('Exp Date'),
           onSort: (int columnIndex, bool ascending) =>
@@ -361,7 +361,7 @@ class TempProfilesPageState extends ConsumerState<TempProfilesPage> {
         style: exp ? expTextStyle : const TextStyle(),
       )));
     }
-    if (width > 550) {
+    if (width > 580) {
       cellList.add(DataCell(Text(
         documentSnapshot['exp'],
         style: exp ? expTextStyle : const TextStyle(),

@@ -328,19 +328,19 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 640) {
+    if (width > 690) {
       columnList.add(DataColumn(
           label: const Text('Current Status'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 790) {
+    if (width > 840) {
       columnList.add(DataColumn(
           label: const Text('Status Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 960) {
+    if (width > 1010) {
       columnList.add(DataColumn(
           label: const Text('Date Submitted'),
           onSort: (int columnIndex, bool ascending) =>
@@ -379,19 +379,19 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
         style: const TextStyle(),
       )));
     }
-    if (width > 640) {
+    if (width > 690) {
       cellList.add(DataCell(Text(
         documentSnapshot['currentStatus'].toString(),
         style: const TextStyle(),
       )));
     }
-    if (width > 790) {
+    if (width > 840) {
       cellList.add(DataCell(Text(
         documentSnapshot['statusDate'].toString(),
         style: const TextStyle(),
       )));
     }
-    if (width > 960) {
+    if (width > 1010) {
       cellList.add(DataCell(Text(
         documentSnapshot['dateSubmitted'].toString(),
         style: const TextStyle(),

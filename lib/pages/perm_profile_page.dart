@@ -357,7 +357,7 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
         ),
       );
     }
-    if (width > 875) {
+    if (width > 880) {
       columnList.add(
         DataColumn(
           label: const Text('Alt Event'),
@@ -424,7 +424,7 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
         ),
       );
     }
-    if (width > 875) {
+    if (width > 880) {
       cellList.add(
         DataCell(
           Text(documentSnapshot['altEvent']),

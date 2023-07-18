@@ -354,7 +354,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 685) {
+    if (width > 700) {
       columnList.add(DataColumn(
           label: const Text('AT Lvl 1'),
           onSort: (int columnIndex, bool ascending) =>
@@ -394,7 +394,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
     if (width > 550) {
       cellList.add(DataCell(Text(documentSnapshot['opsec'])));
     }
-    if (width > 685) {
+    if (width > 700) {
       cellList.add(DataCell(Text(documentSnapshot['antiTerror'])));
     }
     if (width > 825) {

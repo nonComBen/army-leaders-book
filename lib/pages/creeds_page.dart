@@ -128,18 +128,18 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
           child: const Text(
             'March along, sing our song, with the Army of the free.\n'
             'Count the brave, count the true, who have fought to victory.\n'
-            'We’re the Army and proud of our name!\n'
-            'We’re the Army and proudly proclaim:\n\n'
+            'We\'re the Army and proud of our name!\n'
+            'We\'re the Army and proudly proclaim:\n\n'
             'First to fight for the right,\n'
-            'And to build the Nation’s might,\n'
+            'And to build the Nation\'s might,\n'
             'And the Army goes rolling along.\n'
             'Proud of all we have done,\n'
-            'Fighting till the battle’s won,\n'
+            'Fighting till the battle\'s won,\n'
             'And the Army goes rolling along.\n\n'
-            'Then it’s hi! hi! hey!\n'
-            'The Army’s on its way.\n'
+            'Then it\'s hi! hi! hey!\n'
+            'The Army\'s on its way.\n'
             'Count off the cadence loud and strong;\n'
-            'For where’er we go,\n'
+            'For where\'er we go,\n'
             'You will always know\n'
             'That the Army goes rolling along.',
             textAlign: TextAlign.start,
@@ -165,7 +165,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             'You fulfill your obligations as a part of your unit every time you resist the temptation to take “shortcuts” '
             'that might undermine the integrity of the final product.\n\n'
             'RESPECT\n'
-            'Treat people as they should be treated. In the Soldier’s Code, we pledge to “treat others with dignity and '
+            'Treat people as they should be treated. In the Soldier\'s Code, we pledge to “treat others with dignity and '
             'respect while expecting others to do the same.” Respect is what allows us to appreciate the best in other '
             'people. Respect is trusting that all people have done their jobs and fulfilled their duty. And self-respect '
             'is a vital ingredient with the Army value of respect, which results from knowing you have put forth your best '
@@ -176,12 +176,12 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
             'gain. The basic building block of selfless service is the commitment of each team member to go a little further, '
             'endure a little longer, and look a little closer to see how he or she can add to the effort.\n\n'
             'HONOR\n'
-            'Live up to Army values. The nation’s highest military award is The Medal of Honor. This award goes to Soldiers '
+            'Live up to Army values. The nation\'s highest military award is The Medal of Honor. This award goes to Soldiers '
             'who make honor a matter of daily living — Soldiers who develop the habit of being honorable, and solidify that '
             'habit with every value choice they make. Honor is a matter of carrying out, acting, and living the values of '
             'respect, duty, loyalty, selfless service, integrity and personal courage in everything you do.\n\n'
             'INTEGRITY\n'
-            'Do what’s right, legally and morally. Integrity is a quality you develop by adhering to moral principles. It '
+            'Do what\'s right, legally and morally. Integrity is a quality you develop by adhering to moral principles. It '
             'requires that you do and say nothing that deceives others. As your integrity grows, so does the trust others '
             'place in you. The more choices you make based on integrity, the more this highly prized value will affect your '
             'relationships with family and friends, and, finally, the fundamental acceptance of yourself.\n\n'
@@ -291,7 +291,6 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
         )),
   ];
   late BannerAd myBanner;
-  bool _adLoaded = false;
 
   @override
   void initState() {
@@ -308,13 +307,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
               : 'ca-app-pub-2431077176117105/4531945950',
       size: AdSize.banner,
       request: AdRequest(nonPersonalizedAds: !trackingAllowed),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _adLoaded = true;
-          });
-        },
-      ),
+      listener: const BannerAdListener(),
     );
 
     if (!kIsWeb) {
@@ -330,9 +323,6 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb && !isSubscribed) {
-      myBanner.load();
-    }
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
       title: 'Creeds, Etc.',
@@ -363,7 +353,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
                                   fontSize: 20,
                                 ),
                               ),
-                              trailing: Platform.isAndroid
+                              trailing: kIsWeb || Platform.isAndroid
                                   ? Icon(
                                       Icons.arrow_drop_down,
                                       color: getOnPrimaryColor(context),
@@ -385,7 +375,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
                   ],
                 ),
               ),
-              if (!isSubscribed && _adLoaded)
+              if (!isSubscribed && !kIsWeb)
                 Container(
                   alignment: Alignment.center,
                   width: myBanner.size.width.toDouble(),

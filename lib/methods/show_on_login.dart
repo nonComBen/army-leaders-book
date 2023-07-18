@@ -2,39 +2,21 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:leaders_book/widgets/header_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../models/leader.dart';
 import '../../widgets/formatted_text_button.dart';
-
-Widget headerText(String text) {
-  return Padding(
-    padding: const EdgeInsets.all(4.0),
-    child: Text(
-      text,
-      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-    ),
-  );
-}
-
-Widget normalText(String text) {
-  return Padding(
-    padding: const EdgeInsets.all(4.0),
-    child: Text(
-      text,
-      textAlign: TextAlign.start,
-    ),
-  );
-}
+import '../widgets/standard_text.dart';
 
 Future<void> showTos(BuildContext context, String? userId) async {
   Widget title = const Text('Terms and Conditions');
-  Widget content = SingleChildScrollView(
+  Widget content = const SingleChildScrollView(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        normalText('Last updated: July 28, 2019'
+      children: [
+        StandardText('Last updated: July 28, 2019'
             '\n\nPlease read these Terms and Conditions ("Terms", "Terms and Conditions")'
             'carefully before using the https://armyleadersbook.app website and the Army'
             'Leader\'s Book mobile application (together, or individually, the "Service")'
@@ -45,8 +27,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             '\n\nBy accessing or using the Service you agree to be bound by these Terms. If you'
             'disagree with any part of the terms then you do not have permission to access'
             'the Service.'),
-        headerText('Subscriptions'),
-        normalText(
+        HeaderText('Subscriptions'),
+        StandardText(
             'Some parts of the Service are billed on a subscription basis'
             '("Subscription(s)"). You will be billed in advance on a recurring and periodic'
             'basis ("Billing Cycle"). Billing cycles are set on a annual basis.'
@@ -65,8 +47,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             'issue an electronic invoice indicating that you must proceed manually, within'
             'a certain deadline date, with the full payment corresponding to the billing'
             'period as indicated on the invoice.'),
-        headerText('Free Trial'),
-        normalText(
+        HeaderText('Free Trial'),
+        StandardText(
             'Army Leader\'s Book may, at its sole discretion, offer a Subscription with a'
             'free trial for a limited period of time ("Free Trial").'
             '\n\nYou may be required to enter your billing information in order to sign up for'
@@ -79,8 +61,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             '\n\nAt any time and without notice, Army Leader\'s Book reserves the right to (i)'
             'modify the terms and conditions of the Free Trial offer, or (ii) cancel such'
             'Free Trial offer.'),
-        headerText('Fee Changes'),
-        normalText(
+        HeaderText('Fee Changes'),
+        StandardText(
             'Army Leader\'s Book, in its sole discretion and at any time, may modify the'
             'Subscription fees for the Subscriptions. Any Subscription fee change will'
             'become effective at the end of the then-current Billing Cycle.'
@@ -89,13 +71,13 @@ Future<void> showTos(BuildContext context, String? userId) async {
             'Subscription before such change becomes effective.'
             '\n\nYour continued use of the Service after the Subscription fee change comes into'
             'effect constitutes your agreement to pay the modified Subscription fee amount.'),
-        headerText('Refunds'),
-        normalText(
+        HeaderText('Refunds'),
+        StandardText(
             'Certain refund requests for Subscriptions may be considered by Army Leader\'s'
             'Book on a case-by-case basis and granted in sole discretion of Army Leader\'s'
             'Book.'),
-        headerText('Accounts'),
-        normalText(
+        HeaderText('Accounts'),
+        StandardText(
             'When you create an account with us, you guarantee that you are above the age'
             'of 18, and that the information you provide us is accurate, complete, and'
             'current at all times. Inaccurate, incomplete, or obsolete information may'
@@ -107,16 +89,16 @@ Future<void> showTos(BuildContext context, String? userId) async {
             'your password is with our Service or a third-party service. You must notify us'
             'immediately upon becoming aware of any breach of security or unauthorized use'
             'of your account.'),
-        headerText('Intellectual Property'),
-        normalText(
+        HeaderText('Intellectual Property'),
+        StandardText(
             'The Service and its original content, features and functionality are and will'
             'remain the exclusive property of Army Leader\'s Book and its licensors. The'
             'Service is protected by copyright, trademark, and other laws of both the'
             'United States and foreign countries. Our trademarks and trade dress may not be'
             'used in connection with any product or service without the prior written'
             'consent of Army Leader\'s Book.'),
-        headerText('Links To Other Web Sites'),
-        normalText(
+        HeaderText('Links To Other Web Sites'),
+        StandardText(
             'Our Service may contain links to third party web sites or services that are'
             'not owned or controlled by Army Leader\'s Book'
             '\n\nArmy Leader\'s Book has no control over, and assumes no responsibility for the'
@@ -130,8 +112,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             'services.'
             '\n\nWe strongly advise you to read the terms and conditions and privacy policies'
             'of any third party web sites or services that you visit.'),
-        headerText('Termination'),
-        normalText(
+        HeaderText('Termination'),
+        StandardText(
             'We may terminate or suspend your account and bar access to the Service'
             'immediately, without prior notice or liability, under our sole discretion, for'
             'any reason whatsoever and without limitation, including but not limited to a'
@@ -141,8 +123,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             '\n\nAll provisions of the Terms which by their nature should survive termination'
             'shall survive termination, including, without limitation, ownership'
             'provisions, warranty disclaimers, indemnity and limitations of liability.'),
-        headerText('Indemnification'),
-        normalText(
+        HeaderText('Indemnification'),
+        StandardText(
             'You agree to defend, indemnify and hold harmless Army Leader\'s Book and its'
             'licensee and licensors, and their employees, contractors, agents, officers and'
             'directors, from and against any and all claims, damages, obligations, losses,'
@@ -150,8 +132,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             'attorney\'s fees), resulting from or arising out of a) your use and access of'
             'the Service, by you or any person using your account and password, or b) a'
             'breach of these Terms.'),
-        headerText('Limitation Of Liability'),
-        normalText(
+        HeaderText('Limitation Of Liability'),
+        StandardText(
             'In no event shall Army Leader\'s Book, nor its directors, employees, partners,'
             'agents, suppliers, or affiliates, be liable for any indirect, incidental,'
             'special, consequential or punitive damages, including without limitation, loss'
@@ -163,8 +145,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             '(including negligence) or any other legal theory, whether or not we have been'
             'informed of the possibility of such damage, and even if a remedy set forth'
             'herein is found to have failed of its essential purpose.'),
-        headerText('Disclaimer'),
-        normalText(
+        HeaderText('Disclaimer'),
+        StandardText(
             'Your use of the Service is at your sole risk. The Service is provided on an'
             '"AS IS" and "AS AVAILABLE" basis. The Service is provided without warranties'
             'of any kind, whether express or implied, including, but not limited to,'
@@ -175,13 +157,13 @@ Future<void> showTos(BuildContext context, String? userId) async {
             'at any particular time or location; b) any errors or defects will be'
             'corrected; c) the Service is free of viruses or other harmful components; or'
             'd) the results of using the Service will meet your requirements.'),
-        headerText('Exclusions'),
-        normalText(
+        HeaderText('Exclusions'),
+        StandardText(
             'Some jurisdictions do not allow the exclusion of certain warranties or the'
             'exclusion or limitation of liability for consequential or incidental damages,'
             'so the limitations above may not apply to you.'),
-        headerText('Governing Law'),
-        normalText(
+        HeaderText('Governing Law'),
+        StandardText(
             'These Terms shall be governed and construed in accordance with the laws of'
             'Pennsylvania, United States, without regard to its conflict of law provisions.'
             '\n\nOur failure to enforce any right or provision of these Terms will not be'
@@ -190,8 +172,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             'Terms will remain in effect. These Terms constitute the entire agreement'
             'between us regarding our Service, and supersede and replace any prior'
             'agreements we might have had between us regarding the Service.'),
-        headerText('Changes'),
-        normalText(
+        HeaderText('Changes'),
+        StandardText(
             'We reserve the right, at our sole discretion, to modify or replace these Terms'
             'at any time. If a revision is material we will provide at least 30 days notice'
             'prior to any new terms taking effect. What constitutes a material change will'
@@ -199,8 +181,8 @@ Future<void> showTos(BuildContext context, String? userId) async {
             '\n\nBy continuing to access or use our Service after any revisions become'
             'effective, you agree to be bound by the revised terms. If you do not agree to'
             'the new terms, you are no longer authorized to use the Service.'),
-        headerText('Contact Us'),
-        normalText(
+        HeaderText('Contact Us'),
+        StandardText(
             'If you have any questions about these Terms, please contact us at armynoncomtools@gmail.com.')
       ],
     ),
@@ -227,24 +209,24 @@ Future<void> showTos(BuildContext context, String? userId) async {
 List<Widget> androidNewText() {
   return [
     const Text(
-      '4.3.4 (29 June 2023)\n',
+      '4.3.6 (16 July 2023)\n',
       style: TextStyle(fontWeight: FontWeight.bold),
     ),
-    const Text(
-        '[New] Added notifications for ACFT, Body Comp, Weapons, Medpros, HR Metrics, and Appointments. See FAQ page for instructions.'),
-    const Text('[Fix] Bug fixes'),
+    const Text('[Fix] Fixed Remove Soldiers Already Added checkbox.'),
+    const Text('[Fix] Fixed Hand Receipts not being able to be added/updated.'),
+    const Text('[Fix] Removed auto-populating date fields with current date.'),
   ];
 }
 
 List<Widget> iosNewText() {
   return [
     const Text(
-      '4.3.4 (29 June 2023)\n',
+      '4.3.6 (16 July 2023)\n',
       style: TextStyle(fontWeight: FontWeight.bold),
     ),
-    const Text(
-        '[New] Added notifications for ACFT, Body Comp, Weapons, Medpros, HR Metrics, and Appointments. See FAQ page for instructions.'),
-    const Text('[Fix] Bug fixes'),
+    const Text('[Fix] Fixed Remove Soldiers Already Added switch.'),
+    const Text('[Fix] Fixed Hand Receipts not being able to be added/updated.'),
+    const Text('[Fix] Removed auto-populating date fields with current date.'),
   ];
 }
 

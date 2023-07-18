@@ -329,13 +329,13 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 685) {
+    if (width > 705) {
       columnList.add(DataColumn(
           label: const Text('Reviewer'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 835) {
+    if (width > 840) {
       columnList.add(DataColumn(
           label: const Text('Next Due'),
           onSort: (int columnIndex, bool ascending) =>
@@ -402,7 +402,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                 : const TextStyle(),
       )));
     }
-    if (width > 685) {
+    if (width > 705) {
       cellList.add(DataCell(Text(
         documentSnapshot['reviewer'],
         style: overdue
@@ -412,7 +412,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                 : const TextStyle(),
       )));
     }
-    if (width > 835) {
+    if (width > 840) {
       cellList.add(
         DataCell(
           Text(

@@ -376,7 +376,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
     }
     if (width > 600) {
       cellList.add(DataCell(Text(
-        documentSnapshot['type'],
+        documentSnapshot['type'] ?? '',
         style: amber ? amberTextStyle : const TextStyle(),
         overflow: TextOverflow.ellipsis,
       )));

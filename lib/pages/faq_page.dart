@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/auth_provider.dart';
@@ -180,7 +181,7 @@ class FaqPageState extends ConsumerState<FaqPage> {
                           ),
                           softWrap: true,
                         ),
-                        trailing: Platform.isAndroid
+                        trailing: kIsWeb || Platform.isAndroid
                             ? Icon(
                                 Icons.arrow_drop_down,
                                 color: getOnPrimaryColor(context),

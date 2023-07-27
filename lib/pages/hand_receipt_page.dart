@@ -28,6 +28,7 @@ import '../pdf/hand_receipt_pdf.dart';
 import '../providers/subscription_state.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/table_frame.dart';
 import 'editPages/edit_hand_receipt_page.dart';
@@ -589,8 +590,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
-                    checkboxHorizontalMargin: 8.0,
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

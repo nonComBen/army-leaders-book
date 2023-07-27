@@ -27,6 +27,7 @@ import '../models/app_bar_option.dart';
 import '../pdf/perstats_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -593,8 +594,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
-                    checkboxHorizontalMargin: 8.0,
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

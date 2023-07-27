@@ -35,6 +35,7 @@ import '../pdf/acft_pdf.dart';
 import '../providers/subscription_state.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/table_frame.dart';
 import 'editPages/edit_acft_page.dart';
 import 'uploadPages/upload_acft_page.dart';
@@ -884,8 +885,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
                     color: getContrastingBackgroundColor(context),
-                    child: DataTable(
-                      checkboxHorizontalMargin: 8.0,
+                    child: CustomDataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
                       columns:

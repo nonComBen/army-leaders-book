@@ -107,160 +107,264 @@ class OverflowTab extends ConsumerWidget {
       children: <Widget>[
         const CustomDrawerHeader(),
         PlatformListTile(
-          title: const Text('PERSTAT'),
-          leading: const Icon(Icons.date_range),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(PerstatPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Appointments'),
-          leading: const Icon(Icons.access_time),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(AptsPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('APFT Stats'),
-          leading: const Icon(Icons.directions_run),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(ApftPage.routeName);
-          },
-        ),
-        PlatformListTile(
           title: const Text('ACFT Stats'),
-          leading: const Icon(Icons.fitness_center),
+          leading: Icon(
+            Icons.fitness_center,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(AcftPage.routeName);
           },
         ),
         PlatformListTile(
-          title: const Text('Temporary Profiles'),
-          leading: const Icon(Icons.healing),
+          title: const Text('Actions Tracker'),
+          leading: Icon(
+            Icons.article,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
-                .pushNamed(TempProfilesPage.routeName);
+                .pushNamed(ActionsTrackerPage.routeName);
           },
         ),
         PlatformListTile(
-          title: const Text('Permanent Profiles'),
-          leading: const Icon(Icons.accessible_forward),
+          title: const Text('Alert Roster'),
+          leading: Icon(
+            Icons.device_hub,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
-                .pushNamed(PermProfilesPage.routeName);
+                .pushNamed(AlertRosterPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('APFT Stats'),
+          leading: Icon(
+            Icons.directions_run,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(ApftPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Appointments'),
+          leading: Icon(
+            Icons.access_time,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(AptsPage.routeName);
           },
         ),
         PlatformListTile(
           title: const Text('Body Comp'),
-          leading: const Icon(Icons.accessibility),
+          leading: Icon(
+            Icons.accessibility,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(BodyfatPage.routeName);
           },
         ),
         PlatformListTile(
-          title: const Text('Weapon Stats'),
-          leading: const Icon(Icons.my_location),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(WeaponsPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Flags'),
-          leading: const Icon(Icons.assistant_photo),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(FlagsPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Rating Scheme'),
-          leading: const Icon(Icons.star),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(RatingsPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('MedPros'),
-          leading: const Icon(Icons.local_hospital),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(MedProsPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Training'),
-          leading: const Icon(Icons.school),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(TrainingPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Equipment'),
-          leading: const Icon(Icons.important_devices),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(EquipmentPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Hand Receipt'),
-          leading: const Icon(Icons.request_quote),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(HandReceiptPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Military License'),
-          leading: const Icon(Icons.local_shipping),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(MilLicPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Duty Roster'),
-          leading: const Icon(Icons.sentiment_very_dissatisfied),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(DutyRosterPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Taskings'),
-          leading: const Icon(Icons.sentiment_dissatisfied),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(TaskingsPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('HR Metrics'),
-          leading: const Icon(Icons.assignment),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(HrActionsPage.routeName);
-          },
-        ),
-        PlatformListTile(
           title: const Text('Counselings'),
-          leading: const Icon(Icons.folder_shared),
+          leading: Icon(
+            Icons.folder_shared,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(CounselingsPage.routeName);
           },
         ),
         PlatformListTile(
+          title: const Text('Duty Roster'),
+          leading: Icon(
+            Icons.sentiment_very_dissatisfied,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(DutyRosterPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Equipment'),
+          leading: Icon(
+            Icons.important_devices,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(EquipmentPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Flags'),
+          leading: Icon(
+            Icons.assistant_photo,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(FlagsPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Hand Receipt'),
+          leading: Icon(
+            Icons.request_quote,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(HandReceiptPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('HR Metrics'),
+          leading: Icon(
+            Icons.assignment,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(HrActionsPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('MedPros'),
+          leading: Icon(
+            Icons.local_hospital,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(MedProsPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Military License'),
+          leading: Icon(
+            Icons.local_shipping,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(MilLicPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Notes'),
+          leading: Icon(
+            Icons.note,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(NotesPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('PERSTAT'),
+          leading: Icon(
+            Icons.date_range,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(PerstatPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Phone Numbers'),
+          leading: Icon(
+            Icons.phone,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(PhonePage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Profiles - Temporary'),
+          leading: Icon(
+            Icons.healing,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(TempProfilesPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Profiles - Permanent'),
+          leading: Icon(
+            Icons.accessible_forward,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(PermProfilesPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Rating Scheme'),
+          leading: Icon(
+            Icons.star,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(RatingsPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Taskings'),
+          leading: Icon(
+            Icons.sentiment_dissatisfied,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(TaskingsPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Training'),
+          leading: Icon(
+            Icons.school,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(TrainingPage.routeName);
+          },
+        ),
+        PlatformListTile(
+          title: const Text('Weapon Stats'),
+          leading: Icon(
+            Icons.my_location,
+            color: getTextColor(context),
+          ),
+          onTap: () {
+            Navigator.of(context, rootNavigator: true)
+                .pushNamed(WeaponsPage.routeName);
+          },
+        ),
+        PlatformListTile(
           title: const Text('Working Awards'),
-          leading: const Icon(Icons.bookmark),
+          leading: Icon(
+            Icons.bookmark,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(WorkingAwardsPage.routeName);
@@ -268,42 +372,13 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Working Evals'),
-          leading: const Icon(Icons.star_half),
+          leading: Icon(
+            Icons.star_half,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(WorkingEvalsPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Actions Tracker'),
-          leading: const Icon(Icons.article),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(ActionsTrackerPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Phone Numbers'),
-          leading: const Icon(Icons.phone),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(PhonePage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Notes'),
-          leading: const Icon(Icons.note),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(NotesPage.routeName);
-          },
-        ),
-        PlatformListTile(
-          title: const Text('Alert Roster'),
-          leading: const Icon(Icons.device_hub),
-          onTap: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed(AlertRosterPage.routeName);
           },
         ),
         Divider(
@@ -311,7 +386,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Creeds, Etc.'),
-          leading: const Icon(Icons.record_voice_over),
+          leading: Icon(
+            Icons.record_voice_over,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(CreedsPage.routeName);
@@ -319,7 +397,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Subscription'),
-          leading: const Icon(Icons.subscriptions),
+          leading: Icon(
+            Icons.subscriptions,
+            color: getTextColor(context),
+          ),
           onTap: () {
             if (!isSubscribedAdFree) {
               if (!kIsWeb) {
@@ -336,7 +417,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Rate'),
-          leading: const Icon(Icons.rate_review),
+          leading: Icon(
+            Icons.rate_review,
+            color: getTextColor(context),
+          ),
           onTap: kIsWeb
               ? null
               : () {
@@ -347,7 +431,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('FAQ'),
-          leading: const Icon(Icons.info_outline),
+          leading: Icon(
+            Icons.info_outline,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(FaqPage.routeName);
@@ -355,14 +442,20 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Contact'),
-          leading: const Icon(Icons.email),
+          leading: Icon(
+            Icons.email,
+            color: getTextColor(context),
+          ),
           onTap: () {
             launchURL('armynoncomtools@gmail.com');
           },
         ),
         PlatformListTile(
           title: const Text('Privacy Policy'),
-          leading: const Icon(Icons.info),
+          leading: Icon(
+            Icons.info,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(PrivacyPolicyPage.routeName);
@@ -370,7 +463,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Terms and Conditions'),
-          leading: const Icon(Icons.info),
+          leading: Icon(
+            Icons.info,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(TosPage.routeName);
@@ -378,7 +474,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Settings'),
-          leading: const Icon(Icons.settings),
+          leading: Icon(
+            Icons.settings,
+            color: getTextColor(context),
+          ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(SettingsPage.routeName);
@@ -386,7 +485,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Edit Profile'),
-          leading: const Icon(Icons.person),
+          leading: Icon(
+            Icons.person,
+            color: getTextColor(context),
+          ),
           onTap: () {
             if (!user!.isAnonymous) {
               Navigator.of(context).push(
@@ -410,7 +512,10 @@ class OverflowTab extends ConsumerWidget {
         ),
         PlatformListTile(
           title: const Text('Sign Out'),
-          leading: const Icon(Icons.directions_walk),
+          leading: Icon(
+            Icons.directions_walk,
+            color: getTextColor(context),
+          ),
           onTap: () {
             if (user!.isAnonymous) {
               signOutWarning(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_icon_button.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_list_tile.dart';
+
+import '../widgets/header_text.dart';
+import '../widgets/platform_widgets/platform_icon_button.dart';
 
 import '../methods/theme_methods.dart';
 
@@ -17,18 +18,36 @@ class MoreTilesHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: PlatformListTile(
-        title: Text(
-          label,
-          style: TextStyle(color: getOnPrimaryColor(context)),
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: getPrimaryColor(context),
+          borderRadius: BorderRadius.circular(12.0),
         ),
-        color: getPrimaryColor(context),
-        trailing: PlatformIconButton(
-          icon: Icon(
-            Icons.add,
-            color: getOnPrimaryColor(context),
-          ),
-          onPressed: onPressed,
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: HeaderText(
+                  label,
+                  textAlign: TextAlign.start,
+                  color: getOnPrimaryColor(context),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: PlatformIconButton(
+                icon: Icon(
+                  Icons.add,
+                  size: 28,
+                  color: getOnPrimaryColor(context),
+                ),
+                onPressed: onPressed,
+              ),
+            ),
+          ],
         ),
       ),
     );

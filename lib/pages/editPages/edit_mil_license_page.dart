@@ -18,7 +18,7 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
-import '../../widgets/header_text.dart';
+import '../../widgets/more_tiles_header.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -333,44 +333,11 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
           Divider(
             color: getOnPrimaryColor(context),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: getPrimaryColor(context)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: HeaderText(
-                        'Qualified Vehicles',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: getOnPrimaryColor(context)),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformIconButton(
-                        icon: Icon(
-                          Icons.add,
-                          size: 32,
-                          color: getOnPrimaryColor(context),
-                        ),
-                        onPressed: () {
-                          _editVehicle(context, null);
-                        },
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
+          MoreTilesHeader(
+            label: 'Qualified Vehicles',
+            onPressed: () {
+              _editVehicle(context, null);
+            },
           ),
           if (qualVehicles!.isNotEmpty)
             FormGridView(width: width, children: _vehicles()),

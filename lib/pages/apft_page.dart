@@ -11,6 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/models/setting.dart';
+import 'package:leaders_book/widgets/header_text.dart';
+import 'package:leaders_book/widgets/standard_text.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -721,10 +723,8 @@ class ApftPageState extends ConsumerState<ApftPage> {
                       children: <Widget>[
                         const Padding(
                           padding: EdgeInsets.all(4.0),
-                          child: Text(
+                          child: HeaderText(
                             'Average',
-                            style: TextStyle(fontSize: 18),
-                            textAlign: TextAlign.center,
                           ),
                         ),
                         Row(
@@ -732,27 +732,28 @@ class ApftPageState extends ConsumerState<ApftPage> {
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('PU: $puAve'),
+                              child: StandardText('PU: $puAve'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('SU: $suAve'),
+                              child: StandardText('SU: $suAve'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('Run: $runAve'),
+                              child: StandardText('Run: $runAve'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('Total: $totalAve'),
+                              child: StandardText('Total: $totalAve'),
                             ),
                           ],
                         ),
-                        const Padding(
-                          padding: EdgeInsets.all(4.0),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
                           child: Text(
                             'Zeros are factored out and averages are rounded down.',
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(
+                                fontSize: 14, color: getTextColor(context)),
                             textAlign: TextAlign.center,
                           ),
                         )

@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/models/setting.dart';
+import 'package:leaders_book/widgets/standard_text.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -913,31 +914,32 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                   children: <Widget>[
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('MDL: $deadliftAve'),
+                                      child: StandardText('MDL: $deadliftAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('SPT: $powerThrowAve'),
+                                      child:
+                                          StandardText('SPT: $powerThrowAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('HRP: $puAve'),
+                                      child: StandardText('HRP: $puAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('SDC: $dragAve'),
+                                      child: StandardText('SDC: $dragAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('LTK: $plkAve'),
+                                      child: StandardText('LTK: $plkAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('2MR: $runAve'),
+                                      child: StandardText('2MR: $runAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('Total: $totalAve'),
+                                      child: StandardText('Total: $totalAve'),
                                     ),
                                   ],
                                 )
@@ -949,15 +951,17 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                       children: <Widget>[
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('MDL: $deadliftAve'),
+                                          child:
+                                              StandardText('MDL: $deadliftAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('SPT: $powerThrowAve'),
+                                          child: StandardText(
+                                              'SPT: $powerThrowAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('HRP: $puAve'),
+                                          child: StandardText('HRP: $puAve'),
                                         ),
                                       ],
                                     ),
@@ -967,29 +971,31 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                       children: <Widget>[
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('SDC: $dragAve'),
+                                          child: StandardText('SDC: $dragAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('PLK: $plkAve'),
+                                          child: StandardText('PLK: $plkAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('2MR: $runAve'),
+                                          child: StandardText('2MR: $runAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('Total: $totalAve'),
+                                          child:
+                                              StandardText('Total: $totalAve'),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
-                          const Padding(
-                            padding: EdgeInsets.all(4.0),
+                          Padding(
+                            padding: const EdgeInsets.all(4.0),
                             child: Text(
                               'Zeros are factored out and averages are rounded down.',
-                              style: TextStyle(fontSize: 14),
+                              style: TextStyle(
+                                  fontSize: 14, color: getTextColor(context)),
                               textAlign: TextAlign.center,
                             ),
                           ),

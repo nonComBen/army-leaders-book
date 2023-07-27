@@ -442,16 +442,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
             childAspectRatio: width > 900 ? 900 / 325 : width / 325,
             shrinkWrap: true,
             children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+              const Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
                   child: HeaderText(
                     'Pushup',
                     textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: getTextColor(context),
-                    ),
                   )),
               PaddedTextField(
                 controller: _puRawController,
@@ -480,16 +475,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                   labelText: 'Score',
                 ),
               ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+              const Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
                   child: HeaderText(
                     'Situp',
                     textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: getTextColor(context),
-                    ),
                   )),
               PaddedTextField(
                 controller: _suRawController,
@@ -523,11 +513,6 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                 child: HeaderText(
                   _runType,
                   textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: getTextColor(context),
-                  ),
                 ),
               ),
               PaddedTextField(
@@ -554,16 +539,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                   labelText: 'Score',
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
                 child: HeaderText(
                   'Total',
                   textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: getTextColor(context),
-                  ),
                 ),
               ),
               const Padding(padding: EdgeInsets.all(8.0), child: SizedBox()),

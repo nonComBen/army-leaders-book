@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/widgets/more_tiles_header.dart';
 
 import '../../auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
@@ -18,7 +19,6 @@ import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
-import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -397,43 +397,11 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.0),
-                color: getPrimaryColor(context),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: HeaderText(
-                      'Subcompents',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: getOnPrimaryColor(context),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformIconButton(
-                      icon: Icon(
-                        Icons.add,
-                        size: 28,
-                        color: getOnPrimaryColor(context),
-                      ),
-                      onPressed: () {
-                        _editSubComponent(context, null);
-                      },
-                    ),
-                  )
-                ],
-              ),
-            ),
+          MoreTilesHeader(
+            label: 'Subcomponents',
+            onPressed: () {
+              _editSubComponent(context, null);
+            },
           ),
           if (_subComponents!.isNotEmpty)
             FormGridView(width: width, children: _subComponentWidgets()),

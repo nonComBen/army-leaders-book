@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
 
 import '../../../methods/validate.dart';
@@ -35,13 +33,14 @@ import '../../models/weapon.dart';
 import '../../pages/hr_actions_page.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../providers/tracking_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../widgets/perstat_rollup_card.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_loading_widget.dart';
 import '../../widgets/rollup_card.dart';
 import '../../widgets/show_by_name_content.dart';
+import '../../widgets/standard_text.dart';
 import '../acft_page.dart';
 import '../apft_page.dart';
 import '../appointments_page.dart';
@@ -91,8 +90,6 @@ class HomePageState extends ConsumerState<RollupTab>
       isInitial = true,
       isSubscribed = true,
       notificationsInitialized = false;
-  StreamSubscription<List<PurchaseDetails>>? _streamSubscription;
-  StreamSubscription<QuerySnapshot>? _soldierSubscription;
   final _firestore = FirebaseFirestore.instance;
   final format = DateFormat('yyyy-MM-dd');
   late Setting setting;
@@ -194,8 +191,6 @@ class HomePageState extends ConsumerState<RollupTab>
 
   @override
   void dispose() async {
-    _streamSubscription?.cancel();
-    _soldierSubscription?.cancel();
     myBanner.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -280,21 +275,47 @@ class HomePageState extends ConsumerState<RollupTab>
                     }
                   }
                 }
-                return PerstatRollupCard(
+                int assigned = ref.read(soldiersProvider).length;
+                return RollupCard(
                   title: 'PERSTAT',
-                  leave: leave,
-                  tdy: tdy,
-                  other: other,
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(PerstatPage.routeName),
-                    child: const Text('Go to PERSTAT'),
-                  ),
-                  button2: PlatformButton(
-                    child: const Text('By Name'),
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(DailyPerstatPage.routeName),
-                  ),
+                  infoRow1: [
+                    StandardText(
+                      'Assigned: $assigned',
+                      textAlign: TextAlign.center,
+                    ),
+                    StandardText(
+                      'PDY: ${assigned - leave - tdy - other}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  infoRow2: [
+                    StandardText(
+                      'Leave: $leave',
+                      textAlign: TextAlign.center,
+                    ),
+                    StandardText(
+                      'TDY: $tdy',
+                      textAlign: TextAlign.center,
+                    ),
+                    StandardText(
+                      'Other: $other',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(PerstatPage.routeName),
+                      child: const Text('Go to PERSTAT'),
+                    ),
+                    PlatformButton(
+                      child: const Text('By Name'),
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(DailyPerstatPage.routeName),
+                    ),
+                  ],
                 );
             }
           },
@@ -344,33 +365,38 @@ class HomePageState extends ConsumerState<RollupTab>
                 futureByName.sort((a, b) => a['date'].compareTo(b['date']));
                 return RollupCard(
                   title: 'Appointments',
-                  info1: TextButton(
-                    child: Text('Apts Today: $aptsToday',
-                        style: const TextStyle(
-                            color: Colors.blue,
-                            fontSize: 16,
-                            decoration: TextDecoration.underline)),
-                    onPressed: () {
-                      showByName(
-                          'Apts Today', todayByName, HomeCard.appointments);
-                    },
-                  ),
-                  info2: TextButton(
-                    child: Text('Future Apts: $aptsFuture',
-                        style: const TextStyle(
-                            color: Colors.blue,
-                            fontSize: 16,
-                            decoration: TextDecoration.underline)),
-                    onPressed: () {
-                      showByName(
-                          'Future Apts', futureByName, HomeCard.appointments);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(AptsPage.routeName),
-                    child: const Text('Go to Appointments'),
-                  ),
+                  infoRow1: [
+                    TextButton(
+                      child: Text('Apts Today: $aptsToday',
+                          style: const TextStyle(
+                              color: Colors.blue,
+                              fontSize: 16,
+                              decoration: TextDecoration.underline)),
+                      onPressed: () {
+                        showByName(
+                            'Apts Today', todayByName, HomeCard.appointments);
+                      },
+                    ),
+                    TextButton(
+                      child: Text('Future Apts: $aptsFuture',
+                          style: const TextStyle(
+                              color: Colors.blue,
+                              fontSize: 16,
+                              decoration: TextDecoration.underline)),
+                      onPressed: () {
+                        showByName(
+                            'Future Apts', futureByName, HomeCard.appointments);
+                      },
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(AptsPage.routeName),
+                      child: const Text('Go to Appointments'),
+                    ),
+                  ],
                 );
             }
           },
@@ -378,7 +404,8 @@ class HomePageState extends ConsumerState<RollupTab>
       );
     }
     if (setting.apft) {
-      list.add(StreamBuilder(
+      list.add(
+        StreamBuilder(
           stream: _firestore
               .collection(Apft.collectionName)
               .where('users', isNotEqualTo: null)
@@ -412,37 +439,45 @@ class HomePageState extends ConsumerState<RollupTab>
                 }
                 return RollupCard(
                   title: 'APFT Stats',
-                  info1: TextButton(
-                    child: Text('Overdue: $apftOverdue',
-                        style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue)),
-                    onPressed: () {
-                      showByName('Overdue APFTs', overdue, HomeCard.apft);
-                    },
-                  ),
-                  info2: TextButton(
-                    child: Text('Failed: $apftFail',
-                        style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue)),
-                    onPressed: () {
-                      showByName('Failed APFTs', fails, HomeCard.apft);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(ApftPage.routeName),
-                    child: const Text('Go to APFT'),
-                  ),
+                  infoRow1: [
+                    TextButton(
+                      child: Text('Overdue: $apftOverdue',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue)),
+                      onPressed: () {
+                        showByName('Overdue APFTs', overdue, HomeCard.apft);
+                      },
+                    ),
+                    TextButton(
+                      child: Text('Failed: $apftFail',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue)),
+                      onPressed: () {
+                        showByName('Failed APFTs', fails, HomeCard.apft);
+                      },
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(ApftPage.routeName),
+                      child: const Text('Go to APFT'),
+                    ),
+                  ],
                 );
             }
-          }));
+          },
+        ),
+      );
     }
     if (setting.acft) {
-      list.add(StreamBuilder(
+      list.add(
+        StreamBuilder(
           stream: _firestore
               .collection(Acft.collectionName)
               .where('users', isNotEqualTo: null)
@@ -476,36 +511,43 @@ class HomePageState extends ConsumerState<RollupTab>
                 }
                 return RollupCard(
                   title: 'ACFT Stats',
-                  info1: TextButton(
-                    child: Text(
-                      'Overdue: $acftOverdue',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          decoration: TextDecoration.underline,
-                          color: Colors.blue),
-                    ),
-                    onPressed: () {
-                      showByName('Overdue ACFTs', overdue, HomeCard.acft);
-                    },
-                  ),
-                  info2: TextButton(
-                    child: Text('Failed: $acftFail',
+                  infoRow1: [
+                    TextButton(
+                      child: Text(
+                        'Overdue: $acftOverdue',
                         style: const TextStyle(
                             fontSize: 16,
                             decoration: TextDecoration.underline,
-                            color: Colors.blue)),
-                    onPressed: () {
-                      showByName('Failed ACFTs', fails, HomeCard.acft);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(AcftPage.routeName),
-                    child: const Text('Go to ACFT'),
-                  ),
+                            color: Colors.blue),
+                      ),
+                      onPressed: () {
+                        showByName('Overdue ACFTs', overdue, HomeCard.acft);
+                      },
+                    ),
+                    TextButton(
+                      child: Text('Failed: $acftFail',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue)),
+                      onPressed: () {
+                        showByName('Failed ACFTs', fails, HomeCard.acft);
+                      },
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(AcftPage.routeName),
+                      child: const Text('Go to ACFT'),
+                    ),
+                  ],
                 );
             }
-          }));
+          },
+        ),
+      );
     }
     if (setting.profiles) {
       list.add(StreamBuilder(
@@ -537,46 +579,53 @@ class HomePageState extends ConsumerState<RollupTab>
                 int profilesPerm = permList.length;
                 return RollupCard(
                   title: 'Profiles',
-                  info1: TextButton(
-                    child: Text(
-                      'Temporary: $profilesTemp',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          decoration: TextDecoration.underline,
-                          color: Colors.blue),
+                  infoRow1: [
+                    TextButton(
+                      child: Text(
+                        'Temporary: $profilesTemp',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue),
+                      ),
+                      onPressed: () {
+                        showByName('Temp Profiles', tempList, HomeCard.profile);
+                      },
                     ),
-                    onPressed: () {
-                      showByName('Temp Profiles', tempList, HomeCard.profile);
-                    },
-                  ),
-                  info2: TextButton(
-                    child: Text(
-                      'Permanent: $profilesPerm',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          decoration: TextDecoration.underline,
-                          color: Colors.blue),
+                    TextButton(
+                      child: Text(
+                        'Permanent: $profilesPerm',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue),
+                      ),
+                      onPressed: () {
+                        showByName('Perm Profiles', permList, HomeCard.profile);
+                      },
                     ),
-                    onPressed: () {
-                      showByName('Perm Profiles', permList, HomeCard.profile);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(TempProfilesPage.routeName),
-                    child: const Text('Go to Temp'),
-                  ),
-                  button2: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(PermProfilesPage.routeName),
-                    child: const Text('Go to Perm'),
-                  ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(TempProfilesPage.routeName),
+                      child: const Text('Go to Temp'),
+                    ),
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(PermProfilesPage.routeName),
+                      child: const Text('Go to Perm'),
+                    ),
+                  ],
                 );
             }
           }));
     }
     if (setting.bf) {
-      list.add(StreamBuilder(
+      list.add(
+        StreamBuilder(
           stream: _firestore
               .collection(Bodyfat.collectionName)
               .where('users', isNotEqualTo: null)
@@ -610,42 +659,50 @@ class HomePageState extends ConsumerState<RollupTab>
                 }
                 return RollupCard(
                   title: 'Body Comp',
-                  info1: TextButton(
-                    child: Text(
-                      'Overdue: $bfOverdue',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        decoration: TextDecoration.underline,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    onPressed: () {
-                      showByName(
-                          'Overdue Body Compositions', overdue, HomeCard.bf);
-                    },
-                  ),
-                  info2: TextButton(
-                    child: Text('Failed: $bfFail',
+                  infoRow1: [
+                    TextButton(
+                      child: Text(
+                        'Overdue: $bfOverdue',
                         style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue)),
-                    onPressed: () {
-                      showByName(
-                          'Failed Body Compositions', fails, HomeCard.bf);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(BodyfatPage.routeName),
-                    child: const Text('Go to Body Comp'),
-                  ),
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      onPressed: () {
+                        showByName(
+                            'Overdue Body Compositions', overdue, HomeCard.bf);
+                      },
+                    ),
+                    TextButton(
+                      child: Text('Failed: $bfFail',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue)),
+                      onPressed: () {
+                        showByName(
+                            'Failed Body Compositions', fails, HomeCard.bf);
+                      },
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(BodyfatPage.routeName),
+                      child: const Text('Go to Body Comp'),
+                    ),
+                  ],
                 );
             }
-          }));
+          },
+        ),
+      );
     }
     if (setting.weapons) {
-      list.add(StreamBuilder(
+      list.add(
+        StreamBuilder(
           stream: _firestore
               .collection(Weapon.collectionName)
               .where('users', isNotEqualTo: null)
@@ -679,42 +736,50 @@ class HomePageState extends ConsumerState<RollupTab>
                 }
                 return RollupCard(
                   title: 'Weapon Stats',
-                  info1: TextButton(
-                    child: Text(
-                      'Overdue: $weaponsOverdue',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        decoration: TextDecoration.underline,
-                        color: Colors.blue,
-                      ),
-                    ),
-                    onPressed: () {
-                      showByName(
-                          'Overdue Weapon Quals', overdue, HomeCard.weapons);
-                    },
-                  ),
-                  info2: TextButton(
-                    child: Text('Failed: $weaponsFail',
+                  infoRow1: [
+                    TextButton(
+                      child: Text(
+                        'Overdue: $weaponsOverdue',
                         style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue)),
-                    onPressed: () {
-                      showByName(
-                          'Failed Weapons Quals', fails, HomeCard.weapons);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(WeaponsPage.routeName),
-                    child: const Text('Go to Weapons'),
-                  ),
+                          fontSize: 16,
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      onPressed: () {
+                        showByName(
+                            'Overdue Weapon Quals', overdue, HomeCard.weapons);
+                      },
+                    ),
+                    TextButton(
+                      child: Text('Failed: $weaponsFail',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue)),
+                      onPressed: () {
+                        showByName(
+                            'Failed Weapons Quals', fails, HomeCard.weapons);
+                      },
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(WeaponsPage.routeName),
+                      child: const Text('Go to Weapons'),
+                    ),
+                  ],
                 );
             }
-          }));
+          },
+        ),
+      );
     }
     if (setting.flags) {
-      list.add(StreamBuilder(
+      list.add(
+        StreamBuilder(
           stream: _firestore
               .collection(Flag.collectionName)
               .where('users', isNotEqualTo: null)
@@ -743,34 +808,41 @@ class HomePageState extends ConsumerState<RollupTab>
                 }
                 return RollupCard(
                   title: 'Flags',
-                  info1: TextButton(
-                    onPressed: null,
-                    child: Text(
-                      'Active: $flags',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: getTextColor(context),
+                  infoRow1: [
+                    TextButton(
+                      onPressed: null,
+                      child: Text(
+                        'Active: $flags',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: getTextColor(context),
+                        ),
                       ),
                     ),
-                  ),
-                  info2: TextButton(
-                    child: Text('> 180 Days: $flagsOverdue',
-                        style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue)),
-                    onPressed: () {
-                      showByName('Flags > 180 Days', overdue, HomeCard.flags);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(FlagsPage.routeName),
-                    child: const Text('Go to Flags'),
-                  ),
+                    TextButton(
+                      child: Text('> 180 Days: $flagsOverdue',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue)),
+                      onPressed: () {
+                        showByName('Flags > 180 Days', overdue, HomeCard.flags);
+                      },
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(FlagsPage.routeName),
+                      child: const Text('Go to Flags'),
+                    ),
+                  ],
                 );
             }
-          }));
+          },
+        ),
+      );
     }
     if (setting.medpros) {
       list.add(
@@ -807,28 +879,34 @@ class HomePageState extends ConsumerState<RollupTab>
                 }
                 return RollupCard(
                   title: 'Medpros',
-                  info1: TextButton(
-                    onPressed: null,
-                    child: Text(
-                      'Records: $medpros',
-                      style: const TextStyle(fontSize: 16),
+                  infoRow1: [
+                    TextButton(
+                      onPressed: null,
+                      child: Text(
+                        'Records: $medpros',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ),
-                  ),
-                  info2: TextButton(
-                    child: Text('Overdue: $medprosOverdue',
-                        style: const TextStyle(
-                            fontSize: 16,
-                            decoration: TextDecoration.underline,
-                            color: Colors.blue)),
-                    onPressed: () {
-                      showByName('Overdue MedPros', overdue, HomeCard.medpros);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(MedProsPage.routeName),
-                    child: const Text('Go to Medpros'),
-                  ),
+                    TextButton(
+                      child: Text('Overdue: $medprosOverdue',
+                          style: const TextStyle(
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                              color: Colors.blue)),
+                      onPressed: () {
+                        showByName(
+                            'Overdue MedPros', overdue, HomeCard.medpros);
+                      },
+                    ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(MedProsPage.routeName),
+                      child: const Text('Go to Medpros'),
+                    ),
+                  ],
                 );
             }
           },
@@ -873,31 +951,36 @@ class HomePageState extends ConsumerState<RollupTab>
                 }
                 return RollupCard(
                   title: 'Training',
-                  info1: TextButton(
-                    onPressed: null,
-                    child: Text(
-                      'Records: $training',
-                      style: const TextStyle(fontSize: 16),
+                  infoRow1: [
+                    TextButton(
+                      onPressed: null,
+                      child: Text(
+                        'Records: $training',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ),
-                  ),
-                  info2: TextButton(
-                    child: Text(
-                      'Overdue: $trainingOverdue',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          decoration: TextDecoration.underline,
-                          color: Colors.blue),
+                    TextButton(
+                      child: Text(
+                        'Overdue: $trainingOverdue',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                            color: Colors.blue),
+                      ),
+                      onPressed: () {
+                        showByName(
+                            'Overdue Trainings', overdue, HomeCard.training);
+                      },
                     ),
-                    onPressed: () {
-                      showByName(
-                          'Overdue Trainings', overdue, HomeCard.training);
-                    },
-                  ),
-                  button: PlatformButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true)
-                        .pushNamed(TrainingPage.routeName),
-                    child: const Text('Go to Training'),
-                  ),
+                  ],
+                  buttons: [
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(TrainingPage.routeName),
+                      child: const Text('Go to Training'),
+                    ),
+                  ],
                 );
             }
           },
@@ -928,10 +1011,10 @@ class HomePageState extends ConsumerState<RollupTab>
                 GridView.count(
                   crossAxisCount: width > 750 ? 2 : 1,
                   childAspectRatio: width > 750
-                      ? width / 450
+                      ? width / 380
                       : width > 350
-                          ? width / 225
-                          : width / 275,
+                          ? width / 190
+                          : width / 250,
                   shrinkWrap: true,
                   primary: false,
                   crossAxisSpacing: 1.0,

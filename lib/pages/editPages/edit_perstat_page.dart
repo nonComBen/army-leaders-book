@@ -306,7 +306,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
           ),
           PlatformButton(
             onPressed: () {
-              if (_endController.text != '' && _end!.isBefore(_start!)) {
+              if (_end != null && _end!.isBefore(_start!)) {
                 toast.showToast(
                   child: const MyToast(
                     message: 'End Date must be after Start Date',

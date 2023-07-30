@@ -241,7 +241,18 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
           ),
           PlatformButton(
             onPressed: () {
-              if (_endController.text != '' && _end!.isBefore(_start!)) {
+              if (_startController.text == '' ||
+                  !isValidDate(_startController.text)) {
+                toast.showToast(
+                    child: const MyToast(
+                        message: 'Start Date is blank or in invalid format'));
+                return;
+              }
+              _end = DateTime.tryParse(_endController.text);
+              _start = DateTime.tryParse(_startController.text);
+              if (_endController.text != '' &&
+                  _end != null &&
+                  _end!.isBefore(_start!)) {
                 toast.showToast(
                   child: const MyToast(
                     message: 'End Date must be after Start Date',

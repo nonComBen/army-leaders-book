@@ -485,8 +485,11 @@ class AptsPageState extends ConsumerState<AptsPage> {
   }
 
   void onSelected(bool? selected, DocumentSnapshot snapshot) {
+    if (selected == null) {
+      return;
+    }
     setState(() {
-      if (selected!) {
+      if (selected) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);

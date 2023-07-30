@@ -309,6 +309,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
 
   void _editRecord(BuildContext context) {
     if (_selectedDocuments.length != 1) {
+      toast.context = context;
       toast.showToast(
         child: const MyToast(
           message: 'You must select exactly one record',

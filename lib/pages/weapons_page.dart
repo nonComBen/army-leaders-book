@@ -303,6 +303,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
+      toast.init(context);
       toast.showToast(
         child: const MyToast(
           message: 'You must select exactly one record',

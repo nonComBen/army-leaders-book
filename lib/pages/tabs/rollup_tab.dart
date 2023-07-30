@@ -253,24 +253,21 @@ class HomePageState extends ConsumerState<RollupTab>
                 int tdy = 0;
                 int other = 0;
                 for (DocumentSnapshot doc in snapshot.data!.docs) {
-                  Object start;
-                  if (isValidDate(doc['start'])) {
-                    start = DateTime.tryParse(doc['start'] + ' 00:00:00') ?? '';
-                  } else {
-                    start = '';
-                  }
-                  var end = isValidDate(doc['end'])
-                      ? DateTime.tryParse(doc['end'] + ' 18:00:00') ?? ''
-                      : '';
-                  if (start != '' &&
-                      DateTime.now().isAfter(start as DateTime)) {
-                    if (end == '' || DateTime.now().isBefore(end as DateTime)) {
-                      if (doc['type'] == 'Leave') {
-                        leave++;
-                      } else if (doc['type'] == 'TDY') {
-                        tdy++;
-                      } else {
-                        other++;
+                  DateTime? start =
+                      DateTime.tryParse(doc['start'] + ' 00:00:00');
+                  DateTime? end = DateTime.tryParse(doc['end'] + ' 18:00:00');
+                  if (start != null && DateTime.now().isAfter(start)) {
+                    if (end == null || DateTime.now().isBefore(end)) {
+                      switch (doc['type']) {
+                        case 'Leave':
+                          leave++;
+                          break;
+                        case 'TDY':
+                          tdy++;
+                          break;
+                        default:
+                          other++;
+                          break;
                       }
                     }
                   }
@@ -347,7 +344,7 @@ class HomePageState extends ConsumerState<RollupTab>
                 for (DocumentSnapshot doc in snapshot.data!.docs) {
                   DateTime? start;
                   if (isValidDate(doc['date'])) {
-                    start = DateTime.parse(doc['date'] + ' 00:00:00');
+                    start = DateTime.tryParse(doc['date'] + ' 00:00:00');
                   } else {
                     start = null;
                   }

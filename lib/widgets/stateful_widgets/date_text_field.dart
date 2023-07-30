@@ -4,12 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:leaders_book/methods/pick_date.dart';
-import 'package:leaders_book/methods/theme_methods.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_icon_button.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_text_field.dart';
 
+import '../../methods/pick_date.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/validate.dart';
+import '../../widgets/platform_widgets/platform_icon_button.dart';
+import '../../widgets/platform_widgets/platform_text_field.dart';
 
 class DateTextField extends StatefulWidget {
   const DateTextField({

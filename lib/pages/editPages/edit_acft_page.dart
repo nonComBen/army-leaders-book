@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/models/setting.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../calculators/hrp_calculator.dart';
 import '../../calculators/mdl_calculator.dart';
 import '../../calculators/plk_calculator.dart';

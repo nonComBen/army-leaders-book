@@ -11,7 +11,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../models/note.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
 import '../methods/theme_methods.dart';

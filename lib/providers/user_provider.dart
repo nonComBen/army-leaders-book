@@ -3,29 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/leader.dart';
 
-final userProvider = Provider<UserService>((ref) {
-  return UserService();
+final leaderProvider = Provider<LeaderService>((ref) {
+  return LeaderService();
 });
 
-class UserService {
-  Leader? _user;
-  UserService();
+class LeaderService {
+  Leader? _leader;
+  LeaderService();
 
-  void loadUser(String userId) {
+  void init(String userId) {
     final userStream = FirebaseFirestore.instance
         .collection(Leader.collectionName)
         .doc(userId)
         .snapshots();
     userStream.listen((event) {
-      _user = Leader.fromSnapshot(event);
+      _leader = Leader.fromSnapshot(event);
     });
   }
 
-  void nullUser() {
-    _user = null;
+  void nullLeader() {
+    _leader = null;
   }
 
-  Leader? get user {
-    return _user;
+  Leader? get leader {
+    return _leader;
   }
 }

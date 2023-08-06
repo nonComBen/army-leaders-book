@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/leader.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../widgets/form_frame.dart';
 import '../widgets/my_toast.dart';

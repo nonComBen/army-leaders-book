@@ -7,7 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../models/setting.dart';
 import '../../providers/shared_prefs_provider.dart';

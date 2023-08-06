@@ -16,7 +16,7 @@ import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/profile.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/table_frame.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';

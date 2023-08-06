@@ -10,7 +10,7 @@ import 'package:leaders_book/models/reminder.dart';
 import 'package:leaders_book/widgets/more_tiles_header.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_selection_widget.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';

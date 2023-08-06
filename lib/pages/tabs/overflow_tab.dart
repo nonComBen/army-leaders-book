@@ -8,8 +8,7 @@ import 'package:launch_review/launch_review.dart';
 import '../../methods/toast_messages/show_toast.dart';
 import '../../pages/premium_page.dart';
 import '../../providers/user_provider.dart';
-import '../../auth_provider.dart';
-import '../../auth_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
 import '../../pages/privacy_policy_page.dart';
@@ -87,7 +86,7 @@ class OverflowTab extends ConsumerWidget {
       primaryText: 'Yes',
       primary: () {
         signOut(auth: auth, root: root);
-        ref.read(userProvider).nullUser();
+        ref.read(leaderProvider).nullLeader();
       },
       secondaryText: 'Create Account',
       secondary: () {
@@ -526,7 +525,7 @@ class OverflowTab extends ConsumerWidget {
               );
             } else {
               signOut(auth: auth, root: root);
-              ref.read(userProvider).nullUser();
+              ref.read(leaderProvider).nullLeader();
             }
           },
         ),

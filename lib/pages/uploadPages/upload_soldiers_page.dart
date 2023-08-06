@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/toast_messages/file_is_blank_message.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../methods/rank_sort.dart';

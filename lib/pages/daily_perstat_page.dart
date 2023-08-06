@@ -13,7 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/create_app_bar_actions.dart';
 import '../../methods/filter_documents.dart';
 import '../../models/perstat.dart';

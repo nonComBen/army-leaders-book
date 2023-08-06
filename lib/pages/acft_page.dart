@@ -21,7 +21,7 @@ import '../../providers/settings_provider.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';

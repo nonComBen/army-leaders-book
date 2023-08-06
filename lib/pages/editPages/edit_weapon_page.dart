@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:leaders_book/models/setting.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/local_notification_methods.dart';
 import '../../methods/on_back_pressed.dart';

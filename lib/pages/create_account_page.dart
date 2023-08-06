@@ -8,12 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../auth_service.dart';
 import '../models/leader.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/logo_widget.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../widgets/form_frame.dart';
 import '../widgets/my_toast.dart';
@@ -86,7 +85,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
         await FirebaseFirestore.instance
             .doc('users/${user.uid}')
             .set(userObj.toMap());
-        ref.read(userProvider).loadUser(user.uid);
+        ref.read(leaderProvider).init(user.uid);
         ref.read(settingsProvider.notifier).init(user.uid);
         ref.read(rootProvider.notifier).signIn();
       } catch (e) {

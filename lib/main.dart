@@ -11,7 +11,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/providers/notification_provider.dart';
 
 import '../../pages/premium_page.dart';
-import '../../auth_provider.dart';
+import 'providers/auth_provider.dart';
 import '../../pages/acft_page.dart';
 import '../../pages/actions_tracker_page.dart';
 import '../../pages/alert_roster_page.dart';

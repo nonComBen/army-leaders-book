@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
-import '../../auth_service.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/logo_widget.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../providers/user_provider.dart';
 import '../widgets/platform_widgets/platform_text_button.dart';
@@ -54,7 +53,7 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
   @override
   Widget build(BuildContext context) {
     _auth = ref.read(authProvider);
-    ref.read(userProvider).loadUser(_auth!.currentUser()!.uid);
+    ref.read(leaderProvider).init(_auth!.currentUser()!.uid);
     return PlatformScaffold(
       title: 'Lock Screen',
       body: Center(

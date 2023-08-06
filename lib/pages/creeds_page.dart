@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:leaders_book/auth_provider.dart';
+import 'package:leaders_book/providers/auth_provider.dart';
 import 'package:leaders_book/methods/theme_methods.dart';
 import 'package:leaders_book/providers/tracking_provider.dart';
 import 'package:leaders_book/widgets/platform_widgets/platform_expansion_list_tile.dart';

@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/local_notification_methods.dart';

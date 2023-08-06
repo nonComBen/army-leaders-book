@@ -11,7 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/leader.dart';
 import '../../providers/root_provider.dart';
 import '../../providers/settings_provider.dart';
@@ -105,10 +105,12 @@ class LoginPageState extends ConsumerState<LoginPage> {
         const Duration(minutes: 1),
       ),
     )) {
-      ref.read(userProvider).loadUser(user.uid);
+      FirebaseFirestore.instance.doc('users/${user.uid}').update(
+          {'created': user.metadata.creationTime, 'lastLogin': DateTime.now()});
+      ref.read(leaderProvider).init(user.uid);
       return;
     }
-    final userObj = Leader(
+    final leader = Leader(
       userId: user.uid,
       userEmail: user.email ?? 'anonymous@email.com',
       userName: user.displayName ?? '',
@@ -119,9 +121,9 @@ class LoginPageState extends ConsumerState<LoginPage> {
     );
     await FirebaseFirestore.instance
         .doc('users/${user.uid}')
-        .set(userObj.toMap());
+        .set(leader.toMap());
 
-    ref.read(userProvider).loadUser(user.uid);
+    ref.read(leaderProvider).init(user.uid);
   }
 
   bool validateAndSave() {

@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../methods/toast_messages/file_is_blank_message.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/counseling.dart';
 import '../../models/soldier.dart';

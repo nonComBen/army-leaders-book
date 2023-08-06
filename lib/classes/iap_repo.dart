@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/auth_provider.dart';
+import 'package:leaders_book/providers/auth_provider.dart';
 import 'package:leaders_book/models/past_purchase.dart';
 import 'package:leaders_book/models/leader.dart';
 import 'package:leaders_book/providers/subscription_state.dart';
@@ -22,12 +22,12 @@ class IAPRepo {
     listenToLogin();
   }
 
-  Leader? _userObj;
+  Leader? _leader;
   bool hasActiveSubscription = false;
   List<PastPurchase> purchases = [];
 
   bool get isLoggedIn => _user != null;
-  Leader? get user => _userObj;
+  Leader? get user => _leader;
 
   final premiumIds = [
     'N5EIa03V7rSma0LDlko6YzGXuXF3', //bhultquist84
@@ -39,6 +39,7 @@ class IAPRepo {
     '0v4SkNMrtpPrs25hEtMU6uwwYUK2', //Vic Harper
     'ozdVTlpNrraI16I76XjIWePZnX32', //Lascelles May
     'dZnvpPh22EYNgIgCkhzZiVV2VPc2', //Tyler Siegfried
+    '9GtKo4IEbMRSEUnntMpRZYwg1MF3', //Jason Infante
     // '8o9XIyQykXdBe2dZKgTPDfSdD7Y2',
   ];
 
@@ -66,24 +67,15 @@ class IAPRepo {
         .where('userId', isEqualTo: _user!.uid)
         .get();
 
-    _userObj = Leader.fromSnapshot(userSnapshot.docs.first);
+    _leader = Leader.fromSnapshot(userSnapshot.docs.first);
     bool isSubscribed =
         userSnapshot.docs.first['adFree'] || premiumIds.contains(_user!.uid);
-
-    for (DocumentSnapshot doc in purchaseSnapshot.docs) {
-      Timestamp expiry = doc['expiryDate'];
-      if (expiry.toDate().isBefore(DateTime.now())) {
-        doc.reference.update({'status': 'EXPIRED'});
-      }
-    }
 
     purchases = purchaseSnapshot.docs.map((document) {
       return PastPurchase.fromJson(document.data());
     }).toList();
 
-    hasActiveSubscription =
-        purchases.any((element) => element.status != Status.expired) ||
-            isSubscribed;
+    hasActiveSubscription = purchases.isNotEmpty || isSubscribed;
 
     if (hasActiveSubscription) {
       subState.subscribe();

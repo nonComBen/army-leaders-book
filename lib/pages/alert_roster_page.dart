@@ -12,7 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/theme_methods.dart';

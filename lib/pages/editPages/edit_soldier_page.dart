@@ -17,7 +17,7 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/theme_methods.dart';
 import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/padded_text_field.dart';

@@ -16,7 +16,7 @@ import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/perstat.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';

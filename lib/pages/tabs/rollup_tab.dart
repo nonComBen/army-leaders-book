@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +11,7 @@ import '../../../methods/validate.dart';
 import '../../../models/setting.dart';
 import '../../../providers/subscription_state.dart';
 import '../../../widgets/anon_warning_banner.dart';
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../classes/iap_repo.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/date_methods.dart';
@@ -95,7 +94,7 @@ class HomePageState extends ConsumerState<RollupTab>
   late Setting setting;
   SubscriptionState? subState;
   late BannerAd myBanner;
-  Leader? _userObj;
+  Leader? _leader;
 
   @override
   void initState() {
@@ -133,8 +132,8 @@ class HomePageState extends ConsumerState<RollupTab>
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    _userObj = ref.read(userProvider).user;
-    if (isInitial && _userObj != null) {
+    _leader = ref.read(leaderProvider).leader;
+    if (isInitial && _leader != null) {
       isInitial = false;
       init();
     }
@@ -143,35 +142,33 @@ class HomePageState extends ConsumerState<RollupTab>
   //performs initial async functions
   void init() async {
     // if old home page overwrote user profile, rewrite
-    if (_userObj!.userEmail == 'anonymous@email.com') {
+    if (_leader!.userEmail == 'anonymous@email.com') {
       final user = ref.read(authProvider).currentUser()!;
-      _userObj!.userEmail = user.email!;
-      _userObj!.userName = user.displayName ?? 'Anonymous User';
-      _userObj!.createdDate = user.metadata.creationTime;
-      _firestore.doc('users/${_userObj!.userId}').update(_userObj!.toMap());
+      _leader!.userEmail = user.email!;
+      _leader!.userName = user.displayName ?? 'Anonymous User';
+      _leader!.createdDate = user.metadata.creationTime;
+      _firestore.doc('users/${_leader!.userId}').update(_leader!.toMap());
     }
-    if (!_userObj!.tosAgree) {
-      if (mounted) {
-        await showTos(context, _userObj!.userId);
-      }
+    if (!_leader!.tosAgree) {
+      await showTos(context, _leader!.userId);
     }
     // update users array if not updated
     try {
-      if (!_userObj!.updatedUserArray) {
-        updateUsersArray(_userObj!.userId);
+      if (!_leader!.updatedUserArray) {
+        updateUsersArray(_leader!.userId);
       }
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Updated Users Array Fail');
+      debugPrint('Updated Users Array Fail');
     }
 
-    if (!_userObj!.updatedPovs) {
-      updatePovs(_userObj!.userId!);
+    if (!_leader!.updatedPovs) {
+      updatePovs(_leader!.userId!);
     }
-    if (!_userObj!.updatedAwards) {
-      updateAwards(_userObj!.userId!);
+    if (!_leader!.updatedAwards) {
+      updateAwards(_leader!.userId!);
     }
-    if (!_userObj!.updatedTraining) {
-      updateTraining(_userObj!.userId!);
+    if (!_leader!.updatedTraining) {
+      updateTraining(_leader!.userId!);
     }
 
 // show change log if new version
@@ -301,16 +298,16 @@ class HomePageState extends ConsumerState<RollupTab>
                   ],
                   buttons: [
                     PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(PerstatPage.routeName),
-                      child: const Text('Go to PERSTAT'),
-                    ),
-                    PlatformButton(
                       child: const Text('By Name'),
                       onPressed: () =>
                           Navigator.of(context, rootNavigator: true)
                               .pushNamed(DailyPerstatPage.routeName),
+                    ),
+                    PlatformButton(
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true)
+                              .pushNamed(PerstatPage.routeName),
+                      child: const Text('Go to PERSTAT'),
                     ),
                   ],
                 );
@@ -990,7 +987,7 @@ class HomePageState extends ConsumerState<RollupTab>
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).currentUser();
-    setting = ref.watch(settingsProvider) ?? Setting(owner: user!.uid);
+    setting = ref.watch(settingsProvider) ?? Setting(owner: '');
     isSubscribed = ref.watch(subscriptionStateProvider);
     double width = MediaQuery.of(context).size.width;
     ref.read(iapRepoProvider);
@@ -1004,7 +1001,7 @@ class HomePageState extends ConsumerState<RollupTab>
               primary: true,
               shrinkWrap: true,
               children: [
-                if (user!.isAnonymous) const AnonWarningBanner(),
+                if (user?.isAnonymous ?? false) const AnonWarningBanner(),
                 GridView.count(
                   crossAxisCount: width > 750 ? 2 : 1,
                   childAspectRatio: width > 750
@@ -1016,7 +1013,7 @@ class HomePageState extends ConsumerState<RollupTab>
                   primary: false,
                   crossAxisSpacing: 1.0,
                   mainAxisSpacing: 1.0,
-                  children: homeCards(user.uid),
+                  children: homeCards(user?.uid ?? ''),
                 ),
               ],
             ),

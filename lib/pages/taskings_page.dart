@@ -11,7 +11,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/tasking.dart';

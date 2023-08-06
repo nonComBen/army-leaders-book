@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_app_bar_actions.dart';
 import '../../methods/delete_methods.dart';
 import '../../methods/soldier_methods.dart';
@@ -103,7 +103,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
       });
     }
 
-    updateUser(firebaseUser, ref.read(userProvider).user);
+    updateUser(firebaseUser, ref.read(leaderProvider).leader);
   }
 
   //signs out or locks user after 10 minutes of inactivity
@@ -331,7 +331,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
     User? firebaseUser = ref.read(authProvider).currentUser();
     userId = firebaseUser!.uid;
 
-    updateUser(firebaseUser, ref.read(userProvider).user);
+    updateUser(firebaseUser, ref.read(leaderProvider).leader);
   }
 
   //signs out or locks user after 10 minutes of inactivity

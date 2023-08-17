@@ -433,13 +433,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         notificationIds: notificationIds,
       );
 
-      // setDateNotifications(
-      //   setting: ref.read(settingsProvider.notifier).settings,
-      //   map: saveAcft.toMap(),
-      //   user: ref.read(userProvider).user!,
-      //   topic: 'ACFT',
-      // );
-
       if (widget.acft.id == null) {
         firestore.collection(Acft.collectionName).add(saveAcft.toMap());
       } else {

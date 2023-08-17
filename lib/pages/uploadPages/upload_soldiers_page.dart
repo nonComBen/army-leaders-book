@@ -258,7 +258,7 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
         owner: owner,
         users: users,
         rank: saveRank,
-        rankSort: getRankSort(saveRank),
+        rankSort: getRankSort(saveRank.toUpperCase().trim()),
         lastName: saveLastName,
         firstName: saveFirstName,
         mi: saveMi,

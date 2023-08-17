@@ -13,7 +13,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/models/setting.dart';
 import 'package:leaders_book/widgets/header_text.dart';
 import 'package:leaders_book/widgets/standard_text.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/auth_provider.dart';
@@ -158,8 +157,6 @@ class ApftPageState extends ConsumerState<ApftPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(context, Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -268,8 +265,6 @@ class ApftPageState extends ConsumerState<ApftPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(context, Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );

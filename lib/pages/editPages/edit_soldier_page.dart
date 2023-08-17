@@ -458,7 +458,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
         owner: widget.soldier.owner,
         users: widget.soldier.users,
         rank: _rankController.text,
-        rankSort: getRankSort(_rankController.text),
+        rankSort: getRankSort(_rankController.text.toUpperCase().trim()),
         promotable: _promotable ? '(P)' : '',
         lastName: _lastNameController.text,
         firstName: _firstNameController.text,

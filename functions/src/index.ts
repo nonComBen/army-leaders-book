@@ -7,6 +7,7 @@ import {GooglePlayPurchaseHandler} from "./google-play.purchase-handler";
 import {AppStorePurchaseHandler} from "./app-store.purchase-handler";
 import {HttpsError} from "firebase-functions/lib/providers/https";
 import {productDataMap} from "./products";
+// import { DatabaseCleanup } from "./database_cleanup";
 
 // The Cloud Functions for Firebase SDK to create Cloud Functions
 // and setup triggers.
@@ -89,6 +90,10 @@ export const handlePlayStoreServerEvent =
 // missing store events
 export const expireSubscriptions = functions.pubsub.schedule("5 11 * * *")
     .onRun(() => iapRepository.expireSubscriptions());
+
+// schedule function to delete inactive accounts
+// export const deleteInactiveAccounts = functions.pubsub.schedule("5 11 * * *")
+//     .onRun(() => new DatabaseCleanup(admin.auth()).deleteInactiveAccount(0, undefined));
 
 exports.onUserDeleted = functions.auth.user().onDelete( async (user) => {
   const snapshot = await admin.firestore().doc(`users/${user.uid}`).get();
@@ -827,5 +832,5 @@ exports.onSoldierUpdated = functions.firestore.document("soldiers/{docId}")
             }
           });
         }
-      }
+        }
     });

@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,7 +24,6 @@ import '../../widgets/header_text.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../methods/create_app_bar_actions.dart';
-import '../methods/download_methods.dart';
 import '../methods/open_file.dart';
 import '../models/alert_soldier.dart';
 import '../models/app_bar_option.dart';
@@ -413,8 +411,6 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(context, Permission.storage);
-    if (!approved) return;
     AlertRosterPdf pdf = AlertRosterPdf(
       documents: _soldiers,
     );

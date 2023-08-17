@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../providers/auth_provider.dart';
 import '../../providers/subscription_state.dart';
@@ -115,7 +114,6 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   }
 
   void _downloadExcel() async {
-    if (!await checkPermission(context, Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',

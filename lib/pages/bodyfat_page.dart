@@ -10,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:leaders_book/models/setting.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
@@ -145,8 +144,6 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(context, Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -257,8 +254,6 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(context, Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );

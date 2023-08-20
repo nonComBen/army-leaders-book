@@ -259,7 +259,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
         firestore
             .collection(HandReceiptItem.collectionName)
             .doc(widget.item.id)
-            .set(saveHRItem.toMap());
+            .set(saveHRItem.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

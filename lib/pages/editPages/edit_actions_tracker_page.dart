@@ -129,7 +129,7 @@ class EditActionsTrackerPageState
           firestore
               .collection(ActionObj.collectionName)
               .doc(widget.action.id)
-              .set(saveAction.toMap());
+              .set(saveAction.toMap(), SetOptions(merge: true));
         } on Exception catch (e) {
           debugPrint('Error updating Actions Tracker: $e');
         }

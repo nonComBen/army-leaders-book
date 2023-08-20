@@ -139,7 +139,7 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
         firestore
             .collection(WorkingEval.collectionName)
             .doc(widget.eval.id)
-            .set(saveEval.toMap());
+            .set(saveEval.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

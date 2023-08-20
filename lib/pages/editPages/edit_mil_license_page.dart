@@ -165,7 +165,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
         firestore
             .collection(MilLic.collectionName)
             .doc(widget.milLic.id)
-            .set(saveMilLic.toMap());
+            .set(saveMilLic.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

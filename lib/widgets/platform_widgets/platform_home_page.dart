@@ -131,6 +131,8 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         break;
       case AppLifecycleState.detached:
         break;
+      case AppLifecycleState.hidden:
+        break;
     }
   }
 
@@ -358,6 +360,8 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         }
         break;
       case AppLifecycleState.detached:
+        break;
+      case AppLifecycleState.hidden:
         break;
     }
   }

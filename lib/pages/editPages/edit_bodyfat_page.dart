@@ -435,7 +435,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
           firestore
               .collection(Bodyfat.collectionName)
               .doc(widget.bodyfat.id)
-              .set(saveBodyfat.toMap());
+              .set(saveBodyfat.toMap(), SetOptions(merge: true));
         } on Exception catch (e) {
           debugPrint('Error updating Body Comp: $e');
         }

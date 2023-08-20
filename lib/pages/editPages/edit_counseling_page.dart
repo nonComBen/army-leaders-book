@@ -129,7 +129,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
         firestore
             .collection(Counseling.collectionName)
             .doc(widget.counseling.id)
-            .set(saveCounseling.toMap());
+            .set(saveCounseling.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

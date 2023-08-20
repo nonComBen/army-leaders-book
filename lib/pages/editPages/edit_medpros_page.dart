@@ -312,7 +312,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         firestore
             .collection(Medpro.collectionName)
             .doc(widget.medpro.id)
-            .set(saveMedpros.toMap());
+            .set(saveMedpros.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

@@ -76,7 +76,10 @@ class EditNotePageState extends ConsumerState<EditNotePage> {
       if (widget.note.id == null) {
         firestore.collection('notes').add(saveNote.toMap());
       } else {
-        firestore.collection('notes').doc(widget.note.id).set(saveNote.toMap());
+        firestore
+            .collection('notes')
+            .doc(widget.note.id)
+            .set(saveNote.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

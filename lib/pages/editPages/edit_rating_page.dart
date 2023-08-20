@@ -147,7 +147,7 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
         firestore
             .collection(Rating.collectionName)
             .doc(widget.rating.id)
-            .set(saveRating.toMap());
+            .set(saveRating.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

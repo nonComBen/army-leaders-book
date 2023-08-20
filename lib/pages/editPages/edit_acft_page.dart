@@ -440,7 +440,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
           firestore
               .collection(Acft.collectionName)
               .doc(widget.acft.id)
-              .set(saveAcft.toMap());
+              .set(saveAcft.toMap(), SetOptions(merge: true));
         } on Exception catch (e) {
           debugPrint('Error updating ACFT: $e');
         }

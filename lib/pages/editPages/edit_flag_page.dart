@@ -137,7 +137,7 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
         firestore
             .collection(Flag.collectionName)
             .doc(widget.flag.id)
-            .set(saveFlag.toMap());
+            .set(saveFlag.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

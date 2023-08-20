@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,24 +69,29 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     debugPrint('Validating');
     if (validateAndSave()) {
       try {
-        User user = (await auth.createUserWithEmailAndPassword(
-            _emailController.text, _passwordController.text))!;
-        final userObj = Leader(
-          userId: user.uid,
-          userEmail: user.email!,
-          userName: user.displayName ?? '',
-          createdDate: DateTime.now(),
-          lastLoginDate: DateTime.now(),
-          updatedUserArray: true,
-          tosAgree: true,
-          agreeDate: DateTime.now(),
-        );
-        await FirebaseFirestore.instance
-            .doc('users/${user.uid}')
-            .set(userObj.toMap());
-        ref.read(leaderProvider).init(user.uid);
-        ref.read(settingsProvider.notifier).init(user.uid);
-        ref.read(rootProvider.notifier).signIn();
+        auth
+            .createUserWithEmailAndPassword(
+                _emailController.text, _passwordController.text)
+            .then((user) {
+          if (user != null) {
+            final userObj = Leader(
+              userId: user.uid,
+              userEmail: user.email!,
+              userName: user.displayName ?? '',
+              createdDate: DateTime.now(),
+              lastLoginDate: DateTime.now(),
+              updatedUserArray: true,
+              tosAgree: true,
+              agreeDate: DateTime.now(),
+            );
+            FirebaseFirestore.instance
+                .doc('users/${user.uid}')
+                .set(userObj.toMap(), SetOptions(merge: true));
+            ref.read(leaderProvider).init(user.uid);
+            ref.read(settingsProvider.notifier).init(user.uid);
+          }
+          ref.read(rootProvider.notifier).signIn();
+        });
       } catch (e) {
         FToast toast = FToast();
         toast.init(context);

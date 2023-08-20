@@ -140,7 +140,7 @@ class EditWorkingAwardPageState extends ConsumerState<EditWorkingAwardPage> {
         firestore
             .collection(WorkingAward.collectionName)
             .doc(widget.award.id)
-            .set(saveAward.toMap());
+            .set(saveAward.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

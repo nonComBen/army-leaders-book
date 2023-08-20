@@ -123,7 +123,7 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
         firestore
             .collection(Duty.collectionName)
             .doc(widget.duty.id)
-            .update(saveDuty.toMap());
+            .set(saveDuty.toMap(), SetOptions(merge: true));
       }
       Navigator.pop(context);
     } else {

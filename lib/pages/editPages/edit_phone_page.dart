@@ -88,7 +88,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
         firestore
             .collection(Phone.collectionName)
             .doc(widget.phone.id)
-            .set(savePhone.toMap());
+            .set(savePhone.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

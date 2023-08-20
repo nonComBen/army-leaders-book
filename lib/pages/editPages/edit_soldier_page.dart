@@ -509,7 +509,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
         firestore
             .collection('soldiers')
             .doc(widget.soldier.id)
-            .set(saveSoldier.toMap());
+            .set(saveSoldier.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

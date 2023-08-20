@@ -166,7 +166,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
         firestore
             .collection(Perstat.collectionName)
             .doc(widget.perstat.id)
-            .update(savePerstat.toMap());
+            .set(savePerstat.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

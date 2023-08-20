@@ -197,7 +197,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
         firestore
             .collection(Weapon.collectionName)
             .doc(widget.weapon.id)
-            .set(saveWeapon.toMap());
+            .set(saveWeapon.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

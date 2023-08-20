@@ -170,7 +170,7 @@ class EditEquipmentPageState extends ConsumerState<EditEquipmentPage> {
         firestore
             .collection(Equipment.collectionName)
             .doc(widget.equipment.id)
-            .set(saveEquipment.toMap());
+            .set(saveEquipment.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

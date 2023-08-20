@@ -122,7 +122,7 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
         firestore
             .collection(Tasking.collectionName)
             .doc(widget.tasking.id)
-            .update(saveTasking.toMap());
+            .set(saveTasking.toMap(), SetOptions(merge: true));
       }
       Navigator.pop(context);
     } else {

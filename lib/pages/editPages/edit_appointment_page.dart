@@ -196,7 +196,7 @@ class EditAppointmentPageState extends ConsumerState<EditAppointmentPage> {
         firestore
             .collection(Appointment.collectionName)
             .doc(widget.apt.id)
-            .set(saveApt.toMap());
+            .set(saveApt.toMap(), SetOptions(merge: true));
       }
       Navigator.pop(context);
     } else {

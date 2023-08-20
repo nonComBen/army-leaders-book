@@ -342,7 +342,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
         firestore
             .collection(Training.collectionName)
             .doc(widget.training.id)
-            .set(saveTraining.toMap());
+            .set(saveTraining.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

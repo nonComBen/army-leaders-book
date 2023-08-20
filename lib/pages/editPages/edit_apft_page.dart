@@ -279,7 +279,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
           firestore
               .collection(Apft.collectionName)
               .doc(widget.apft.id)
-              .set(saveApft.toMap());
+              .set(saveApft.toMap(), SetOptions(merge: true));
         } on Exception catch (e) {
           debugPrint('Error updating APFT: $e');
         }

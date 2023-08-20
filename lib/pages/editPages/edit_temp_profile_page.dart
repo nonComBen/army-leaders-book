@@ -128,7 +128,7 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
         firestore
             .collection(TempProfile.collectionName)
             .doc(widget.profile.id)
-            .set(saveProfile.toMap());
+            .set(saveProfile.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

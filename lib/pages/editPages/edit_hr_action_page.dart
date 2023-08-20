@@ -164,7 +164,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
         firestore
             .collection(HrAction.collectionName)
             .doc(widget.hrAction.id)
-            .set(saveHrAction.toMap());
+            .set(saveHrAction.toMap(), SetOptions(merge: true));
       }
       Navigator.of(context).pop();
     } else {

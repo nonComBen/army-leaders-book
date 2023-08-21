@@ -389,51 +389,75 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
     bool overdue = isOverdue(documentSnapshot['end'], 1);
+    String status = 'Approved';
+    try {
+      status = documentSnapshot['status'];
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+    bool pending = status == 'Pending';
+    bool denied = status == 'Denied';
+    TextStyle textStyle = overdue
+        ? const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)
+        : pending
+            ? const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)
+            : denied
+                ? const TextStyle(
+                    color: Colors.red, fontWeight: FontWeight.bold)
+                : const TextStyle();
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
+      DataCell(
+        Text(
+          documentSnapshot['rank'],
+          style: textStyle,
+        ),
+      ),
+      DataCell(
+        Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+          style: textStyle,
+        ),
+      ),
     ];
     if (width > 400) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['start'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['start'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     if (width > 550) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['end'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['end'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     if (width > 685) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['type'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['type'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     if (width > 800) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['section'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['section'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     return cellList;
   }
@@ -605,10 +629,26 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Red Text: Past Thru Date',
+                          'Amber Text: Past Thru Date',
                           style: TextStyle(
-                              color: Colors.red, fontWeight: FontWeight.bold),
-                        )
+                            color: Colors.amber,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Blue Text: Approval Status Pending',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Red Text: Approval Status Denied',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ),

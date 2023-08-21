@@ -3,20 +3,19 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:leaders_book/widgets/header_text.dart';
 
 import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
-import '../../models/action.dart';
+import '../../models/profile.dart';
 import '../../providers/subscription_state.dart';
-import '../../widgets/anon_warning_banner.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
@@ -25,45 +24,44 @@ import '../methods/open_file.dart';
 import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
-import '../pdf/actions_pdf.dart';
+import '../pdf/perm_profiles_pdf.dart';
 import '../providers/tracking_provider.dart';
-import '../widgets/custom_data_table.dart';
+import '../widgets/anon_warning_banner.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
-import 'editPages/edit_actions_tracker_page.dart';
-import 'uploadPages/upload_actions_page.dart';
+import 'editPages/edit_perm_profile_page.dart';
+import 'uploadPages/upload_perm_profile_page.dart';
 
-class ActionsTrackerPage extends ConsumerStatefulWidget {
-  const ActionsTrackerPage({
+enum ProfileType {
+  temporary,
+  permanent,
+}
+
+class PermProfilesPage extends ConsumerStatefulWidget {
+  const PermProfilesPage({
     Key? key,
   }) : super(key: key);
 
-  static const routeName = '/actions-tracker-page';
+  static const routeName = '/permanent-profile-page';
 
   @override
-  ActionsTrackerPageState createState() => ActionsTrackerPageState();
+  PermProfilesPageState createState() => PermProfilesPageState();
 }
 
-class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
-  int _sortColumnIndex = 0;
-  bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
+class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
+  ProfileType profileType = ProfileType.temporary;
+  bool _adLoaded = false, isSubscribed = false;
   final List<DocumentSnapshot> _selectedDocuments = [];
   List<DocumentSnapshot> documents = [], filteredDocs = [];
   late StreamSubscription _subscriptionUsers;
-  QuerySnapshot? snapshot;
   late BannerAd myBanner;
   late String userId;
-
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-  }
+  FToast toast = FToast();
 
   @override
   void initState() {
     super.initState();
-
     userId = ref.read(authProvider).currentUser()!.uid;
     isSubscribed = ref.read(subscriptionStateProvider);
     bool trackingAllowed = ref.read(trackingProvider).trackingAllowed;
@@ -71,8 +69,8 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
     String adUnitId = kIsWeb
         ? ''
         : Platform.isAndroid
-            ? 'ca-app-pub-2431077176117105/7545382050'
-            : 'ca-app-pub-2431077176117105/3608623589';
+            ? 'ca-app-pub-2431077176117105/2008650672'
+            : 'ca-app-pub-2431077176117105/3276851835';
 
     myBanner = BannerAd(
       adUnitId: adUnitId,
@@ -92,9 +90,10 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection(ActionObj.collectionName)
+        .collection(TempProfile.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
+        .where('type', isEqualTo: 'Permanent')
         .snapshots();
     _subscriptionUsers = streamUsers.listen((updates) {
       setState(() {
@@ -115,9 +114,9 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const UploadActionsPage()),
-      );
+          context,
+          MaterialPageRoute(
+              builder: (context) => const UploadPermProfilePage()));
     } else {
       uploadRequiresSub(context);
     }
@@ -132,11 +131,13 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
       'Last Name',
       'First Name',
       'Section',
-      'Action',
-      'Date Submitted',
-      'Current Status',
-      'Status Date',
-      'Remarks',
+      'Date',
+      'Shaving',
+      'PU',
+      'SU',
+      'Run',
+      'Alt Event',
+      'Comments'
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -146,11 +147,13 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
       docs.add(doc['name']);
       docs.add(doc['firstName']);
       docs.add(doc['section']);
-      docs.add(doc['action']);
-      docs.add(doc['dateSubmitted']);
-      docs.add(doc['currentStatus']);
-      docs.add(doc['statusDate']);
-      docs.add(doc['remarks']);
+      docs.add(doc['date']);
+      docs.add(doc['shaving'].toString());
+      docs.add(doc['pu'].toString());
+      docs.add(doc['su'].toString());
+      docs.add(doc['run'].toString());
+      docs.add(doc['altEvent']);
+      docs.add(doc['comments']);
 
       docsList.add(docs);
     }
@@ -164,7 +167,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
     String dir, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'actionsTracker.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'permProfiles.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -172,23 +175,22 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
       location = strings[1];
       try {
         var bytes = excel.encode()!;
-        File('$dir/actionsTracker.xlsx')
+        File('$dir/permProfiles.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {
-          FToast toast = FToast();
-          toast.context = context;
           toast.showToast(
             child: MyToast(
               message: 'Data successfully downloaded to $location',
               buttonText: kIsWeb ? null : 'Open',
               onPressed:
-                  kIsWeb ? null : () => openFile('$dir/actionsTracker.xlsx'),
+                  kIsWeb ? null : () => openFile('$dir/permProfiles.xlsx'),
             ),
           );
         }
       } catch (e) {
-        FirebaseAnalytics.instance.logEvent(name: 'Download Fail');
+        // ignore: avoid_print
+        print('Error: $e');
       }
     }
   }
@@ -196,7 +198,10 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   void _downloadPdf() async {
     if (isSubscribed) {
       Widget title = const Text('Download PDF');
-      Widget content = const Text('Select full page or half page format.');
+      Widget content = Container(
+        padding: const EdgeInsets.all(8.0),
+        child: const Text('Select full page or half page format.'),
+      );
       customAlertDialog(
         context: context,
         title: title,
@@ -217,10 +222,9 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
 
   void completePdfDownload(bool fullPage) async {
     documents.sort(
-      (a, b) =>
-          a['statusDate'].toString().compareTo(b['statusDate'].toString()),
+      (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
-    ActionsPdf pdf = ActionsPdf(
+    PermProfilesPdf pdf = PermProfilesPdf(
       documents: documents,
     );
     String location;
@@ -240,14 +244,12 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
           : 'Pdf successfully downloaded to temporary storage. Please open and save to permanent location.';
     }
     if (mounted) {
-      FToast toast = FToast();
-      toast.context = context;
       toast.showToast(
         child: MyToast(
           message: message,
-          onPressed:
-              kIsWeb ? null : () => openFile('$location/actionsTracker.pdf'),
           buttonText: kIsWeb ? null : 'Open',
+          onPressed:
+              kIsWeb ? null : () => openFile('$location/permProfiles.pdf'),
         ),
       );
     }
@@ -257,13 +259,12 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
     filteredDocs = documents
         .where((element) => sections.contains(element['section']))
         .toList();
+
     setState(() {});
   }
 
   void _deleteRecord() {
     if (_selectedDocuments.isEmpty) {
-      FToast toast = FToast();
-      toast.context = context;
       toast.showToast(
         child: const MyToast(
           message: 'You must select at least one record',
@@ -272,13 +273,11 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, userId, 'Action$s');
+    deleteRecord(context, _selectedDocuments, userId, 'Permanent Profile$s');
   }
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
-      FToast toast = FToast();
-      toast.context = context;
       toast.showToast(
         child: const MyToast(
           message: 'You must select exactly one record',
@@ -287,193 +286,42 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditActionsTrackerPage(
-                  action: ActionObj.fromSnapshot(_selectedDocuments[0]),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPermProfilePage(
+          profile: PermProfile.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditActionsTrackerPage(
-                  action: ActionObj(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
-  }
-
-  List<DataColumn> _createColumns(double width) {
-    List<DataColumn> columnList = [
-      DataColumn(
-        label: const Text('Rank'),
-        onSort: (int columnIndex, bool ascending) =>
-            onSortColumn(columnIndex, ascending),
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPermProfilePage(
+          profile: PermProfile(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
       ),
-      DataColumn(
-          label: const Text('Name'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)),
-    ];
-    if (width > 420) {
-      columnList.add(DataColumn(
-          label: const Text('Action'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 690) {
-      columnList.add(DataColumn(
-          label: const Text('Current Status'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 850) {
-      columnList.add(DataColumn(
-          label: const Text('Status Date'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    if (width > 1030) {
-      columnList.add(DataColumn(
-          label: const Text('Date Submitted'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending)));
-    }
-    return columnList;
-  }
-
-  List<DataRow> _createRows(List<DocumentSnapshot> snapshot, double width) {
-    List<DataRow> newList;
-    newList = snapshot.map((DocumentSnapshot documentSnapshot) {
-      return DataRow(
-          selected: _selectedDocuments.contains(documentSnapshot),
-          onSelectChanged: (bool? selected) =>
-              onSelected(selected, documentSnapshot),
-          cells: getCells(documentSnapshot, width));
-    }).toList();
-
-    return newList;
-  }
-
-  List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
-    List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: const TextStyle(),
-      )),
-    ];
-    if (width > 420) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['action'],
-        style: const TextStyle(),
-      )));
-    }
-    if (width > 690) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['currentStatus'].toString(),
-        style: const TextStyle(),
-      )));
-    }
-    if (width > 850) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['statusDate'].toString(),
-        style: const TextStyle(),
-      )));
-    }
-    if (width > 1030) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['dateSubmitted'].toString(),
-        style: const TextStyle(),
-      )));
-    }
-    return cellList;
-  }
-
-  void onSortColumn(int columnIndex, bool ascending) {
-    setState(() {
-      if (ascending) {
-        switch (columnIndex) {
-          case 0:
-            filteredDocs.sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-            break;
-          case 1:
-            filteredDocs.sort((a, b) => a['name'].compareTo(b['name']));
-            break;
-          case 2:
-            filteredDocs.sort((a, b) => a['action'].compareTo(b['action']));
-            break;
-          case 3:
-            filteredDocs.sort(
-                (a, b) => a['currentStatus'].compareTo(b['currentStatus']));
-            break;
-          case 4:
-            filteredDocs
-                .sort((a, b) => a['statusDate'].compareTo(b['statusDate']));
-            break;
-          case 5:
-            filteredDocs.sort(
-                (a, b) => a['dateSubmitted'].compareTo(b['dateSubmitted']));
-            break;
-        }
-      } else {
-        switch (columnIndex) {
-          case 0:
-            filteredDocs.sort((a, b) => b['rankSort'].compareTo(a['rankSort']));
-            break;
-          case 1:
-            filteredDocs.sort((a, b) => b['name'].compareTo(a['name']));
-            break;
-          case 2:
-            filteredDocs.sort((a, b) => b['action'].compareTo(a['action']));
-            break;
-          case 3:
-            filteredDocs.sort(
-                (a, b) => b['currentStatus'].compareTo(a['currentStatus']));
-            break;
-          case 4:
-            filteredDocs
-                .sort((a, b) => b['statusDate'].compareTo(a['statusDate']));
-            break;
-          case 5:
-            filteredDocs.sort(
-                (a, b) => b['dateSubmitted'].compareTo(a['dateSubmitted']));
-            break;
-        }
-      }
-      _sortAscending = ascending;
-      _sortColumnIndex = columnIndex;
-    });
-  }
-
-  void onSelected(bool? selected, DocumentSnapshot snapshot) {
-    setState(() {
-      if (selected!) {
-        _selectedDocuments.add(snapshot);
-      } else {
-        _selectedDocuments.remove(snapshot);
-      }
-    });
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
+    final width = MediaQuery.of(context).size.width;
+    toast.context = context;
     return PlatformScaffold(
-      title: 'Action Tracker',
+      title: 'Permanent Profiles',
       actions: createAppBarActions(
         width,
         [
           if (!kIsWeb && Platform.isIOS)
             AppBarOption(
-              title: 'New Action',
+              title: 'New Profile',
               icon: Icon(
                 CupertinoIcons.add,
                 color: getOnPrimaryColor(context),
@@ -481,7 +329,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
               onPressed: () => _newRecord(context),
             ),
           AppBarOption(
-            title: 'Edit Action',
+            title: 'Edit Profile',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
               color: getOnPrimaryColor(context),
@@ -489,7 +337,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
             onPressed: () => _editRecord(),
           ),
           AppBarOption(
-            title: 'Delete Action',
+            title: 'Delete Profile',
             icon: Icon(
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
@@ -499,7 +347,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
             onPressed: () => _deleteRecord(),
           ),
           AppBarOption(
-            title: 'Filter Actions',
+            title: 'Filter Profiles',
             icon: Icon(
               Icons.filter_alt,
               color: getOnPrimaryColor(context),
@@ -540,30 +388,31 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          _newRecord(context);
-        },
-      ),
+          child: const Icon(Icons.add),
+          onPressed: () {
+            _newRecord(context);
+          }),
       body: TableFrame(
         children: [
-          Expanded(
-            child: ListView(
-              children: <Widget>[
-                if (user.isAnonymous) const AnonWarningBanner(),
-                Card(
-                  color: getContrastingBackgroundColor(context),
-                  child: CustomDataTable(
-                    sortAscending: _sortAscending,
-                    sortColumnIndex: _sortColumnIndex,
-                    columns: _createColumns(MediaQuery.of(context).size.width),
-                    rows: _createRows(
-                        filteredDocs, MediaQuery.of(context).size.width),
-                  ),
-                ),
-              ],
-            ),
+          if (user.isAnonymous) const AnonWarningBanner(),
+          ToggleButtons(
+            isSelected: [
+              profileType == ProfileType.temporary,
+              profileType == ProfileType.permanent,
+            ],
+            selectedColor: getPrimaryColor(context),
+            color: getBackgroundColor(context),
+            borderColor: getTextColor(context),
+            children: const [
+              HeaderText('Temporary'),
+              HeaderText('Permanent'),
+            ],
           ),
+          // Expanded(
+          //   child: profileType == ProfileType.temporary
+          //       ? TemporaryProfileTable()
+          //       : PermanentProfilesTable(),
+          // ),
           if (!isSubscribed && _adLoaded)
             Container(
               alignment: Alignment.center,

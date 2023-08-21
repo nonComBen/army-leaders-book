@@ -38,6 +38,7 @@ class EditPerstatPage extends ConsumerStatefulWidget {
 
 class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
   String _title = 'New Perstat';
+  String status = 'Approved';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -108,6 +109,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     if (widget.perstat.id != null) {
       _title = '${widget.perstat.rank} ${widget.perstat.name}';
     }
+    status = widget.perstat.status;
 
     _soldierId = widget.perstat.soldierId;
     _rank = widget.perstat.rank;
@@ -158,6 +160,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
         type: type!,
         comments: _commentsController.text,
         location: _locController.text,
+        status: status,
       );
 
       if (widget.perstat.id == null) {
@@ -291,6 +294,28 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
                 date: _end,
                 minYears: 1,
                 maxYears: 2,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Status'),
+                  value: status,
+                  items: const [
+                    'Approved',
+                    'Pending',
+                    'Denied',
+                  ],
+                  itemLabels: const [
+                    'Approved',
+                    'Pending',
+                    'Denied',
+                  ],
+                  onChanged: (newStatus) {
+                    setState(() {
+                      status = newStatus;
+                    });
+                  },
+                ),
               ),
             ],
           ),

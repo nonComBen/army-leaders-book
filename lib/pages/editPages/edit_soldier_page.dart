@@ -55,12 +55,14 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
   final TextEditingController _supervisorController = TextEditingController();
   final TextEditingController _sectionController = TextEditingController();
   final TextEditingController _dodIdController = TextEditingController();
+  final TextEditingController _cacExpireController = TextEditingController();
   final TextEditingController _dorController = TextEditingController();
   final TextEditingController _mosController = TextEditingController();
   final TextEditingController _paraLnController = TextEditingController();
   final TextEditingController _reqMosController = TextEditingController();
   final TextEditingController _dutyController = TextEditingController();
   final TextEditingController _lossController = TextEditingController();
+  final TextEditingController _ymavController = TextEditingController();
   final TextEditingController _gainController = TextEditingController();
   final TextEditingController _etsController = TextEditingController();
   final TextEditingController _basdController = TextEditingController();
@@ -82,6 +84,8 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _workEmailController = TextEditingController();
   final TextEditingController _nokController = TextEditingController();
+  final TextEditingController _nokRelationshipController =
+      TextEditingController();
   final TextEditingController _nokPhoneController = TextEditingController();
   final TextEditingController _maritalStatusController =
       TextEditingController();
@@ -116,7 +120,13 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     'DLC5',
     'SMA',
   ];
-  DateTime? _dorDate, _lossDate, _etsDate, _basdDate, _pebdDate, _gainDate;
+  DateTime? _dorDate,
+      _lossDate,
+      _etsDate,
+      _basdDate,
+      _pebdDate,
+      _gainDate,
+      _cacDate;
   DateFormat formatter = DateFormat('yyyy-MM-dd');
 
   @override
@@ -134,12 +144,14 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _supervisorController.text = widget.soldier.supervisor;
     _sectionController.text = widget.soldier.section;
     _dodIdController.text = widget.soldier.dodId;
+    _cacExpireController.text = widget.soldier.cacExpiration;
     _mosController.text = widget.soldier.mos;
     _dutyController.text = widget.soldier.duty;
     _paraLnController.text = widget.soldier.paraLn;
     _reqMosController.text = widget.soldier.reqMos;
     _dorController.text = widget.soldier.dor;
     _lossController.text = widget.soldier.lossDate;
+    _ymavController.text = widget.soldier.ymav;
     _etsController.text = widget.soldier.ets;
     _gainController.text = widget.soldier.gainDate;
     _basdController.text = widget.soldier.basd;
@@ -161,6 +173,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _workPhoneController.text = widget.soldier.workPhone;
     _emailController.text = widget.soldier.email;
     _nokController.text = widget.soldier.nok;
+    _nokRelationshipController.text = widget.soldier.nokRelationship;
     _maritalStatusController.text = widget.soldier.maritalStatus;
     _nokPhoneController.text = widget.soldier.nokPhone;
     _commentsController.text = widget.soldier.comments;
@@ -173,6 +186,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _povs = widget.soldier.povs.map((e) => POV.fromMap(e)).toList();
     _awards = widget.soldier.awards.map((e) => Award.fromMap(e)).toList();
 
+    _cacDate = DateTime.tryParse(widget.soldier.cacExpiration);
     _dorDate = DateTime.tryParse(widget.soldier.dor);
     _lossDate = DateTime.tryParse(widget.soldier.lossDate);
     _etsDate = DateTime.tryParse(widget.soldier.ets);
@@ -190,12 +204,14 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _supervisorController.dispose();
     _sectionController.dispose();
     _dodIdController.dispose();
+    _cacExpireController.dispose();
     _mosController.dispose();
     _dorController.dispose();
     _dutyController.dispose();
     _paraLnController.dispose();
     _reqMosController.dispose();
     _lossController.dispose();
+    _ymavController.dispose();
     _etsController.dispose();
     _basdController.dispose();
     _pebdController.dispose();
@@ -218,6 +234,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _workEmailController.dispose();
     _nokPhoneController.dispose();
     _nokController.dispose();
+    _nokRelationshipController.dispose();
     _maritalStatusController.dispose();
     _commentsController.dispose();
     super.dispose();
@@ -468,12 +485,14 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
         supervisor: _supervisorController.text,
         section: _sectionController.text,
         dodId: _dodIdController.text,
+        cacExpiration: _cacExpireController.text,
         dor: _dorController.text,
         mos: _mosController.text,
         duty: _dutyController.text,
         paraLn: _paraLnController.text,
         reqMos: _reqMosController.text,
         lossDate: _lossController.text,
+        ymav: _ymavController.text,
         ets: _etsController.text,
         basd: _basdController.text,
         pebd: _pebdController.text,
@@ -497,6 +516,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
         email: _emailController.text,
         workEmail: _workEmailController.text,
         nok: _nokController.text,
+        nokRelationship: _nokRelationshipController.text,
         nokPhone: _nokPhoneController.text,
         maritalStatus: _maritalStatusController.text,
         comments: _commentsController.text,
@@ -640,6 +660,13 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                 onChanged: (_) => updated = true,
               ),
               DateTextField(
+                label: 'CAC Expiration Date',
+                date: _cacDate,
+                minYears: 1,
+                maxYears: 5,
+                controller: _cacExpireController,
+              ),
+              DateTextField(
                 label: 'Date of Rank',
                 date: _dorDate,
                 minYears: 20,
@@ -687,6 +714,15 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                 minYears: 1,
                 maxYears: 10,
                 controller: _lossController,
+              ),
+              PaddedTextField(
+                label: 'YMAV',
+                decoration: const InputDecoration(
+                  labelText: 'YMAV',
+                ),
+                controller: _ymavController,
+                keyboardType: TextInputType.number,
+                onChanged: (_) => updated = true,
               ),
               DateTextField(
                 label: 'ETS Date',
@@ -909,6 +945,15 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                   labelText: 'Next of Kin',
                 ),
                 controller: _nokController,
+                keyboardType: TextInputType.text,
+                onChanged: (_) => updated = true,
+              ),
+              PaddedTextField(
+                label: 'Next of Kin Relationship',
+                decoration: const InputDecoration(
+                  labelText: 'Next of Kin Relationship',
+                ),
+                controller: _nokRelationshipController,
                 keyboardType: TextInputType.text,
                 onChanged: (_) => updated = true,
               ),

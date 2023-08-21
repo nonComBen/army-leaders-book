@@ -309,7 +309,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                 keyboardType: TextInputType.text,
                 label: 'License',
                 decoration: const InputDecoration(
-                  labelText: 'License',
+                  labelText: 'License Number',
                 ),
                 onChanged: (value) {
                   updated = true;

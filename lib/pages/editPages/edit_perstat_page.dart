@@ -48,6 +48,8 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
   final TextEditingController _typeController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
   final TextEditingController _locController = TextEditingController();
+  final TextEditingController _daysController = TextEditingController();
+
   String? _type,
       _otherType,
       _soldierId,
@@ -83,6 +85,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     _typeController.dispose();
     _commentsController.dispose();
     _locController.dispose();
+    _daysController.dispose();
     super.dispose();
   }
 
@@ -128,6 +131,35 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
 
     _start = DateTime.tryParse(_startController.text);
     _end = DateTime.tryParse(_endController.text);
+    calcDays();
+
+    _startController.addListener(() {
+      calcDays();
+    });
+
+    _endController.addListener(() {
+      calcDays();
+    });
+  }
+
+  bool bothDatesValid() {
+    return isValidDate(_startController.text) &&
+        _startController.text != '' &&
+        isValidDate(_endController.text) &&
+        _endController.text != '';
+  }
+
+  void calcDays() {
+    if (bothDatesValid()) {
+      setState(() {
+        _daysController.text =
+            '${DateTime.parse(_endController.text).difference(DateTime.parse(_startController.text)).inDays + 1} Days';
+      });
+    } else {
+      setState(() {
+        _daysController.text = '';
+      });
+    }
   }
 
   void submit(BuildContext context) async {
@@ -294,6 +326,14 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
                 date: _end,
                 minYears: 1,
                 maxYears: 2,
+              ),
+              PaddedTextField(
+                controller: _daysController,
+                enabled: false,
+                label: 'Length',
+                decoration: const InputDecoration(
+                  labelText: 'Length',
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),

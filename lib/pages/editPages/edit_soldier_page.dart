@@ -5,30 +5,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:leaders_book/widgets/more_tiles_header.dart';
 
-import '../../methods/custom_modal_bottom_sheet.dart';
-import '../../methods/validate.dart';
-import '../../widgets/form_frame.dart';
-import '../../widgets/form_grid_view.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
-import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../widgets/header_text.dart';
-import '../../widgets/my_toast.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
-import '../../providers/auth_provider.dart';
-import '../../methods/theme_methods.dart';
-import '../../widgets/edit_delete_list_tile.dart';
-import '../../widgets/padded_text_field.dart';
-import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../methods/custom_alert_dialog.dart';
+import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/rank_sort.dart';
+import '../../methods/theme_methods.dart';
+import '../../methods/validate.dart';
 import '../../models/award.dart';
 import '../../models/pov.dart';
 import '../../models/soldier.dart';
-import '../../methods/rank_sort.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/selected_soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/edit_delete_list_tile.dart';
+import '../../widgets/form_frame.dart';
+import '../../widgets/form_grid_view.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/more_tiles_header.dart';
+import '../../widgets/my_toast.dart';
+import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditSoldierPage extends ConsumerStatefulWidget {
   const EditSoldierPage({
@@ -511,6 +512,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
             .doc(widget.soldier.id)
             .set(saveSoldier.toMap(), SetOptions(merge: true));
       }
+      ref.read(selectedSoldiersProvider.notifier).clearSoldiers();
       Navigator.of(context).pop();
     } else {
       MyToast myToast = const MyToast(
@@ -1013,8 +1015,13 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
             onPressed: () {
               submit(context);
             },
-            child: Text(
-                widget.soldier.id == null ? 'Add Soldier' : 'Update Soldier'),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: HeaderText(
+                widget.soldier.id == null ? 'Add Soldier' : 'Update Soldier',
+                color: getOnPrimaryColor(context),
+              ),
+            ),
           ),
         ],
       ),

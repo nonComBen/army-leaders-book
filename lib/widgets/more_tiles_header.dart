@@ -19,7 +19,7 @@ class MoreTilesHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         decoration: BoxDecoration(
           color: getPrimaryColor(context),
           borderRadius: BorderRadius.circular(12.0),
@@ -41,7 +41,7 @@ class MoreTilesHeader extends StatelessWidget {
               child: PlatformIconButton(
                 icon: Icon(
                   Icons.add,
-                  size: 28,
+                  size: 24,
                   color: getOnPrimaryColor(context),
                 ),
                 onPressed: onPressed,

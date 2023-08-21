@@ -10,10 +10,6 @@ final selectedSoldiersProvider =
 class SelectedSoldiers extends StateNotifier<List<Soldier>> {
   SelectedSoldiers() : super([]);
 
-  get soldiers {
-    return state;
-  }
-
   void addSoldier(Soldier soldier) {
     debugPrint('Soldier added to selected soldiers');
     state.add(soldier);

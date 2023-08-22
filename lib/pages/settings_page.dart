@@ -1,18 +1,19 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/auth_provider.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:leaders_book/providers/shared_prefs_provider.dart';
+import 'package:leaders_book/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../providers/auth_provider.dart';
+import '../../methods/custom_alert_dialog.dart';
+import '../../models/setting.dart';
+import '../../providers/shared_prefs_provider.dart';
 import '../methods/on_back_pressed.dart';
 import '../methods/theme_methods.dart';
 import '../providers/theme_provider.dart';
-import '../../models/setting.dart';
 import '../widgets/header_text.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/padded_text_field.dart';
@@ -35,7 +36,17 @@ class SettingsPage extends ConsumerStatefulWidget {
   SettingsPageState createState() => SettingsPageState();
 }
 
-enum Notification { acft, bf, weapon, pha, dental, vision, hearing, hiv }
+enum Notification {
+  acft,
+  bf,
+  weapon,
+  pha,
+  dental,
+  vision,
+  hearing,
+  hiv,
+  hrAction
+}
 
 class SettingsPageState extends ConsumerState<SettingsPage> {
   int acftMos = 6,
@@ -45,7 +56,8 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       dentalMos = 12,
       visionMos = 12,
       hearingMos = 12,
-      hivMos = 24;
+      hivMos = 24,
+      hrActionMos = 12;
   List<dynamic> acftNotifications = [],
       bfNotifications = [],
       weaponNotifications = [],
@@ -53,7 +65,8 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       dentalNotifications = [],
       visionNotifications = [],
       hearingNotifications = [],
-      hivNotifications = [];
+      hivNotifications = [],
+      hrActionNotifications = [];
   bool updated = false,
       addNotification = true,
       perstat = true,
@@ -72,6 +85,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   late Setting setting;
   late SharedPreferences prefs;
+  DocumentSnapshot? doc;
 
   final TextEditingController acftController = TextEditingController();
   final TextEditingController bfController = TextEditingController();
@@ -81,6 +95,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
   final TextEditingController visionController = TextEditingController();
   final TextEditingController hearingController = TextEditingController();
   final TextEditingController hivController = TextEditingController();
+  final TextEditingController hrActionController = TextEditingController();
 
   final GlobalKey<FormState> _formState = GlobalKey<FormState>();
 
@@ -103,6 +118,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
     visionController.dispose();
     hearingController.dispose();
     hivController.dispose();
+    hrActionController.dispose();
     super.dispose();
   }
 
@@ -117,29 +133,19 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
 
   void initialize() async {
     QuerySnapshot snapshot = await firestore
-        .collection('settings')
+        .collection(Setting.collectionName)
         .where('owner', isEqualTo: userId)
         .get();
-    DocumentSnapshot? doc;
     if (snapshot.docs.isNotEmpty) {
       doc = snapshot.docs.firstWhere((doc) => doc.id == userId);
     }
 
     setState(() {
       if (doc != null) {
-        setting = Setting.fromMap(doc.data() as Map<String, dynamic>);
-        updated = false;
+        setting = Setting.fromMap(doc!.data() as Map<String, dynamic>, userId);
       } else {
         setting = Setting(
           owner: userId,
-          hearingNotifications: [0, 30],
-          weaponsNotifications: [0, 30],
-          acftNotifications: [0, 30],
-          dentalNotifications: [0, 30],
-          visionNotifications: [0, 30],
-          bfNotifications: [0, 30],
-          hivNotifications: [0, 30],
-          phaNotifications: [0, 30],
         );
         updated = true;
       }
@@ -163,6 +169,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       visionMos = setting.visionMonths;
       hearingMos = setting.hearingMonths;
       hivMos = setting.hivMonths;
+      hrActionMos = setting.hrActionMonths;
 
       acftController.text = acftMos.toString();
       bfController.text = bfMos.toString();
@@ -172,7 +179,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       visionController.text = visionMos.toString();
       hearingController.text = hearingMos.toString();
       hivController.text = hivMos.toString();
-
+      hrActionController.text = hrActionMos.toString();
       bfNotifications = setting.bfNotifications.toList(growable: true);
       weaponNotifications = setting.weaponsNotifications.toList(growable: true);
       phaNotifications = setting.phaNotifications.toList(growable: true);
@@ -182,6 +189,8 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
           setting.hearingNotifications.toList(growable: true);
       hivNotifications = setting.hivNotifications.toList(growable: true);
       acftNotifications = setting.acftNotifications.toList(growable: true);
+      hrActionNotifications =
+          setting.hrActionNotifications.toList(growable: true);
     });
   }
 
@@ -215,6 +224,9 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
           break;
         case Notification.hiv:
           number = hivNotifications[index];
+          break;
+        case Notification.hrAction:
+          number = hrActionNotifications[index];
           break;
       }
       numController.text = number.toString();
@@ -271,6 +283,9 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
               case Notification.hiv:
                 hivNotifications[index] = number;
                 break;
+              case Notification.hrAction:
+                hrActionNotifications[index] = number;
+                break;
             }
           });
         } else {
@@ -299,6 +314,9 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                 break;
               case Notification.hiv:
                 hivNotifications.add(number);
+                break;
+              case Notification.hrAction:
+                hrActionNotifications.add(number);
                 break;
             }
           });
@@ -329,6 +347,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       visionMonths: visionMos,
       hearingMonths: hearingMos,
       hivMonths: hivMos,
+      hrActionMonths: hrActionMos,
       acftNotifications: acftNotifications,
       bfNotifications: bfNotifications,
       weaponsNotifications: weaponNotifications,
@@ -337,13 +356,24 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
       visionNotifications: visionNotifications,
       hearingNotifications: hearingNotifications,
       hivNotifications: hivNotifications,
+      hrActionNotifications: hrActionNotifications,
       owner: userId,
     );
 
-    firestore.collection('settings').doc(userId).set(
+    firestore
+        .collection(Setting.collectionName)
+        .doc(userId)
+        .set(
           saveSetting.toMap(),
           SetOptions(merge: true),
-        );
+        )
+        .then(
+      (value) {
+        if (doc == null) {
+          ref.read(settingsProvider.notifier).init(userId);
+        }
+      },
+    );
 
     Navigator.pop(context);
   }
@@ -526,15 +556,18 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                     'Notifications',
                   ),
                 ),
-                PlatformCheckboxListTile(
+                Padding(
                   padding: const EdgeInsets.all(8.0),
-                  title: const Text('Receive Notifications'),
-                  onChanged: (value) {
-                    setState(() {
-                      addNotification = value!;
-                    });
-                  },
-                  value: addNotification,
+                  child: PlatformCheckboxListTile(
+                    padding: const EdgeInsets.all(8.0),
+                    title: const Text('Receive Notifications'),
+                    onChanged: (value) {
+                      setState(() {
+                        addNotification = value!;
+                      });
+                    },
+                    value: addNotification,
+                  ),
                 ),
                 const Text(
                   'APFT/ACFT',
@@ -655,7 +688,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                           color: getTextColor(context),
                         ),
                         onPressed: () {
-                          _editNotification(context, null, Notification.acft);
+                          _editNotification(context, null, Notification.bf);
                         })
                   ],
                 ),
@@ -738,7 +771,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                           color: getTextColor(context),
                         ),
                         onPressed: () {
-                          _editNotification(context, null, Notification.acft);
+                          _editNotification(context, null, Notification.weapon);
                         })
                   ],
                 ),
@@ -821,7 +854,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                           color: getTextColor(context),
                         ),
                         onPressed: () {
-                          _editNotification(context, null, Notification.acft);
+                          _editNotification(context, null, Notification.pha);
                         })
                   ],
                 ),
@@ -904,7 +937,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                           color: getTextColor(context),
                         ),
                         onPressed: () {
-                          _editNotification(context, null, Notification.acft);
+                          _editNotification(context, null, Notification.dental);
                         })
                   ],
                 ),
@@ -987,7 +1020,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                           color: getTextColor(context),
                         ),
                         onPressed: () {
-                          _editNotification(context, null, Notification.acft);
+                          _editNotification(context, null, Notification.vision);
                         })
                   ],
                 ),
@@ -1070,7 +1103,8 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                           color: getTextColor(context),
                         ),
                         onPressed: () {
-                          _editNotification(context, null, Notification.acft);
+                          _editNotification(
+                              context, null, Notification.hearing);
                         })
                   ],
                 ),
@@ -1153,7 +1187,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                           color: getTextColor(context),
                         ),
                         onPressed: () {
-                          _editNotification(context, null, Notification.acft);
+                          _editNotification(context, null, Notification.hiv);
                         })
                   ],
                 ),
@@ -1191,6 +1225,90 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
                             onTap: () {
                               _editNotification(
                                   context, index, Notification.hiv);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+                Divider(
+                  color: accentColor,
+                ),
+                const Text(
+                  'HR Metrics',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.start,
+                ),
+                PaddedTextField(
+                  keyboardType: TextInputType.number,
+                  controller: hrActionController,
+                  enabled: true,
+                  label: 'Due after X months',
+                  decoration: const InputDecoration(
+                    labelText: 'Due after X months',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      hrActionMos = int.tryParse(value) ?? 12;
+                      updated = true;
+                    });
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: HeaderText(
+                        'Notifications',
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    PlatformIconButton(
+                        icon: Icon(
+                          Icons.add,
+                          size: 32,
+                          color: getTextColor(context),
+                        ),
+                        onPressed: () {
+                          _editNotification(
+                              context, null, Notification.hrAction);
+                        })
+                  ],
+                ),
+                GridView.builder(
+                    padding: const EdgeInsets.all(0.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: width > 700 ? 2 : 1,
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                      childAspectRatio: width > 900
+                          ? 900 / 150
+                          : width > 700
+                              ? width / 150
+                              : width / 75,
+                    ),
+                    shrinkWrap: true,
+                    primary: false,
+                    itemCount: hrActionNotifications.length,
+                    itemBuilder: (context, index) {
+                      hivNotifications.sort();
+                      return Card(
+                        color: getContrastingBackgroundColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: PlatformListTile(
+                            title: Text(
+                                '${hrActionNotifications[index].toString()} Days Before'),
+                            trailing: PlatformIconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  setState(() {
+                                    hrActionNotifications.removeAt(index);
+                                  });
+                                }),
+                            onTap: () {
+                              _editNotification(
+                                  context, index, Notification.hrAction);
                             },
                           ),
                         ),

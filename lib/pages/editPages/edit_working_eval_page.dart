@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
-import '../../methods/theme_methods.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
+import '../../models/soldier.dart';
 import '../../models/working_eval.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -135,26 +134,14 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
       );
 
       if (widget.eval.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kWorkingEvalsCollection)
-            .add(saveEval.toMap());
-
-        saveEval.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(WorkingEval.collectionName).add(saveEval.toMap());
       } else {
         firestore
-            .collection(kWorkingEvalsCollection)
+            .collection(WorkingEval.collectionName)
             .doc(widget.eval.id)
-            .set(saveEval.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveEval.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -208,12 +195,15 @@ class EditWorkingEvalPageState extends ConsumerState<EditWorkingEvalPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kWorkingEvalsCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: WorkingEval.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

@@ -4,22 +4,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/widgets/more_tiles_header.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
-import '../../methods/theme_methods.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/hand_receipt_item.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
-import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -253,26 +252,16 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
       );
 
       if (widget.item.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kHandReceiptCollection)
+        firestore
+            .collection(HandReceiptItem.collectionName)
             .add(saveHRItem.toMap());
-
-        saveHRItem.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
-            .collection(kHandReceiptCollection)
+            .collection(HandReceiptItem.collectionName)
             .doc(widget.item.id)
-            .set(saveHRItem.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Hand Receipt');
-        });
+            .set(saveHRItem.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -328,12 +317,15 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kHandReceiptCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: HandReceiptItem.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -350,7 +342,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
               ),
               PaddedTextField(
                 controller: _modelController,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 label: 'Model #',
                 decoration: const InputDecoration(
                   labelText: 'Model #',
@@ -405,43 +397,11 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.0),
-                color: getPrimaryColor(context),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: HeaderText(
-                      'Subcompents',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: getOnPrimaryColor(context),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlatformIconButton(
-                      icon: Icon(
-                        Icons.add,
-                        size: 28,
-                        color: getOnPrimaryColor(context),
-                      ),
-                      onPressed: () {
-                        _editSubComponent(context, null);
-                      },
-                    ),
-                  )
-                ],
-              ),
-            ),
+          MoreTilesHeader(
+            label: 'Subcomponents',
+            onPressed: () {
+              _editSubComponent(context, null);
+            },
           ),
           if (_subComponents!.isNotEmpty)
             FormGridView(width: width, children: _subComponentWidgets()),

@@ -1,69 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:leaders_book/methods/theme_methods.dart';
+
+import '../../methods/theme_methods.dart';
+import '../../widgets/header_text.dart';
 
 class RollupCard extends StatelessWidget {
   const RollupCard({
     Key? key,
     required this.title,
-    required this.info1,
-    required this.info2,
-    required this.button,
-    this.button2,
+    required this.infoRow1,
+    this.infoRow2 = const [],
+    required this.buttons,
   }) : super(key: key);
 
   final String title;
-  final Widget info1, info2;
-  final Widget? button, button2;
+  final List<Widget> infoRow1;
+  final List<Widget> infoRow2;
+  final List<Widget> buttons;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-        color: getContrastingBackgroundColor(context),
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                      color: getTextColor(context),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+      color: getContrastingBackgroundColor(context),
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: <Widget>[
+            HeaderText(
+              title,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: infoRow1.map((e) => Expanded(child: e)).toList()),
               ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
+            ),
+            if (infoRow2.isNotEmpty)
+              Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Expanded(
-                        child: info1,
-                      ),
-                      Expanded(
-                        child: info2,
-                      ),
-                    ],
-                  ),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children:
+                          infoRow2.map((e) => Expanded(child: e)).toList()),
                 ),
               ),
-              Expanded(
-                  child: ButtonBar(
-                layoutBehavior: ButtonBarLayoutBehavior.constrained,
-                children: <Widget>[
-                  button!,
-                  if (button2 != null) button2!,
-                ],
-              ))
-            ],
-          ),
-        ));
+            ButtonBar(
+              layoutBehavior: ButtonBarLayoutBehavior.constrained,
+              children: buttons.map((e) => e).toList(),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }

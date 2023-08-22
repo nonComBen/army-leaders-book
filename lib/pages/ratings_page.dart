@@ -9,14 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/rating.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/table_frame.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
@@ -29,6 +28,7 @@ import '../models/app_bar_option.dart';
 import '../pdf/ratings_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import 'editPages/edit_rating_page.dart';
@@ -86,7 +86,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('ratings')
+        .collection(Rating.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -118,8 +118,6 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -215,8 +213,6 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
@@ -282,23 +278,27 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditRatingPage(
-                  rating: Rating.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditRatingPage(
+          rating: Rating.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditRatingPage(
-                  rating: Rating(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditRatingPage(
+          rating: Rating(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -325,13 +325,13 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 685) {
+    if (width > 705) {
       columnList.add(DataColumn(
           label: const Text('Reviewer'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 835) {
+    if (width > 840) {
       columnList.add(DataColumn(
           label: const Text('Next Due'),
           onSort: (int columnIndex, bool ascending) =>
@@ -398,7 +398,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                 : const TextStyle(),
       )));
     }
-    if (width > 685) {
+    if (width > 705) {
       cellList.add(DataCell(Text(
         documentSnapshot['reviewer'],
         style: overdue
@@ -408,7 +408,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                 : const TextStyle(),
       )));
     }
-    if (width > 835) {
+    if (width > 840) {
       cellList.add(
         DataCell(
           Text(
@@ -576,7 +576,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

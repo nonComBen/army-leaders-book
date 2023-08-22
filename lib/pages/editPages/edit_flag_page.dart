@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/flag.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -103,8 +102,8 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
     _expController.text = widget.flag.exp;
     _commentsController.text = widget.flag.comments;
 
-    _dateTime = DateTime.tryParse(widget.flag.date) ?? DateTime.now();
-    _expDate = DateTime.tryParse(widget.flag.exp) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.flag.date);
+    _expDate = DateTime.tryParse(widget.flag.exp);
   }
 
   void submit(BuildContext context) async {
@@ -133,25 +132,14 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
       );
 
       if (widget.flag.id == null) {
-        DocumentReference docRef =
-            await firestore.collection(kFlagCollection).add(saveFlag.toMap());
-
-        saveFlag.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Flag.collectionName).add(saveFlag.toMap());
       } else {
         firestore
-            .collection(kFlagCollection)
+            .collection(Flag.collectionName)
             .doc(widget.flag.id)
-            .set(saveFlag.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveFlag.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -207,12 +195,15 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kFlagCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Flag.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

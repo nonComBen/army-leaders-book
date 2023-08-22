@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 
-class UserObj {
+class Leader {
   String? userId;
   String userRank;
   String userEmail;
@@ -17,8 +18,9 @@ class UserObj {
   bool updatedTraining;
   DateTime? createdDate;
   DateTime? lastLoginDate;
+  List<dynamic> deviceTokens;
 
-  UserObj({
+  Leader({
     this.userId,
     this.userRank = '',
     this.userName = '',
@@ -34,7 +36,10 @@ class UserObj {
     this.updatedTraining = false,
     this.createdDate,
     this.lastLoginDate,
+    this.deviceTokens = const [],
   });
+
+  static const String collectionName = 'users';
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -53,11 +58,12 @@ class UserObj {
     map['updatedPovs'] = updatedPovs;
     map['updatedAwards'] = updatedAwards;
     map['updatedTraining'] = updatedTraining;
+    map['deviceTokens'] = deviceTokens;
 
     return map;
   }
 
-  factory UserObj.fromSnapshot(DocumentSnapshot doc) {
+  factory Leader.fromSnapshot(DocumentSnapshot doc) {
     Timestamp agreeTimestamp = Timestamp.fromDate(DateTime.now()),
         createdTimestamp = Timestamp.fromDate(DateTime.now()),
         lastLoginTimestamp = Timestamp.fromDate(DateTime.now());
@@ -66,7 +72,7 @@ class UserObj {
         isPovsUpdated = false,
         isAwardsUpdated = false,
         isTrainingUpdated = false;
-
+    List<dynamic> tokens = [];
     try {
       rank = doc['rank'];
       userName = doc['userName'];
@@ -106,7 +112,13 @@ class UserObj {
           .logEvent(name: 'CreatedTimeStamp Does Not Exist');
     }
 
-    return UserObj(
+    try {
+      tokens = doc['deviceTokens'];
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+
+    return Leader(
       userId: doc.id,
       userRank: rank,
       userName: userName,
@@ -122,6 +134,7 @@ class UserObj {
       updatedTraining: isTrainingUpdated,
       createdDate: createdTimestamp.toDate(),
       lastLoginDate: lastLoginTimestamp.toDate(),
+      deviceTokens: tokens,
     );
   }
 }

@@ -1,19 +1,25 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:leaders_book/methods/local_notification_methods.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/hr_action.dart';
+import '../../models/setting.dart';
+import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -50,6 +56,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
   bool removeSoldiers = false, updated = false;
   DateTime? _dd93Date, _sglvDate, _prrDate;
   FToast toast = FToast();
+  Setting? setting;
 
   @override
   void dispose() {
@@ -85,9 +92,9 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
     removeSoldiers = false;
     updated = false;
 
-    _dd93Date = DateTime.tryParse(widget.hrAction.dd93) ?? DateTime.now();
-    _sglvDate = DateTime.tryParse(widget.hrAction.sglv) ?? DateTime.now();
-    _prrDate = DateTime.tryParse(widget.hrAction.prr) ?? DateTime.now();
+    _dd93Date = DateTime.tryParse(widget.hrAction.dd93);
+    _sglvDate = DateTime.tryParse(widget.hrAction.sglv);
+    _prrDate = DateTime.tryParse(widget.hrAction.prr);
   }
 
   void submit(BuildContext context) async {
@@ -99,6 +106,42 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
       _formKey,
       [_dd93Controller.text, _sglvController.text, _prrController.text],
     )) {
+      setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
+      List<int> notificationIds = [];
+      DateFormat formatter = DateFormat('yyyy-MM-dd');
+      if (!kIsWeb && setting!.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        if (widget.hrAction.notificationIds.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.hrAction.notificationIds);
+        }
+
+        List<String> topics = ['DD93', 'SGLV', 'PRR'];
+        for (String topic in topics) {
+          final date = getDate(topic);
+          if (date != '') {
+            DateTime dueDate = getDueDate(date, setting!.hrActionMonths);
+
+            for (int days in setting!.hrActionNotifications) {
+              notificationIds.add(id);
+              notificationService.scheduleNotification(
+                dateTime: dueDate.subtract(Duration(days: days)),
+                id: id,
+                title: '$_rank $_lastName\'s $topic Due',
+                body:
+                    '$_rank $_lastName\'s $topic Due in $days on ${formatter.format(dueDate)}',
+                payload: NotificationService.hrMetricsPayload,
+              );
+              id++;
+            }
+          }
+        }
+        prefs.setInt('notificationId', id);
+      }
+
       HrAction saveHrAction = HrAction(
         id: widget.hrAction.id,
         soldierId: _soldierId,
@@ -112,35 +155,35 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
         dd93: _dd93Controller.text,
         sglv: _sglvController.text,
         prr: _prrController.text,
+        notificationIds: notificationIds,
       );
 
       if (widget.hrAction.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kHrMetricCollection)
-            .add(saveHrAction.toMap());
-
-        saveHrAction.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(HrAction.collectionName).add(saveHrAction.toMap());
       } else {
         firestore
-            .collection(kHrMetricCollection)
+            .collection(HrAction.collectionName)
             .doc(widget.hrAction.id)
-            .set(saveHrAction.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Hr Metrics');
-        });
+            .set(saveHrAction.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
           message: 'Form is invalid - dates must be in yyyy-MM-dd format',
         ),
       );
+    }
+  }
+
+  String getDate(String topic) {
+    switch (topic) {
+      case 'DD93':
+        return _dd93Controller.text;
+      case 'SGLV':
+        return _sglvController.text;
+      default:
+        return _prrController.text;
     }
   }
 
@@ -190,12 +233,15 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kHrMetricCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: HrAction.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

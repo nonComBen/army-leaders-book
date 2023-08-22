@@ -7,6 +7,8 @@ class AlertSoldiers {
 
   AlertSoldiers(this.id, this.owner, this.soldiers);
 
+  static const String collectionName = 'alertSoldiers';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

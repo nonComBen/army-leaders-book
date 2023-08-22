@@ -133,7 +133,7 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
             comments: saveComments,
           );
 
-          firestore.collection('profiles').add(profile.toMap());
+          firestore.collection(TempProfile.collectionName).add(profile.toMap());
         }
       }
       Navigator.pop(context);

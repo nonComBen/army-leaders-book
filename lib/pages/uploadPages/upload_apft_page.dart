@@ -175,7 +175,7 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
             gender: saveGender,
           );
 
-          firestore.collection('apftStats').add(apft.toMap());
+          firestore.collection(Apft.collectionName).add(apft.toMap());
         }
       }
       Navigator.pop(context);

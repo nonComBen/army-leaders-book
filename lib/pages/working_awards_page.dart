@@ -9,9 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../providers/subscription_state.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
@@ -25,6 +24,7 @@ import '../models/app_bar_option.dart';
 import '../models/working_award.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -83,7 +83,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
     }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('workingAwards')
+        .collection(WorkingAward.collectionName)
         .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
@@ -114,7 +114,6 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
   }
 
   void _downloadExcel() async {
-    if (!await checkPermission(Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -216,24 +215,28 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWorkingAwardPage(
-                  award: WorkingAward.fromSnapshot(
-                    _selectedDocuments[0],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWorkingAwardPage(
+          award: WorkingAward.fromSnapshot(
+            _selectedDocuments[0],
+          ),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWorkingAwardPage(
-                  award: WorkingAward(
-                    owner: userId,
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWorkingAwardPage(
+          award: WorkingAward(
+            owner: userId,
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -248,7 +251,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 420) {
       columnList.add(DataColumn(
           label: const Text('Reason'),
           onSort: (int columnIndex, bool ascending) =>
@@ -282,7 +285,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 435) {
+    if (width > 420) {
       cellList.add(DataCell(Text(documentSnapshot['awardReason'])));
     }
     if (width > 550) {
@@ -424,7 +427,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

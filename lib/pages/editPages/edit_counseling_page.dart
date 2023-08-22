@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/counseling.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -92,7 +91,7 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
     _purposeController.text = widget.counseling.purpose;
     _keyPointsController.text = widget.counseling.keyPoints;
 
-    _dateTime = DateTime.tryParse(widget.counseling.date) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.counseling.date);
   }
 
   void submit(BuildContext context, String userId) async {
@@ -123,26 +122,16 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
       );
 
       if (widget.counseling.id == null) {
-        DocumentReference docRef = await firestore
-            .collection('counselings')
+        firestore
+            .collection(Counseling.collectionName)
             .add(saveCounseling.toMap());
-
-        saveCounseling.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
-            .collection('counselings')
+            .collection(Counseling.collectionName)
             .doc(widget.counseling.id)
-            .set(saveCounseling.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveCounseling.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -196,11 +185,15 @@ class EditCounselingPageState extends ConsumerState<EditCounselingPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: kCounselingCollection,
-                        userId: user.uid,
-                        allSoldiers: allSoldiers!);
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Counseling.collectionName,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

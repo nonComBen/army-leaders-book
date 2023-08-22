@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/profile.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -92,8 +91,8 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
     _expController.text = widget.profile.exp;
     _commentsController.text = widget.profile.comments;
 
-    _dateTime = DateTime.tryParse(widget.profile.date) ?? DateTime.now();
-    _expDate = DateTime.tryParse(widget.profile.exp) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.profile.date);
+    _expDate = DateTime.tryParse(widget.profile.exp);
   }
 
   void submit(BuildContext context) async {
@@ -121,17 +120,17 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
         comments: _commentsController.text,
       );
 
-      DocumentReference docRef;
       if (widget.profile.id == null) {
-        firestore.collection(kProfilesCollection).add(saveProfile.toMap());
-        Navigator.pop(context);
+        firestore
+            .collection(TempProfile.collectionName)
+            .add(saveProfile.toMap());
       } else {
-        docRef = firestore.collection('profiles').doc(widget.profile.id);
-        docRef.set(saveProfile.toMap());
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore
+            .collection(TempProfile.collectionName)
+            .doc(widget.profile.id)
+            .set(saveProfile.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -187,12 +186,15 @@ class EditTempProfilePageState extends ConsumerState<EditTempProfilePage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: kProfilesCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                        collection: TempProfile.collectionName,
                         userId: user.uid,
                         allSoldiers: allSoldiers!,
                         profileType: 'Temporary');
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

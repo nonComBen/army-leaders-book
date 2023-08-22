@@ -9,13 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/training.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
@@ -27,6 +26,7 @@ import '../models/app_bar_option.dart';
 import '../pdf/training_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -85,7 +85,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('training')
+        .collection(Training.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -117,8 +117,6 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -240,8 +238,6 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
@@ -342,19 +338,19 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Cyber'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 560) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('OPSEC'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 685) {
+    if (width > 700) {
       columnList.add(DataColumn(
           label: const Text('AT Lvl 1'),
           onSort: (int columnIndex, bool ascending) =>
@@ -388,13 +384,13 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['cyber'])));
     }
-    if (width > 560) {
+    if (width > 550) {
       cellList.add(DataCell(Text(documentSnapshot['opsec'])));
     }
-    if (width > 685) {
+    if (width > 700) {
       cellList.add(DataCell(Text(documentSnapshot['antiTerror'])));
     }
     if (width > 825) {
@@ -556,7 +552,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

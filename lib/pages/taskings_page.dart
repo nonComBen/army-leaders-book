@@ -9,9 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/tasking.dart';
@@ -27,6 +26,7 @@ import '../models/app_bar_option.dart';
 import '../pdf/taskings_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -85,7 +85,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('taskings')
+        .collection(Tasking.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -115,8 +115,6 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -214,8 +212,6 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['start'].toString().compareTo(b['start'].toString()),
     );
@@ -312,23 +308,27 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditTaskingPage(
-                  tasking: Tasking.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTaskingPage(
+          tasking: Tasking.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditTaskingPage(
-                  tasking: Tasking(
-                    owner: userId,
-                    users: [userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTaskingPage(
+          tasking: Tasking(
+            owner: userId,
+            users: [userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -343,13 +343,13 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Start'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 570) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('End'),
           onSort: (int columnIndex, bool ascending) =>
@@ -399,7 +399,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
             : const TextStyle(),
       )),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['start'],
         style: overdue
@@ -407,7 +407,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
             : const TextStyle(),
       )));
     }
-    if (width > 570) {
+    if (width > 550) {
       cellList.add(DataCell(Text(
         documentSnapshot['end'],
         style: overdue
@@ -585,7 +585,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

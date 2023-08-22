@@ -5,25 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../widgets/form_frame.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/duty.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/my_toast.dart';
-import '../../widgets/platform_widgets/platform_soldier_picker.dart';
-import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/duty.dart';
-import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../../widgets/platform_widgets/platform_soldier_picker.dart';
+import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditDutyRosterPage extends ConsumerStatefulWidget {
   const EditDutyRosterPage({
@@ -88,8 +87,8 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
     _commentsController.text = widget.duty.comments;
     _locController.text = widget.duty.location;
 
-    _start = DateTime.tryParse(widget.duty.start) ?? DateTime.now();
-    _end = DateTime.tryParse(widget.duty.end) ?? DateTime.now();
+    _start = DateTime.tryParse(widget.duty.start);
+    _end = DateTime.tryParse(widget.duty.end);
   }
 
   void submit(BuildContext context) async {
@@ -118,19 +117,15 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
         location: _locController.text,
       );
 
-      DocumentReference docRef;
       if (widget.duty.id == null) {
-        docRef = await firestore
-            .collection(kDutyRosterCollection)
-            .add(saveDuty.toMap());
+        firestore.collection(Duty.collectionName).add(saveDuty.toMap());
       } else {
-        docRef =
-            firestore.collection(kDutyRosterCollection).doc(widget.duty.id);
-        docRef.update(saveDuty.toMap());
+        firestore
+            .collection(Duty.collectionName)
+            .doc(widget.duty.id)
+            .set(saveDuty.toMap(), SetOptions(merge: true));
       }
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(
@@ -186,11 +181,15 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: kDutyRosterCollection,
-                        userId: user.uid,
-                        allSoldiers: allSoldiers!);
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Duty.collectionName,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -242,7 +241,18 @@ class EditDutyRosterPageState extends ConsumerState<EditDutyRosterPage> {
           ),
           PlatformButton(
             onPressed: () {
-              if (_endController.text != '' && _end!.isBefore(_start!)) {
+              if (_startController.text == '' ||
+                  !isValidDate(_startController.text)) {
+                toast.showToast(
+                    child: const MyToast(
+                        message: 'Start Date is blank or in invalid format'));
+                return;
+              }
+              _end = DateTime.tryParse(_endController.text);
+              _start = DateTime.tryParse(_startController.text);
+              if (_endController.text != '' &&
+                  _end != null &&
+                  _end!.isBefore(_start!)) {
                 toast.showToast(
                   child: const MyToast(
                     message: 'End Date must be after Start Date',

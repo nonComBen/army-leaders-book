@@ -20,7 +20,7 @@ class SoldiersService extends StateNotifier<List<Soldier>> {
   void loadSoldiers(String userId) {
     Stream<QuerySnapshot<Map<String, dynamic>>> soldiersStream =
         FirebaseFirestore.instance
-            .collection('soldiers')
+            .collection(Soldier.collectionName)
             .where('users', isNotEqualTo: null)
             .where('users', arrayContains: userId)
             .snapshots();

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/note.dart';
 import '../../widgets/anon_warning_banner.dart';
@@ -74,25 +74,14 @@ class EditNotePageState extends ConsumerState<EditNotePage> {
       );
 
       if (widget.note.id == null) {
-        DocumentReference docRef =
-            await firestore.collection('notes').add(saveNote.toMap());
-
-        saveNote.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection('notes').add(saveNote.toMap());
       } else {
         firestore
             .collection('notes')
             .doc(widget.note.id)
-            .set(saveNote.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveNote.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       FToast toast = FToast();
       toast.context = context;

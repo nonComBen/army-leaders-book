@@ -41,6 +41,8 @@ class WorkingEval {
     this.performance = '',
   });
 
+  static const String collectionName = 'workingEvals';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

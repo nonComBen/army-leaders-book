@@ -9,11 +9,11 @@ import 'package:leaders_book/methods/theme_methods.dart';
 import '../../providers/filtered_soldiers_provider.dart';
 import '../../providers/selected_soldiers_provider.dart';
 import '../../providers/subscription_state.dart';
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../models/soldier.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../../providers/soldiers_provider.dart';
 import '../../providers/tracking_provider.dart';
+import '../../widgets/custom_data_table.dart';
 
 class SoldiersPage extends ConsumerStatefulWidget {
   const SoldiersPage({
@@ -30,9 +30,8 @@ class SoldiersPage extends ConsumerStatefulWidget {
 class SoldiersPageState extends ConsumerState<SoldiersPage> {
   int _sortColumnIndex = 0;
   bool _sortAscending = true, _adLoaded = false, isSubscribed = false;
-  late List<Soldier> _selectedSoldiers;
-  late List<Soldier> _filteredSoldiers;
-  List<Soldier> soldiers = [];
+  List<Soldier> _selectedSoldiers = [];
+  List<Soldier> _filteredSoldiers = [];
   late BannerAd myBanner;
   late String _userId;
 
@@ -303,7 +302,6 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
     final user = ref.read(authProvider).currentUser()!;
     _selectedSoldiers = ref.watch(selectedSoldiersProvider);
     _filteredSoldiers = ref.watch(filteredSoldiersProvider);
-    soldiers = ref.watch(soldiersProvider);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -316,7 +314,7 @@ class SoldiersPageState extends ConsumerState<SoldiersPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

@@ -16,8 +16,8 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../methods/create_app_bar_actions.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/app_bar_option.dart';
-import '../../models/user.dart';
-import '../../auth_provider.dart';
+import '../../models/leader.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/root_provider.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -26,7 +26,6 @@ import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../../auth_service.dart';
 import '../../methods/custom_alert_dialog.dart';
 
 class EditUserPage extends ConsumerStatefulWidget {
@@ -43,7 +42,7 @@ class EditUserPage extends ConsumerStatefulWidget {
 class EditUserPageState extends ConsumerState<EditUserPage> {
   bool updated = false;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  UserObj? user;
+  late Leader leader;
   FToast toast = FToast();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -56,11 +55,11 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
   @override
   void initState() {
     super.initState();
-    user = ref.read(userProvider).user;
-    _rankController.text = user!.userRank;
-    _nameController.text = user!.userName;
-    _unitController.text = user!.userUnit;
-    _emailController.text = user!.userEmail;
+    leader = ref.read(leaderProvider).leader ?? Leader();
+    _rankController.text = leader.userRank;
+    _nameController.text = leader.userName;
+    _unitController.text = leader.userUnit;
+    _emailController.text = leader.userEmail;
   }
 
   Future<void> deleteAccount(BuildContext context) async {

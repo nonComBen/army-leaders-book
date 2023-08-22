@@ -9,19 +9,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../models/note.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
-import '../../models/note.dart';
 import '../methods/theme_methods.dart';
 import '../models/app_bar_option.dart';
+import '../providers/tracking_provider.dart';
+import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
 import 'editPages/edit_note_page.dart';
-import '../providers/tracking_provider.dart';
-import '../widgets/anon_warning_banner.dart';
 
 class NotesPage extends ConsumerStatefulWidget {
   const NotesPage({
@@ -75,7 +76,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
     }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('notes')
+        .collection(Note.collectionName)
         .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen(
@@ -283,7 +284,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).orientation),

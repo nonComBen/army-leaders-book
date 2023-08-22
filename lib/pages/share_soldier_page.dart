@@ -1,17 +1,18 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_selection_widget.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
+import '../../models/soldier.dart';
+import '../models/leader.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../widgets/platform_widgets/platform_loading_widget.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../../models/soldier.dart';
+import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../widgets/upload_frame.dart';
 
 class ShareSoldierPage extends StatefulWidget {
@@ -67,7 +68,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
       List<dynamic> users = soldier.users;
       users.add(userId);
       DocumentReference soldierRef =
-          firestore.collection('soldiers').doc(soldier.id);
+          firestore.collection(Soldier.collectionName).doc(soldier.id);
       soldierRef.update({'users': users});
     }
     Navigator.pop(context);
@@ -144,7 +145,7 @@ class ShareSoldierPageState extends State<ShareSoldierPage> {
             ),
             FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 future: firestore
-                    .collection('users')
+                    .collection(Leader.collectionName)
                     .where(lookUpMethod == 'User ID' ? 'userId' : 'userEmail',
                         isEqualTo: userId)
                     .get(),

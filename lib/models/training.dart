@@ -75,6 +75,8 @@ class Training {
     this.addTraining,
   });
 
+  static const String collectionName = 'training';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

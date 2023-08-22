@@ -9,9 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
@@ -28,6 +27,7 @@ import '../pdf/hand_receipt_pdf.dart';
 import '../providers/subscription_state.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/table_frame.dart';
 import 'editPages/edit_hand_receipt_page.dart';
@@ -85,7 +85,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('handReceipt')
+        .collection(HandReceiptItem.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -117,8 +117,6 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -236,8 +234,6 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     HandReceiptPdf pdf = HandReceiptPdf(
       documents: documents,
     );
@@ -305,24 +301,28 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditHandReceiptPage(
-                  item: HandReceiptItem.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditHandReceiptPage(
+          item: HandReceiptItem.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditHandReceiptPage(
-                  item: HandReceiptItem(
-                    owner: userId,
-                    users: [userId],
-                    subComponents: [],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditHandReceiptPage(
+          item: HandReceiptItem(
+            owner: userId,
+            users: [userId],
+            subComponents: [],
+          ),
+        ),
+      ),
+    );
   }
 
   void _copyRecord() {
@@ -375,7 +375,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 595) {
+    if (width > 560) {
       columnList.add(DataColumn(
           label: const Expanded(
             flex: 1,
@@ -417,7 +417,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
     if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['location'])));
     }
-    if (width > 595) {
+    if (width > 560) {
       cellList.add(DataCell(Text(documentSnapshot['serial'])));
     }
     if (width > 685) {
@@ -585,7 +585,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

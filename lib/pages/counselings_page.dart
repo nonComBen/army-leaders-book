@@ -9,13 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/counseling.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/delete_methods.dart';
 import '../methods/download_methods.dart';
@@ -25,6 +24,7 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../providers/tracking_provider.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -83,7 +83,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
     }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('counselings')
+        .collection(Counseling.collectionName)
         .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
@@ -114,7 +114,6 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
   }
 
   void _downloadExcel() async {
-    if (!await checkPermission(Permission.storage)) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -254,13 +253,13 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 510) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Section'),
           onSort: (int columnIndex, bool ascending) =>
@@ -288,10 +287,10 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
-    if (width > 420) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['date'])));
     }
-    if (width > 510) {
+    if (width > 500) {
       cellList.add(DataCell(Text(documentSnapshot['section'])));
     }
     return cellList;
@@ -425,7 +424,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

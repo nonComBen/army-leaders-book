@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
@@ -105,7 +104,7 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
     su = widget.profile.su;
     run = widget.profile.run;
 
-    _dateTime = DateTime.tryParse(widget.profile.date) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.profile.date);
   }
 
   void submit(BuildContext context) async {
@@ -137,26 +136,16 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
       );
 
       if (widget.profile.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kProfilesCollection)
+        firestore
+            .collection(TempProfile.collectionName)
             .add(saveProfile.toMap());
-
-        saveProfile.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
       } else {
         firestore
-            .collection(kProfilesCollection)
+            .collection(TempProfile.collectionName)
             .doc(widget.profile.id)
-            .set(saveProfile.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveProfile.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -304,13 +293,16 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kProfilesCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: TempProfile.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                       profileType: 'Permanent',
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

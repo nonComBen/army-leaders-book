@@ -125,7 +125,7 @@ class UploadActionsPageState extends ConsumerState<UploadActionsPage> {
             remarks: saveRemarks,
           );
 
-          firestore.collection('actions').add(actionObj.toMap());
+          firestore.collection(ActionObj.collectionName).add(actionObj.toMap());
         }
       }
       Navigator.pop(context);

@@ -1,19 +1,25 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:leaders_book/models/setting.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
+import '../../methods/local_notification_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/soldier.dart';
 import '../../models/weapon.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -121,6 +127,43 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
       _formKey,
       [_dateController.text],
     )) {
+      final setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
+      List<int> notificationIds = [];
+      if (!kIsWeb && _dateController.text != '' && setting.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        if (widget.weapon.notificationIds != null &&
+            widget.weapon.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.weapon.notificationIds!);
+        }
+        final dueDate = getDueDate(_dateController.text, setting.weaponsMonths);
+        DateFormat formatter = DateFormat('yyyy-MM-dd');
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        for (int days in setting.weaponsNotifications) {
+          notificationIds.add(id);
+          notificationService.scheduleNotification(
+            dateTime: dueDate.subtract(Duration(days: days)),
+            id: id,
+            title: '$_rank $_lastName\'s Weapon Qual Due',
+            body:
+                '$_rank $_lastName\'s Weapon Qual Due in $days on ${formatter.format(dueDate)}',
+            payload: NotificationService.weaponPayload,
+          );
+          id++;
+        }
+        //Test
+        // notificationService.scheduleNotification(
+        //     dateTime: DateTime.now().add(const Duration(seconds: 10)),
+        //     id: id++,
+        //     title: 'Test Weapon',
+        //     body: 'Test Weapon Notification Body',
+        //     payload: NotificationService.weaponPayload);
+
+        prefs.setInt('notificationId', id);
+      }
+
       Weapon saveWeapon = Weapon(
         id: widget.weapon.id,
         soldierId: _soldierId,
@@ -138,29 +181,25 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
         badge: _badgeController.text,
         pass: pass,
         qualType: _qualType!,
+        notificationIds: notificationIds,
       );
 
-      if (widget.weapon.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kWeaponCollection)
-            .add(saveWeapon.toMap());
+      // setDateNotifications(
+      //   setting: ref.read(settingsProvider.notifier).settings,
+      //   map: saveWeapon.toMap(),
+      //   user: ref.read(userProvider).user!,
+      //   topic: 'Weapons Qualification',
+      // );
 
-        saveWeapon.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+      if (widget.weapon.id == null) {
+        firestore.collection(Weapon.collectionName).add(saveWeapon.toMap());
       } else {
         firestore
-            .collection(kWeaponCollection)
+            .collection(Weapon.collectionName)
             .doc(widget.weapon.id)
-            .set(saveWeapon.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Weapon');
-        });
+            .set(saveWeapon.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -216,12 +255,15 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kWeaponCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Weapon.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -252,6 +294,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                 controller: _typeController,
                 keyboardType: TextInputType.text,
                 label: 'Weapon',
+                textCapitalization: TextCapitalization.characters,
                 decoration: const InputDecoration(
                   labelText: 'Weapon',
                 ),
@@ -261,7 +304,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
               ),
               PaddedTextField(
                 controller: _hitsController,
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.number,
                 label: 'Hits',
                 decoration: const InputDecoration(
                   labelText: 'Hits',
@@ -272,7 +315,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
               ),
               PaddedTextField(
                 controller: _maxController,
-                keyboardType: TextInputType.text,
+                keyboardType: TextInputType.number,
                 label: 'Maximum',
                 decoration: const InputDecoration(
                   labelText: 'Maximum',
@@ -285,6 +328,7 @@ class EditWeaponPageState extends ConsumerState<EditWeaponPage> {
                 controller: _badgeController,
                 keyboardType: TextInputType.text,
                 label: 'Badge',
+                textCapitalization: TextCapitalization.words,
                 decoration: const InputDecoration(
                   labelText: 'Badge',
                 ),

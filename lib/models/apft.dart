@@ -48,6 +48,8 @@ class Apft {
     this.gender = 'Male',
   });
 
+  static const String collectionName = 'apftStats';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

@@ -217,7 +217,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
               altEvent: saveRunEvent,
               pass: pass);
 
-          firestore.collection('acftStats').add(acft.toMap());
+          firestore.collection(Acft.collectionName).add(acft.toMap());
         }
       }
       Navigator.pop(context);

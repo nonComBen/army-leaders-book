@@ -34,6 +34,8 @@ class MilLic {
     required this.vehicles,
   });
 
+  static const String collectionName = 'milLic';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

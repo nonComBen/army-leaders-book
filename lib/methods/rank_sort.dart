@@ -30,7 +30,7 @@ int getRankSort(String rank) {
     'LTG': 26,
     'GEN': 27,
   };
-  if (ranks.keys.contains(rank.toUpperCase().trim())) {
+  if (ranks.keys.contains(rank)) {
     rankSort = ranks[rank]!;
   } else {
     rankSort = 50;

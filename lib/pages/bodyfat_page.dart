@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:leaders_book/models/setting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
@@ -17,7 +17,7 @@ import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/bodyfat.dart';
 import '../../providers/subscription_state.dart';
 import '../../widgets/anon_warning_banner.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
@@ -28,7 +28,9 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/bodyfats_pdf.dart';
+import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -107,7 +109,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
     prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('bodyfatStats')
+        .collection(Bodyfat.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -118,13 +120,9 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
         _selectedDocuments.clear();
       });
     });
-    snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot!.docs[0];
+    final setting = ref.read(settingsProvider) ?? Setting(owner: _userId);
     setState(() {
-      overdueDays = doc['bfMonths'] * 30;
+      overdueDays = setting.bfMonths * 30;
       amberDays = overdueDays - 30;
     });
   }
@@ -146,8 +144,6 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -258,8 +254,6 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
@@ -364,13 +358,13 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 530) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Height'),
           onSort: (int columnIndex, bool ascending) =>
@@ -436,7 +430,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                     : const TextStyle(),
       )),
     ];
-    if (width > 435) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['date'],
         style: fail
@@ -448,7 +442,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                     : const TextStyle(),
       )));
     }
-    if (width > 530) {
+    if (width > 500) {
       cellList.add(DataCell(Text(
         documentSnapshot['height'],
         style: fail
@@ -639,7 +633,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
                     color: getContrastingBackgroundColor(context),
-                    child: DataTable(
+                    child: CustomDataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
                       columns:

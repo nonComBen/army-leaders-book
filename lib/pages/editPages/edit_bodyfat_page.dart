@@ -1,33 +1,39 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:leaders_book/models/setting.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
+import '../../calculators/bf_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
+import '../../methods/local_notification_methods.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/bodyfat.dart';
 import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/platform_widgets/platform_text_field.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/bodyfat.dart';
-import '../../calculators/bf_calculator.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
-import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
-import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditBodyfatPage extends ConsumerStatefulWidget {
   const EditBodyfatPage({
@@ -59,7 +65,8 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
       bfPass = true,
       removeSoldiers = false,
       updated = false,
-      underweight = false;
+      underweight = false,
+      isNewVersion = false;
   String _gender = 'Male';
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
@@ -123,6 +130,10 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
     _ageController.text = widget.bodyfat.age.toString();
     _heightDoubleController.text = heightDouble.toString();
 
+    if (!bmiPass && widget.bodyfat.neck == '') {
+      isNewVersion = true;
+    }
+
     _dateTime = DateTime.tryParse(widget.bodyfat.date) ?? DateTime.now();
   }
 
@@ -168,19 +179,32 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
   calcBf() {
     int maxPercent = bfCalculator.percentTable[
         _gender == 'Male' ? ageGroupIndex() : ageGroupIndex() + 4];
+    int weight = int.tryParse(_weightController.text) ?? 0;
     double neck = double.tryParse(_neckController.text) ?? 0;
     double waist = double.tryParse(_waistController.text) ?? 0;
     double hip = double.tryParse(_hipController.text) ?? 0;
     neck = roundToPointFive(neck);
     waist = roundToPointFive(waist);
     hip = roundToPointFive(hip);
-    double cirValue = _gender == 'Male' ? waist - neck : hip + waist - neck;
 
-    int bfPercent = bfCalculator.getBfPercent(
-      cirValue: cirValue,
-      height: heightDouble!,
-      male: _gender == 'Male',
-    );
+    late double cirValue;
+    late int bfPercent;
+    if (!isNewVersion) {
+      cirValue = _gender == 'Male' ? waist - neck : hip + waist - neck;
+      bfPercent = bfCalculator.getBfPercent(
+        cirValue: cirValue,
+        height: heightDouble!,
+        male: _gender == 'Male',
+      );
+    } else {
+      cirValue = waist;
+      bfPercent = bfCalculator.getNewBfPercent(
+        male: _gender == 'Male',
+        weight: weight,
+        cirValue: cirValue,
+      );
+    }
+
     _percentController.text = bfPercent.toString();
     setState(() {
       bfPass = bfPercent <= maxPercent;
@@ -200,8 +224,8 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               SizedBox(
-                width: 72,
-                height: 42,
+                width: 92,
+                height: 64,
                 child: PlatformButton(
                   onPressed: () {
                     if (!(heightDouble == (height.toDouble() - 0.5))) {
@@ -230,8 +254,8 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                 ),
               ),
               SizedBox(
-                width: 72,
-                height: 42,
+                width: 92,
+                height: 64,
                 child: PlatformButton(
                   child: const Text('+ 0.5'),
                   onPressed: () {
@@ -255,17 +279,33 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
 
   List<Widget> tapes() {
     List<Widget> tapes = [
-      PaddedTextField(
-        controller: _neckController,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        label: 'Neck',
-        decoration: const InputDecoration(
-          labelText: 'Neck',
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: PlatformSelectionWidget(
+          titles: const [Text('Old Version'), Text('New Version')],
+          values: const [false, true],
+          groupValue: isNewVersion,
+          onChanged: (value) {
+            FocusScope.of(context).unfocus();
+            setState(() {
+              isNewVersion = value! as bool;
+              calcBf();
+            });
+          },
         ),
-        onChanged: (value) {
-          calcBf();
-        },
       ),
+      if (!isNewVersion)
+        PaddedTextField(
+          controller: _neckController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          label: 'Neck',
+          decoration: const InputDecoration(
+            labelText: 'Neck',
+          ),
+          onChanged: (value) {
+            calcBf();
+          },
+        ),
       PaddedTextField(
         controller: _waistController,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -278,7 +318,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         },
       ),
     ];
-    if (_gender == 'Female') {
+    if (_gender == 'Female' && !isNewVersion) {
       tapes.add(
         PaddedTextField(
           controller: _hipController,
@@ -303,15 +343,18 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
             labelText: 'Bodyfat Percent',
           )),
     );
-    tapes.add(CheckboxListTile(
-      title: const Text('Pass Bodyfat'),
-      controlAffinity: ListTileControlAffinity.leading,
-      value: bfPass,
-      onChanged: (value) {
-        setState(() {
-          bfPass = value!;
-        });
-      },
+    tapes.add(Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: PlatformCheckboxListTile(
+        title: const Text('Pass Bodyfat'),
+        controlAffinity: ListTileControlAffinity.leading,
+        value: bfPass,
+        onChanged: (value) {
+          setState(() {
+            bfPass = value!;
+          });
+        },
+      ),
     ));
     return tapes;
   }
@@ -325,6 +368,34 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
       _formKey,
       [_dateController.text],
     )) {
+      final setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
+      List<int> notificationIds = [];
+      if (!kIsWeb && _dateController.text != '' && setting.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        if (widget.bodyfat.notificationIds != null &&
+            widget.bodyfat.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.bodyfat.notificationIds!);
+        }
+        final dueDate = getDueDate(_dateController.text, setting.bfMonths);
+        DateFormat formatter = DateFormat('yyyy-MM-dd');
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        for (int days in setting.bfNotifications) {
+          notificationIds.add(id);
+          notificationService.scheduleNotification(
+            dateTime: dueDate.subtract(Duration(days: days)),
+            id: id,
+            title: '$_rank $_lastName\'s Height/Weight Due',
+            body:
+                '$_rank $_lastName\'s Height/Weight Due in $days on ${formatter.format(dueDate)}',
+            payload: NotificationService.bfPayload,
+          );
+          id++;
+        }
+        prefs.setInt('notificationId', id);
+      }
       Bodyfat saveBodyfat = Bodyfat(
         id: widget.bodyfat.id,
         soldierId: _soldierId,
@@ -347,29 +418,29 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
         hip: _hipController.text,
         percent: _percentController.text,
         passBf: bfPass,
+        notificationIds: notificationIds,
       );
 
-      if (widget.bodyfat.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kBodyfatCollection)
-            .add(saveBodyfat.toMap());
+      // setDateNotifications(
+      //   setting: ref.read(settingsProvider.notifier).settings,
+      //   map: saveBodyfat.toMap(),
+      //   user: ref.read(userProvider).user!,
+      //   topic: 'Body Composition',
+      // );
 
-        saveBodyfat.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+      if (widget.bodyfat.id == null) {
+        firestore.collection(Bodyfat.collectionName).add(saveBodyfat.toMap());
       } else {
-        firestore
-            .collection(kBodyfatCollection)
-            .doc(widget.bodyfat.id)
-            .set(saveBodyfat.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Bodyfat');
-        });
+        try {
+          firestore
+              .collection(Bodyfat.collectionName)
+              .doc(widget.bodyfat.id)
+              .set(saveBodyfat.toMap(), SetOptions(merge: true));
+        } on Exception catch (e) {
+          debugPrint('Error updating Body Comp: $e');
+        }
       }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(
@@ -425,11 +496,15 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: kBodyfatCollection,
-                        userId: user.uid,
-                        allSoldiers: allSoldiers!);
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Bodyfat.collectionName,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -488,6 +563,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
                 onChanged: (value) {
                   updated = true;
                   calcBmi();
+                  calcBf();
                 },
               ),
               Padding(

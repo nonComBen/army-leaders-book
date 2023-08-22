@@ -5,21 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
-import '../../methods/theme_methods.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/mil_license.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
-import '../../widgets/header_text.dart';
+import '../../widgets/more_tiles_header.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -127,8 +126,8 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       qualVehicles = widget.milLic.vehicles.toList();
     }
 
-    _dateTime = DateTime.tryParse(widget.milLic.date) ?? DateTime.now();
-    _expDate = DateTime.tryParse(widget.milLic.exp) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.milLic.date);
+    _expDate = DateTime.tryParse(widget.milLic.exp);
   }
 
   void submit(BuildContext context) async {
@@ -140,7 +139,9 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       _formKey,
       [_dateController.text, _expController.text],
     )) {
-      if (qualVehicles!.last == '') qualVehicles!.removeLast();
+      if (qualVehicles!.isNotEmpty && qualVehicles!.last == '') {
+        qualVehicles!.removeLast();
+      }
       MilLic saveMilLic = MilLic(
         id: widget.milLic.id,
         soldierId: _soldierId,
@@ -159,26 +160,14 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
       );
 
       if (widget.milLic.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kMilLicenseCollection)
-            .add(saveMilLic.toMap());
-
-        saveMilLic.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(MilLic.collectionName).add(saveMilLic.toMap());
       } else {
         firestore
-            .collection(kMilLicenseCollection)
+            .collection(MilLic.collectionName)
             .doc(widget.milLic.id)
-            .set(saveMilLic.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveMilLic.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -303,12 +292,15 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kMilLicenseCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: MilLic.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -317,7 +309,7 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
                 keyboardType: TextInputType.text,
                 label: 'License',
                 decoration: const InputDecoration(
-                  labelText: 'License',
+                  labelText: 'License Number',
                 ),
                 onChanged: (value) {
                   updated = true;
@@ -341,44 +333,11 @@ class EditMilLicPageState extends ConsumerState<EditMilLicPage> {
           Divider(
             color: getOnPrimaryColor(context),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: getPrimaryColor(context)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: HeaderText(
-                        'Qualified Vehicles',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: getOnPrimaryColor(context)),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformIconButton(
-                        icon: Icon(
-                          Icons.add,
-                          size: 32,
-                          color: getOnPrimaryColor(context),
-                        ),
-                        onPressed: () {
-                          _editVehicle(context, null);
-                        },
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
+          MoreTilesHeader(
+            label: 'Qualified Vehicles',
+            onPressed: () {
+              _editVehicle(context, null);
+            },
           ),
           if (qualVehicles!.isNotEmpty)
             FormGridView(width: width, children: _vehicles()),

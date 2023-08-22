@@ -9,12 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
@@ -28,6 +27,7 @@ import '../models/mil_license.dart';
 import '../pdf/mil_lic_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -87,7 +87,7 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('milLic')
+        .collection(MilLic.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -119,8 +119,6 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -227,8 +225,6 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['name'].toString().compareTo(b['name'].toString()),
     );
@@ -294,24 +290,28 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditMilLicPage(
-                  milLic: MilLic.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditMilLicPage(
+          milLic: MilLic.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditMilLicPage(
-                  milLic: MilLic(
-                    owner: userId,
-                    users: [userId],
-                    vehicles: [],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditMilLicPage(
+          milLic: MilLic(
+            owner: userId,
+            users: [userId],
+            vehicles: [],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -326,13 +326,13 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 420) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 565) {
+    if (width > 550) {
       columnList.add(DataColumn(
           label: const Text('Expires'),
           onSort: (int columnIndex, bool ascending) =>
@@ -368,52 +368,68 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
     TextStyle amberTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )),
+      DataCell(
+        Text(
+          documentSnapshot['rank'],
+          style: overdue
+              ? overdueTextStyle
+              : amber
+                  ? amberTextStyle
+                  : const TextStyle(),
+        ),
+      ),
+      DataCell(
+        Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+          style: overdue
+              ? overdueTextStyle
+              : amber
+                  ? amberTextStyle
+                  : const TextStyle(),
+        ),
+      ),
     ];
-    if (width > 420) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )));
+    if (width > 400) {
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['date'],
+            style: overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
+          ),
+        ),
+      );
     }
-    if (width > 565) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['exp'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )));
+    if (width > 550) {
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['exp'],
+            style: overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 670) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['section'],
-        style: overdue
-            ? overdueTextStyle
-            : amber
-                ? amberTextStyle
-                : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['section'],
+            style: overdue
+                ? overdueTextStyle
+                : amber
+                    ? amberTextStyle
+                    : const TextStyle(),
+          ),
+        ),
+      );
     }
     return cellList;
   }
@@ -563,7 +579,7 @@ class MilLicPageState extends ConsumerState<MilLicPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

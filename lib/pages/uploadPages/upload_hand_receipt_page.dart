@@ -162,7 +162,9 @@ class UploadHandReceiptPageState extends ConsumerState<UploadHandReceiptPage> {
             comments: saveComments,
           );
 
-          firestore.collection('handReceipt').add(handReceipt.toMap());
+          firestore
+              .collection(HandReceiptItem.collectionName)
+              .add(handReceipt.toMap());
         }
       }
       Navigator.pop(context);

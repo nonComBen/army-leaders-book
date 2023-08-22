@@ -1,10 +1,15 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+final authProvider = Provider<AuthService>((ref) {
+  return AuthService();
+});
 
 abstract class BaseAuth {
   Future<User?> signInWithEmailAndPassword(String? email, String? password);
@@ -82,7 +87,8 @@ class AuthService implements BaseAuth {
   }
 
   @override
-  Future<User?> signInWithEmailAndPassword(String? email, String? password) async {
+  Future<User?> signInWithEmailAndPassword(
+      String? email, String? password) async {
     var result = await _firebaseAuth.signInWithEmailAndPassword(
         email: email!, password: password!);
     return result.user;
@@ -114,10 +120,14 @@ class AuthService implements BaseAuth {
 
   @override
   Future<void> signOut() async {
+    var user = _firebaseAuth.currentUser;
     GoogleSignIn googleSignIn = GoogleSignIn.standard(scopes: [
       'email',
     ]);
     await googleSignIn.signOut();
+    if (user?.isAnonymous ?? false) {
+      user!.delete();
+    }
     await _firebaseAuth.signOut();
   }
 

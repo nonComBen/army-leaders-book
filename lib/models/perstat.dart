@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/cupertino.dart';
 
 class Perstat {
   String? id;
@@ -16,6 +16,7 @@ class Perstat {
   String type;
   String comments;
   String location;
+  String status;
 
   Perstat({
     this.id,
@@ -32,7 +33,10 @@ class Perstat {
     this.type = 'Leave',
     this.comments = '',
     this.location = '',
+    this.status = 'Approved',
   });
+
+  static const String collectionName = 'perstat';
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -49,12 +53,13 @@ class Perstat {
     map['type'] = type;
     map['comments'] = comments;
     map['location'] = location;
+    map['status'] = status;
 
     return map;
   }
 
   factory Perstat.fromSnapshot(DocumentSnapshot doc) {
-    String location = '';
+    String location = '', status = 'Approved';
     try {
       location = doc['location'];
     } catch (e) {
@@ -64,7 +69,12 @@ class Perstat {
     try {
       users = doc['users'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+      debugPrint('Error: $e');
+    }
+    try {
+      status = doc['status'];
+    } catch (e) {
+      debugPrint('Error: $e');
     }
     return Perstat(
       id: doc.id,
@@ -81,6 +91,7 @@ class Perstat {
       type: doc['type'],
       comments: doc['comments'],
       location: location,
+      status: status,
     );
   }
 }

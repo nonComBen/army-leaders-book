@@ -9,13 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:leaders_book/models/setting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../models/weapon.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
@@ -27,8 +27,10 @@ import '../methods/toast_messages/subscription_needed_toast.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/weapons_pdf.dart';
+import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -105,7 +107,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
     prefs = await SharedPreferences.getInstance();
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('weaponStats')
+        .collection(Weapon.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -116,13 +118,10 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
         _selectedDocuments.clear();
       });
     });
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot.docs[0];
+    final setting = ref.read(settingsProvider) ?? Setting(owner: _userId);
+    debugPrint('Weapon Months: ${setting.weaponsMonths}');
     setState(() {
-      overdueDays = doc['weaponsMonths'] * 30;
+      overdueDays = setting.weaponsMonths * 30;
       amberDays = overdueDays - 30;
     });
   }
@@ -144,8 +143,6 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -244,8 +241,6 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
@@ -303,6 +298,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
 
   void _editRecord() {
     if (_selectedDocuments.length != 1) {
+      toast.init(context);
       toast.showToast(
         child: const MyToast(
           message: 'You must select exactly one record',
@@ -311,23 +307,27 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWeaponPage(
-                  weapon: Weapon.fromSnapshot(_selectedDocuments.first),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWeaponPage(
+          weapon: Weapon.fromSnapshot(_selectedDocuments.first),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditWeaponPage(
-                  weapon: Weapon(
-                    owner: _userId!,
-                    users: [_userId],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditWeaponPage(
+          weapon: Weapon(
+            owner: _userId!,
+            users: [_userId],
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -342,13 +342,13 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 435) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 535) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Score'),
           onSort: (int columnIndex, bool ascending) =>
@@ -393,74 +393,94 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
     TextStyle failTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )),
+      DataCell(
+        Text(
+          documentSnapshot['rank'],
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
+      DataCell(
+        Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+          style: fail
+              ? failTextStyle
+              : overdue
+                  ? overdueTextStyle
+                  : amber
+                      ? amberTextStyle
+                      : const TextStyle(),
+        ),
+      ),
     ];
-    if (width > 435) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['date'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+    if (width > 400) {
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['date'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
-    if (width > 535) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['score'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+    if (width > 500) {
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['score'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 650) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['max'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['max'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     if (width > 800) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['type'],
-        style: fail
-            ? failTextStyle
-            : overdue
-                ? overdueTextStyle
-                : amber
-                    ? amberTextStyle
-                    : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['type'],
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
     }
     return cellList;
   }
@@ -616,7 +636,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

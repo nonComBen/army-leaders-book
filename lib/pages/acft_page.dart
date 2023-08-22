@@ -10,15 +10,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:leaders_book/models/setting.dart';
+import 'package:leaders_book/widgets/standard_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
+import '../../providers/settings_provider.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/delete_methods.dart';
@@ -33,6 +35,7 @@ import '../pdf/acft_pdf.dart';
 import '../providers/subscription_state.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/table_frame.dart';
 import 'editPages/edit_acft_page.dart';
 import 'uploadPages/upload_acft_page.dart';
@@ -114,7 +117,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
   void initialize() async {
     prefs = await SharedPreferences.getInstance();
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('acftStats')
+        .collection(Acft.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -127,13 +130,9 @@ class AcftPageState extends ConsumerState<AcftPage> {
 
       _calcAves();
     });
-    snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot!.docs[0];
+    final setting = ref.read(settingsProvider) ?? Setting(owner: _userId);
     setState(() {
-      overdueDays = doc['acftMonths'] * 30;
+      overdueDays = setting.acftMonths * 30;
       amberDays = overdueDays - 30;
     });
   }
@@ -159,8 +158,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -279,8 +276,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
@@ -444,7 +439,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
             onSortColumn(columnIndex, ascending),
       ),
     ];
-    if (width > 430) {
+    if (width > 400) {
       columnList.add(
         DataColumn(
           label: const Text('Date'),
@@ -453,7 +448,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 520) {
+    if (width > 500) {
       columnList.add(
         DataColumn(
           label: const Text('Total'),
@@ -568,7 +563,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       ),
     ];
-    if (width > 430) {
+    if (width > 400) {
       cellList.add(
         DataCell(
           Text(
@@ -584,7 +579,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 520) {
+    if (width > 500) {
       cellList.add(
         DataCell(
           Text(
@@ -886,7 +881,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   if (user.isAnonymous) const AnonWarningBanner(),
                   Card(
                     color: getContrastingBackgroundColor(context),
-                    child: DataTable(
+                    child: CustomDataTable(
                       sortAscending: _sortAscending,
                       sortColumnIndex: _sortColumnIndex,
                       columns:
@@ -914,31 +909,32 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                   children: <Widget>[
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('MDL: $deadliftAve'),
+                                      child: StandardText('MDL: $deadliftAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('SPT: $powerThrowAve'),
+                                      child:
+                                          StandardText('SPT: $powerThrowAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('HRP: $puAve'),
+                                      child: StandardText('HRP: $puAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('SDC: $dragAve'),
+                                      child: StandardText('SDC: $dragAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('LTK: $plkAve'),
+                                      child: StandardText('LTK: $plkAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('2MR: $runAve'),
+                                      child: StandardText('2MR: $runAve'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child: Text('Total: $totalAve'),
+                                      child: StandardText('Total: $totalAve'),
                                     ),
                                   ],
                                 )
@@ -950,15 +946,17 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                       children: <Widget>[
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('MDL: $deadliftAve'),
+                                          child:
+                                              StandardText('MDL: $deadliftAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('SPT: $powerThrowAve'),
+                                          child: StandardText(
+                                              'SPT: $powerThrowAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('HRP: $puAve'),
+                                          child: StandardText('HRP: $puAve'),
                                         ),
                                       ],
                                     ),
@@ -968,29 +966,31 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                       children: <Widget>[
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('SDC: $dragAve'),
+                                          child: StandardText('SDC: $dragAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('PLK: $plkAve'),
+                                          child: StandardText('PLK: $plkAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('2MR: $runAve'),
+                                          child: StandardText('2MR: $runAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text('Total: $totalAve'),
+                                          child:
+                                              StandardText('Total: $totalAve'),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
-                          const Padding(
-                            padding: EdgeInsets.all(4.0),
+                          Padding(
+                            padding: const EdgeInsets.all(4.0),
                             child: Text(
                               'Zeros are factored out and averages are rounded down.',
-                              style: TextStyle(fontSize: 14),
+                              style: TextStyle(
+                                  fontSize: 14, color: getTextColor(context)),
                               textAlign: TextAlign.center,
                             ),
                           ),

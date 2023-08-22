@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 
 class Soldier {
   String? id;
@@ -15,12 +15,14 @@ class Soldier {
   String supervisor;
   String section;
   String dodId;
+  String cacExpiration;
   String dor;
   String mos;
   String duty;
   String paraLn;
   String reqMos;
   String lossDate;
+  String ymav;
   String ets;
   String basd;
   String pebd;
@@ -44,6 +46,7 @@ class Soldier {
   String email;
   String workEmail;
   String nok;
+  String nokRelationship;
   String nokPhone;
   String maritalStatus;
   String comments;
@@ -64,12 +67,14 @@ class Soldier {
     this.supervisor = '',
     this.section = '',
     this.dodId = '',
+    this.cacExpiration = '',
     this.dor = '',
     this.mos = '',
     this.duty = '',
     this.paraLn = '',
     this.reqMos = '',
     this.lossDate = '',
+    this.ymav = '',
     this.ets = '',
     this.basd = '',
     this.pebd = '',
@@ -93,12 +98,15 @@ class Soldier {
     this.email = '',
     this.workEmail = '',
     this.nok = '',
+    this.nokRelationship = '',
     this.nokPhone = '',
     this.maritalStatus = '',
     this.comments = '',
     this.awards = const [],
     this.povs = const [],
   });
+
+  static const String collectionName = 'soldiers';
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -114,12 +122,14 @@ class Soldier {
     map['supervisorId'] = supervisor;
     map['section'] = section;
     map['dodId'] = dodId;
+    map['cacExpiration'] = cacExpiration;
     map['dor'] = dor;
     map['mos'] = mos;
     map['duty'] = duty;
     map['paraLn'] = paraLn;
     map['reqMos'] = reqMos;
     map['deros'] = lossDate;
+    map['ymav'] = ymav;
     map['ets'] = ets;
     map['basd'] = basd;
     map['pebd'] = pebd;
@@ -143,6 +153,7 @@ class Soldier {
     map['email'] = email;
     map['workEmail'] = workEmail;
     map['nok'] = nok;
+    map['nokRelationship'] = nokRelationship;
     map['nokPhone'] = nokPhone;
     map['maritalStatus'] = maritalStatus;
     map['comments'] = comments;
@@ -172,12 +183,15 @@ class Soldier {
         state = '',
         zip = '',
         dodId = '',
-        maritalStatus = '';
+        maritalStatus = '',
+        cacExpiration = '',
+        nokRelationship = '',
+        ymav = '';
     bool assigned = true;
     try {
       users = doc['users'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+      debugPrint('Error: $e');
     }
     try {
       workEmail = doc['workEmail'];
@@ -185,7 +199,7 @@ class Soldier {
       email = doc['email'];
       pebd = doc['pebd'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
+      debugPrint('Error: $e');
     }
     try {
       nbcSuit = doc['nbcSuitSize'];
@@ -197,7 +211,7 @@ class Soldier {
       acuTop = doc['acuTopSize'];
       acuTrouser = doc['acuTrouserSize'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
+      debugPrint('Error: $e');
     }
     try {
       address = doc['address'];
@@ -206,24 +220,30 @@ class Soldier {
       zip = doc['zip'];
       dodId = doc['dodId'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'New Fields Do Not Exist');
+      debugPrint('Error: $e');
     }
     try {
       maritalStatus = doc['maritalStatus'];
     } catch (e) {
-      FirebaseAnalytics.instance
-          .logEvent(name: 'Marital Status Does Not Exist');
+      debugPrint('Error: $e');
     }
     try {
       assigned = doc['assigned'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'Assigned Does Not Exist');
+      debugPrint('Error: $e');
     }
     try {
       newPovs = doc['povs'];
       newAwards = doc['awards'];
     } catch (e) {
-      FirebaseAnalytics.instance.logEvent(name: 'povs Does Not Exist');
+      debugPrint('Error: $e');
+    }
+    try {
+      cacExpiration = doc['cacExpiration'];
+      nokRelationship = doc['nokRelationship'];
+      ymav = doc['ymav'];
+    } catch (e) {
+      debugPrint('Error: $e');
     }
 
     return Soldier(
@@ -240,12 +260,14 @@ class Soldier {
       supervisor: doc['supervisorId'],
       section: doc['section'],
       dodId: dodId,
+      cacExpiration: cacExpiration,
       dor: doc['dor'],
       mos: doc['mos'],
       duty: doc['duty'],
       paraLn: doc['paraLn'],
       reqMos: doc['reqMos'],
       lossDate: doc['deros'],
+      ymav: ymav,
       ets: doc['ets'],
       basd: doc['basd'],
       pebd: pebd,
@@ -269,6 +291,7 @@ class Soldier {
       email: email,
       workEmail: workEmail,
       nok: doc['nok'],
+      nokRelationship: nokRelationship,
       nokPhone: doc['nokPhone'],
       maritalStatus: maritalStatus,
       comments: doc['comments'],

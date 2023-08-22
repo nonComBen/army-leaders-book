@@ -4,7 +4,6 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../pages/editPages/edit_soldier_page.dart';
 import '../../providers/filtered_soldiers_provider.dart';
@@ -75,8 +74,6 @@ void selectFilters(BuildContext context, List<String> sections,
 }
 
 void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
-  bool approved = await checkPermission(Permission.storage);
-  if (!approved) return;
   List<List<dynamic>> docsList = [];
   docsList.add([
     'Soldier Id',
@@ -325,8 +322,6 @@ void downloadPdf(BuildContext context, bool isSubscribed,
 
 void completePdfDownload(BuildContext context, bool fullPage,
     List<Soldier> selectedSoldiers, String userId) async {
-  bool approved = await checkPermission(Permission.storage);
-  if (!approved) return;
   SoldierPdf soldierPdf =
       SoldierPdf(soldiers: selectedSoldiers, userId: userId);
   soldierPdf.createPdf(fullPage).then((location) {

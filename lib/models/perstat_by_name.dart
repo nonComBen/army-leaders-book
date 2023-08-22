@@ -5,7 +5,13 @@ class PerstatByName {
   String date;
   List<dynamic> dailies;
 
-  PerstatByName({required this.owner, this.date = '', this.dailies = const []});
+  PerstatByName({
+    required this.owner,
+    this.date = '',
+    this.dailies = const [],
+  });
+
+  static const String collectionName = 'perstatByName';
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};

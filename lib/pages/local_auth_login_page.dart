@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
-import '../auth_provider.dart';
-import '../providers/root_provider.dart';
-import '../providers/user_provider.dart';
-import '../widgets/platform_widgets/platform_text_button.dart';
-import '../../auth_service.dart';
+import '../../providers/settings_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../widgets/logo_widget.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
+import '../providers/auth_provider.dart';
+import '../providers/root_provider.dart';
+import '../providers/user_provider.dart';
+import '../widgets/platform_widgets/platform_text_button.dart';
 
 class LocalAuthLoginPage extends ConsumerStatefulWidget {
   const LocalAuthLoginPage({Key? key}) : super(key: key);
@@ -25,6 +25,7 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
   void onUnlockApp(BuildContext context) async {
     final rootService = ref.read(rootProvider.notifier);
     final soldiersService = ref.read(soldiersProvider.notifier);
+    final settingsService = ref.read(settingsProvider.notifier);
     final LocalAuthentication localAuth = LocalAuthentication();
 
     bool authenticated = await localAuth.authenticate(
@@ -33,6 +34,7 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
 
     if (authenticated) {
       soldiersService.loadSoldiers(_auth!.currentUser()!.uid);
+      settingsService.init(_auth!.currentUser()!.uid);
       rootService.signIn();
     }
   }
@@ -51,7 +53,7 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
   @override
   Widget build(BuildContext context) {
     _auth = ref.read(authProvider);
-    ref.read(userProvider).loadUser(_auth!.currentUser()!.uid);
+    ref.read(leaderProvider).init(_auth!.currentUser()!.uid);
     return PlatformScaffold(
       title: 'Lock Screen',
       body: Center(

@@ -1,6 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
+class NotificationMedpro {
+  String date;
+  int months;
+  List<dynamic> notifications;
+
+  NotificationMedpro({
+    this.date = '',
+    this.months = 0,
+    this.notifications = const [],
+  });
+}
+
 class Medpro {
   String? id;
   String? soldierId;
@@ -31,6 +43,7 @@ class Medpro {
   String varicella;
   String yellow;
   List<dynamic>? otherImms;
+  List<dynamic>? notificationIds;
 
   Medpro({
     this.id,
@@ -62,7 +75,10 @@ class Medpro {
     this.varicella = '',
     this.yellow = '',
     this.otherImms,
+    this.notificationIds,
   });
+
+  static const String collectionName = 'medpros';
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
@@ -94,6 +110,7 @@ class Medpro {
     map['varicella'] = varicella;
     map['yellow'] = yellow;
     map['otherImms'] = otherImms;
+    map['notificationIds'] = notificationIds;
 
     return map;
   }
@@ -101,9 +118,11 @@ class Medpro {
   factory Medpro.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
     List<dynamic> otherImms = [];
+    List<dynamic>? notificationIds;
     try {
       users = doc['users'];
       otherImms = doc['otherImms'];
+      notificationIds = doc['notificationIds'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
@@ -138,6 +157,7 @@ class Medpro {
       varicella: doc['varicella'],
       yellow: doc['yellow'],
       otherImms: otherImms,
+      notificationIds: notificationIds,
     );
   }
 }

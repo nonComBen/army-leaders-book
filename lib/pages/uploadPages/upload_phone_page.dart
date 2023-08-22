@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/toast_messages/file_is_blank_message.dart';
 import '../../methods/upload_methods.dart';
 import '../../models/phone_number.dart';
@@ -80,7 +80,7 @@ class UploadPhonePageState extends ConsumerState<UploadPhonePage> {
           location: saveLoc,
         );
 
-        firestore.collection('phoneNumbers').add(phoneObj.toMap());
+        firestore.collection(Phone.collectionName).add(phoneObj.toMap());
       }
     }
     Navigator.pop(context);

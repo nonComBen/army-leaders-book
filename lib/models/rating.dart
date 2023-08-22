@@ -36,6 +36,8 @@ class Rating {
     this.reviewer = '',
   });
 
+  static const String collectionName = 'ratings';
+
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{};
     map['owner'] = owner;

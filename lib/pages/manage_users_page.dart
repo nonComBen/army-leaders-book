@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:leaders_book/widgets/platform_widgets/platform_item_picker.dart';
 
-import '../../methods/custom_modal_bottom_sheet.dart';
-import '../../widgets/header_text.dart';
-import '../../methods/theme_methods.dart';
-import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../methods/custom_alert_dialog.dart';
+import '../../methods/custom_modal_bottom_sheet.dart';
+import '../../methods/theme_methods.dart';
+import '../models/leader.dart';
+import '../../widgets/header_text.dart';
 import '../../widgets/platform_widgets/platform_icon_button.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_list_tile.dart';
 import '../../widgets/platform_widgets/platform_loading_widget.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../models/soldier.dart';
 import '../widgets/platform_widgets/platform_button.dart';
 
@@ -75,7 +76,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                         onPressed: () {
                           Navigator.pop(context);
                           _firestore
-                              .collection('soldiers')
+                              .collection(Soldier.collectionName)
                               .doc(soldier.id)
                               .update({'owner': user});
                           resetSoldiers();
@@ -112,13 +113,16 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
   void deleteUser(Soldier soldier, String? userId) {
     var users = soldier.users;
     users.removeWhere((element) => element == userId);
-    _firestore.collection('soldiers').doc(soldier.id).update({'users': users});
+    _firestore
+        .collection(Soldier.collectionName)
+        .doc(soldier.id)
+        .update({'users': users});
     resetSoldiers();
   }
 
   void resetSoldiers() async {
     var snapshots = await _firestore
-        .collection('soldiers')
+        .collection(Soldier.collectionName)
         .where('owner', isEqualTo: widget.userId)
         .get();
     setState(() {
@@ -182,7 +186,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                           .toList();
                       return StreamBuilder<DocumentSnapshot>(
                         stream: _firestore
-                            .collection('users')
+                            .collection(Leader.collectionName)
                             .doc(users[i])
                             .snapshots(),
                         builder: (context, snapshot) {

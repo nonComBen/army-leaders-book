@@ -10,9 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/action.dart';
@@ -28,6 +27,7 @@ import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/actions_pdf.dart';
 import '../providers/tracking_provider.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -92,7 +92,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('actions')
+        .collection(ActionObj.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -124,8 +124,6 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -218,8 +216,6 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) =>
           a['statusDate'].toString().compareTo(b['statusDate'].toString()),
@@ -322,25 +318,25 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 480) {
+    if (width > 420) {
       columnList.add(DataColumn(
           label: const Text('Action'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 640) {
+    if (width > 690) {
       columnList.add(DataColumn(
           label: const Text('Current Status'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 790) {
+    if (width > 850) {
       columnList.add(DataColumn(
           label: const Text('Status Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 960) {
+    if (width > 1030) {
       columnList.add(DataColumn(
           label: const Text('Date Submitted'),
           onSort: (int columnIndex, bool ascending) =>
@@ -373,25 +369,25 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
         style: const TextStyle(),
       )),
     ];
-    if (width > 480) {
+    if (width > 420) {
       cellList.add(DataCell(Text(
         documentSnapshot['action'],
         style: const TextStyle(),
       )));
     }
-    if (width > 640) {
+    if (width > 690) {
       cellList.add(DataCell(Text(
         documentSnapshot['currentStatus'].toString(),
         style: const TextStyle(),
       )));
     }
-    if (width > 790) {
+    if (width > 850) {
       cellList.add(DataCell(Text(
         documentSnapshot['statusDate'].toString(),
         style: const TextStyle(),
       )));
     }
-    if (width > 960) {
+    if (width > 1030) {
       cellList.add(DataCell(Text(
         documentSnapshot['dateSubmitted'].toString(),
         style: const TextStyle(),
@@ -557,7 +553,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

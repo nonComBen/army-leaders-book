@@ -71,6 +71,18 @@ class AndroidSelectionWidget extends StatelessWidget
             },
           ),
         ),
+        if (values.length == 3)
+          Flexible(
+            child: RadioListTile(
+              title: titles[2],
+              value: values[2],
+              groupValue: groupValue,
+              activeColor: getOnPrimaryColor(context),
+              onChanged: (dynamic value) {
+                onChanged(value);
+              },
+            ),
+          ),
       ],
     );
   }
@@ -91,19 +103,27 @@ class IOSSelectionWidget extends StatelessWidget
   final void Function(Object?) onChanged;
   @override
   Widget build(BuildContext context) {
-    return CupertinoSlidingSegmentedControl<Object>(
-      children: {
-        values[0]: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: titles[0],
-        ),
-        values[1]: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: titles[1],
-        ),
-      },
-      groupValue: groupValue,
-      onValueChanged: onChanged,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: CupertinoSlidingSegmentedControl<Object>(
+        children: {
+          values[0]: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: titles[0],
+          ),
+          values[1]: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: titles[1],
+          ),
+          if (values.length == 3)
+            values[2]: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: titles[2],
+            ),
+        },
+        groupValue: groupValue,
+        onValueChanged: onChanged,
+      ),
     );
   }
 }

@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/perstat.dart';
+import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -39,6 +38,7 @@ class EditPerstatPage extends ConsumerStatefulWidget {
 
 class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
   String _title = 'New Perstat';
+  String status = 'Approved';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -48,6 +48,8 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
   final TextEditingController _typeController = TextEditingController();
   final TextEditingController _commentsController = TextEditingController();
   final TextEditingController _locController = TextEditingController();
+  final TextEditingController _daysController = TextEditingController();
+
   String? _type,
       _otherType,
       _soldierId,
@@ -83,6 +85,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     _typeController.dispose();
     _commentsController.dispose();
     _locController.dispose();
+    _daysController.dispose();
     super.dispose();
   }
 
@@ -109,6 +112,7 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     if (widget.perstat.id != null) {
       _title = '${widget.perstat.rank} ${widget.perstat.name}';
     }
+    status = widget.perstat.status;
 
     _soldierId = widget.perstat.soldierId;
     _rank = widget.perstat.rank;
@@ -125,8 +129,37 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
     _commentsController.text = widget.perstat.comments;
     _locController.text = widget.perstat.location;
 
-    _start = DateTime.tryParse(_startController.text) ?? DateTime.now();
-    _end = DateTime.tryParse(_endController.text) ?? DateTime.now();
+    _start = DateTime.tryParse(_startController.text);
+    _end = DateTime.tryParse(_endController.text);
+    calcDays();
+
+    _startController.addListener(() {
+      calcDays();
+    });
+
+    _endController.addListener(() {
+      calcDays();
+    });
+  }
+
+  bool bothDatesValid() {
+    return isValidDate(_startController.text) &&
+        _startController.text != '' &&
+        isValidDate(_endController.text) &&
+        _endController.text != '';
+  }
+
+  void calcDays() {
+    if (bothDatesValid()) {
+      setState(() {
+        _daysController.text =
+            '${DateTime.parse(_endController.text).difference(DateTime.parse(_startController.text)).inDays + 1} Days';
+      });
+    } else {
+      setState(() {
+        _daysController.text = '';
+      });
+    }
   }
 
   void submit(BuildContext context) async {
@@ -159,20 +192,18 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
         type: type!,
         comments: _commentsController.text,
         location: _locController.text,
+        status: status,
       );
-      DocumentReference docRef;
+
       if (widget.perstat.id == null) {
-        docRef = await firestore
-            .collection(kPerstatCollection)
-            .add(savePerstat.toMap());
+        firestore.collection(Perstat.collectionName).add(savePerstat.toMap());
       } else {
-        docRef =
-            firestore.collection(kPerstatCollection).doc(widget.perstat.id);
-        docRef.update(savePerstat.toMap());
+        firestore
+            .collection(Perstat.collectionName)
+            .doc(widget.perstat.id)
+            .set(savePerstat.toMap(), SetOptions(merge: true));
       }
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -228,12 +259,15 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kPerstatCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Perstat.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -293,6 +327,36 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
                 minYears: 1,
                 maxYears: 2,
               ),
+              PaddedTextField(
+                controller: _daysController,
+                enabled: false,
+                label: 'Length',
+                decoration: const InputDecoration(
+                  labelText: 'Length',
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Status'),
+                  value: status,
+                  items: const [
+                    'Approved',
+                    'Pending',
+                    'Denied',
+                  ],
+                  itemLabels: const [
+                    'Approved',
+                    'Pending',
+                    'Denied',
+                  ],
+                  onChanged: (newStatus) {
+                    setState(() {
+                      status = newStatus;
+                    });
+                  },
+                ),
+              ),
             ],
           ),
           PaddedTextField(
@@ -307,7 +371,18 @@ class EditPerstatPageState extends ConsumerState<EditPerstatPage> {
           ),
           PlatformButton(
             onPressed: () {
-              if (_endController.text != '' && _end!.isBefore(_start!)) {
+              if (_startController.text == '' ||
+                  !isValidDate(_startController.text)) {
+                toast.showToast(
+                    child: const MyToast(
+                        message: 'Start Date is blank or in invalid format'));
+                return;
+              }
+              _end = DateTime.tryParse(_endController.text);
+              _start = DateTime.tryParse(_startController.text);
+              if (_endController.text != '' &&
+                  _end != null &&
+                  _end!.isBefore(_start!)) {
                 toast.showToast(
                   child: const MyToast(
                     message: 'End Date must be after Start Date',

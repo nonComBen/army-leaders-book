@@ -4,7 +4,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pdf;
-import 'package:permission_handler/permission_handler.dart';
 
 import 'web_download.dart';
 
@@ -23,23 +22,6 @@ Future<List<String>> getPath() async {
     await dir.create(recursive: true);
   }
   return [newPath, location];
-}
-
-Future<bool> checkPermission(Permission permission) async {
-  if (kIsWeb || Platform.isIOS) {
-    return true;
-  }
-  var status = await permission.status;
-  if (!status.isGranted) {
-    var requestStatus = await permission.request();
-    if (requestStatus.isGranted) {
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return true;
-  }
 }
 
 Future<String> pdfDownload(pdf.Document pdf, String filename) async {

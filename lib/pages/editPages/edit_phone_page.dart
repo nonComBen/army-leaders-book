@@ -4,9 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:leaders_book/constants/firestore_collections.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/anon_warning_banner.dart';
@@ -84,25 +83,14 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
       );
 
       if (widget.phone.id == null) {
-        DocumentReference docRef =
-            await firestore.collection(kPhoneCollection).add(savePhone.toMap());
-
-        savePhone.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Phone.collectionName).add(savePhone.toMap());
       } else {
         firestore
-            .collection(kPhoneCollection)
+            .collection(Phone.collectionName)
             .doc(widget.phone.id)
-            .set(savePhone.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Phone');
-        });
+            .set(savePhone.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       FToast toast = FToast();
       toast.context = context;

@@ -5,32 +5,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
+import '../../calculators/pu_calculator.dart';
+import '../../calculators/run_calculator.dart';
+import '../../calculators/su_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../providers/soldiers_provider.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/apft.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
+import '../../widgets/platform_widgets/platform_item_picker.dart';
+import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/apft.dart';
-import '../../calculators/pu_calculator.dart';
-import '../../calculators/su_calculator.dart';
-import '../../calculators/run_calculator.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
-import '../../widgets/platform_widgets/platform_item_picker.dart';
-import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditApftPage extends ConsumerStatefulWidget {
   const EditApftPage({
@@ -274,25 +273,18 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
       );
 
       if (widget.apft.id == null) {
-        DocumentReference docRef =
-            await firestore.collection(kApftCollection).add(saveApft.toMap());
-
-        saveApft.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Apft.collectionName).add(saveApft.toMap());
       } else {
-        firestore
-            .collection(kApftCollection)
-            .doc(widget.apft.id)
-            .set(saveApft.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating APFT');
-        });
+        try {
+          firestore
+              .collection(Apft.collectionName)
+              .doc(widget.apft.id)
+              .set(saveApft.toMap(), SetOptions(merge: true));
+        } on Exception catch (e) {
+          debugPrint('Error updating APFT: $e');
+        }
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -348,12 +340,15 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kApftCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Apft.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),
@@ -447,16 +442,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
             childAspectRatio: width > 900 ? 900 / 325 : width / 325,
             shrinkWrap: true,
             children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+              const Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
                   child: HeaderText(
                     'Pushup',
                     textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: getTextColor(context),
-                    ),
                   )),
               PaddedTextField(
                 controller: _puRawController,
@@ -485,16 +475,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                   labelText: 'Score',
                 ),
               ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+              const Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
                   child: HeaderText(
                     'Situp',
                     textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: getTextColor(context),
-                    ),
                   )),
               PaddedTextField(
                 controller: _suRawController,
@@ -528,11 +513,6 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                 child: HeaderText(
                   _runType,
                   textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: getTextColor(context),
-                  ),
                 ),
               ),
               PaddedTextField(
@@ -559,16 +539,11 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
                   labelText: 'Score',
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
                 child: HeaderText(
                   'Total',
                   textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: getTextColor(context),
-                  ),
                 ),
               ),
               const Padding(padding: EdgeInsets.all(8.0), child: SizedBox()),

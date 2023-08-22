@@ -10,10 +10,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:leaders_book/models/setting.dart';
+import 'package:leaders_book/widgets/header_text.dart';
+import 'package:leaders_book/widgets/standard_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/apft.dart';
@@ -29,7 +31,9 @@ import '../methods/theme_methods.dart';
 import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/apfts_pdf.dart';
+import '../providers/settings_provider.dart';
 import '../providers/tracking_provider.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -114,7 +118,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
   void initialize() async {
     prefs = await SharedPreferences.getInstance();
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('apftStats')
+        .collection(Apft.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: _userId)
         .snapshots();
@@ -127,13 +131,9 @@ class ApftPageState extends ConsumerState<ApftPage> {
 
       _calcAves();
     });
-    snapshot = await FirebaseFirestore.instance
-        .collection('settings')
-        .where('owner', isEqualTo: _userId)
-        .get();
-    DocumentSnapshot doc = snapshot!.docs[0];
+    final setting = ref.read(settingsProvider) ?? Setting(owner: _userId);
     setState(() {
-      overdueDays = doc['acftMonths'] * 30;
+      overdueDays = setting.acftMonths * 30;
       amberDays = overdueDays - 30;
     });
   }
@@ -157,8 +157,6 @@ class ApftPageState extends ConsumerState<ApftPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -267,8 +265,6 @@ class ApftPageState extends ConsumerState<ApftPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
@@ -409,13 +405,13 @@ class ApftPageState extends ConsumerState<ApftPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 430) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
-    if (width > 515) {
+    if (width > 500) {
       columnList.add(DataColumn(
           label: const Text('Total'),
           onSort: (int columnIndex, bool ascending) =>
@@ -487,7 +483,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                     : const TextStyle(),
       )),
     ];
-    if (width > 430) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['date'],
         style: fail
@@ -499,7 +495,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                     : const TextStyle(),
       )));
     }
-    if (width > 515) {
+    if (width > 500) {
       cellList.add(DataCell(Text(
         documentSnapshot['total'].toString(),
         style: fail
@@ -706,7 +702,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),
@@ -722,10 +718,8 @@ class ApftPageState extends ConsumerState<ApftPage> {
                       children: <Widget>[
                         const Padding(
                           padding: EdgeInsets.all(4.0),
-                          child: Text(
+                          child: HeaderText(
                             'Average',
-                            style: TextStyle(fontSize: 18),
-                            textAlign: TextAlign.center,
                           ),
                         ),
                         Row(
@@ -733,27 +727,28 @@ class ApftPageState extends ConsumerState<ApftPage> {
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('PU: $puAve'),
+                              child: StandardText('PU: $puAve'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('SU: $suAve'),
+                              child: StandardText('SU: $suAve'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('Run: $runAve'),
+                              child: StandardText('Run: $runAve'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Text('Total: $totalAve'),
+                              child: StandardText('Total: $totalAve'),
                             ),
                           ],
                         ),
-                        const Padding(
-                          padding: EdgeInsets.all(4.0),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
                           child: Text(
                             'Zeros are factored out and averages are rounded down.',
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(
+                                fontSize: 14, color: getTextColor(context)),
                             textAlign: TextAlign.center,
                           ),
                         )

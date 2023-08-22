@@ -129,7 +129,7 @@ class UploadWorkingAwardsPageState
             citation: saveCitation,
           );
 
-          firestore.collection('workingAwards').add(award.toMap());
+          firestore.collection(WorkingAward.collectionName).add(award.toMap());
         }
       }
       Navigator.pop(context);

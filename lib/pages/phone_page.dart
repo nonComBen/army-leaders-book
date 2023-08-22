@@ -9,9 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../providers/subscription_state.dart';
@@ -26,6 +25,7 @@ import '../models/phone_number.dart';
 import '../pdf/phone_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -84,7 +84,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
     }
 
     final Stream<QuerySnapshot> stream = FirebaseFirestore.instance
-        .collection('phoneNumbers')
+        .collection(Phone.collectionName)
         .where('owner', isEqualTo: userId)
         .snapshots();
     _subscription = stream.listen((updates) {
@@ -114,8 +114,6 @@ class PhonePageState extends ConsumerState<PhonePage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     List<List<dynamic>> docsList = [];
     docsList.add(['Title', 'POC', 'Phone Number', 'Location']);
     for (DocumentSnapshot doc in documents) {
@@ -191,8 +189,6 @@ class PhonePageState extends ConsumerState<PhonePage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['title'].toString().compareTo(b['title'].toString()),
     );
@@ -250,24 +246,28 @@ class PhonePageState extends ConsumerState<PhonePage> {
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPhonePage(
-                  phone: Phone.fromSnapshot(
-                    _selectedDocuments[0],
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPhonePage(
+          phone: Phone.fromSnapshot(
+            _selectedDocuments[0],
+          ),
+        ),
+      ),
+    );
   }
 
   void _newRecord(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditPhonePage(
-                  phone: Phone(
-                    owner: userId,
-                  ),
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPhonePage(
+          phone: Phone(
+            owner: userId,
+          ),
+        ),
+      ),
+    );
   }
 
   List<DataColumn> _createColumns(double width) {
@@ -282,7 +282,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 425) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Phone No'),
           onSort: (int columnIndex, bool ascending) =>
@@ -315,7 +315,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
       DataCell(Text(documentSnapshot['title'])),
       DataCell(Text(documentSnapshot['name'])),
     ];
-    if (width > 425) {
+    if (width > 400) {
       cellList.add(DataCell(Text(documentSnapshot['phone'])));
     }
     if (width > 525) {
@@ -454,7 +454,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

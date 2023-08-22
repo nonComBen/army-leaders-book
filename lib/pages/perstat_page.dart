@@ -9,14 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/perstat.dart';
 import '../../providers/subscription_state.dart';
-import '../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../methods/create_app_bar_actions.dart';
 import '../methods/date_methods.dart';
 import '../methods/download_methods.dart';
@@ -27,6 +26,7 @@ import '../models/app_bar_option.dart';
 import '../pdf/perstats_pdf.dart';
 import '../providers/tracking_provider.dart';
 import '../widgets/anon_warning_banner.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -86,7 +86,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('perstat')
+        .collection(Perstat.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -118,9 +118,6 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
-
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -218,8 +215,6 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['start'].toString().compareTo(b['start'].toString()),
     );
@@ -308,6 +303,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
 
   void _editRecord(BuildContext context) {
     if (_selectedDocuments.length != 1) {
+      toast.context = context;
       toast.showToast(
         child: const MyToast(
           message: 'You must select exactly one record',
@@ -350,7 +346,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 415) {
+    if (width > 400) {
       list.add(DataColumn(
           label: const Text('Start'),
           onSort: (int columnIndex, bool ascending) =>
@@ -393,51 +389,75 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
 
   List<DataCell> getCells(DocumentSnapshot documentSnapshot, double width) {
     bool overdue = isOverdue(documentSnapshot['end'], 1);
+    String status = 'Approved';
+    try {
+      status = documentSnapshot['status'];
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+    bool pending = status == 'Pending';
+    bool denied = status == 'Denied';
+    TextStyle textStyle = overdue
+        ? const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)
+        : pending
+            ? const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)
+            : denied
+                ? const TextStyle(
+                    color: Colors.red, fontWeight: FontWeight.bold)
+                : const TextStyle();
     List<DataCell> cellList = [
-      DataCell(Text(
-        documentSnapshot['rank'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
-      DataCell(Text(
-        '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )),
+      DataCell(
+        Text(
+          documentSnapshot['rank'],
+          style: textStyle,
+        ),
+      ),
+      DataCell(
+        Text(
+          '${documentSnapshot['name']}, ${documentSnapshot['firstName']}',
+          style: textStyle,
+        ),
+      ),
     ];
-    if (width > 415) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['start'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+    if (width > 400) {
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['start'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     if (width > 550) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['end'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['end'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     if (width > 685) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['type'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['type'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     if (width > 800) {
-      cellList.add(DataCell(Text(
-        documentSnapshot['section'],
-        style: overdue
-            ? const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-            : const TextStyle(),
-      )));
+      cellList.add(
+        DataCell(
+          Text(
+            documentSnapshot['section'],
+            style: textStyle,
+          ),
+        ),
+      );
     }
     return cellList;
   }
@@ -593,7 +613,7 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),
@@ -609,10 +629,26 @@ class PerstatPageState extends ConsumerState<PerstatPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Red Text: Past Thru Date',
+                          'Amber Text: Past Thru Date',
                           style: TextStyle(
-                              color: Colors.red, fontWeight: FontWeight.bold),
-                        )
+                            color: Colors.amber,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Blue Text: Approval Status Pending',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Red Text: Approval Status Denied',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ),

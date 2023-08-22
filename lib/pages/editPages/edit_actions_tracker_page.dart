@@ -5,24 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/on_back_pressed.dart';
 import '../../methods/validate.dart';
-import '../../providers/soldiers_provider.dart';
+import '../../models/action.dart';
 import '../../models/soldier.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
+import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/action.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
-import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 
 class EditActionsTrackerPage extends ConsumerStatefulWidget {
   const EditActionsTrackerPage({
@@ -89,10 +88,8 @@ class EditActionsTrackerPageState
     _statusDateController.text = widget.action.statusDate;
     _remarksController.text = widget.action.remarks;
 
-    _dateTime =
-        DateTime.tryParse(widget.action.dateSubmitted) ?? DateTime.now();
-    _statusDateTime =
-        DateTime.tryParse(widget.action.statusDate) ?? DateTime.now();
+    _dateTime = DateTime.tryParse(widget.action.dateSubmitted);
+    _statusDateTime = DateTime.tryParse(widget.action.statusDate);
   }
 
   void submit(BuildContext context) async {
@@ -126,26 +123,18 @@ class EditActionsTrackerPageState
       );
 
       if (widget.action.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kActionsCollection)
-            .add(saveAction.toMap());
-
-        saveAction.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(ActionObj.collectionName).add(saveAction.toMap());
       } else {
-        firestore
-            .collection(kActionsCollection)
-            .doc(widget.action.id)
-            .set(saveAction.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Action');
-        });
+        try {
+          firestore
+              .collection(ActionObj.collectionName)
+              .doc(widget.action.id)
+              .set(saveAction.toMap(), SetOptions(merge: true));
+        } on Exception catch (e) {
+          debugPrint('Error updating Actions Tracker: $e');
+        }
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         toastDuration: const Duration(seconds: 5),
@@ -202,11 +191,15 @@ class EditActionsTrackerPageState
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                        collection: kActionsCollection,
-                        userId: user.uid,
-                        allSoldiers: allSoldiers!);
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: ActionObj.collectionName,
+                      userId: user.uid,
+                      allSoldiers: allSoldiers!,
+                    );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

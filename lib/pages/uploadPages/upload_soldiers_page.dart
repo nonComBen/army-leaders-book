@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../auth_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/toast_messages/file_is_blank_message.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../methods/rank_sort.dart';
@@ -258,7 +258,7 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
         owner: owner,
         users: users,
         rank: saveRank,
-        rankSort: getRankSort(saveRank),
+        rankSort: getRankSort(saveRank.toUpperCase().trim()),
         lastName: saveLastName,
         firstName: saveFirstName,
         mi: saveMi,
@@ -303,11 +303,11 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
 
       if (saveSoldierId != null) {
         firestore
-            .collection('soldiers')
+            .collection(Soldier.collectionName)
             .doc(saveSoldierId)
             .set(soldier.toMap(), SetOptions(merge: true));
       } else {
-        firestore.collection('soldiers').add(soldier.toMap());
+        firestore.collection(Soldier.collectionName).add(soldier.toMap());
       }
     }
     Navigator.pop(context);

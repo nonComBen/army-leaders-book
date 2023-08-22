@@ -10,9 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/toast_messages/subscription_needed_toast.dart';
 import '../../models/appointment.dart';
@@ -28,6 +27,7 @@ import '../methods/web_download.dart';
 import '../models/app_bar_option.dart';
 import '../pdf/appointments_pdf.dart';
 import '../providers/tracking_provider.dart';
+import '../widgets/custom_data_table.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/table_frame.dart';
@@ -86,7 +86,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
     }
 
     final Stream<QuerySnapshot> streamUsers = FirebaseFirestore.instance
-        .collection('appointments')
+        .collection(Appointment.collectionName)
         .where('users', isNotEqualTo: null)
         .where('users', arrayContains: userId)
         .snapshots();
@@ -118,9 +118,6 @@ class AptsPageState extends ConsumerState<AptsPage> {
   }
 
   void _downloadExcel() async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
-
     List<List<dynamic>> docsList = [];
     docsList.add([
       'Soldier Id',
@@ -224,8 +221,6 @@ class AptsPageState extends ConsumerState<AptsPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     documents.sort(
       (a, b) => a['date'].toString().compareTo(b['date'].toString()),
     );
@@ -362,7 +357,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)),
     ];
-    if (width > 410) {
+    if (width > 400) {
       columnList.add(DataColumn(
           label: const Text('Date'),
           onSort: (int columnIndex, bool ascending) =>
@@ -412,7 +407,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
             : const TextStyle(),
       )),
     ];
-    if (width > 410) {
+    if (width > 400) {
       cellList.add(DataCell(Text(
         documentSnapshot['date'],
         style: overdue
@@ -484,8 +479,11 @@ class AptsPageState extends ConsumerState<AptsPage> {
   }
 
   void onSelected(bool? selected, DocumentSnapshot snapshot) {
+    if (selected == null) {
+      return;
+    }
     setState(() {
-      if (selected!) {
+      if (selected) {
         _selectedDocuments.add(snapshot);
       } else {
         _selectedDocuments.remove(snapshot);
@@ -583,7 +581,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
                 if (user.isAnonymous) const AnonWarningBanner(),
                 Card(
                   color: getContrastingBackgroundColor(context),
-                  child: DataTable(
+                  child: CustomDataTable(
                     sortAscending: _sortAscending,
                     sortColumnIndex: _sortColumnIndex,
                     columns: _createColumns(MediaQuery.of(context).size.width),

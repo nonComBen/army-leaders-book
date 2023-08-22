@@ -5,24 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../widgets/more_tiles_header.dart';
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
-import '../../models/additional_training.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/additional_training.dart';
+import '../../models/soldier.dart';
 import '../../models/training.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
+import '../../widgets/more_tiles_header.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -189,26 +188,25 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       addMoreLess = 'More Training';
     }
 
-    _cyberDate = DateTime.tryParse(widget.training.cyber) ?? DateTime.now();
-    _opsecDate = DateTime.tryParse(widget.training.opsec) ?? DateTime.now();
-    _antiTerrorDate =
-        DateTime.tryParse(widget.training.antiTerror) ?? DateTime.now();
-    _lawDate = DateTime.tryParse(widget.training.lawOfWar) ?? DateTime.now();
-    _persRecDate = DateTime.tryParse(widget.training.persRec) ?? DateTime.now();
-    _infoSecDate = DateTime.tryParse(widget.training.infoSec) ?? DateTime.now();
-    _ctipDate = DateTime.tryParse(widget.training.ctip) ?? DateTime.now();
-    _gatDate = DateTime.tryParse(widget.training.gat) ?? DateTime.now();
-    _sereDate = DateTime.tryParse(widget.training.sere) ?? DateTime.now();
-    _tarpDate = DateTime.tryParse(widget.training.tarp) ?? DateTime.now();
-    _eoDate = DateTime.tryParse(widget.training.eo) ?? DateTime.now();
-    _asapDate = DateTime.tryParse(widget.training.asap) ?? DateTime.now();
-    _sharpDate = DateTime.tryParse(widget.training.sharp) ?? DateTime.now();
-    _suicideDate = DateTime.tryParse(widget.training.suicide) ?? DateTime.now();
-    _add1Date = DateTime.tryParse(widget.training.add1Date) ?? DateTime.now();
-    _add2Date = DateTime.tryParse(widget.training.add2Date) ?? DateTime.now();
-    _add3Date = DateTime.tryParse(widget.training.add3Date) ?? DateTime.now();
-    _add4Date = DateTime.tryParse(widget.training.add4Date) ?? DateTime.now();
-    _add5Date = DateTime.tryParse(widget.training.add5Date) ?? DateTime.now();
+    _cyberDate = DateTime.tryParse(widget.training.cyber);
+    _opsecDate = DateTime.tryParse(widget.training.opsec);
+    _antiTerrorDate = DateTime.tryParse(widget.training.antiTerror);
+    _lawDate = DateTime.tryParse(widget.training.lawOfWar);
+    _persRecDate = DateTime.tryParse(widget.training.persRec);
+    _infoSecDate = DateTime.tryParse(widget.training.infoSec);
+    _ctipDate = DateTime.tryParse(widget.training.ctip);
+    _gatDate = DateTime.tryParse(widget.training.gat);
+    _sereDate = DateTime.tryParse(widget.training.sere);
+    _tarpDate = DateTime.tryParse(widget.training.tarp);
+    _eoDate = DateTime.tryParse(widget.training.eo);
+    _asapDate = DateTime.tryParse(widget.training.asap);
+    _sharpDate = DateTime.tryParse(widget.training.sharp);
+    _suicideDate = DateTime.tryParse(widget.training.suicide);
+    _add1Date = DateTime.tryParse(widget.training.add1Date);
+    _add2Date = DateTime.tryParse(widget.training.add2Date);
+    _add3Date = DateTime.tryParse(widget.training.add3Date);
+    _add4Date = DateTime.tryParse(widget.training.add4Date);
+    _add5Date = DateTime.tryParse(widget.training.add5Date);
   }
 
   void editTraining(
@@ -244,13 +242,13 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
           ),
           PlatformButton(
             onPressed: () {
-              AdditionalTraining saveAward =
+              AdditionalTraining saveTraining =
                   AdditionalTraining(name: name.text, date: date.text);
               setState(() {
                 if (index != null) {
-                  _addTraining[index] = saveAward;
+                  _addTraining[index] = saveTraining;
                 } else {
-                  _addTraining.add(saveAward);
+                  _addTraining.add(saveTraining);
                 }
               });
               Navigator.of(context).pop();
@@ -266,7 +264,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
     Widget title = const Text('Delete Training?');
     Widget content = Container(
       padding: const EdgeInsets.all(8.0),
-      child: const Text('Are you sure you want to delete this award?'),
+      child: const Text('Are you sure you want to delete this training?'),
     );
     customAlertDialog(
       context: context,
@@ -339,26 +337,14 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       );
 
       if (widget.training.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kTrainingCollection)
-            .add(saveTraining.toMap());
-
-        saveTraining.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Training.collectionName).add(saveTraining.toMap());
       } else {
         firestore
-            .collection(kTrainingCollection)
+            .collection(Training.collectionName)
             .doc(widget.training.id)
-            .set(saveTraining.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveTraining.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
@@ -487,12 +473,15 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kTrainingCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Training.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

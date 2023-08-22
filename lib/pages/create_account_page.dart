@@ -1,14 +1,17 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../auth_provider.dart';
+import '../models/leader.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../widgets/logo_widget.dart';
+import '../providers/auth_provider.dart';
 import '../providers/root_provider.dart';
 import '../widgets/form_frame.dart';
 import '../widgets/my_toast.dart';
@@ -17,10 +20,6 @@ import '../widgets/platform_widgets/platform_button.dart';
 import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/platform_widgets/platform_text_button.dart';
-import '../../auth_service.dart';
-import '../../models/user.dart';
-import '../../providers/user_provider.dart';
-import '../../widgets/logo_widget.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({
@@ -70,23 +69,29 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
     debugPrint('Validating');
     if (validateAndSave()) {
       try {
-        User user = (await auth.createUserWithEmailAndPassword(
-            _emailController.text, _passwordController.text))!;
-        final userObj = UserObj(
-          userId: user.uid,
-          userEmail: user.email!,
-          userName: user.displayName ?? '',
-          createdDate: DateTime.now(),
-          lastLoginDate: DateTime.now(),
-          updatedUserArray: true,
-          tosAgree: true,
-          agreeDate: DateTime.now(),
-        );
-        await FirebaseFirestore.instance
-            .doc('users/${user.uid}')
-            .set(userObj.toMap());
-        ref.read(userProvider).loadUser(user.uid);
-        ref.read(rootProvider.notifier).signIn();
+        auth
+            .createUserWithEmailAndPassword(
+                _emailController.text, _passwordController.text)
+            .then((user) {
+          if (user != null) {
+            final userObj = Leader(
+              userId: user.uid,
+              userEmail: user.email!,
+              userName: user.displayName ?? '',
+              createdDate: DateTime.now(),
+              lastLoginDate: DateTime.now(),
+              updatedUserArray: true,
+              tosAgree: true,
+              agreeDate: DateTime.now(),
+            );
+            FirebaseFirestore.instance
+                .doc('users/${user.uid}')
+                .set(userObj.toMap(), SetOptions(merge: true));
+            ref.read(leaderProvider).init(user.uid);
+            ref.read(settingsProvider.notifier).init(user.uid);
+          }
+          ref.read(rootProvider.notifier).signIn();
+        });
       } catch (e) {
         FToast toast = FToast();
         toast.init(context);

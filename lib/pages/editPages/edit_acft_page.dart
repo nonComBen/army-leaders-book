@@ -1,38 +1,45 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:leaders_book/models/setting.dart';
 
-import '../../constants/firestore_collections.dart';
-import '../../methods/theme_methods.dart';
-import '../../providers/soldiers_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../calculators/hrp_calculator.dart';
+import '../../calculators/mdl_calculator.dart';
+import '../../calculators/plk_calculator.dart';
+import '../../calculators/sdc_calculator.dart';
+import '../../calculators/spt_calculator.dart';
+import '../../calculators/twomr_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
+import '../../methods/local_notification_methods.dart';
+import '../../methods/on_back_pressed.dart';
+import '../../methods/theme_methods.dart';
 import '../../methods/validate.dart';
+import '../../models/acft.dart';
 import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../providers/soldiers_provider.dart';
+import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
 import '../../widgets/header_text.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
+import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../../widgets/platform_widgets/platform_selection_widget.dart';
 import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 import '../../widgets/stateful_widgets/date_text_field.dart';
-import '../../auth_provider.dart';
-import '../../calculators/twomr_calculator.dart';
-import '../../calculators/plk_calculator.dart';
-import '../../methods/on_back_pressed.dart';
-import '../../models/acft.dart';
-import '../../widgets/anon_warning_banner.dart';
-import '../../calculators/hrp_calculator.dart';
-import '../../calculators/mdl_calculator.dart';
-import '../../calculators/sdc_calculator.dart';
-import '../../calculators/spt_calculator.dart';
-import '../../widgets/platform_widgets/platform_button.dart';
 
 class EditAcftPage extends ConsumerStatefulWidget {
   const EditAcftPage({
@@ -67,6 +74,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   final TextEditingController _runRawController = TextEditingController();
   String _ageGroup = '17-21', _gender = 'Male', _runType = 'Run';
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
+  late User user;
   List<dynamic>? _users;
   int? _total,
       _mdlScore,
@@ -96,7 +104,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       plkPass = true,
       runPass = true;
   final List<String> _runTypes = ['Run', 'Walk', 'Row', 'Bike', 'Swim'];
-  DateTime? _dateTime;
+  late DateTime _dateTime;
   FToast toast = FToast();
 
   List<String> ageGroups = [
@@ -133,6 +141,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   @override
   void initState() {
     super.initState();
+    user = ref.read(authProvider).currentUser()!;
     allSoldiers = ref.read(soldiersProvider);
 
     _runType = widget.acft.altEvent;
@@ -161,7 +170,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     _runScore = widget.acft.runScore;
 
     _mdlRaw = int.tryParse(widget.acft.deadliftRaw) ?? 0;
-    _sptRaw = int.tryParse(widget.acft.powerThrowRaw) as double? ?? 0;
+    _sptRaw = double.tryParse(widget.acft.powerThrowRaw) ?? 0;
     _hrpRaw = int.tryParse(widget.acft.puRaw) ?? 0;
     if (widget.acft.dragRaw.characters.contains(":")) {
       _sdcMins = int.tryParse(widget.acft.dragRaw
@@ -364,6 +373,35 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       _formKey,
       [_dateController.text],
     )) {
+      final setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
+      List<int> notificationIds = [];
+      if (!kIsWeb && _dateController.text != '' && setting.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        if (widget.acft.notificationIds != null &&
+            widget.acft.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.acft.notificationIds!);
+        }
+        final dueDate = getDueDate(_dateController.text, setting.acftMonths);
+        DateFormat formatter = DateFormat('yyyy-MM-dd');
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        for (int days in setting.acftNotifications) {
+          notificationIds.add(id);
+          notificationService.scheduleNotification(
+            dateTime: dueDate.subtract(Duration(days: days)),
+            id: id,
+            title: '$_rank $_lastName\'s ACFT Due',
+            body:
+                '$_rank $_lastName\'s ACFT Due in $days on ${formatter.format(dueDate)}',
+            payload: 'ACFT',
+          );
+          id++;
+        }
+        prefs.setInt('notificationId', id);
+      }
+
       Acft saveAcft = Acft(
         id: widget.acft.id,
         soldierId: _soldierId,
@@ -392,26 +430,22 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         total: _total!,
         altEvent: _runType,
         pass: pass,
+        notificationIds: notificationIds,
       );
 
       if (widget.acft.id == null) {
-        await firestore.collection(kAcftCollection).add(saveAcft.toMap());
-
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Acft.collectionName).add(saveAcft.toMap());
       } else {
-        firestore
-            .collection(kAcftCollection)
-            .doc(widget.acft.id)
-            .set(saveAcft.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating ACFT');
-        });
+        try {
+          firestore
+              .collection(Acft.collectionName)
+              .doc(widget.acft.id)
+              .set(saveAcft.toMap(), SetOptions(merge: true));
+        } on Exception catch (e) {
+          debugPrint('Error updating ACFT: $e');
+        }
       }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(
@@ -424,7 +458,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    final user = ref.read(authProvider).currentUser()!;
     toast.context = context;
     return PlatformScaffold(
       title: _title,
@@ -468,9 +501,9 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
                   onChanged: (checked) async {
-                    lessSoldiers ??= await createLessSoldiers(
+                    lessSoldiers = await createLessSoldiers(
                       userId: user.uid,
-                      collection: kAcftCollection,
+                      collection: Acft.collectionName,
                       allSoldiers: allSoldiers,
                     );
                     setState(() {

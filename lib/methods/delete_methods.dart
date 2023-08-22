@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:leaders_book/methods/custom_alert_dialog.dart';
-import 'package:leaders_book/providers/selected_soldiers_provider.dart';
 
+import '../../methods/custom_alert_dialog.dart';
+import '../../providers/selected_soldiers_provider.dart';
 import '../models/soldier.dart';
 
 Future<void> deleteSoldiers(BuildContext context,
@@ -48,12 +48,12 @@ Future<void> deleteSoldiers(BuildContext context,
 Future<void> deleteSoldier(Soldier soldier, String uid) async {
   FirebaseFirestore db = FirebaseFirestore.instance;
   if (soldier.owner == uid) {
-    db.collection('soldiers').doc(soldier.id).delete();
+    db.collection(Soldier.collectionName).doc(soldier.id).delete();
   } else {
     List<dynamic> users = soldier.users;
     users.remove(uid);
     DocumentReference ref =
-        FirebaseFirestore.instance.collection('soldiers').doc(soldier.id);
+        db.collection(Soldier.collectionName).doc(soldier.id);
     ref.update({'users': users});
   }
 }

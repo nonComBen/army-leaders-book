@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
+import '../../models/soldier.dart';
 import '../../models/tasking.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
@@ -88,8 +87,8 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
     _commentsController.text = widget.tasking.comments;
     _locController.text = widget.tasking.location;
 
-    _start = DateTime.tryParse(widget.tasking.start) ?? DateTime.now();
-    _end = DateTime.tryParse(widget.tasking.end) ?? DateTime.now();
+    _start = DateTime.tryParse(widget.tasking.start);
+    _end = DateTime.tryParse(widget.tasking.end);
   }
 
   void submit(BuildContext context) async {
@@ -117,19 +116,15 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
         comments: _commentsController.text,
         location: _locController.text,
       );
-      DocumentReference docRef;
       if (widget.tasking.id == null) {
-        docRef = await firestore
-            .collection(kTaskingCollection)
-            .add(saveTasking.toMap());
+        firestore.collection(Tasking.collectionName).add(saveTasking.toMap());
       } else {
-        docRef =
-            firestore.collection(kTaskingCollection).doc(widget.tasking.id);
-        docRef.update(saveTasking.toMap());
+        firestore
+            .collection(Tasking.collectionName)
+            .doc(widget.tasking.id)
+            .set(saveTasking.toMap(), SetOptions(merge: true));
       }
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      Navigator.pop(context);
     } else {
       toast.showToast(
         child: const MyToast(
@@ -185,12 +180,15 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kTaskingCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Tasking.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

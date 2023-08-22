@@ -1,25 +1,31 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
-import '../../widgets/edit_delete_list_tile.dart';
-import '../../widgets/more_tiles_header.dart';
-import '../../constants/firestore_collections.dart';
+import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../models/soldier.dart';
-import '../../providers/soldiers_provider.dart';
-import '../../auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
+import '../../methods/local_notification_methods.dart';
 import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/medpro.dart';
+import '../../models/setting.dart';
+import '../../models/soldier.dart';
+import '../../providers/notification_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/shared_prefs_provider.dart';
+import '../../providers/soldiers_provider.dart';
 import '../../widgets/anon_warning_banner.dart';
+import '../../widgets/edit_delete_list_tile.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/form_grid_view.dart';
+import '../../widgets/more_tiles_header.dart';
 import '../../widgets/my_toast.dart';
 import '../../widgets/padded_text_field.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -90,6 +96,7 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       _smallPoxDate,
       _anthraxDate;
   FToast toast = FToast();
+  Setting? setting;
 
   @override
   void dispose() {
@@ -173,28 +180,25 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
       expanded = false;
     }
 
-    _phaDate = DateTime.tryParse(widget.medpro.pha) ?? DateTime.now();
-    _dentalDate = DateTime.tryParse(widget.medpro.dental) ?? DateTime.now();
-    _visionDate = DateTime.tryParse(widget.medpro.vision) ?? DateTime.now();
-    _hearingDate = DateTime.tryParse(widget.medpro.hearing) ?? DateTime.now();
-    _hivDate = DateTime.tryParse(widget.medpro.hiv) ?? DateTime.now();
-    _fluDate = DateTime.tryParse(widget.medpro.flu) ?? DateTime.now();
-    _mmrDate = DateTime.tryParse(widget.medpro.mmr) ?? DateTime.now();
-    _varicellaDate =
-        DateTime.tryParse(widget.medpro.varicella) ?? DateTime.now();
-    _polioDate = DateTime.tryParse(widget.medpro.polio) ?? DateTime.now();
-    _tuberDate = DateTime.tryParse(widget.medpro.tuberculin) ?? DateTime.now();
-    _tetanusDate = DateTime.tryParse(widget.medpro.tetanus) ?? DateTime.now();
-    _hepADate = DateTime.tryParse(widget.medpro.hepA) ?? DateTime.now();
-    _hepBDate = DateTime.tryParse(widget.medpro.hepB) ?? DateTime.now();
-    _encephalitisDate =
-        DateTime.tryParse(widget.medpro.encephalitis) ?? DateTime.now();
-    _meningDate =
-        DateTime.tryParse(widget.medpro.meningococcal) ?? DateTime.now();
-    _typhoidDate = DateTime.tryParse(widget.medpro.typhoid) ?? DateTime.now();
-    _yellowDate = DateTime.tryParse(widget.medpro.yellow) ?? DateTime.now();
-    _smallPoxDate = DateTime.tryParse(widget.medpro.smallPox) ?? DateTime.now();
-    _anthraxDate = DateTime.tryParse(widget.medpro.anthrax) ?? DateTime.now();
+    _phaDate = DateTime.tryParse(widget.medpro.pha);
+    _dentalDate = DateTime.tryParse(widget.medpro.dental);
+    _visionDate = DateTime.tryParse(widget.medpro.vision);
+    _hearingDate = DateTime.tryParse(widget.medpro.hearing);
+    _hivDate = DateTime.tryParse(widget.medpro.hiv);
+    _fluDate = DateTime.tryParse(widget.medpro.flu);
+    _mmrDate = DateTime.tryParse(widget.medpro.mmr);
+    _varicellaDate = DateTime.tryParse(widget.medpro.varicella);
+    _polioDate = DateTime.tryParse(widget.medpro.polio);
+    _tuberDate = DateTime.tryParse(widget.medpro.tuberculin);
+    _tetanusDate = DateTime.tryParse(widget.medpro.tetanus);
+    _hepADate = DateTime.tryParse(widget.medpro.hepA);
+    _hepBDate = DateTime.tryParse(widget.medpro.hepB);
+    _encephalitisDate = DateTime.tryParse(widget.medpro.encephalitis);
+    _meningDate = DateTime.tryParse(widget.medpro.meningococcal);
+    _typhoidDate = DateTime.tryParse(widget.medpro.typhoid);
+    _yellowDate = DateTime.tryParse(widget.medpro.yellow);
+    _smallPoxDate = DateTime.tryParse(widget.medpro.smallPox);
+    _anthraxDate = DateTime.tryParse(widget.medpro.anthrax);
   }
 
   void submit(BuildContext context) async {
@@ -226,6 +230,49 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         _anthraxController.text,
       ],
     )) {
+      setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
+      List<int> notificationIds = [];
+      DateFormat formatter = DateFormat('yyyy-MM-dd');
+      if (!kIsWeb && setting!.addNotifications) {
+        final notificationService = ref.read(notificationProvider);
+        final prefs = ref.read(sharedPreferencesProvider);
+        int id = prefs.getInt('notificationId') ?? 0;
+
+        if (widget.medpro.notificationIds != null &&
+            widget.medpro.notificationIds!.isNotEmpty) {
+          notificationService
+              .cancelPreviousNotifications(widget.medpro.notificationIds!);
+        }
+
+        List<String> topics = ['PHA', 'Dental', 'Vision', 'Hearing', 'HIV'];
+        for (String topic in topics) {
+          final notificationMedpro = getNotificationMedpro(topic);
+          if (notificationMedpro.date != '') {
+            final dueDate =
+                getDueDate(notificationMedpro.date, notificationMedpro.months);
+
+            for (int days in notificationMedpro.notifications) {
+              notificationIds.add(id);
+              notificationService.scheduleNotification(
+                dateTime: dueDate.subtract(Duration(days: days)),
+                id: id,
+                title: '$_rank $_lastName\'s $topic Due',
+                body:
+                    '$_rank $_lastName\'s $topic Due in $days on ${formatter.format(dueDate)}',
+                payload: NotificationService.medprosPayload,
+              );
+              id++;
+            }
+          }
+        }
+        prefs.setInt('notificationId', id);
+      }
+
+      // setMedprosNotifications(
+      //   setting: ref.read(settingsProvider)!,
+      //   medpro: saveMedpros,
+      //   user: ref.read(userProvider).user!,
+      // );
       Medpro saveMedpros = Medpro(
         id: widget.medpro.id,
         soldierId: _soldierId,
@@ -256,35 +303,61 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
         varicella: _varicellaController.text,
         yellow: _yellowController.text,
         otherImms: _otherImms,
+        notificationIds: notificationIds,
       );
 
       if (widget.medpro.id == null) {
-        DocumentReference docRef = await firestore
-            .collection(kMedprosCollection)
-            .add(saveMedpros.toMap());
-
-        saveMedpros.id = docRef.id;
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        firestore.collection(Medpro.collectionName).add(saveMedpros.toMap());
       } else {
         firestore
-            .collection(kMedprosCollection)
+            .collection(Medpro.collectionName)
             .doc(widget.medpro.id)
-            .set(saveMedpros.toMap())
-            .then((value) {
-          Navigator.pop(context);
-        }).catchError((e) {
-          // ignore: avoid_print
-          print('Error $e thrown while updating Perstat');
-        });
+            .set(saveMedpros.toMap(), SetOptions(merge: true));
       }
+      Navigator.of(context).pop();
     } else {
       toast.showToast(
         child: const MyToast(
           message: 'Form is invalid - dates must be in yyyy-MM-dd format',
         ),
       );
+    }
+  }
+
+  NotificationMedpro getNotificationMedpro(String topic) {
+    switch (topic) {
+      case 'PHA':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'Dental':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'Vision':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'Hearing':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      case 'HIV':
+        return NotificationMedpro(
+          date: _phaController.text,
+          months: setting!.phaMonths,
+          notifications: setting!.phaNotifications,
+        );
+      default:
+        return NotificationMedpro();
     }
   }
 
@@ -519,12 +592,15 @@ class EditMedprosPageState extends ConsumerState<EditMedprosPage> {
                   controlAffinity: ListTileControlAffinity.leading,
                   value: removeSoldiers,
                   title: const Text('Remove Soldiers already added'),
-                  onChanged: (checked) {
-                    createLessSoldiers(
-                      collection: kMedprosCollection,
+                  onChanged: (checked) async {
+                    lessSoldiers = await createLessSoldiers(
+                      collection: Medpro.collectionName,
                       userId: user.uid,
                       allSoldiers: allSoldiers!,
                     );
+                    setState(() {
+                      removeSoldiers = checked!;
+                    });
                   },
                 ),
               ),

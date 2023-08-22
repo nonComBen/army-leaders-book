@@ -8,11 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../auth_provider.dart';
+import '../providers/auth_provider.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
 import '../../methods/theme_methods.dart';
@@ -25,7 +24,6 @@ import '../../widgets/header_text.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_item_picker.dart';
 import '../methods/create_app_bar_actions.dart';
-import '../methods/download_methods.dart';
 import '../methods/open_file.dart';
 import '../models/alert_soldier.dart';
 import '../models/app_bar_option.dart';
@@ -87,7 +85,10 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     DocumentSnapshot snapshot;
     AlertSoldiers? alertSoldiers;
     try {
-      snapshot = await firestore.collection('alertSoldiers').doc(_userId).get();
+      snapshot = await firestore
+          .collection(AlertSoldiers.collectionName)
+          .doc(_userId)
+          .get();
       alertSoldiers = AlertSoldiers.fromSnapshot(snapshot);
     } catch (e) {
       FirebaseAnalytics.instance
@@ -410,8 +411,6 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   }
 
   void completePdfDownload(bool fullPage) async {
-    bool approved = await checkPermission(Permission.storage);
-    if (!approved) return;
     AlertRosterPdf pdf = AlertRosterPdf(
       documents: _soldiers,
     );
@@ -565,7 +564,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     AlertSoldiers alertSoldiers = AlertSoldiers(
         _userId, _userId, _soldiers.map((e) => e!.toMap()).toList());
     firestore
-        .collection('alertSoldiers')
+        .collection(AlertSoldiers.collectionName)
         .doc(_userId)
         .set(alertSoldiers.toMap());
     return Future.value(true);

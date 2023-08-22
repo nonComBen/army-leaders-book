@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../models/leader.dart';
+import '../providers/auth_provider.dart';
 import '../providers/root_provider.dart';
-import '../auth_provider.dart';
-import '../../models/user.dart';
 import '../widgets/form_frame.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/padded_text_field.dart';
@@ -70,7 +70,7 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
       try {
         await auth.linkEmailAccount(
             _emailController.text, _passwordController.text, user!);
-        UserObj userObj = UserObj(
+        Leader userObj = Leader(
           userId: user!.uid,
           userRank: _rankController.text,
           userName: _nameController.text,
@@ -81,7 +81,7 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
           agreeDate: DateTime.now(),
         );
         FirebaseFirestore.instance
-            .collection('users')
+            .collection(Leader.collectionName)
             .doc(user!.uid)
             .set(userObj.toMap(), SetOptions(merge: true));
         ref.read(rootProvider.notifier).signIn();

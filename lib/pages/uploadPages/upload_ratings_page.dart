@@ -137,7 +137,7 @@ class UploadRatingsPageStat extends ConsumerState<UploadRatingsPage> {
             reviewer: saveReviewer,
           );
 
-          firestore.collection('ratings').add(rating.toMap());
+          firestore.collection(Rating.collectionName).add(rating.toMap());
         }
       }
       Navigator.pop(context);

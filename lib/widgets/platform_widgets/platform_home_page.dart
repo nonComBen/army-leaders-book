@@ -240,17 +240,20 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
           actions: index != 1 ? [] : createAppBarActions(width, getOptions())),
       floatingActionButton: index != 1
           ? null
-          : FloatingActionButton(
-              child: const Icon(Icons.add),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => EditSoldierPage(
-                      soldier: Soldier(owner: userId, users: [userId]),
+          : Padding(
+              padding: EdgeInsets.only(bottom: isSubscribed ? 0.0 : 60.0),
+              child: FloatingActionButton(
+                child: const Icon(Icons.add),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => EditSoldierPage(
+                        soldier: Soldier(owner: userId, users: [userId]),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,

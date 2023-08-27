@@ -497,11 +497,14 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () {
-            _newRecord(context);
-          }),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: isSubscribed ? 0.0 : 60.0),
+        child: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              _newRecord(context);
+            }),
+      ),
       body: TableFrame(
         children: [
           Expanded(

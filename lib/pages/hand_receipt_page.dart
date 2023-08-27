@@ -557,25 +557,28 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
           ),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-              heroTag: 'copy',
-              child: const Icon(Icons.copy),
-              onPressed: () {
-                _copyRecord();
-              }),
-          const SizedBox(
-            height: 10,
-          ),
-          FloatingActionButton(
-              heroTag: 'add',
-              child: const Icon(Icons.add),
-              onPressed: () {
-                _newRecord(context);
-              }),
-        ],
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: isSubscribed ? 0.0 : 60.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+                heroTag: 'copy',
+                child: const Icon(Icons.copy),
+                onPressed: () {
+                  _copyRecord();
+                }),
+            const SizedBox(
+              height: 10,
+            ),
+            FloatingActionButton(
+                heroTag: 'add',
+                child: const Icon(Icons.add),
+                onPressed: () {
+                  _newRecord(context);
+                }),
+          ],
+        ),
       ),
       body: TableFrame(
         children: [

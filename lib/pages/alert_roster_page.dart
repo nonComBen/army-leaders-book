@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -71,11 +70,11 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     super.initState();
     _userId = ref.read(authProvider).currentUser()!.uid;
     isSubscribed = ref.read(subscriptionStateProvider);
+    _allSoldiers = ref.read(soldiersProvider);
     prefs = ref.read(sharedPreferencesProvider);
   }
 
   initialize() async {
-    _allSoldiers = ref.read(soldiersProvider);
     _supervisors.addAll(_allSoldiers
         .map((e) => {
               'soldier': '${e.rank} ${e.lastName}, ${e.firstName}',
@@ -91,8 +90,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           .get();
       alertSoldiers = AlertSoldiers.fromSnapshot(snapshot);
     } catch (e) {
-      FirebaseAnalytics.instance
-          .logEvent(name: 'Alert Soldiers Does Not Exist');
+      debugPrint('Error: $e');
     }
     if (alertSoldiers == null) {
       buildNewSoldiers();
@@ -242,9 +240,8 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
         ),
       );
       soldiers.removeWhere((element) => element.soldierId == top.soldierId);
-      for (var soldierA in _soldiers
-          .where((e) => e!.supervisorId == top.soldierId)
-          .toList()) {
+      for (var soldierA
+          in soldiers.where((e) => e!.supervisorId == top.soldierId).toList()) {
         list.add(
           Container(
             padding: const EdgeInsets.only(left: 16, top: 4),
@@ -261,7 +258,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
         );
         soldiers
             .removeWhere((element) => element.soldierId == soldierA.soldierId);
-        for (var soldierB in _soldiers
+        for (var soldierB in soldiers
             .where((e) => e!.supervisorId == soldierA.soldierId)
             .toList()) {
           list.add(
@@ -280,7 +277,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           );
           soldiers.removeWhere(
               (element) => element.soldierId == soldierB.soldierId);
-          for (var soldierC in _soldiers
+          for (var soldierC in soldiers
               .where((e) => e!.supervisorId == soldierB.soldierId)
               .toList()) {
             list.add(
@@ -299,7 +296,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
             );
             soldiers.removeWhere(
                 (element) => element.soldierId == soldierC.soldierId);
-            for (var soldierD in _soldiers
+            for (var soldierD in soldiers
                 .where((e) => e!.supervisorId == soldierB.soldierId)
                 .toList()) {
               list.add(
@@ -318,7 +315,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
               );
               soldiers.removeWhere(
                   (element) => element.soldierId == soldierD.soldierId);
-              for (var soldierE in _soldiers
+              for (var soldierE in soldiers
                   .where((e) => e!.supervisorId == soldierB.soldierId)
                   .toList()) {
                 list.add(
@@ -452,15 +449,16 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
   }
 
   void addSoldier(Soldier soldier) {
-    var map = <String, dynamic>{
-      'soldierId': soldier.id,
-      'supervisorId': '',
-      'soldier': '${soldier.rank} ${soldier.lastName}, ${soldier.firstName}',
-      'rankSort': soldier.rankSort.toString(),
-      'phone': soldier.phone,
-      'workPhone': soldier.workPhone,
-    };
-    _soldiers.add(AlertSoldier.fromMap(map));
+    _soldiers.add(
+      AlertSoldier(
+        soldierId: soldier.id!,
+        supervisorId: '',
+        name: '${soldier.rank} ${soldier.lastName} ${soldier.firstName}',
+        rankSort: soldier.rankSort.toString(),
+        phone: soldier.phone,
+        workPhone: soldier.workEmail,
+      ),
+    );
   }
 
   void removeSoldier(String soldierId) {

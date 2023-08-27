@@ -234,10 +234,26 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
           ),
           PlatformButton(
             onPressed: () {
-              if (_endController.text != '' && _end!.isBefore(_start!)) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('End Date must be after Start Date'),
-                ));
+              _start = DateTime.tryParse(_startController.text);
+              _end = DateTime.tryParse(_endController.text);
+              if (_start == null) {
+                toast.showToast(
+                  child: const MyToast(
+                    message: 'Start date is blank or in invalid format',
+                  ),
+                );
+              } else if (_end != null && _endController.text != '') {
+                toast.showToast(
+                  child: const MyToast(
+                    message: 'End date is in invalid format',
+                  ),
+                );
+              } else if (_endController.text != '' && _end!.isBefore(_start!)) {
+                toast.showToast(
+                  child: const MyToast(
+                    message: 'Start date must be before End date',
+                  ),
+                );
               } else {
                 submit(context);
               }

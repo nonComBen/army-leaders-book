@@ -101,7 +101,17 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
             .toList();
         List<String> soldierIds =
             _allSoldiers.map((e) => e.id.toString()).toList();
-        _soldiers.removeWhere((e) => !soldierIds.contains(e!.soldierId));
+        _soldiers
+            .removeWhere((element) => !soldierIds.contains(element!.soldierId));
+        for (AlertSoldier? soldier in _soldiers) {
+          Soldier newSoldier = _allSoldiers
+              .firstWhere((element) => element.id == soldier!.soldierId);
+          soldier!.name =
+              '${newSoldier.rank} ${newSoldier.lastName}, ${newSoldier.firstName}';
+          soldier.phone = newSoldier.phone;
+          soldier.workPhone = newSoldier.workPhone;
+          soldier.rankSort = newSoldier.rankSort.toString();
+        }
         if (_allSoldiers.length > _soldiers.length) {
           final addedSoldierIds = _soldiers.map((e) => e!.soldierId).toList();
           final extraSoldiers = _allSoldiers
@@ -372,17 +382,8 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
 
   void _downloadPdf() async {
     if (isSubscribed) {
-      AlertSoldier? top = _soldiers.firstWhere(
-          (doc) => doc!.supervisorId == 'Top of Hierarchy', orElse: () {
-        FToast toast = FToast();
-        toast.context = context;
-        toast.showToast(
-          child: const MyToast(
-            message: 'Hierarchy must be set before downloading to Pdf.',
-          ),
-        );
-        return null;
-      });
+      AlertSoldier? top = _soldiers
+          .firstWhere((doc) => doc!.supervisorId == 'Top of Hierarchy');
       if (top == null) return;
       Widget title = const Text('Download PDF');
       Widget content = Container(

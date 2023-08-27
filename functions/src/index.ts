@@ -91,9 +91,6 @@ export const handlePlayStoreServerEvent =
 export const expireSubscriptions = functions.pubsub.schedule("5 11 * * *")
     .onRun(() => iapRepository.expireSubscriptions());
 
-// schedule function to delete inactive accounts
-// export const deleteInactiveAccounts = functions.pubsub.schedule("5 11 * * *")
-//     .onRun(() => new DatabaseCleanup(admin.auth()).deleteInactiveAccount(0, undefined));
 
 exports.onUserDeleted = functions.auth.user().onDelete( async (user) => {
   const snapshot = await admin.firestore().doc(`users/${user.uid}`).get();
@@ -543,7 +540,7 @@ exports.onSoldierUpdated = functions.firestore.document("soldiers/{docId}")
       const firstNameChanged = oldDoc.firstName !== newDoc.firstName;
       const sectionChanged = oldDoc.section !== newDoc.section;
       const ownerChanged = oldDoc.owner !== newDoc.owner;
-      const usersChanged = oldUsers.length !== newUsers.length;
+      const usersChanged = oldUsers !== newUsers;
 
       // if none are changed, return
       if (rankChanged || lastNameChanged || firstNameChanged ||
@@ -555,11 +552,6 @@ exports.onSoldierUpdated = functions.firestore.document("soldiers/{docId}")
           "name": newDoc.lastName,
           "firstName": newDoc.firstName,
           "section": newDoc.section,
-          "owner": newDoc.owner,
-          "users": newUsers,
-        };
-
-        const newAwardData = {
           "owner": newDoc.owner,
           "users": newUsers,
         };
@@ -607,17 +599,6 @@ exports.onSoldierUpdated = functions.firestore.document("soldiers/{docId}")
             doc.ref.update(newDataUsers);
           } catch (e) {
             console.log(`Apts update failed: ${e}`);
-          }
-        });
-
-        // update Awards associated with Soldier that was deleted
-        const awards = await admin.firestore().collection("awards")
-            .where("soldierId", "==", soldierId).get();
-        awards.docs.forEach((doc) => {
-          try {
-            doc.ref.update(newAwardData);
-          } catch (e) {
-            console.log(`Awards update failed: ${e}`);
           }
         });
 
@@ -717,17 +698,6 @@ exports.onSoldierUpdated = functions.firestore.document("soldiers/{docId}")
             doc.ref.update(newDataUsers);
           } catch (e) {
             console.log(`PERSTAT update failed: ${e}`);
-          }
-        });
-
-        // update POVs associated with Soldier that was deleted
-        const povs = await admin.firestore().collection("povs")
-            .where("soldierId", "==", soldierId).get();
-        povs.docs.forEach((doc) => {
-          try {
-            doc.ref.update(newAwardData);
-          } catch (e) {
-            console.log(`POVs update failed: ${e}`);
           }
         });
 
@@ -832,5 +802,5 @@ exports.onSoldierUpdated = functions.firestore.document("soldiers/{docId}")
             }
           });
         }
-        }
+      }
     });

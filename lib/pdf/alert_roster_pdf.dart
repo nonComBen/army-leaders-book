@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'package:leaders_book/methods/download_methods.dart';
+import 'package:leaders_book/models/alert_soldier.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 
 class AlertRosterPdf {
   AlertRosterPdf({
-    required this.documents,
+    required this.soldiers,
   });
 
-  final List<dynamic> documents;
+  final List<AlertSoldier?> soldiers;
   List<Widget> children = [];
   int all = 0;
 
@@ -54,80 +55,74 @@ class AlertRosterPdf {
   List<Widget>? alertChildren(bool fullPage, int page) {
     children = [];
     int a, b, c, d, e, current = 1;
-    Map<String, dynamic>? top = documents
-        .firstWhere((doc) => doc['supervisorId'] == 'Top of Hierarchy');
+    AlertSoldier? top =
+        soldiers.firstWhere((sm) => sm!.supervisorId == 'Top of Hierarchy');
     if (page == 1) {
-      children.add(alertRow(
-          top!['soldier'], top['phone'], top['workPhone'], 0.0, fullPage));
+      children
+          .add(alertRow(top!.name, top.phone, top.workPhone, 0.0, fullPage));
       all = 1;
       //current = 1;
     }
-    for (a = 0; a < documents.length; a++) {
+    for (a = 0; a < soldiers.length; a++) {
       if ((fullPage && all >= page * 12) || (!fullPage && all >= page * 9)) {
         break;
       }
-      if (documents[a]['supervisorId'] == top!['soldierId']) {
+      if (soldiers[a]!.supervisorId == top!.soldierId) {
         if (current >= all) {
-          children.add(alertRow(documents[a]['soldier'], documents[a]['phone'],
-              documents[a]['workPhone'], fullPage ? 36.0 : 18.0, fullPage));
+          children.add(alertRow(soldiers[a]!.name, soldiers[a]!.phone,
+              soldiers[a]!.workPhone, fullPage ? 36.0 : 18.0, fullPage));
           all++;
         }
         current++;
-        for (b = 0; b < documents.length; b++) {
+        for (b = 0; b < soldiers.length; b++) {
           if ((fullPage && all >= page * 12) ||
               (!fullPage && all >= page * 9)) {
             break;
           }
-          if (documents[b]['supervisorId'] == documents[a]['soldierId']) {
+          if (soldiers[b]!.supervisorId == soldiers[a]!.soldierId) {
             if (current >= all) {
-              children.add(alertRow(
-                  documents[b]['soldier'],
-                  documents[b]['phone'],
-                  documents[b]['workPhone'],
-                  fullPage ? 72.0 : 36.0,
-                  fullPage));
+              children.add(alertRow(soldiers[b]!.name, soldiers[b]!.phone,
+                  soldiers[b]!.workPhone, fullPage ? 72.0 : 36.0, fullPage));
               all++;
             }
             current++;
-            for (c = 0; c < documents.length; c++) {
+            for (c = 0; c < soldiers.length; c++) {
               if ((fullPage && all >= page * 12) ||
                   (!fullPage && all >= page * 9)) break;
-              if (documents[c]['supervisorId'] == documents[b]['soldierId']) {
+              if (soldiers[c]!.supervisorId == soldiers[b]!.soldierId) {
                 if (current >= all) {
                   children.add(alertRow(
-                      documents[c]['soldier'],
-                      documents[c]['phone'],
-                      documents[c]['workPhone'],
+                      soldiers[c]!.name,
+                      soldiers[c]!.phone,
+                      soldiers[c]!.workPhone,
                       fullPage ? 108.0 : 54.0,
                       fullPage));
                   all++;
                 }
                 current++;
-                for (d = 0; d < documents.length; d++) {
+                for (d = 0; d < soldiers.length; d++) {
                   if ((fullPage && all >= page * 12) ||
                       (!fullPage && all >= page * 9)) break;
-                  if (documents[d]['supervisorId'] ==
-                      documents[c]['soldierId']) {
+                  if (soldiers[d]!.supervisorId == soldiers[c]!.soldierId) {
                     if (current >= all) {
                       children.add(alertRow(
-                          documents[d]['soldier'],
-                          documents[d]['phone'],
-                          documents[d]['workPhone'],
+                          soldiers[d]!.name,
+                          soldiers[d]!.phone,
+                          soldiers[d]!.workPhone,
                           fullPage ? 144.0 : 72.0,
                           fullPage));
                       all++;
                     }
                     current++;
-                    for (e = 0; e < documents.length; e++) {
+                    for (e = 0; e < soldiers.length; e++) {
                       if ((fullPage && all >= page * 12) ||
                           (!fullPage && all >= page * 9)) break;
-                      if (documents[e]['supervisorId'] ==
-                          documents[d]['soldierId']) {
+                      if (soldiers[e]!.supervisorId == soldiers[d]!.soldierId) {
                         if (current >= all) {
                           children.add(alertRow(
-                              documents[e]['soldier'],
-                              documents[e]['phone'],
-                              documents[e]['workPhone'],
+                              soldiers[e]!.name,
+                              soldiers[e]!.phone,
+                              soldiers[e]!.workPhone,
                               fullPage ? 180.0 : 90.0,
                               fullPage));
                           all++;
@@ -160,7 +155,7 @@ class AlertRosterPdf {
               children: alertChildren(true, 1)!);
         }));
 
-    if (documents.length > 12) {
+    if (soldiers.length > 12) {
       pdf.addPage(Page(
           pageFormat: PdfPageFormat.letter,
           orientation: PageOrientation.portrait,
@@ -171,7 +166,7 @@ class AlertRosterPdf {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: alertChildren(true, 2)!));
           }));
-      if (documents.length > 24) {
+      if (soldiers.length > 24) {
         pdf.addPage(Page(
             pageFormat: PdfPageFormat.letter,
             orientation: PageOrientation.portrait,
@@ -182,7 +177,7 @@ class AlertRosterPdf {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: alertChildren(true, 3)!));
             }));
-        if (documents.length > 36) {
+        if (soldiers.length > 36) {
           pdf.addPage(Page(
               pageFormat: PdfPageFormat.letter,
               orientation: PageOrientation.portrait,
@@ -193,7 +188,7 @@ class AlertRosterPdf {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: alertChildren(true, 4)!));
               }));
-          if (documents.length > 48) {
+          if (soldiers.length > 48) {
             pdf.addPage(Page(
                 pageFormat: PdfPageFormat.letter,
                 orientation: PageOrientation.portrait,
@@ -204,7 +199,7 @@ class AlertRosterPdf {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: alertChildren(true, 5)!));
                 }));
-            if (documents.length > 60) {
+            if (soldiers.length > 60) {
               pdf.addPage(Page(
                   pageFormat: PdfPageFormat.letter,
                   orientation: PageOrientation.portrait,
@@ -215,7 +210,7 @@ class AlertRosterPdf {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: alertChildren(true, 6)!));
                   }));
-              if (documents.length > 72) {
+              if (soldiers.length > 72) {
                 pdf.addPage(Page(
                     pageFormat: PdfPageFormat.letter,
                     orientation: PageOrientation.portrait,
@@ -226,7 +221,7 @@ class AlertRosterPdf {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: alertChildren(true, 7)!));
                     }));
-                if (documents.length > 84) {
+                if (soldiers.length > 84) {
                   pdf.addPage(Page(
                       pageFormat: PdfPageFormat.letter,
                       orientation: PageOrientation.portrait,
@@ -237,7 +232,7 @@ class AlertRosterPdf {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: alertChildren(true, 8)!));
                       }));
-                  if (documents.length > 96) {
+                  if (soldiers.length > 96) {
                     pdf.addPage(Page(
                         pageFormat: PdfPageFormat.letter,
                         orientation: PageOrientation.portrait,
@@ -248,7 +243,7 @@ class AlertRosterPdf {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: alertChildren(true, 9)!));
                         }));
-                    if (documents.length > 108) {
+                    if (soldiers.length > 108) {
                       pdf.addPage(Page(
                           pageFormat: PdfPageFormat.letter,
                           orientation: PageOrientation.portrait,
@@ -260,7 +255,7 @@ class AlertRosterPdf {
                                         CrossAxisAlignment.start,
                                     children: alertChildren(true, 10)!));
                           }));
-                      if (documents.length > 120) {
+                      if (soldiers.length > 120) {
                         pdf.addPage(Page(
                             pageFormat: PdfPageFormat.letter,
                             orientation: PageOrientation.portrait,
@@ -272,7 +267,7 @@ class AlertRosterPdf {
                                           CrossAxisAlignment.start,
                                       children: alertChildren(true, 11)!));
                             }));
-                        if (documents.length > 132) {
+                        if (soldiers.length > 132) {
                           pdf.addPage(Page(
                               pageFormat: PdfPageFormat.letter,
                               orientation: PageOrientation.portrait,
@@ -313,7 +308,7 @@ class AlertRosterPdf {
                   children: alertChildren(false, 1)!));
         }));
 
-    if (documents.length > 9) {
+    if (soldiers.length > 9) {
       pdf.addPage(Page(
           pageFormat: PdfPageFormat.letter,
           orientation: PageOrientation.landscape,
@@ -325,7 +320,7 @@ class AlertRosterPdf {
                     children: alertChildren(false, 2)!));
           }));
 
-      if (documents.length > 18) {
+      if (soldiers.length > 18) {
         pdf.addPage(Page(
             pageFormat: PdfPageFormat.letter,
             orientation: PageOrientation.landscape,
@@ -337,7 +332,7 @@ class AlertRosterPdf {
                       children: alertChildren(false, 3)!));
             }));
 
-        if (documents.length > 27) {
+        if (soldiers.length > 27) {
           pdf.addPage(Page(
               pageFormat: PdfPageFormat.letter,
               orientation: PageOrientation.landscape,
@@ -349,7 +344,7 @@ class AlertRosterPdf {
                         children: alertChildren(false, 4)!));
               }));
 
-          if (documents.length > 36) {
+          if (soldiers.length > 36) {
             pdf.addPage(Page(
                 pageFormat: PdfPageFormat.letter,
                 orientation: PageOrientation.landscape,
@@ -361,7 +356,7 @@ class AlertRosterPdf {
                           children: alertChildren(false, 5)!));
                 }));
 
-            if (documents.length > 45) {
+            if (soldiers.length > 45) {
               pdf.addPage(Page(
                   pageFormat: PdfPageFormat.letter,
                   orientation: PageOrientation.landscape,
@@ -373,7 +368,7 @@ class AlertRosterPdf {
                             children: alertChildren(false, 6)!));
                   }));
 
-              if (documents.length > 54) {
+              if (soldiers.length > 54) {
                 pdf.addPage(Page(
                     pageFormat: PdfPageFormat.letter,
                     orientation: PageOrientation.landscape,
@@ -384,7 +379,7 @@ class AlertRosterPdf {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: alertChildren(false, 7)!));
                     }));
-                if (documents.length > 63) {
+                if (soldiers.length > 63) {
                   pdf.addPage(Page(
                       pageFormat: PdfPageFormat.letter,
                       orientation: PageOrientation.landscape,
@@ -395,7 +390,7 @@ class AlertRosterPdf {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: alertChildren(false, 8)!));
                       }));
-                  if (documents.length > 72) {
+                  if (soldiers.length > 72) {
                     pdf.addPage(Page(
                         pageFormat: PdfPageFormat.letter,
                         orientation: PageOrientation.landscape,
@@ -406,7 +401,7 @@ class AlertRosterPdf {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: alertChildren(false, 9)!));
                         }));
-                    if (documents.length > 81) {
+                    if (soldiers.length > 81) {
                       pdf.addPage(Page(
                           pageFormat: PdfPageFormat.letter,
                           orientation: PageOrientation.landscape,
@@ -418,7 +413,7 @@ class AlertRosterPdf {
                                         CrossAxisAlignment.start,
                                     children: alertChildren(false, 10)!));
                           }));
-                      if (documents.length > 90) {
+                      if (soldiers.length > 90) {
                         pdf.addPage(Page(
                             pageFormat: PdfPageFormat.letter,
                             orientation: PageOrientation.landscape,
@@ -430,7 +425,7 @@ class AlertRosterPdf {
                                           CrossAxisAlignment.start,
                                       children: alertChildren(false, 11)!));
                             }));
-                        if (documents.length > 99) {
+                        if (soldiers.length > 99) {
                           pdf.addPage(Page(
                               pageFormat: PdfPageFormat.letter,
                               orientation: PageOrientation.landscape,

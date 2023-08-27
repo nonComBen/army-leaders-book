@@ -410,7 +410,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
 
   void completePdfDownload(bool fullPage) async {
     AlertRosterPdf pdf = AlertRosterPdf(
-      documents: _soldiers,
+      soldiers: _soldiers,
     );
     String location;
     if (fullPage) {

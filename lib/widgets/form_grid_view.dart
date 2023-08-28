@@ -19,8 +19,8 @@ class FormGridView extends StatelessWidget {
       childAspectRatio: width > 900
           ? 900 / 200
           : width > 700
-              ? width / 200
-              : width / 100,
+              ? (width - 32) / 200
+              : (width - 32) / 100,
       shrinkWrap: true,
       children: children,
     );

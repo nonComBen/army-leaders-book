@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:leaders_book/methods/theme_methods.dart';
-import 'package:leaders_book/providers/user_provider.dart';
+import 'package:leaders_book/providers/leader_provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../methods/create_app_bar_actions.dart';

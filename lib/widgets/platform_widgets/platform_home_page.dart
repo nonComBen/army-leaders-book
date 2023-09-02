@@ -27,7 +27,7 @@ import '../../providers/root_provider.dart';
 import '../../providers/selected_soldiers_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../providers/subscription_state.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/leader_provider.dart';
 
 abstract class PlatformHomePage extends StatefulWidget {
   factory PlatformHomePage() {

@@ -21,7 +21,7 @@ import '../../widgets/logo_widget.dart';
 import '../apple_sign_in_available.dart';
 import '../methods/show_on_login.dart';
 import '../providers/soldiers_provider.dart';
-import '../providers/user_provider.dart';
+import '../providers/leader_provider.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/padded_text_field.dart';
 import '../widgets/platform_widgets/platform_button.dart';

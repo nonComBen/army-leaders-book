@@ -9,7 +9,7 @@ import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_scaffold.dart';
 import '../providers/auth_provider.dart';
 import '../providers/root_provider.dart';
-import '../providers/user_provider.dart';
+import '../providers/leader_provider.dart';
 import '../widgets/platform_widgets/platform_text_button.dart';
 
 class LocalAuthLoginPage extends ConsumerStatefulWidget {

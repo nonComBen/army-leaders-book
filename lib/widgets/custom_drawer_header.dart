@@ -7,7 +7,7 @@ import 'package:leaders_book/providers/auth_provider.dart';
 import 'package:leaders_book/models/leader.dart';
 
 import '../../methods/theme_methods.dart';
-import '../../providers/user_provider.dart';
+import '../providers/leader_provider.dart';
 import '../pages/editPages/edit_user_page.dart';
 
 class CustomDrawerHeader extends ConsumerWidget {

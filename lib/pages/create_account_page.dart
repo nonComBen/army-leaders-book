@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/leader.dart';
 import '../../providers/settings_provider.dart';
-import '../../providers/user_provider.dart';
+import '../providers/leader_provider.dart';
 import '../../widgets/logo_widget.dart';
 import '../providers/auth_provider.dart';
 import '../providers/root_provider.dart';

@@ -34,7 +34,7 @@ import '../../providers/notification_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/soldiers_provider.dart';
 import '../../providers/tracking_provider.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/leader_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
 import '../../widgets/platform_widgets/platform_loading_widget.dart';
 import '../../widgets/rollup_card.dart';

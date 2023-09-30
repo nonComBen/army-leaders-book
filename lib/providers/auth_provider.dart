@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -138,17 +139,30 @@ class AuthService implements BaseAuth {
 
   @override
   Future<User?> signInWithGoogle() async {
-    GoogleSignIn googleSignIn = GoogleSignIn.standard(scopes: [
-      'email',
-    ]);
-    GoogleSignInAccount googleSignInAccount = (await googleSignIn.signIn())!;
-    GoogleSignInAuthentication gsa = await googleSignInAccount.authentication;
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: gsa.accessToken,
-      idToken: gsa.idToken,
-    );
+    UserCredential result;
+    if (kIsWeb) {
+      // Create a new provider
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-    var result = await _firebaseAuth.signInWithCredential(credential);
+      // googleProvider
+      //     .addScope('https://www.googleapis.com/auth/contacts.readonly');
+      googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
+
+      // Once signed in, return the UserCredential
+      result = await _firebaseAuth.signInWithPopup(googleProvider);
+    } else {
+      GoogleSignIn googleSignIn = GoogleSignIn.standard(scopes: [
+        'email',
+      ]);
+      GoogleSignInAccount googleSignInAccount = (await googleSignIn.signIn())!;
+      GoogleSignInAuthentication gsa = await googleSignInAccount.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: gsa.accessToken,
+        idToken: gsa.idToken,
+      );
+
+      result = await _firebaseAuth.signInWithCredential(credential);
+    }
 
     return result.user;
   }

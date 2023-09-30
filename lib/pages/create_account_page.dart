@@ -37,6 +37,8 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  FToast toast = FToast();
+
   _launchURL(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
@@ -47,8 +49,6 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
 
   bool validateAndSave() {
     if (!tosAgree) {
-      FToast toast = FToast();
-      toast.init(context);
       toast.showToast(
         child: const MyToast(
           message:
@@ -59,53 +59,55 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
       return false;
     }
     if (_emailController.text.isNotEmpty &&
-        _passwordController.text == _confirmPasswordController.text) {
-      return true;
+        _passwordController.text != _confirmPasswordController.text) {
+      toast.showToast(
+        child: const MyToast(
+          message: 'Confirm Password does not equal Password.',
+        ),
+      );
+      return false;
     }
-    return false;
+    return true;
   }
 
-  void validateAndCreate(AuthService auth) async {
+  void validateAndCreate(AuthService auth) {
     debugPrint('Validating');
     if (validateAndSave()) {
-      try {
-        auth
-            .createUserWithEmailAndPassword(
-                _emailController.text, _passwordController.text)
-            .then((user) {
-          if (user != null) {
-            final userObj = Leader(
-              userId: user.uid,
-              userEmail: user.email!,
-              userName: user.displayName ?? '',
-              createdDate: DateTime.now(),
-              lastLoginDate: DateTime.now(),
-              updatedUserArray: true,
-              tosAgree: true,
-              agreeDate: DateTime.now(),
-            );
-            FirebaseFirestore.instance
-                .doc('users/${user.uid}')
-                .set(userObj.toMap(), SetOptions(merge: true));
-            ref.read(leaderProvider).init(user.uid);
-            ref.read(settingsProvider.notifier).init(user.uid);
-          }
-          ref.read(rootProvider.notifier).signIn();
-        });
-      } catch (e) {
-        FToast toast = FToast();
-        toast.init(context);
+      auth
+          .createUserWithEmailAndPassword(
+              _emailController.text, _passwordController.text)
+          .then((user) {
+        if (user != null) {
+          final userObj = Leader(
+            userId: user.uid,
+            userEmail: user.email!,
+            userName: user.displayName ?? '',
+            createdDate: DateTime.now(),
+            lastLoginDate: DateTime.now(),
+            updatedUserArray: true,
+            tosAgree: true,
+            agreeDate: DateTime.now(),
+          );
+          FirebaseFirestore.instance
+              .doc('users/${user.uid}')
+              .set(userObj.toMap(), SetOptions(merge: true));
+          ref.read(leaderProvider).init(user.uid);
+          ref.read(settingsProvider.notifier).init(user.uid);
+        }
+        ref.read(rootProvider.notifier).signIn();
+      }).catchError((e) {
         toast.showToast(
           child: MyToast(
             message: e.toString(),
           ),
         );
-      }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    toast.init(context);
     final rootService = ref.read(rootProvider.notifier);
     var auth = ref.read(authProvider);
     return PlatformScaffold(

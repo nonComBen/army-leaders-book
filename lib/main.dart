@@ -69,7 +69,8 @@ void main() async {
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   await FirebaseAppCheck.instance.activate(
-    webRecaptchaSiteKey: '6LcxDyQdAAAAAJN3xGUZ3M4uZIiEyFehxLcZG4QV',
+    webProvider:
+        ReCaptchaV3Provider('6LcxDyQdAAAAAJN3xGUZ3M4uZIiEyFehxLcZG4QV'),
     appleProvider: AppleProvider.appAttest,
     androidProvider: AndroidProvider.playIntegrity,
   );

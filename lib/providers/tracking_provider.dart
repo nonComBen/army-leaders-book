@@ -11,8 +11,12 @@ class TrackingService {
   bool _trackingAllowed = false;
   final SharedPreferences prefs;
   TrackingService(this.prefs) {
-    final trackingAllowed = prefs.getBool('trackingAllowed') ?? true;
-    _trackingAllowed = trackingAllowed;
+    bool? trackingAllowed = prefs.getBool('trackingAllowed');
+    if (trackingAllowed != null) {
+      _trackingAllowed = trackingAllowed;
+    } else {
+      getTrackingFromPermission();
+    }
   }
 
   bool get trackingAllowed {
@@ -27,11 +31,12 @@ class TrackingService {
     _trackingAllowed = false;
   }
 
-  Future<bool> getTrackingFromPermission() async {
+  Future<void> getTrackingFromPermission() async {
     PermissionStatus status = await Permission.appTrackingTransparency.status;
     if (status.isDenied) {
       status = await Permission.appTrackingTransparency.request();
     }
-    return status.isGranted;
+    _trackingAllowed = status.isGranted;
+    prefs.setBool('trackingAllowed', status.isGranted);
   }
 }

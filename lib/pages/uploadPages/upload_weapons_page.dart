@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadWeaponsPage extends ConsumerStatefulWidget {
   const UploadWeaponsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadWeaponsPageState createState() => UploadWeaponsPageState();

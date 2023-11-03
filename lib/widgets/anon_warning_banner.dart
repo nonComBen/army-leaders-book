@@ -5,7 +5,7 @@ import '../providers/root_provider.dart';
 import './formatted_text_button.dart';
 
 class AnonWarningBanner extends ConsumerWidget {
-  const AnonWarningBanner({Key? key}) : super(key: key);
+  const AnonWarningBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

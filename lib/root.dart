@@ -10,7 +10,7 @@ import './pages/login.dart';
 import 'pages/link_anonymous_page.dart';
 
 class RootPage extends ConsumerStatefulWidget {
-  const RootPage({Key? key}) : super(key: key);
+  const RootPage({super.key});
 
   @override
   RootPageState createState() => RootPageState();

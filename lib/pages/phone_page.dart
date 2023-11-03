@@ -34,8 +34,8 @@ import 'uploadPages/upload_phone_page.dart';
 
 class PhonePage extends ConsumerStatefulWidget {
   const PhonePage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/phone-page';
 

@@ -27,8 +27,8 @@ import '../widgets/platform_widgets/platform_text_field.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/settings-page';
 

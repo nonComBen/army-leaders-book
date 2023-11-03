@@ -36,8 +36,8 @@ import 'uploadPages/upload_appointment_page.dart';
 
 class AptsPage extends ConsumerStatefulWidget {
   const AptsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/appointments-page';
 

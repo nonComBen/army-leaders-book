@@ -21,8 +21,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadAppointmentsPage extends ConsumerStatefulWidget {
   const UploadAppointmentsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadAppointmentsPageState createState() => UploadAppointmentsPageState();

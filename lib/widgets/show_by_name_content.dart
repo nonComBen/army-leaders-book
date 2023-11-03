@@ -9,14 +9,14 @@ import '../models/setting.dart';
 
 class ShowByNameContent extends StatelessWidget {
   const ShowByNameContent({
-    Key? key,
+    super.key,
     required this.title,
     required this.list,
     required this.homeCard,
     required this.setting,
     required this.width,
     required this.height,
-  }) : super(key: key);
+  });
   final String title;
   final List<DocumentSnapshot> list;
   final HomeCard homeCard;

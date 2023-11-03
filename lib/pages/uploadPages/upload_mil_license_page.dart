@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadMilLicensePage extends ConsumerStatefulWidget {
   const UploadMilLicensePage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadMilLicensePageState createState() => UploadMilLicensePageState();

@@ -18,7 +18,9 @@ class IAPRepo {
   final SubscriptionState subState;
 
   IAPRepo(this.subState, this._user) {
-    updatePurchases();
+    if (_user != null) {
+      updatePurchases(_user!);
+    }
     listenToLogin();
   }
 
@@ -40,36 +42,37 @@ class IAPRepo {
     'ozdVTlpNrraI16I76XjIWePZnX32', //Lascelles May
     'dZnvpPh22EYNgIgCkhzZiVV2VPc2', //Tyler Siegfried
     '9GtKo4IEbMRSEUnntMpRZYwg1MF3', //Jason Infante
-    // '8o9XIyQykXdBe2dZKgTPDfSdD7Y2',
+    'vaXSdsPzShVr4fGlegxG6UW0jJZ2', //Fernando Dejesus
+    'nc9qajO8sYRxA9YbrOUA2WvdWTE3', //Rebecca Luckinbill
+    // '8o9XIyQykXdBe2dZKgTPDfSdD7Y2', //test
   ];
 
   void listenToLogin() {
     FirebaseAuth.instance.authStateChanges().listen((user) {
       _user = user;
-      updatePurchases();
+      if (_user != null) {
+        updatePurchases(_user!);
+      }
     });
   }
 
-  void updatePurchases() async {
-    if (_user == null) {
-      purchases = [];
-      hasActiveSubscription = false;
-      return;
-    }
+  void updatePurchases(User user) async {
     final purchaseSnapshot = await FirebaseFirestore.instance
         .collection('purchases')
-        .where('userId', isEqualTo: _user!.uid)
+        .where('userId', isEqualTo: user.uid)
         .where('status', isEqualTo: 'ACTIVE')
         .get();
 
     final userSnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .where('userId', isEqualTo: _user!.uid)
+        .where('userId', isEqualTo: user.uid)
         .get();
-
-    _leader = Leader.fromSnapshot(userSnapshot.docs.first);
-    bool isSubscribed =
-        userSnapshot.docs.first['adFree'] || premiumIds.contains(_user!.uid);
+    bool isSubscribed = false;
+    if (userSnapshot.docs.isNotEmpty) {
+      _leader = Leader.fromSnapshot(userSnapshot.docs.first);
+      isSubscribed =
+          userSnapshot.docs.first['adFree'] || premiumIds.contains(user.uid);
+    }
 
     purchases = purchaseSnapshot.docs.map((document) {
       return PastPurchase.fromJson(document.data());

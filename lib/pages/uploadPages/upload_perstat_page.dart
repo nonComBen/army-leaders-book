@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadPerstatPage extends ConsumerStatefulWidget {
   const UploadPerstatPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadPerstatPageState createState() => UploadPerstatPageState();

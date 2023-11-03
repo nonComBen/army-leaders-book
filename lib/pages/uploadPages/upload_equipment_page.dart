@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadEquipmentPage extends ConsumerStatefulWidget {
   const UploadEquipmentPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadEquipmentPageState createState() => UploadEquipmentPageState();

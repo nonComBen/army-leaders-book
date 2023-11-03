@@ -27,9 +27,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditRatingPage extends ConsumerStatefulWidget {
   const EditRatingPage({
-    Key? key,
+    super.key,
     required this.rating,
-  }) : super(key: key);
+  });
   final Rating rating;
 
   @override

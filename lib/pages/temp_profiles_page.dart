@@ -36,8 +36,8 @@ import 'uploadPages/upload_temp_profile_page.dart';
 
 class TempProfilesPage extends ConsumerStatefulWidget {
   const TempProfilesPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/temporary-profiles-page';
 

@@ -34,9 +34,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditWeaponPage extends ConsumerStatefulWidget {
   const EditWeaponPage({
-    Key? key,
+    super.key,
     required this.weapon,
-  }) : super(key: key);
+  });
   final Weapon weapon;
 
   @override

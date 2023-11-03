@@ -92,7 +92,7 @@ void main() async {
 }
 
 class MyApp extends ConsumerWidget with WidgetsBindingObserver {
-  MyApp({Key? key, this.launchDetails}) : super(key: key);
+  MyApp({super.key, this.launchDetails});
   final NotificationAppLaunchDetails? launchDetails;
 
   @override

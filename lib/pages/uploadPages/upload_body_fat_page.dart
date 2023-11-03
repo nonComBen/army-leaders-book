@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadBodyFatsPage extends ConsumerStatefulWidget {
   const UploadBodyFatsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadBodyFatsPageState createState() => UploadBodyFatsPageState();

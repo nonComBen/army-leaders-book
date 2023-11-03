@@ -17,10 +17,10 @@ import '../widgets/upload_frame.dart';
 
 class ShareSoldierPage extends StatefulWidget {
   const ShareSoldierPage({
-    Key? key,
+    super.key,
     required this.userId,
     required this.soldiers,
-  }) : super(key: key);
+  });
   final String userId;
   final List<Soldier> soldiers;
 

@@ -26,9 +26,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditCounselingPage extends ConsumerStatefulWidget {
   const EditCounselingPage({
-    Key? key,
+    super.key,
     required this.counseling,
-  }) : super(key: key);
+  });
   final Counseling counseling;
 
   @override

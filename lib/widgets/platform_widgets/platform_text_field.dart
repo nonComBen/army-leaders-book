@@ -76,7 +76,7 @@ abstract class PlatformTextField extends Widget {
 
 class AndroidTextField extends TextFormField implements PlatformTextField {
   AndroidTextField({
-    Key? key,
+    super.key,
     required super.controller,
     super.focusNode,
     super.enabled = true,
@@ -95,12 +95,12 @@ class AndroidTextField extends TextFormField implements PlatformTextField {
     super.onChanged,
     super.onEditingComplete,
     super.style,
-  }) : super(key: key);
+  });
 }
 
 class IOSTextField extends StatelessWidget implements PlatformTextField {
   const IOSTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.focusNode,
     this.enabled = true,
@@ -117,7 +117,7 @@ class IOSTextField extends StatelessWidget implements PlatformTextField {
     this.onChanged,
     this.onEditingComplete,
     this.style,
-  }) : super(key: key);
+  });
 
   final TextEditingController controller;
   final TextStyle? style;

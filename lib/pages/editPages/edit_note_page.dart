@@ -17,9 +17,9 @@ import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditNotePage extends ConsumerStatefulWidget {
   const EditNotePage({
-    Key? key,
+    super.key,
     required this.note,
-  }) : super(key: key);
+  });
   final Note note;
 
   @override

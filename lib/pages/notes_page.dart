@@ -26,8 +26,8 @@ import 'editPages/edit_note_page.dart';
 
 class NotesPage extends ConsumerStatefulWidget {
   const NotesPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/notes-page';
 

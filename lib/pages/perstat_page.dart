@@ -35,8 +35,8 @@ import 'uploadPages/upload_perstat_page.dart';
 
 class PerstatPage extends ConsumerStatefulWidget {
   const PerstatPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/perstat-page';
 

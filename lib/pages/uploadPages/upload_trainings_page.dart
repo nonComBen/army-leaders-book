@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadTrainingsPage extends ConsumerStatefulWidget {
   const UploadTrainingsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadTrainingsPageState createState() => UploadTrainingsPageState();

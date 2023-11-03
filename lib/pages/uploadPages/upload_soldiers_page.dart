@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadSoldierPage extends ConsumerStatefulWidget {
   const UploadSoldierPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadSoldierPageState createState() => UploadSoldierPageState();

@@ -26,9 +26,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditDutyRosterPage extends ConsumerStatefulWidget {
   const EditDutyRosterPage({
-    Key? key,
+    super.key,
     required this.duty,
-  }) : super(key: key);
+  });
   final Duty duty;
 
   @override

@@ -33,8 +33,8 @@ import 'uploadPages/upload_working_evals_page.dart';
 
 class WorkingEvalsPage extends ConsumerStatefulWidget {
   const WorkingEvalsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/working-evaluations-page';
 

@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadWorkingEvalsPage extends ConsumerStatefulWidget {
   const UploadWorkingEvalsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadWorkingEvalsPageState createState() => UploadWorkingEvalsPageState();

@@ -33,9 +33,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditSoldierPage extends ConsumerStatefulWidget {
   const EditSoldierPage({
-    Key? key,
+    super.key,
     required this.soldier,
-  }) : super(key: key);
+  });
   final Soldier soldier;
 
   @override

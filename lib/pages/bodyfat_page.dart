@@ -39,8 +39,8 @@ import 'uploadPages/upload_body_fat_page.dart';
 
 class BodyfatPage extends ConsumerStatefulWidget {
   const BodyfatPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/bodyfat-page';
 

@@ -43,9 +43,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditAcftPage extends ConsumerStatefulWidget {
   const EditAcftPage({
-    Key? key,
+    super.key,
     required this.acft,
-  }) : super(key: key);
+  });
   final Acft acft;
 
   @override

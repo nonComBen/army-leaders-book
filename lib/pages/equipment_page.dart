@@ -35,8 +35,8 @@ import 'uploadPages/upload_equipment_page.dart';
 
 class EquipmentPage extends ConsumerStatefulWidget {
   const EquipmentPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/equipment-page';
 

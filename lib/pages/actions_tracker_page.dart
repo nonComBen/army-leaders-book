@@ -36,8 +36,8 @@ import 'uploadPages/upload_actions_page.dart';
 
 class ActionsTrackerPage extends ConsumerStatefulWidget {
   const ActionsTrackerPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/actions-tracker-page';
 

@@ -30,9 +30,9 @@ import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 
 class EditHandReceiptPage extends ConsumerStatefulWidget {
   const EditHandReceiptPage({
-    Key? key,
+    super.key,
     required this.item,
-  }) : super(key: key);
+  });
   final HandReceiptItem item;
 
   @override

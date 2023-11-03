@@ -32,9 +32,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditHrActionPage extends ConsumerStatefulWidget {
   const EditHrActionPage({
-    Key? key,
+    super.key,
     required this.hrAction,
-  }) : super(key: key);
+  });
   final HrAction hrAction;
 
   @override

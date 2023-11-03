@@ -13,8 +13,8 @@ import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class FaqPage extends ConsumerStatefulWidget {
   const FaqPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/faq-page';
 
@@ -198,7 +198,7 @@ class FaqPageState extends ConsumerState<FaqPage> {
                       ),
                     ),
                   )
-                  .toList(),
+                  ,
             ],
           ),
         ),

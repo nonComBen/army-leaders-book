@@ -25,9 +25,9 @@ import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 
 class EditWorkingAwardPage extends ConsumerStatefulWidget {
   const EditWorkingAwardPage({
-    Key? key,
+    super.key,
     required this.award,
-  }) : super(key: key);
+  });
   final WorkingAward award;
 
   @override

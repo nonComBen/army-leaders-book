@@ -39,8 +39,8 @@ import 'uploadPages/upload_weapons_page.dart';
 
 class WeaponsPage extends ConsumerStatefulWidget {
   const WeaponsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/weapons-page';
 

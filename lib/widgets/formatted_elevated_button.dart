@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 class FormattedElevatedButton extends StatelessWidget {
   const FormattedElevatedButton(
-      {Key? key, required this.text, required this.onPressed})
-      : super(key: key);
+      {super.key, required this.text, required this.onPressed});
 
   final String text;
   final void Function() onPressed;

@@ -30,9 +30,9 @@ import '../../methods/custom_alert_dialog.dart';
 
 class EditUserPage extends ConsumerStatefulWidget {
   const EditUserPage({
-    Key? key,
+    super.key,
     this.userId,
-  }) : super(key: key);
+  });
   final String? userId;
 
   @override

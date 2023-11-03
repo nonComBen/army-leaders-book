@@ -18,9 +18,9 @@ import '../../widgets/platform_widgets/platform_scaffold.dart';
 
 class EditPhonePage extends ConsumerStatefulWidget {
   const EditPhonePage({
-    Key? key,
+    super.key,
     required this.phone,
-  }) : super(key: key);
+  });
   final Phone phone;
 
   @override

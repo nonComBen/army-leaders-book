@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadPermProfilePage extends ConsumerStatefulWidget {
   const UploadPermProfilePage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadPermProfilePageState createState() => UploadPermProfilePageState();

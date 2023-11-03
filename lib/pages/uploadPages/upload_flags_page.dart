@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadFlagsPage extends ConsumerStatefulWidget {
   const UploadFlagsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadFlagsPageState createState() => UploadFlagsPageState();

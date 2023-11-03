@@ -24,9 +24,9 @@ import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 
 class EditWorkingEvalPage extends ConsumerStatefulWidget {
   const EditWorkingEvalPage({
-    Key? key,
+    super.key,
     required this.eval,
-  }) : super(key: key);
+  });
   final WorkingEval eval;
 
   @override

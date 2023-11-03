@@ -27,9 +27,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditFlagPage extends ConsumerStatefulWidget {
   const EditFlagPage({
-    Key? key,
+    super.key,
     required this.flag,
-  }) : super(key: key);
+  });
   final Flag flag;
 
   @override

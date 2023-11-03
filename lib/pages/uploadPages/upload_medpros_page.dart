@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadMedProsPage extends ConsumerStatefulWidget {
   const UploadMedProsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadMedProsPageState createState() => UploadMedProsPageState();

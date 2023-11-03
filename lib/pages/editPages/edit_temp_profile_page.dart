@@ -26,9 +26,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditTempProfilePage extends ConsumerStatefulWidget {
   const EditTempProfilePage({
-    Key? key,
+    super.key,
     required this.profile,
-  }) : super(key: key);
+  });
   final TempProfile profile;
 
   @override

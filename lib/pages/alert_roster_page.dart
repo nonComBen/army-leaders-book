@@ -35,7 +35,7 @@ import '../widgets/platform_widgets/platform_checkbox_list_tile.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class AlertRosterPage extends ConsumerStatefulWidget {
-  const AlertRosterPage({Key? key}) : super(key: key);
+  const AlertRosterPage({super.key});
 
   static const routeName = '/alert-roster-page';
 

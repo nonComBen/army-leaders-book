@@ -42,8 +42,8 @@ import 'uploadPages/upload_apft_page.dart';
 
 class ApftPage extends ConsumerStatefulWidget {
   const ApftPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/apft-page';
 

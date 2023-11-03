@@ -11,7 +11,7 @@ import '../providers/leader_provider.dart';
 import '../pages/editPages/edit_user_page.dart';
 
 class CustomDrawerHeader extends ConsumerWidget {
-  const CustomDrawerHeader({Key? key}) : super(key: key);
+  const CustomDrawerHeader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

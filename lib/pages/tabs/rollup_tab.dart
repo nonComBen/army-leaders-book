@@ -55,8 +55,8 @@ import '../weapons_page.dart';
 
 class RollupTab extends ConsumerStatefulWidget {
   const RollupTab({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const String title = 'Rollup';
 

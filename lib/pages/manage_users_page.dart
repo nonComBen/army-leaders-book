@@ -16,8 +16,7 @@ import '../widgets/platform_widgets/platform_button.dart';
 
 class ManageUsersPage extends StatefulWidget {
   const ManageUsersPage(
-      {Key? key, required this.userId, required this.soldiers})
-      : super(key: key);
+      {super.key, required this.userId, required this.soldiers});
 
   final String userId;
   final List<Soldier> soldiers;

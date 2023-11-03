@@ -27,9 +27,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditPerstatPage extends ConsumerStatefulWidget {
   const EditPerstatPage({
-    Key? key,
+    super.key,
     required this.perstat,
-  }) : super(key: key);
+  });
   final Perstat perstat;
 
   @override

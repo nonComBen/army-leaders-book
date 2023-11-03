@@ -26,9 +26,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditTaskingPage extends ConsumerStatefulWidget {
   const EditTaskingPage({
-    Key? key,
+    super.key,
     required this.tasking,
-  }) : super(key: key);
+  });
   final Tasking tasking;
 
   @override

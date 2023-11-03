@@ -29,7 +29,7 @@ import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/platform_widgets/platform_text_button.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   LoginPageState createState() => LoginPageState();

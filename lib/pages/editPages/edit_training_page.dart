@@ -32,9 +32,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditTrainingPage extends ConsumerStatefulWidget {
   const EditTrainingPage({
-    Key? key,
+    super.key,
     required this.training,
-  }) : super(key: key);
+  });
   final Training training;
 
   @override

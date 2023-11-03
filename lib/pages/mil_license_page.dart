@@ -36,8 +36,8 @@ import 'uploadPages/upload_mil_license_page.dart';
 
 class MilLicPage extends ConsumerStatefulWidget {
   const MilLicPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/military-license-page';
 

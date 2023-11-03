@@ -35,8 +35,8 @@ import 'uploadPages/upload_trainings_page.dart';
 
 class TrainingPage extends ConsumerStatefulWidget {
   const TrainingPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/training-page';
 

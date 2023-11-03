@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadDutyRosterPage extends ConsumerStatefulWidget {
   const UploadDutyRosterPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadDutyRosterPageState createState() => UploadDutyRosterPageState();

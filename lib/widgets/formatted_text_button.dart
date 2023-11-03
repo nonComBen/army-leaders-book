@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 class FormattedTextButton extends StatelessWidget {
   const FormattedTextButton(
-      {Key? key, required this.label, required this.onPressed})
-      : super(key: key);
+      {super.key, required this.label, required this.onPressed});
   final String label;
   final void Function()? onPressed;
 

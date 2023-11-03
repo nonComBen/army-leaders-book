@@ -36,8 +36,8 @@ import 'uploadPages/upload_medpros_page.dart';
 
 class MedProsPage extends ConsumerStatefulWidget {
   const MedProsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/medpros-page';
 

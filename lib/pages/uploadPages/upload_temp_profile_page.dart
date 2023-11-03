@@ -21,8 +21,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadTempProfilesPage extends ConsumerStatefulWidget {
   const UploadTempProfilesPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadTempProfilesPageState createState() => UploadTempProfilesPageState();

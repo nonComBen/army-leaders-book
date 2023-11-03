@@ -36,8 +36,8 @@ import 'uploadPages/upload_ratings_page.dart';
 
 class RatingsPage extends ConsumerStatefulWidget {
   const RatingsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/ratings-page';
 

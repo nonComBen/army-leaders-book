@@ -33,8 +33,8 @@ import 'uploadPages/upload_working_awads_page.dart';
 
 class WorkingAwardsPage extends ConsumerStatefulWidget {
   const WorkingAwardsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/working-awards-page';
 

@@ -35,8 +35,8 @@ import 'uploadPages/upload_duty_roster_page.dart';
 
 class DutyRosterPage extends ConsumerStatefulWidget {
   const DutyRosterPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/duty-roster-page';
 

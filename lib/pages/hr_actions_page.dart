@@ -35,8 +35,8 @@ import 'uploadPages/upload_hr_actions_page.dart';
 
 class HrActionsPage extends ConsumerStatefulWidget {
   const HrActionsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/hr-actions-page';
 

@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadHandReceiptPage extends ConsumerStatefulWidget {
   const UploadHandReceiptPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadHandReceiptPageState createState() => UploadHandReceiptPageState();

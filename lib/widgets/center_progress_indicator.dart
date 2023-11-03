@@ -4,7 +4,7 @@ import '../../methods/theme_methods.dart';
 import '../../widgets/platform_widgets/platform_loading_widget.dart';
 
 class CenterProgressIndicator extends StatelessWidget {
-  const CenterProgressIndicator({Key? key}) : super(key: key);
+  const CenterProgressIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {

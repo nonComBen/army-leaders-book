@@ -37,9 +37,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditBodyfatPage extends ConsumerStatefulWidget {
   const EditBodyfatPage({
-    Key? key,
+    super.key,
     required this.bodyfat,
-  }) : super(key: key);
+  });
   final Bodyfat bodyfat;
 
   @override

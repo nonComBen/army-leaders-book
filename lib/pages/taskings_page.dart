@@ -35,8 +35,8 @@ import 'uploadPages/upload_taskings_page.dart';
 
 class TaskingsPage extends ConsumerStatefulWidget {
   const TaskingsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/taskings-page';
 

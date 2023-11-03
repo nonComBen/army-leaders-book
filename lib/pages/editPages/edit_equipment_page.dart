@@ -26,9 +26,9 @@ import '../../widgets/platform_widgets/platform_soldier_picker.dart';
 
 class EditEquipmentPage extends ConsumerStatefulWidget {
   const EditEquipmentPage({
-    Key? key,
+    super.key,
     required this.equipment,
-  }) : super(key: key);
+  });
   final Equipment equipment;
 
   @override

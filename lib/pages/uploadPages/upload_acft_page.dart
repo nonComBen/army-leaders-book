@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadAcftPage extends ConsumerStatefulWidget {
   const UploadAcftPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadAcftPageState createState() => UploadAcftPageState();

@@ -5,12 +5,12 @@ import '../../widgets/header_text.dart';
 
 class RollupCard extends StatelessWidget {
   const RollupCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.infoRow1,
     this.infoRow2 = const [],
     required this.buttons,
-  }) : super(key: key);
+  });
 
   final String title;
   final List<Widget> infoRow1;

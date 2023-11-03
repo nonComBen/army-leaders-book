@@ -36,8 +36,8 @@ import 'uploadPages/upload_flags_page.dart';
 
 class FlagsPage extends ConsumerStatefulWidget {
   const FlagsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/flags-page';
 

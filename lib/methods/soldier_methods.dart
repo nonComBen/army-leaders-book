@@ -58,7 +58,7 @@ void selectFilters(BuildContext context, List<String> sections,
             );
           });
         },
-      ).toList(),
+      ),
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: PlatformButton(

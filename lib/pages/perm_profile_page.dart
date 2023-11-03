@@ -35,8 +35,8 @@ import 'uploadPages/upload_perm_profile_page.dart';
 
 class PermProfilesPage extends ConsumerStatefulWidget {
   const PermProfilesPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/permanent-profile-page';
 

@@ -33,12 +33,11 @@ abstract class PlatformSelectionWidget extends Widget {
 class AndroidSelectionWidget extends StatelessWidget
     implements PlatformSelectionWidget {
   const AndroidSelectionWidget(
-      {Key? key,
+      {super.key,
       required this.titles,
       required this.values,
       required this.groupValue,
-      required this.onChanged})
-      : super(key: key);
+      required this.onChanged});
   final List<Widget> titles;
   final List<Object> values;
   final Object? groupValue;

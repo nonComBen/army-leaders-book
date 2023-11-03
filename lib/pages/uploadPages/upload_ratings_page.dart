@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadRatingsPage extends ConsumerStatefulWidget {
   const UploadRatingsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadRatingsPageStat createState() => UploadRatingsPageStat();

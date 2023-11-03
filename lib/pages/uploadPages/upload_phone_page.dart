@@ -18,8 +18,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadPhonePage extends ConsumerStatefulWidget {
   const UploadPhonePage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadPhonePageState createState() => UploadPhonePageState();

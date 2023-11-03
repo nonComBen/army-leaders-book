@@ -35,7 +35,7 @@ import '../widgets/platform_widgets/platform_icon_button.dart';
 import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class DailyPerstatPage extends ConsumerStatefulWidget {
-  const DailyPerstatPage({Key? key}) : super(key: key);
+  const DailyPerstatPage({super.key});
 
   static const routeName = '/daily-perstat-page';
 

@@ -39,9 +39,9 @@ import '../../widgets/stateful_widgets/time_text_field.dart';
 
 class EditAppointmentPage extends ConsumerStatefulWidget {
   const EditAppointmentPage({
-    Key? key,
+    super.key,
     required this.apt,
-  }) : super(key: key);
+  });
   final Appointment apt;
 
   @override

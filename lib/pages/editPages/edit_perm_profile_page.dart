@@ -28,9 +28,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditPermProfilePage extends ConsumerStatefulWidget {
   const EditPermProfilePage({
-    Key? key,
+    super.key,
     required this.profile,
-  }) : super(key: key);
+  });
   final PermProfile profile;
 
   @override

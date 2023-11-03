@@ -17,8 +17,8 @@ import '../../widgets/custom_data_table.dart';
 
 class SoldiersPage extends ConsumerStatefulWidget {
   const SoldiersPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/soldiers-page';
   static const title = 'Soldiers';

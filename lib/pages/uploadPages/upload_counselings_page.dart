@@ -21,8 +21,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadCounselingsPage extends ConsumerStatefulWidget {
   const UploadCounselingsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadCounselingsPageState createState() => UploadCounselingsPageState();

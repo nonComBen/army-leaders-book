@@ -35,8 +35,8 @@ import 'uploadPages/upload_hand_receipt_page.dart';
 
 class HandReceiptPage extends ConsumerStatefulWidget {
   const HandReceiptPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/hand-receipt-page';
 

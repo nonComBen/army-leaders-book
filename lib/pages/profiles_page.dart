@@ -40,8 +40,8 @@ enum ProfileType {
 
 class PermProfilesPage extends ConsumerStatefulWidget {
   const PermProfilesPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/permanent-profile-page';
 

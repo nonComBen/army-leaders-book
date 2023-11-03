@@ -33,8 +33,8 @@ import 'uploadPages/upload_counselings_page.dart';
 
 class CounselingsPage extends ConsumerStatefulWidget {
   const CounselingsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/counseling-page';
 

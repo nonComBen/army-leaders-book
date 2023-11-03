@@ -42,8 +42,8 @@ import 'uploadPages/upload_acft_page.dart';
 
 class AcftPage extends ConsumerStatefulWidget {
   const AcftPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/acft-page';
 

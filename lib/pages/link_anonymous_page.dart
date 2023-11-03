@@ -17,8 +17,8 @@ import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class LinkAnonymousPage extends ConsumerStatefulWidget {
   const LinkAnonymousPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   LinkAnonymousPageState createState() => LinkAnonymousPageState();

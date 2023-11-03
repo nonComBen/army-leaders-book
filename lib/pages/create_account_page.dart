@@ -23,8 +23,8 @@ import '../widgets/platform_widgets/platform_text_button.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   CreateAccountPageState createState() => CreateAccountPageState();

@@ -5,7 +5,7 @@ import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/standard_text.dart';
 
 class TosPage extends StatelessWidget {
-  const TosPage({Key? key}) : super(key: key);
+  const TosPage({super.key});
 
   static const routeName = '/terms-of-service-page';
 

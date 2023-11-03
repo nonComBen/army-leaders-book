@@ -13,7 +13,7 @@ import '../providers/leader_provider.dart';
 import '../widgets/platform_widgets/platform_text_button.dart';
 
 class LocalAuthLoginPage extends ConsumerStatefulWidget {
-  const LocalAuthLoginPage({Key? key}) : super(key: key);
+  const LocalAuthLoginPage({super.key});
 
   @override
   LocalAuthLoginPageState createState() => LocalAuthLoginPageState();

@@ -20,8 +20,8 @@ import '../../widgets/upload_frame.dart';
 
 class UploadHrActionsPage extends ConsumerStatefulWidget {
   const UploadHrActionsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UploadHrActionsPageState createState() => UploadHrActionsPageState();

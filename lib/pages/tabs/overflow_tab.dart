@@ -52,8 +52,8 @@ import '../../widgets/upload_frame.dart';
 
 class OverflowTab extends ConsumerWidget {
   const OverflowTab({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const String title = 'Overflow page';
 

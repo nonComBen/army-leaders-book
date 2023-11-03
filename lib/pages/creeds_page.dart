@@ -16,8 +16,8 @@ import '../widgets/platform_widgets/platform_scaffold.dart';
 
 class CreedsPage extends ConsumerStatefulWidget {
   const CreedsPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const routeName = '/creeds-page';
 
@@ -371,7 +371,7 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
                             ),
                           ),
                         )
-                        .toList(),
+                        ,
                   ],
                 ),
               ),

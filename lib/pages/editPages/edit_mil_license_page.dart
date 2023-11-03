@@ -31,9 +31,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditMilLicPage extends ConsumerStatefulWidget {
   const EditMilLicPage({
-    Key? key,
+    super.key,
     required this.milLic,
-  }) : super(key: key);
+  });
   final MilLic milLic;
 
   @override

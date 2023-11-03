@@ -6,7 +6,7 @@ import '../widgets/platform_widgets/platform_scaffold.dart';
 import '../widgets/standard_text.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
-  const PrivacyPolicyPage({Key? key}) : super(key: key);
+  const PrivacyPolicyPage({super.key});
 
   static const routeName = '/privacy-policy-page';
 

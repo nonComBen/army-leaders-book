@@ -6,11 +6,10 @@ import '../methods/theme_methods.dart';
 
 class AlertTile extends StatelessWidget {
   const AlertTile(
-      {Key? key,
+      {super.key,
       required this.soldier,
       required this.phone,
-      required this.workPhone})
-      : super(key: key);
+      required this.workPhone});
   final String soldier;
   final String phone;
   final String workPhone;

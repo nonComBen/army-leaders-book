@@ -25,9 +25,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditActionsTrackerPage extends ConsumerStatefulWidget {
   const EditActionsTrackerPage({
-    Key? key,
+    super.key,
     required this.action,
-  }) : super(key: key);
+  });
   final ActionObj action;
 
   @override

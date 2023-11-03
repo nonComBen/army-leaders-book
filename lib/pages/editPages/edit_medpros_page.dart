@@ -36,9 +36,9 @@ import '../../widgets/stateful_widgets/date_text_field.dart';
 
 class EditMedprosPage extends ConsumerStatefulWidget {
   const EditMedprosPage({
-    Key? key,
+    super.key,
     required this.medpro,
-  }) : super(key: key);
+  });
   final Medpro medpro;
 
   @override

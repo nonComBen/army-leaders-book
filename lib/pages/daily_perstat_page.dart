@@ -108,14 +108,14 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([dateFormat.format(DateTime.now())]);
-    docsList.add([
-      'Soldier',
-      'Assigned',
-      'Status',
-      'Start Date',
-      'End Date',
+    List<List<CellValue>> docsList = [];
+    docsList.add([TextCellValue(dateFormat.format(DateTime.now()))]);
+    docsList.add(const [
+      TextCellValue('Soldier'),
+      TextCellValue('Assigned'),
+      TextCellValue('Status'),
+      TextCellValue('Start Date'),
+      TextCellValue('End Date'),
     ]);
     for (Map<dynamic, dynamic> daily in dailies) {
       List<String?> doc = [
@@ -125,7 +125,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
         daily['start'],
         daily['end']
       ];
-      docsList.add(doc);
+      docsList.add(doc.map((e) => TextCellValue(e ?? '')).toList());
     }
 
     var excel = Excel.createExcel();

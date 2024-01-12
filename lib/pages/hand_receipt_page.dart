@@ -117,22 +117,22 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Item',
-      'Model #',
-      'Serial #',
-      'NSN #',
-      'Location',
-      'Value',
-      'Subcomponents',
-      'Comments',
+    List<List<CellValue>> docsList = [];
+    docsList.add(const [
+      TextCellValue('Soldier Id'),
+      TextCellValue('Rank'),
+      TextCellValue('Rank Sort'),
+      TextCellValue('Last Name'),
+      TextCellValue('First Name'),
+      TextCellValue('Section'),
+      TextCellValue('Item'),
+      TextCellValue('Model #'),
+      TextCellValue('Serial #'),
+      TextCellValue('NSN #'),
+      TextCellValue('Location'),
+      TextCellValue('Value'),
+      TextCellValue('Subcomponents'),
+      TextCellValue('Comments'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -156,7 +156,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
       docs.add(subs);
       docs.add(doc['comments']);
 
-      docsList.add(docs);
+      docsList.add(docs.map((e) => TextCellValue(e)).toList());
     }
 
     var excel = Excel.createExcel();

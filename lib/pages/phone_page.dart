@@ -129,7 +129,7 @@ class PhonePageState extends ConsumerState<PhonePage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet!.appendRow(docs);
+      sheet!.appendRow(docs.map((e) => TextCellValue(e)).toList());
     }
 
     String dir, location;

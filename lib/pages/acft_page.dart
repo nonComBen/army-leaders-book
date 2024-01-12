@@ -158,32 +158,32 @@ class AcftPageState extends ConsumerState<AcftPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Date',
-      'Age Group',
-      'Gender',
-      'MDL Raw',
-      'MDL Score',
-      'SPT Raw',
-      'SPT Score',
-      'HRP Raw',
-      'HRP Score',
-      'SDC Raw',
-      'SDC Score',
-      'PLK Raw',
-      'PLK Score',
-      '2MR Raw',
-      '2MR Score',
-      'Total',
-      'Alt Event',
-      'Pass'
+    List<List<CellValue>> docsList = [];
+    docsList.add(const [
+      TextCellValue('Soldier Id'),
+      TextCellValue('Rank'),
+      TextCellValue('Rank Sort'),
+      TextCellValue('Last Name'),
+      TextCellValue('First Name'),
+      TextCellValue('Section'),
+      TextCellValue('Date'),
+      TextCellValue('Age Group'),
+      TextCellValue('Gender'),
+      TextCellValue('MDL Raw'),
+      TextCellValue('MDL Score'),
+      TextCellValue('SPT Raw'),
+      TextCellValue('SPT Score'),
+      TextCellValue('HRP Raw'),
+      TextCellValue('HRP Score'),
+      TextCellValue('SDC Raw'),
+      TextCellValue('SDC Score'),
+      TextCellValue('PLK Raw'),
+      TextCellValue('PLK Score'),
+      TextCellValue('2MR Raw'),
+      TextCellValue('2MR Score'),
+      TextCellValue('Total'),
+      TextCellValue('Alt Event'),
+      TextCellValue('Pass'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -212,7 +212,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       docs.add(doc['altEvent']);
       docs.add(doc['pass'].toString());
 
-      docsList.add(docs);
+      docsList.add(docs.map((e) => TextCellValue(e)).toList());
     }
 
     var excel = Excel.createExcel();

@@ -157,26 +157,26 @@ class ApftPageState extends ConsumerState<ApftPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Date',
-      'Age',
-      'Gender',
-      'PU Raw',
-      'PU Score',
-      'SU Raw',
-      'SU Score',
-      'Run Raw',
-      'Run Score',
-      'Total',
-      'Alt Event',
-      'Pass'
+    List<List<CellValue>> docsList = [];
+    docsList.add(const [
+      TextCellValue('Soldier Id'),
+      TextCellValue('Rank'),
+      TextCellValue('Rank Sort'),
+      TextCellValue('Last Name'),
+      TextCellValue('First Name'),
+      TextCellValue('Section'),
+      TextCellValue('Date'),
+      TextCellValue('Age'),
+      TextCellValue('Gender'),
+      TextCellValue('PU Raw'),
+      TextCellValue('PU Score'),
+      TextCellValue('SU Raw'),
+      TextCellValue('SU Score'),
+      TextCellValue('Run Raw'),
+      TextCellValue('Run Score'),
+      TextCellValue('Total'),
+      TextCellValue('Alt Event'),
+      TextCellValue('Pass'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -199,7 +199,7 @@ class ApftPageState extends ConsumerState<ApftPage> {
       docs.add(doc['altEvent']);
       docs.add(doc['pass'].toString());
 
-      docsList.add(docs);
+      docsList.add(docs.map((e) => TextCellValue(e)).toList());
     }
 
     var excel = Excel.createExcel();

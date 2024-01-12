@@ -20,7 +20,7 @@ dependencies:
   collection: ^1.17.2
   crypto: ^3.0.3
   cupertino_icons: ^1.0.6
-  excel: ^3.0.0
+  excel: ^4.0.2
   file_picker: ^6.0.0
   firebase_analytics: ^10.6.2
   firebase_app_check: ^0.2.1+2
@@ -32,7 +32,7 @@ dependencies:
   flutter_riverpod: ^2.4.4
   flutter_timezone: ^1.0.8
   fluttertoast: ^8.2.2
-  google_mobile_ads: ^3.1.0
+  google_mobile_ads: ^4.0.0
   google_sign_in: ^6.1.5
   http: ^1.1.0
   in_app_purchase: ^3.1.11
@@ -40,7 +40,7 @@ dependencies:
   launch_review: ^3.0.1
   local_auth: ^2.1.7
   open_file_plus: ^3.4.1
-  package_info_plus: ^4.2.0
+  package_info_plus: ^5.0.1
   path_provider: ^2.1.1
   pdf: ^3.10.4
   permission_handler: ^11.0.1

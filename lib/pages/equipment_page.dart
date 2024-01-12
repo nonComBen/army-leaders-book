@@ -117,30 +117,30 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Weapon',
-      'Butt Stock',
-      'Serial #',
-      'Optics',
-      'Optics Serial #',
-      'Secondary Weapon',
-      'Secondary Butt Stock',
-      'Secondary Serial #',
-      'Secondary Optics',
-      'Secondary Optics Serial #',
-      'Mask',
-      'Vehicle Bumper #',
-      'Vehicle Type',
-      'License #',
-      'Miscellaneous',
-      'Miscellaneous Serial #'
+    List<List<CellValue>> docsList = [];
+    docsList.add(const [
+      TextCellValue('Soldier Id'),
+      TextCellValue('Rank'),
+      TextCellValue('Rank Sort'),
+      TextCellValue('Last Name'),
+      TextCellValue('First Name'),
+      TextCellValue('Section'),
+      TextCellValue('Weapon'),
+      TextCellValue('Butt Stock'),
+      TextCellValue('Serial #'),
+      TextCellValue('Optics'),
+      TextCellValue('Optics Serial #'),
+      TextCellValue('Secondary Weapon'),
+      TextCellValue('Secondary Butt Stock'),
+      TextCellValue('Secondary Serial #'),
+      TextCellValue('Secondary Optics'),
+      TextCellValue('Secondary Optics Serial #'),
+      TextCellValue('Mask'),
+      TextCellValue('Vehicle Bumper #'),
+      TextCellValue('Vehicle Type'),
+      TextCellValue('License #'),
+      TextCellValue('Miscellaneous'),
+      TextCellValue('Miscellaneous Serial #'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -167,7 +167,7 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
       docs.add(doc['misc']);
       docs.add(doc['miscSerial']);
 
-      docsList.add(docs);
+      docsList.add(docs.map((e) => TextCellValue(e)).toList());
     }
 
     var excel = Excel.createExcel();

@@ -118,21 +118,21 @@ class AptsPageState extends ConsumerState<AptsPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Title',
-      'Date',
-      'Start Time',
-      'End Time',
-      'Location',
-      'Status',
-      'Comments'
+    List<List<CellValue>> docsList = [];
+    docsList.add(const [
+      TextCellValue('Soldier Id'),
+      TextCellValue('Rank'),
+      TextCellValue('Rank Sort'),
+      TextCellValue('Last Name'),
+      TextCellValue('First Name'),
+      TextCellValue('Section'),
+      TextCellValue('Title'),
+      TextCellValue('Date'),
+      TextCellValue('Start Time'),
+      TextCellValue('End Time'),
+      TextCellValue('Location'),
+      TextCellValue('Status'),
+      TextCellValue('Comments'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -154,7 +154,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
       docs.add(doc['status']);
       docs.add(doc['comments']);
 
-      docsList.add(docs);
+      docsList.add(docs.map((e) => TextCellValue(e)).toList());
     }
 
     var excel = Excel.createExcel();

@@ -118,18 +118,18 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Date',
-      'Expiration Date',
-      'Flag Type',
-      'Comments'
+    List<List<CellValue>> docsList = [];
+    docsList.add(const [
+      TextCellValue('Soldier Id'),
+      TextCellValue('Rank'),
+      TextCellValue('Rank Sort'),
+      TextCellValue('Last Name'),
+      TextCellValue('First Name'),
+      TextCellValue('Section'),
+      TextCellValue('Date'),
+      TextCellValue('Expiration Date'),
+      TextCellValue('Flag Type'),
+      TextCellValue('Comments'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -144,7 +144,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
       docs.add(doc['type']);
       docs.add(doc['comments']);
 
-      docsList.add(docs);
+      docsList.add(docs.map((e) => TextCellValue(e)).toList());
     }
 
     var excel = Excel.createExcel();

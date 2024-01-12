@@ -144,26 +144,26 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
   }
 
   void _downloadExcel() async {
-    List<List<dynamic>> docsList = [];
-    docsList.add([
-      'Soldier Id',
-      'Rank',
-      'Rank Sort',
-      'Last Name',
-      'First Name',
-      'Section',
-      'Date',
-      'Age',
-      'Gender',
-      'Height',
-      'Height to Half Inch',
-      'Weight',
-      'BMI Pass',
-      'Neck',
-      'Waist',
-      'Hip',
-      'BF Percent',
-      'BF Pass'
+    List<List<CellValue>> docsList = [];
+    docsList.add(const [
+      TextCellValue('Soldier Id'),
+      TextCellValue('Rank'),
+      TextCellValue('Rank Sort'),
+      TextCellValue('Last Name'),
+      TextCellValue('First Name'),
+      TextCellValue('Section'),
+      TextCellValue('Date'),
+      TextCellValue('Age'),
+      TextCellValue('Gender'),
+      TextCellValue('Height'),
+      TextCellValue('Height to Half Inch'),
+      TextCellValue('Weight'),
+      TextCellValue('BMI Pass'),
+      TextCellValue('Neck'),
+      TextCellValue('Waist'),
+      TextCellValue('Hip'),
+      TextCellValue('BF Percent'),
+      TextCellValue('BF Pass'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -186,7 +186,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
       docs.add(doc['percent']);
       docs.add(doc['passBf'].toString());
 
-      docsList.add(docs);
+      docsList.add(docs.map((e) => TextCellValue(e)).toList());
     }
 
     var excel = Excel.createExcel();

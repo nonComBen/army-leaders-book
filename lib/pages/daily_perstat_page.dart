@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -432,7 +431,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     });
   }
 
-  Future<bool> onWillPop() {
+  bool onWillPop() {
     PerstatByName byName = PerstatByName(
       owner: _userId,
       date: dateFormat.format(DateTime.now()),
@@ -442,7 +441,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
         .collection(PerstatByName.collectionName)
         .doc(_userId)
         .set(byName.toMap());
-    return Future.value(true);
+    return true;
   }
 
   buildNewDailies() async {
@@ -667,8 +666,11 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
               onPressed: () => _downloadExcel()),
         ],
       ),
-      body: WillPopScope(
-        onWillPop: onWillPop,
+      body: PopScope(
+        canPop: true,
+        onPopInvoked: (bool didPop) {
+          onWillPop();
+        },
         child: Center(
           heightFactor: 1,
           child: ListView(

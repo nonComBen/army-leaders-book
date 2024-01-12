@@ -14,7 +14,6 @@ import 'package:leaders_book/providers/leader_provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../methods/create_app_bar_actions.dart';
-import '../../methods/on_back_pressed.dart';
 import '../../models/app_bar_option.dart';
 import '../../models/leader.dart';
 import '../../providers/auth_provider.dart';
@@ -356,8 +355,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
       ),
       body: FormFrame(
         formKey: _formKey,
-        onWillPop:
-            updated ? () => onBackPressed(context) : () => Future(() => true),
+        canPop: !updated,
         children: <Widget>[
           FormGridView(
             width: width,

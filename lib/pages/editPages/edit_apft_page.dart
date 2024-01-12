@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +8,6 @@ import '../../calculators/pu_calculator.dart';
 import '../../calculators/run_calculator.dart';
 import '../../calculators/su_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../methods/on_back_pressed.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
@@ -303,8 +300,7 @@ class EditApftPageState extends ConsumerState<EditApftPage> {
       title: _title,
       body: FormFrame(
         formKey: _formKey,
-        onWillPop:
-            updated ? () => onBackPressed(context) : () => Future(() => true),
+        canPop: !updated,
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
           FormGridView(

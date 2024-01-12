@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../providers/auth_provider.dart';
-import '../../methods/on_back_pressed.dart';
 import '../../models/phone_number.dart';
 import '../../widgets/anon_warning_banner.dart';
 import '../../widgets/form_frame.dart';
@@ -110,8 +107,7 @@ class EditPhonePageState extends ConsumerState<EditPhonePage> {
       title: _title,
       body: FormFrame(
         formKey: _formKey,
-        onWillPop:
-            updated ? () => onBackPressed(context) : () => Future(() => true),
+        canPop: !updated,
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
           FormGridView(

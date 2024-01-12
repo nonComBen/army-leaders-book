@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +7,6 @@ import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/custom_alert_dialog.dart';
 import '../../methods/custom_modal_bottom_sheet.dart';
-import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/additional_training.dart';
@@ -436,8 +433,7 @@ class EditTrainingPageState extends ConsumerState<EditTrainingPage> {
       title: _title,
       body: FormFrame(
         formKey: _formKey,
-        onWillPop:
-            updated ? () => onBackPressed(context) : () => Future(() => true),
+        canPop: !updated,
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
           FormGridView(

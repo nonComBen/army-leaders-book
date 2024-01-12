@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -392,9 +390,13 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
           constraints: const BoxConstraints(maxWidth: 900),
           child: Form(
             key: _formState,
-            onWillPop: updated
-                ? () => onBackPressed(context)
-                : () => Future(() => true),
+            canPop: !updated,
+            onPopInvoked: (bool didPop) {
+              if (didPop) {
+                return;
+              }
+              onBackPressed(context);
+            },
             autovalidateMode: AutovalidateMode.onUserInteraction,
             child: ListView(
               children: <Widget>[

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../methods/create_less_soldiers.dart';
-import '../../methods/on_back_pressed.dart';
 import '../../methods/toast_messages/soldier_id_is_blank.dart';
 import '../../methods/validate.dart';
 import '../../models/rating.dart';
@@ -168,8 +165,7 @@ class EditRatingPageState extends ConsumerState<EditRatingPage> {
       title: _title,
       body: FormFrame(
         formKey: _formKey,
-        onWillPop:
-            updated ? () => onBackPressed(context) : () => Future(() => true),
+        canPop: !updated,
         children: <Widget>[
           if (user.isAnonymous) const AnonWarningBanner(),
           FormGridView(

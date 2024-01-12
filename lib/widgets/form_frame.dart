@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:leaders_book/methods/on_back_pressed.dart';
 
 class FormFrame extends StatelessWidget {
   const FormFrame({
     super.key,
     required this.formKey,
-    this.onWillPop,
+    this.canPop = true,
     required this.children,
   });
   final Key formKey;
-  final Future<bool> Function()? onWillPop;
+  final bool canPop;
   final List<Widget> children;
 
   @override
@@ -16,7 +17,13 @@ class FormFrame extends StatelessWidget {
     return Form(
       key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      onWillPop: onWillPop,
+      canPop: canPop,
+      onPopInvoked: (didPop) {
+        if (didPop) {
+          return;
+        }
+        onBackPressed(context);
+      },
       child: Center(
         heightFactor: 1,
         child: Container(

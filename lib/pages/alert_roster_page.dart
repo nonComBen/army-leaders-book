@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -559,14 +558,14 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     }
   }
 
-  Future<bool> onWillPop() {
+  bool onWillPop() {
     AlertSoldiers alertSoldiers = AlertSoldiers(
         _userId, _userId, _soldiers.map((e) => e!.toMap()).toList());
     firestore
         .collection(AlertSoldiers.collectionName)
         .doc(_userId)
         .set(alertSoldiers.toMap());
-    return Future.value(true);
+    return true;
   }
 
   @override
@@ -604,8 +603,11 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           constraints: const BoxConstraints(maxWidth: 900),
-          child: WillPopScope(
-            onWillPop: onWillPop,
+          child: PopScope(
+            canPop: true,
+            onPopInvoked: (bool didPop) {
+              onWillPop();
+            },
             child: ListView(
               children: <Widget>[
                 if (user.isAnonymous) const AnonWarningBanner(),

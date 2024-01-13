@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="preferExternal"
     package="com.armynoncomtools.leadersbook">
 
     <!-- The INTERNET permission is required for development. Specifically,

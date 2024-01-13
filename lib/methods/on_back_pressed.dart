@@ -30,6 +30,7 @@ Future<bool> onBackPressed(BuildContext context) async {
                 label: 'Yes',
                 onPressed: () {
                   Navigator.pop(context2, true);
+                  Navigator.pop(context);
                 },
               )
             ],

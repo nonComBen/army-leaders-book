@@ -238,7 +238,7 @@ class EditTaskingPageState extends ConsumerState<EditTaskingPage> {
                     message: 'Start date is blank or in invalid format',
                   ),
                 );
-              } else if (_end != null && _endController.text != '') {
+              } else if (_end == null && _endController.text != '') {
                 toast.showToast(
                   child: const MyToast(
                     message: 'End date is in invalid format',

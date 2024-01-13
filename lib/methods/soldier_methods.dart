@@ -165,7 +165,7 @@ void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
       soldier.comments
     ];
 
-    docsList.add(docs.map((e) => TextCellValue(e)).toList());
+    docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
   }
 
   var excel = Excel.createExcel();

@@ -20,7 +20,7 @@ class MyToast extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25.0),
-        color: getPrimaryColor(context),
+        color: getOnPrimaryColor(context),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -31,7 +31,7 @@ class MyToast extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
             ),
           ),

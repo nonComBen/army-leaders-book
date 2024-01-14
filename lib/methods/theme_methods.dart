@@ -8,7 +8,7 @@ Color getPrimaryColor(BuildContext context) {
   if (kIsWeb || Platform.isAndroid) {
     return Theme.of(context).colorScheme.primary;
   } else {
-    return CupertinoTheme.of(context).primaryColor;
+    return CupertinoTheme.of(context).primaryContrastingColor;
   }
 }
 
@@ -16,7 +16,7 @@ Color getOnPrimaryColor(BuildContext context) {
   if (kIsWeb || Platform.isAndroid) {
     return Theme.of(context).colorScheme.onPrimary;
   } else {
-    return CupertinoTheme.of(context).primaryContrastingColor;
+    return CupertinoTheme.of(context).primaryColor;
   }
 }
 

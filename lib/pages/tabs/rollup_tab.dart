@@ -229,13 +229,13 @@ class HomePageState extends ConsumerState<RollupTab>
   List<Widget> homeCards(String userId) {
     List<Widget> list = [];
     if (setting.perstat) {
+      final perstatQuery = _firestore
+          .collection(Perstat.collectionName)
+          .where('users', isNotEqualTo: null);
       list.add(
         StreamBuilder(
-          stream: _firestore
-              .collection(Perstat.collectionName)
-              .where('users', isNotEqualTo: null)
-              .where('users', arrayContains: userId)
-              .snapshots(),
+          stream:
+              perstatQuery.where('users', arrayContains: userId).snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasError) return Text('Error: ${snapshot.error}');

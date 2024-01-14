@@ -53,7 +53,7 @@ class AndroidSelectionWidget extends StatelessWidget
             title: titles[0],
             value: values[0],
             groupValue: groupValue,
-            activeColor: getOnPrimaryColor(context),
+            activeColor: getPrimaryColor(context),
             onChanged: (dynamic value) {
               onChanged(value);
             },
@@ -64,7 +64,7 @@ class AndroidSelectionWidget extends StatelessWidget
             title: titles[1],
             value: values[1],
             groupValue: groupValue,
-            activeColor: getOnPrimaryColor(context),
+            activeColor: getPrimaryColor(context),
             onChanged: (dynamic value) {
               onChanged(value);
             },
@@ -76,7 +76,7 @@ class AndroidSelectionWidget extends StatelessWidget
               title: titles[2],
               value: values[2],
               groupValue: groupValue,
-              activeColor: getOnPrimaryColor(context),
+              activeColor: getPrimaryColor(context),
               onChanged: (dynamic value) {
                 onChanged(value);
               },

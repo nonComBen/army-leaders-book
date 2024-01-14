@@ -354,7 +354,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
               title: 'New Eval',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -362,7 +362,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
             title: 'Edit Eval',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -372,7 +372,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),
@@ -380,7 +380,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
             title: 'Filter Evals',
             icon: Icon(
               Icons.filter_alt,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => showFilterOptions(
                 context, getSections(documents), _filterRecords),
@@ -391,7 +391,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.download
                   : CupertinoIcons.cloud_download,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadExcel(),
           ),
@@ -401,7 +401,7 @@ class WorkingEvalsPageState extends ConsumerState<WorkingEvalsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.upload
                   : CupertinoIcons.cloud_upload,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _uploadExcel(context),
           ),

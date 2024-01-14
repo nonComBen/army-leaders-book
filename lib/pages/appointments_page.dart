@@ -505,7 +505,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
               title: 'New Appointment',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -513,7 +513,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
             title: 'Edit Apointment',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -523,7 +523,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),
@@ -531,7 +531,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
             title: 'Filter Appointments',
             icon: Icon(
               Icons.filter_alt,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => showFilterOptions(
                 context, getSections(documents), _filterRecords),
@@ -542,7 +542,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.download
                   : CupertinoIcons.cloud_download,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadExcel(),
           ),
@@ -552,7 +552,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.upload
                   : CupertinoIcons.cloud_upload,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _uploadExcel(context),
           ),
@@ -562,7 +562,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.picture_as_pdf
                   : CupertinoIcons.doc,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadPdf(),
           ),

@@ -509,7 +509,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
               title: 'New Tasking',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -517,7 +517,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
             title: 'Edit Tasking',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -527,7 +527,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),
@@ -535,7 +535,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
             title: 'Filter Taskings',
             icon: Icon(
               Icons.filter_alt,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => showFilterOptions(
                 context, getSections(documents), _filterRecords),
@@ -546,7 +546,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.download
                   : CupertinoIcons.cloud_download,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadExcel(),
           ),
@@ -556,7 +556,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.upload
                   : CupertinoIcons.cloud_upload,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _uploadExcel(context),
           ),
@@ -566,7 +566,7 @@ class TaskingsPageState extends ConsumerState<TaskingsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.picture_as_pdf
                   : CupertinoIcons.doc,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadPdf(),
           ),

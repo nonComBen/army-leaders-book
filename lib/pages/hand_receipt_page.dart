@@ -494,7 +494,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
               title: 'New Item',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -502,7 +502,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
             title: 'Edit Item',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -512,7 +512,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),
@@ -520,7 +520,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
             title: 'Filter Items',
             icon: Icon(
               Icons.filter_alt,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => showFilterOptions(
                 context, getSections(documents), _filterRecords),
@@ -531,7 +531,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.download
                   : CupertinoIcons.cloud_download,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadExcel(),
           ),
@@ -541,7 +541,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.upload
                   : CupertinoIcons.cloud_upload,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _uploadExcel(context),
           ),
@@ -551,7 +551,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.picture_as_pdf
                   : CupertinoIcons.doc,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadPdf(),
           ),

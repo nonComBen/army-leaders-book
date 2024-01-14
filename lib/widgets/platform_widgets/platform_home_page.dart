@@ -154,7 +154,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Edit Soldier',
         icon: Icon(
           Icons.edit,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => editSoldier(context, selectedSoldiers),
       ),
@@ -162,7 +162,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Delete Soldier(s)',
         icon: Icon(
           Icons.delete,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => deleteSoldiers(context, selectedSoldiers, userId, ref),
       ),
@@ -170,7 +170,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Filter Soldiers',
         icon: Icon(
           Icons.filter_alt,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () =>
             selectFilters(context, getSections(soldiers), filteredSoldiers),
@@ -179,7 +179,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Share Soldier(s)',
         icon: Icon(
           Icons.share,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => shareSoldiers(context, selectedSoldiers, userId),
       ),
@@ -187,7 +187,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Download Excel',
         icon: Icon(
           Icons.download,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => downloadExcel(context, soldiers),
       ),
@@ -195,7 +195,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Upload Excel',
         icon: Icon(
           Icons.upload,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => uploadExcel(context, isSubscribed),
       ),
@@ -203,7 +203,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Download PDF',
         icon: Icon(
           Icons.picture_as_pdf,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () =>
             downloadPdf(context, isSubscribed, selectedSoldiers, userId),
@@ -212,7 +212,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Transfer Soldier',
         icon: Icon(
           Icons.arrow_circle_right,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => transferSoldier(context, selectedSoldiers, userId),
       ),
@@ -220,7 +220,7 @@ class _AndroidHomePageState extends ConsumerState<AndroidHomePage>
         title: 'Manage Users',
         icon: Icon(
           Icons.people,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => manageUsers(context, soldiers, userId),
       ),
@@ -387,7 +387,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'New Soldier',
         icon: Icon(
           CupertinoIcons.add,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(
@@ -401,7 +401,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Edit Soldier',
         icon: Icon(
           CupertinoIcons.pencil,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => editSoldier(context, selectedSoldiers),
       ),
@@ -409,7 +409,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Delete Soldier(s)',
         icon: Icon(
           CupertinoIcons.delete,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => deleteSoldiers(context, selectedSoldiers, userId, ref),
       ),
@@ -417,7 +417,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Filter Soldiers',
         icon: Icon(
           Icons.filter_alt,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () =>
             selectFilters(context, getSections(soldiers), filteredSoldiers),
@@ -426,7 +426,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Share Soldier(s)',
         icon: Icon(
           CupertinoIcons.share,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => shareSoldiers(context, selectedSoldiers, userId),
       ),
@@ -434,7 +434,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Download Excel',
         icon: Icon(
           CupertinoIcons.cloud_download,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => downloadExcel(context, soldiers),
       ),
@@ -442,7 +442,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Upload Excel',
         icon: Icon(
           CupertinoIcons.cloud_upload,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => uploadExcel(context, isSubscribed),
       ),
@@ -450,7 +450,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Download PDF',
         icon: Icon(
           CupertinoIcons.doc,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () =>
             downloadPdf(context, isSubscribed, selectedSoldiers, userId),
@@ -459,7 +459,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Transfer Soldier',
         icon: Icon(
           CupertinoIcons.arrow_right_circle,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => transferSoldier(context, selectedSoldiers, userId),
       ),
@@ -467,7 +467,7 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
         title: 'Manage Users',
         icon: Icon(
           CupertinoIcons.person_3_fill,
-          color: getOnPrimaryColor(context),
+          color: getPrimaryColor(context),
         ),
         onPressed: () => manageUsers(context, soldiers, userId),
       ),
@@ -507,14 +507,14 @@ class _IOSHomePageState extends ConsumerState<IOSHomePage>
             icon: Icon(CupertinoIcons.ellipsis),
           ),
         ],
-        activeColor: getOnPrimaryColor(context),
+        activeColor: getPrimaryColor(context),
       ),
       tabBuilder: (context, index) {
         return CupertinoTabView(
           defaultTitle: titles[index],
           builder: (context) => CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
-              backgroundColor: getPrimaryColor(context),
+              backgroundColor: getOnPrimaryColor(context),
               trailing: SizedBox(
                 width: width / 4,
                 child: Row(

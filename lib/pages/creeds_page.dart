@@ -341,37 +341,34 @@ class CreedsPageState extends ConsumerState<CreedsPage> {
                   shrinkWrap: true,
                   children: <Widget>[
                     if (user.isAnonymous) const AnonWarningBanner(),
-                    ..._creeds
-                        .map(
-                          (creed) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PlatformExpansionTile(
-                              title: Text(
-                                creed.header,
-                                style: TextStyle(
-                                  color: getOnPrimaryColor(context),
-                                  fontSize: 20,
-                                ),
-                              ),
-                              trailing: kIsWeb || Platform.isAndroid
-                                  ? Icon(
-                                      Icons.arrow_drop_down,
-                                      color: getOnPrimaryColor(context),
-                                    )
-                                  : Icon(
-                                      CupertinoIcons.chevron_down,
-                                      color: getOnPrimaryColor(context),
-                                    ),
-                              collapsedBackgroundColor:
-                                  getPrimaryColor(context),
-                              collapsedTextColor: getOnPrimaryColor(context),
-                              collapsedIconColor: getOnPrimaryColor(context),
-                              textColor: getOnPrimaryColor(context),
-                              children: [creed.body],
+                    ..._creeds.map(
+                      (creed) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: PlatformExpansionTile(
+                          title: Text(
+                            creed.header,
+                            style: TextStyle(
+                              color: getPrimaryColor(context),
+                              fontSize: 20,
                             ),
                           ),
-                        )
-                        ,
+                          trailing: kIsWeb || Platform.isAndroid
+                              ? Icon(
+                                  Icons.arrow_drop_down,
+                                  color: getPrimaryColor(context),
+                                )
+                              : Icon(
+                                  CupertinoIcons.chevron_down,
+                                  color: getPrimaryColor(context),
+                                ),
+                          collapsedBackgroundColor: getOnPrimaryColor(context),
+                          collapsedTextColor: getPrimaryColor(context),
+                          collapsedIconColor: getPrimaryColor(context),
+                          textColor: getPrimaryColor(context),
+                          children: [creed.body],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

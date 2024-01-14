@@ -247,7 +247,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
               title: 'New Note',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -255,7 +255,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
             title: 'Edit Note',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -265,7 +265,7 @@ class NotesPageState extends ConsumerState<NotesPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),

@@ -21,7 +21,7 @@ class MoreTilesHeader extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         decoration: BoxDecoration(
-          color: getPrimaryColor(context),
+          color: getOnPrimaryColor(context),
           borderRadius: BorderRadius.circular(12.0),
         ),
         child: Row(
@@ -32,7 +32,7 @@ class MoreTilesHeader extends StatelessWidget {
                 child: HeaderText(
                   label,
                   textAlign: TextAlign.start,
-                  color: getOnPrimaryColor(context),
+                  color: getPrimaryColor(context),
                 ),
               ),
             ),
@@ -42,7 +42,7 @@ class MoreTilesHeader extends StatelessWidget {
                 icon: Icon(
                   Icons.add,
                   size: 24,
-                  color: getOnPrimaryColor(context),
+                  color: getPrimaryColor(context),
                 ),
                 onPressed: onPressed,
               ),

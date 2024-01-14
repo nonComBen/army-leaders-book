@@ -107,7 +107,7 @@ class _IOSExpansionTileState extends State<IOSExpansionTile> {
             decoration: BoxDecoration(
               color: isExpanded
                   ? getBackgroundColor(context)
-                  : getPrimaryColor(context),
+                  : getOnPrimaryColor(context),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

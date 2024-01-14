@@ -560,7 +560,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
               title: 'New Qualification',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -568,7 +568,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
             title: 'Edit Qualification',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -578,7 +578,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),
@@ -586,7 +586,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
             title: 'Filter Qualifications',
             icon: Icon(
               Icons.filter_alt,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => showFilterOptions(
                 context, getSections(documents), _filterRecords),
@@ -597,7 +597,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.download
                   : CupertinoIcons.cloud_download,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadExcel(),
           ),
@@ -607,7 +607,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.upload
                   : CupertinoIcons.cloud_upload,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _uploadExcel(context),
           ),
@@ -617,7 +617,7 @@ class WeaponsPageState extends ConsumerState<WeaponsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.picture_as_pdf
                   : CupertinoIcons.doc,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadPdf(),
           ),

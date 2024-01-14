@@ -347,7 +347,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: confirmDeleteAccount,
           ),

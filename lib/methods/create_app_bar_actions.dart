@@ -29,7 +29,7 @@ List<Widget> createAppBarActions(double width, List<AppBarOption> options) {
         buttonBuilder: (context, showMenu) => PlatformIconButton(
           icon: Icon(
             CupertinoIcons.ellipsis_vertical,
-            color: getOnPrimaryColor(context),
+            color: getPrimaryColor(context),
           ),
           onPressed: showMenu,
         ),

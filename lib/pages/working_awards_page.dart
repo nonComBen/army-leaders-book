@@ -361,7 +361,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
               title: 'New Award',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -369,7 +369,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
             title: 'Edit Award',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -379,7 +379,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),
@@ -387,7 +387,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
             title: 'Filter Awards',
             icon: Icon(
               Icons.filter_alt,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => showFilterOptions(
                 context, getSections(documents), _filterRecords),
@@ -398,7 +398,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.download
                   : CupertinoIcons.cloud_download,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadExcel(),
           ),
@@ -408,7 +408,7 @@ class WorkingAwardsPageState extends ConsumerState<WorkingAwardsPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.upload
                   : CupertinoIcons.cloud_upload,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _uploadExcel(context),
           ),

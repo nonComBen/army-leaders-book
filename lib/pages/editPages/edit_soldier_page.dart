@@ -1060,7 +1060,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
               padding: const EdgeInsets.all(8.0),
               child: HeaderText(
                 widget.soldier.id == null ? 'Add Soldier' : 'Update Soldier',
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
             ),
           ),

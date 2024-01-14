@@ -25,8 +25,8 @@ abstract class PlatformApp extends StatelessWidget {
     } else {
       final iosThemeData = CupertinoThemeData(
         brightness: themeData.brightness,
-        primaryColor: themeData.colorScheme.primary,
-        primaryContrastingColor: themeData.colorScheme.onPrimary,
+        primaryColor: themeData.colorScheme.onPrimary,
+        primaryContrastingColor: themeData.colorScheme.primary,
         scaffoldBackgroundColor: themeData.scaffoldBackgroundColor,
         barBackgroundColor: themeData.dialogBackgroundColor,
         textTheme: CupertinoTextThemeData(
@@ -35,10 +35,10 @@ abstract class PlatformApp extends StatelessWidget {
                 ? Colors.black
                 : Colors.white,
           ),
-          primaryColor: themeData.colorScheme.onPrimary,
+          primaryColor: themeData.colorScheme.primary,
           navTitleTextStyle: TextStyle(
             inherit: false,
-            color: themeData.colorScheme.onPrimary,
+            color: themeData.colorScheme.primary,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),

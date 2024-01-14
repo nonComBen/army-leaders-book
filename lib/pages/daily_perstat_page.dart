@@ -626,7 +626,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                 kIsWeb || Platform.isAndroid
                     ? Icons.refresh
                     : CupertinoIcons.refresh,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () {
                 dailies.clear();
@@ -636,7 +636,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
               title: 'Filter Records',
               icon: Icon(
                 Icons.filter_alt,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () {
                 showFilterOptions(
@@ -652,7 +652,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                   kIsWeb || Platform.isAndroid
                       ? Icons.image
                       : CupertinoIcons.photo,
-                  color: getOnPrimaryColor(context),
+                  color: getPrimaryColor(context),
                 ),
                 onPressed: () => _downloadPng()),
           AppBarOption(
@@ -661,7 +661,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
                 kIsWeb || Platform.isAndroid
                     ? Icons.download
                     : CupertinoIcons.cloud_download,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _downloadExcel()),
         ],

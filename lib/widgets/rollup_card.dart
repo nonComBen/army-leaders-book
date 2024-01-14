@@ -27,6 +27,7 @@ class RollupCard extends StatelessWidget {
           children: <Widget>[
             HeaderText(
               title,
+              color: getPrimaryColor(context),
             ),
             Expanded(
               child: Padding(

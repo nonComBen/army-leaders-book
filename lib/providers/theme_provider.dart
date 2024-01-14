@@ -24,21 +24,26 @@ const MaterialColor primaryBlack =
 });
 
 ThemeData darkThemeData = ThemeData(
-  appBarTheme: const AppBarTheme(foregroundColor: Colors.yellow),
-  primarySwatch: primaryBlack,
-  dialogBackgroundColor: Colors.grey[800],
-  colorScheme: ColorScheme.highContrastDark(
-    brightness: Brightness.dark,
-    primary: Colors.black87,
-    primaryContainer: Colors.black,
-    secondary: Colors.grey,
-    secondaryContainer: Colors.grey[900],
-    background: Colors.black45,
-    onPrimary: Colors.yellow,
-    onSecondary: Colors.yellow,
-    onError: Colors.white,
-    error: Colors.red,
+  appBarTheme: const AppBarTheme(
+    foregroundColor: Colors.yellow,
+    actionsIconTheme: IconThemeData(color: Colors.yellow),
   ),
+  scaffoldBackgroundColor: Colors.grey[800],
+  floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: Colors.black, foregroundColor: Colors.yellow),
+  primarySwatch: primaryBlack,
+  dialogBackgroundColor: Colors.grey[900],
+  colorScheme: const ColorScheme.highContrastDark(
+      brightness: Brightness.dark,
+      primary: Colors.yellow,
+      primaryContainer: Colors.yellow,
+      secondary: Colors.black,
+      secondaryContainer: Colors.black,
+      onPrimary: Colors.black,
+      onSecondary: Colors.yellow,
+      onError: Colors.white,
+      error: Colors.red,
+      surface: Colors.black),
 );
 ThemeData lightThemeData = ThemeData(
   primarySwatch: primaryBlack,

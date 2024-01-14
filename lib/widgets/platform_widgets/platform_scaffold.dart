@@ -81,7 +81,7 @@ class IOSScaffold extends StatelessWidget implements PlatformScaffold {
     return CupertinoPageScaffold(
       navigationBar: title != null
           ? CupertinoNavigationBar(
-              backgroundColor: getPrimaryColor(context),
+              backgroundColor: getOnPrimaryColor(context),
               middle: Text(
                 title!,
               ),

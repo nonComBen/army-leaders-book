@@ -168,37 +168,35 @@ class FaqPageState extends ConsumerState<FaqPage> {
           child: ListView(
             children: <Widget>[
               if (user.isAnonymous) const AnonWarningBanner(),
-              ...faqs
-                  .map(
-                    (faq) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: PlatformExpansionTile(
-                        title: Text(
-                          faq.header,
-                          style: TextStyle(
-                            color: getOnPrimaryColor(context),
-                            fontSize: 20,
-                          ),
-                          softWrap: true,
-                        ),
-                        trailing: kIsWeb || Platform.isAndroid
-                            ? Icon(
-                                Icons.arrow_drop_down,
-                                color: getOnPrimaryColor(context),
-                              )
-                            : Icon(
-                                CupertinoIcons.chevron_down,
-                                color: getOnPrimaryColor(context),
-                              ),
-                        collapsedBackgroundColor: getPrimaryColor(context),
-                        collapsedTextColor: getOnPrimaryColor(context),
-                        collapsedIconColor: getOnPrimaryColor(context),
-                        textColor: getOnPrimaryColor(context),
-                        children: [faq.body],
+              ...faqs.map(
+                (faq) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformExpansionTile(
+                    title: Text(
+                      faq.header,
+                      style: TextStyle(
+                        color: getPrimaryColor(context),
+                        fontSize: 20,
                       ),
+                      softWrap: true,
                     ),
-                  )
-                  ,
+                    trailing: kIsWeb || Platform.isAndroid
+                        ? Icon(
+                            Icons.arrow_drop_down,
+                            color: getPrimaryColor(context),
+                          )
+                        : Icon(
+                            CupertinoIcons.chevron_down,
+                            color: getPrimaryColor(context),
+                          ),
+                    collapsedBackgroundColor: getOnPrimaryColor(context),
+                    collapsedTextColor: getPrimaryColor(context),
+                    collapsedIconColor: getPrimaryColor(context),
+                    textColor: getPrimaryColor(context),
+                    children: [faq.body],
+                  ),
+                ),
+              ),
             ],
           ),
         ),

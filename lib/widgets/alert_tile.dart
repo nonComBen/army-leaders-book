@@ -18,7 +18,7 @@ class AlertTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Card(
-        color: getContrastingBackgroundColor(context),
+        color: getOnPrimaryColor(context),
         child: Container(
           padding: const EdgeInsets.all(4.0),
           child: Column(
@@ -27,7 +27,7 @@ class AlertTile extends StatelessWidget {
                 soldier,
                 style: TextStyle(
                   fontSize: 18,
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: getPrimaryColor(context),
                 ),
               ),
               Row(
@@ -39,7 +39,7 @@ class AlertTile extends StatelessWidget {
                       child: Text(
                         'P: $phone',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: getPrimaryColor(context),
                         ),
                       ),
                       onPressed: () {
@@ -55,7 +55,7 @@ class AlertTile extends StatelessWidget {
                       child: Text(
                         'W: $workPhone',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: getPrimaryColor(context),
                         ),
                       ),
                       onPressed: () {

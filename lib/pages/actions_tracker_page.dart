@@ -476,7 +476,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
               title: 'New Action',
               icon: Icon(
                 CupertinoIcons.add,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: () => _newRecord(context),
             ),
@@ -484,7 +484,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
             title: 'Edit Action',
             icon: Icon(
               kIsWeb || Platform.isAndroid ? Icons.edit : CupertinoIcons.pencil,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _editRecord(),
           ),
@@ -494,7 +494,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.delete
                   : CupertinoIcons.delete,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _deleteRecord(),
           ),
@@ -502,7 +502,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
             title: 'Filter Actions',
             icon: Icon(
               Icons.filter_alt,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => showFilterOptions(
                 context, getSections(documents), _filterRecords),
@@ -513,7 +513,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.download
                   : CupertinoIcons.cloud_download,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadExcel(),
           ),
@@ -523,7 +523,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.upload
                   : CupertinoIcons.cloud_upload,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _uploadExcel(context),
           ),
@@ -533,7 +533,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.picture_as_pdf
                   : CupertinoIcons.doc,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: () => _downloadPdf(),
           ),

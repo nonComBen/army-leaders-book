@@ -582,7 +582,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
               title: 'Text All',
               icon: Icon(
                 Icons.sms,
-                color: getOnPrimaryColor(context),
+                color: getPrimaryColor(context),
               ),
               onPressed: _textAll,
             ),
@@ -592,7 +592,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
               kIsWeb || Platform.isAndroid
                   ? Icons.picture_as_pdf
                   : CupertinoIcons.doc,
-              color: getOnPrimaryColor(context),
+              color: getPrimaryColor(context),
             ),
             onPressed: _downloadPdf,
           ),

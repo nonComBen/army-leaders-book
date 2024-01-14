@@ -42,11 +42,11 @@ class CustomDrawerHeader extends ConsumerWidget {
             user.userEmail,
           ),
           currentAccountPicture: CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.secondary,
+            backgroundColor: getPrimaryColor(context),
             child: Text(initials),
           ),
           decoration: BoxDecoration(
-            color: getPrimaryColor(context),
+            color: getOnPrimaryColor(context),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
@@ -65,7 +65,7 @@ class CustomDrawerHeader extends ConsumerWidget {
         );
       } else {
         return Container(
-          color: getPrimaryColor(context),
+          color: getOnPrimaryColor(context),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -74,11 +74,11 @@ class CustomDrawerHeader extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CircleAvatar(
-                    backgroundColor: getOnPrimaryColor(context),
+                    backgroundColor: getPrimaryColor(context),
                     child: Text(
                       initials,
                       style: TextStyle(
-                        color: getPrimaryColor(context),
+                        color: getOnPrimaryColor(context),
                       ),
                     ),
                   ),
@@ -88,7 +88,7 @@ class CustomDrawerHeader extends ConsumerWidget {
                   child: Text(
                     name,
                     style: TextStyle(
-                      color: getOnPrimaryColor(context),
+                      color: getTextColor(context),
                     ),
                   ),
                 ),
@@ -97,7 +97,7 @@ class CustomDrawerHeader extends ConsumerWidget {
                   child: Text(
                     user.userEmail,
                     style: TextStyle(
-                      color: getOnPrimaryColor(context),
+                      color: getTextColor(context),
                     ),
                   ),
                 )

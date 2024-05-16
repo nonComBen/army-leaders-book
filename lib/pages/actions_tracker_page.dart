@@ -152,7 +152,7 @@ class ActionsTrackerPageState extends ConsumerState<ActionsTrackerPage> {
       docs.add(doc['statusDate']);
       docs.add(doc['remarks']);
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

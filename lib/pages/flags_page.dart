@@ -144,7 +144,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
       docs.add(doc['type']);
       docs.add(doc['comments']);
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

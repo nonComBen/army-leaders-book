@@ -210,9 +210,9 @@ class AcftPageState extends ConsumerState<AcftPage> {
       docs.add(doc['runScore']);
       docs.add(doc['total']);
       docs.add(doc['altEvent']);
-      docs.add(doc['pass'].toString());
+      docs.add(doc['pass']);
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

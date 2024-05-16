@@ -146,7 +146,7 @@ class CounselingsPageState extends ConsumerState<CounselingsPage> {
       docs.add(doc['leaderResp']);
       docs.add(doc['assessment']);
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

@@ -142,7 +142,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
       docs.add(doc['sglv']);
       docs.add(doc['prr']);
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

@@ -167,7 +167,7 @@ class EquipmentPageState extends ConsumerState<EquipmentPage> {
       docs.add(doc['misc']);
       docs.add(doc['miscSerial']);
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

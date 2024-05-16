@@ -31,7 +31,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     lintOptions {
         disable 'InvalidPackage'
@@ -40,8 +40,8 @@ android {
     defaultConfig {
         applicationId "com.armynoncomtools.leadersbook"
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 195
+        targetSdkVersion 34
+        versionCode 198
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true

@@ -40,7 +40,7 @@ class MyToast extends StatelessWidget {
               onPressed: onPressed!,
               child: Text(
                 buttonText!,
-                style: TextStyle(color: getOnPrimaryColor(context)),
+                style: TextStyle(color: getPrimaryColor(context)),
               ),
             ),
         ],

@@ -186,7 +186,7 @@ class BodyfatPageState extends ConsumerState<BodyfatPage> {
       docs.add(doc['percent']);
       docs.add(doc['passBf'].toString());
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

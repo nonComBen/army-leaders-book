@@ -156,7 +156,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
       docs.add(subs);
       docs.add(doc['comments']);
 
-      docsList.add(docs.map((e) => TextCellValue(e)).toList());
+      docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     var excel = Excel.createExcel();

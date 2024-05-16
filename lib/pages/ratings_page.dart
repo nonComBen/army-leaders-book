@@ -154,7 +154,7 @@ class RatingsPageState extends ConsumerState<RatingsPage> {
     var excel = Excel.createExcel();
     var sheet = excel.sheets[excel.getDefaultSheet()];
     for (var docs in docsList) {
-      sheet!.appendRow(docs.map((e) => TextCellValue(e)).toList());
+      sheet!.appendRow(docs.map((e) => TextCellValue(e.toString())).toList());
     }
 
     String dir, location;

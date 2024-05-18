@@ -61,7 +61,7 @@ void main() async {
     name: kIsWeb
         ? null
         : Platform.isAndroid
-            ? 'Army Leader\'s Book'
+            ? null
             : 'army-leaders-book',
     options: DefaultFirebaseOptions.currentPlatform,
   );

@@ -1007,8 +1007,8 @@ class HomePageState extends ConsumerState<RollupTab>
                   childAspectRatio: width > 750
                       ? width / 380
                       : width > 350
-                          ? width / 190
-                          : width / 250,
+                          ? width / 200
+                          : width / 275,
                   shrinkWrap: true,
                   primary: false,
                   crossAxisSpacing: 1.0,

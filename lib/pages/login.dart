@@ -19,7 +19,6 @@ import '../../widgets/center_progress_indicator.dart';
 import '../../widgets/form_frame.dart';
 import '../../widgets/logo_widget.dart';
 import '../apple_sign_in_available.dart';
-import '../methods/show_on_login.dart';
 import '../providers/soldiers_provider.dart';
 import '../providers/leader_provider.dart';
 import '../widgets/my_toast.dart';
@@ -75,13 +74,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       pInfo = await PackageInfo.fromPlatform();
       localAuthAvail = await localAuth.isDeviceSupported();
     } else {
-      bool showNipr = prefs!.getBool('niprWarning') == null
-          ? true
-          : !prefs!.getBool('niprWarning')!;
       localAuthAvail = false;
-      if (mounted && showNipr) {
-        showNiprWarning(context, prefs);
-      }
     }
     if (prefs!.getBool("Agree") == null || !prefs!.getBool('Agree')!) {
       prefs!.setBool('Agree', true);

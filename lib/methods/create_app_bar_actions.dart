@@ -27,9 +27,17 @@ List<Widget> createAppBarActions(double width, List<AppBarOption> options) {
     actions.add(
       PullDownButton(
         buttonBuilder: (context, showMenu) => PlatformIconButton(
-          icon: Icon(
-            CupertinoIcons.ellipsis_vertical,
-            color: getPrimaryColor(context),
+          icon: DecoratedBox(
+            decoration: BoxDecoration(
+              color: getOnPrimaryColor(context),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Icon(
+                CupertinoIcons.ellipsis_vertical,
+                color: getPrimaryColor(context),
+              ),
+            ),
           ),
           onPressed: showMenu,
         ),

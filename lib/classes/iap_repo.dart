@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:leaders_book/providers/auth_provider.dart';
 import 'package:leaders_book/models/past_purchase.dart';
@@ -18,6 +19,7 @@ class IAPRepo {
   final SubscriptionState subState;
 
   IAPRepo(this.subState, this._user) {
+    debugPrint('IAP Repo initialized');
     if (_user != null) {
       updatePurchases(_user!);
     }
@@ -58,6 +60,7 @@ class IAPRepo {
   }
 
   void updatePurchases(User user) async {
+    debugPrint('updatePurchases called');
     final purchaseSnapshot = await FirebaseFirestore.instance
         .collection('purchases')
         .where('userId', isEqualTo: user.uid)

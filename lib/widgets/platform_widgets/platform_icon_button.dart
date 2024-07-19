@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 abstract class PlatformIconButton extends StatelessWidget {
   factory PlatformIconButton({
-    required Icon icon,
+    required Widget icon,
     required void Function()? onPressed,
   }) {
     if (kIsWeb || Platform.isAndroid) {

@@ -49,7 +49,7 @@ class EditFlagPageState extends ConsumerState<EditFlagPage> {
   final List<String> _types = [
     'Adverse Action',
     'Alcohol Abuse',
-    'APFT Failure',
+    'ACFT Failure',
     'Commanders Investigatio',
     'Deny Automatic Promotion',
     'Drug Abuse',

@@ -228,6 +228,7 @@ class EditHandReceiptPageState extends ConsumerState<EditHandReceiptPage> {
       _formKey,
       [],
     )) {
+      debugPrint('Form is valid');
       HandReceiptItem saveHRItem = HandReceiptItem(
         id: widget.item.id,
         soldierId: _soldierId,

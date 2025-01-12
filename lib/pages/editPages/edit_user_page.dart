@@ -292,7 +292,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
     if (validateAndSave()) {
       Map<String, dynamic> saveUser = {
         'userId': widget.userId,
-        'userRank': _rankController.text,
+        'rank': _rankController.text,
         'userName': _nameController.text,
         'userUnit': _unitController.text,
         'userEmail': _emailController.text,

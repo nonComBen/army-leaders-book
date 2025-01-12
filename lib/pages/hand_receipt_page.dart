@@ -482,6 +482,7 @@ class HandReceiptPageState extends ConsumerState<HandReceiptPage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('Documents: $filteredDocs');
     final user = ref.read(authProvider).currentUser()!;
     final width = MediaQuery.of(context).size.width;
     return PlatformScaffold(

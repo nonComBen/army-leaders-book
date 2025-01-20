@@ -88,7 +88,9 @@ class AlertRosterPdf {
             current++;
             for (c = 0; c < soldiers.length; c++) {
               if ((fullPage && all >= page * 12) ||
-                  (!fullPage && all >= page * 9)) break;
+                  (!fullPage && all >= page * 9)) {
+                break;
+              }
               if (soldiers[c]!.supervisorId == soldiers[b]!.soldierId) {
                 if (current >= all) {
                   children.add(alertRow(
@@ -102,7 +104,9 @@ class AlertRosterPdf {
                 current++;
                 for (d = 0; d < soldiers.length; d++) {
                   if ((fullPage && all >= page * 12) ||
-                      (!fullPage && all >= page * 9)) break;
+                      (!fullPage && all >= page * 9)) {
+                    break;
+                  }
                   if (soldiers[d]!.supervisorId == soldiers[c]!.soldierId) {
                     if (current >= all) {
                       children.add(alertRow(
@@ -116,7 +120,9 @@ class AlertRosterPdf {
                     current++;
                     for (e = 0; e < soldiers.length; e++) {
                       if ((fullPage && all >= page * 12) ||
-                          (!fullPage && all >= page * 9)) break;
+                          (!fullPage && all >= page * 9)) {
+                        break;
+                      }
                       if (soldiers[e]!.supervisorId == soldiers[d]!.soldierId) {
                         if (current >= all) {
                           children.add(alertRow(

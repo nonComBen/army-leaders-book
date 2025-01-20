@@ -47,8 +47,8 @@ class RollupCard extends StatelessWidget {
                           infoRow2.map((e) => Expanded(child: e)).toList()),
                 ),
               ),
-            ButtonBar(
-              layoutBehavior: ButtonBarLayoutBehavior.constrained,
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
               children: buttons.map((e) => e).toList(),
             )
           ],

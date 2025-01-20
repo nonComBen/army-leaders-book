@@ -36,8 +36,6 @@ class RootPageState extends ConsumerState<RootPage> {
             return const CreateAccountPage();
           case AuthStatus.localAuthSignIn:
             return const LocalAuthLoginPage();
-          default:
-            return const LoginPage();
         }
       },
     );

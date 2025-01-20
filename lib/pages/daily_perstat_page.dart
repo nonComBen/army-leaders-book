@@ -110,7 +110,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
   void _downloadExcel() async {
     List<List<CellValue>> docsList = [];
     docsList.add([TextCellValue(dateFormat.format(DateTime.now()))]);
-    docsList.add(const [
+    docsList.add([
       TextCellValue('Soldier'),
       TextCellValue('Assigned'),
       TextCellValue('Status'),
@@ -668,7 +668,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
       ),
       body: PopScope(
         canPop: true,
-        onPopInvoked: (bool didPop) {
+        onPopInvokedWithResult: (bool didPop, dynamic result) {
           onWillPop();
         },
         child: Center(

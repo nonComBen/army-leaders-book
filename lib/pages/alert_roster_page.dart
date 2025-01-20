@@ -605,7 +605,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
           constraints: const BoxConstraints(maxWidth: 900),
           child: PopScope(
             canPop: true,
-            onPopInvoked: (bool didPop) {
+            onPopInvokedWithResult: (bool didPop, dynamic result) {
               onWillPop();
             },
             child: ListView(

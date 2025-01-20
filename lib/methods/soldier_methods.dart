@@ -75,7 +75,7 @@ void selectFilters(BuildContext context, List<String> sections,
 
 void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
   List<List<CellValue>> docsList = [];
-  docsList.add(const [
+  docsList.add([
     TextCellValue('Soldier Id'),
     TextCellValue('Rank'),
     TextCellValue('Rank Sort'),

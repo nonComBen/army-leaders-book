@@ -82,7 +82,7 @@ class IOSCheckboxListTile extends StatelessWidget
   Widget build(BuildContext context) {
     final cupertinoSwitch = CupertinoSwitch(
       value: value,
-      activeColor: activeColor ?? getOnPrimaryColor(context),
+      activeTrackColor: activeColor ?? getOnPrimaryColor(context),
       onChanged: onChanged,
     );
     return CupertinoListTile(

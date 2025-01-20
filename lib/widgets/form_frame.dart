@@ -18,7 +18,7 @@ class FormFrame extends StatelessWidget {
       key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       canPop: canPop,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, dynamic result) async {
         if (didPop) {
           return;
         }

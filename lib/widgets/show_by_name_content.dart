@@ -185,8 +185,6 @@ class ShowByNameContent extends StatelessWidget {
                     subtitle: Text(subtitle)),
               );
               break;
-            default:
-              null;
           }
           return card;
         },

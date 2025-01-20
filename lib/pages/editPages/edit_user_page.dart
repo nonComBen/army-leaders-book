@@ -150,7 +150,6 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
             padding: const EdgeInsets.all(8.0),
             child: SignInWithAppleButton(
               borderRadius: const BorderRadius.all(Radius.circular(24)),
-              iconAlignment: IconAlignment.center,
               onPressed: () async {
                 Navigator.pop(context);
                 user = await auth.reathenticateWithCredential('apple', '');

@@ -55,7 +55,7 @@ ThemeData lightThemeData = ThemeData(
     primaryContainer: Colors.black,
     secondary: Colors.grey,
     secondaryContainer: Colors.grey[500],
-    background: Colors.black45,
+    surface: Colors.black45,
     onPrimary: Colors.amber,
     onSecondary: Colors.amber,
     onError: Colors.white,

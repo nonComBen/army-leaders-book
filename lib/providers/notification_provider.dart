@@ -71,6 +71,7 @@ class NotificationService {
         title,
         body,
         scheduledDate,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'androidId',

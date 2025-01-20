@@ -391,7 +391,7 @@ class SettingsPageState extends ConsumerState<SettingsPage> {
           child: Form(
             key: _formState,
             canPop: !updated,
-            onPopInvoked: (bool didPop) {
+            onPopInvokedWithResult: (bool didPop, dynamic result) {
               if (didPop) {
                 return;
               }

@@ -36,10 +36,10 @@ class AndroidButton extends StatelessWidget implements PlatformButton {
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
         style: ButtonStyle(
-          padding: MaterialStateProperty.all<EdgeInsets>(
+          padding: WidgetStateProperty.all<EdgeInsets>(
             EdgeInsets.symmetric(vertical: buttonPadding, horizontal: 20.0),
           ),
-          shape: MaterialStateProperty.all<OutlinedBorder>(
+          shape: WidgetStateProperty.all<OutlinedBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
             ),

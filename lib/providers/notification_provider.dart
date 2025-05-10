@@ -84,8 +84,6 @@ class NotificationService {
             presentSound: true,
           ),
         ),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
         payload: payload,
       );
     } on Exception catch (e) {

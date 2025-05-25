@@ -128,9 +128,11 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
       'Section',
       'Date',
       'Shaving',
-      'PU',
-      'SU',
-      'Run',
+      'MDL',
+      'HRP',
+      'SDC',
+      'PLK'
+          'Run',
       'Alt Event',
       'Comments'
     ]);
@@ -144,8 +146,10 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
       docs.add(doc['section']);
       docs.add(doc['date']);
       docs.add(doc['shaving'].toString());
-      docs.add(doc['pu'].toString());
-      docs.add(doc['su'].toString());
+      docs.add(doc['mdl'].toString());
+      docs.add(doc['hrp'].toString());
+      docs.add(doc['sdc'].toString());
+      docs.add(doc['plk'].toString());
       docs.add(doc['run'].toString());
       docs.add(doc['altEvent']);
       docs.add(doc['comments']);
@@ -329,34 +333,52 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
     if (width > 500) {
       columnList.add(
         DataColumn(
-          label: const Text('PU'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending),
-        ),
-      );
-    }
-    if (width > 650) {
-      columnList.add(
-        DataColumn(
-          label: const Text('SU'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending),
-        ),
-      );
-    }
-    if (width > 735) {
-      columnList.add(
-        DataColumn(
           label: const Text('Run'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending),
         ),
       );
     }
-    if (width > 880) {
+    if (width > 700) {
       columnList.add(
         DataColumn(
           label: const Text('Alt Event'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
+    }
+    if (width > 800) {
+      columnList.add(
+        DataColumn(
+          label: const Text('MDL'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
+    }
+    if (width > 900) {
+      columnList.add(
+        DataColumn(
+          label: const Text('HRP'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
+    }
+    if (width > 1000) {
+      columnList.add(
+        DataColumn(
+          label: const Text('SDC'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
+    }
+    if (width > 1100) {
+      columnList.add(
+        DataColumn(
+          label: const Text('PLK'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending),
         ),
@@ -384,6 +406,15 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
       DataCell(Text(
           '${documentSnapshot['name']}, ${documentSnapshot['firstName']}')),
     ];
+    String mdl = 'true', hrp = 'true', sdc = 'true', plk = 'true';
+    try {
+      mdl = documentSnapshot['mdl'].toString();
+      hrp = documentSnapshot['hrp'].toString();
+      sdc = documentSnapshot['sdc'].toString();
+      plk = documentSnapshot['plk'].toString();
+    } catch (e) {
+      debugPrint('new events are null');
+    }
     if (width > 395) {
       cellList.add(
         DataCell(
@@ -397,33 +428,45 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
       cellList.add(
         DataCell(
           Text(
-            documentSnapshot['pu'].toString(),
-          ),
-        ),
-      );
-    }
-    if (width > 650) {
-      cellList.add(
-        DataCell(
-          Text(
-            documentSnapshot['su'].toString(),
-          ),
-        ),
-      );
-    }
-    if (width > 735) {
-      cellList.add(
-        DataCell(
-          Text(
             documentSnapshot['run'].toString(),
           ),
         ),
       );
     }
-    if (width > 880) {
+    if (width > 700) {
       cellList.add(
         DataCell(
-          Text(documentSnapshot['altEvent']),
+          Text(
+            documentSnapshot['altEvent'].toString(),
+          ),
+        ),
+      );
+    }
+    if (width > 800) {
+      cellList.add(
+        DataCell(
+          Text(mdl),
+        ),
+      );
+    }
+    if (width > 900) {
+      cellList.add(
+        DataCell(
+          Text(hrp),
+        ),
+      );
+    }
+    if (width > 1000) {
+      cellList.add(
+        DataCell(
+          Text(sdc),
+        ),
+      );
+    }
+    if (width > 1100) {
+      cellList.add(
+        DataCell(
+          Text(plk),
         ),
       );
     }
@@ -444,16 +487,22 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
             filteredDocs.sort((a, b) => a['shaving'].compareTo(b['shaving']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['pu'].compareTo(b['pu']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => a['su'].compareTo(b['su']));
-            break;
-          case 5:
             filteredDocs.sort((a, b) => a['run'].compareTo(b['run']));
             break;
-          case 6:
+          case 4:
             filteredDocs.sort((a, b) => a['altEvent'].compareTo(b['altEvent']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => a['mdl'].compareTo(b['mdl']));
+            break;
+          case 6:
+            filteredDocs.sort((a, b) => a['hrp'].compareTo(b['hrp']));
+            break;
+          case 7:
+            filteredDocs.sort((a, b) => a['sdc'].compareTo(b['sdc']));
+            break;
+          case 8:
+            filteredDocs.sort((a, b) => a['plk'].compareTo(b['plk']));
             break;
         }
       } else {
@@ -468,16 +517,22 @@ class PermProfilesPageState extends ConsumerState<PermProfilesPage> {
             filteredDocs.sort((a, b) => b['shaving'].compareTo(a['shaving']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['pu'].compareTo(a['pu']));
-            break;
-          case 4:
-            filteredDocs.sort((a, b) => b['su'].compareTo(a['su']));
-            break;
-          case 5:
             filteredDocs.sort((a, b) => b['run'].compareTo(a['run']));
             break;
-          case 6:
+          case 4:
             filteredDocs.sort((a, b) => b['altEvent'].compareTo(a['altEvent']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => b['mdl'].compareTo(a['mdl']));
+            break;
+          case 6:
+            filteredDocs.sort((a, b) => b['hrp'].compareTo(a['hrp']));
+            break;
+          case 7:
+            filteredDocs.sort((a, b) => b['sdc'].compareTo(a['sdc']));
+            break;
+          case 8:
+            filteredDocs.sort((a, b) => b['plk'].compareTo(a['plk']));
             break;
         }
       }

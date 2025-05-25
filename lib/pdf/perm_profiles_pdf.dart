@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:leaders_book/methods/download_methods.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
@@ -39,30 +40,41 @@ class PermProfilesPdf {
   TableRow tableHeader(bool fullPage) {
     return TableRow(children: [
       headerField('Name', fullPage ? 2.75 : 2.5),
-      if (fullPage) headerField('Date', 1.75),
-      headerField('Shaving', 1.0),
-      headerField('PU', 0.75),
-      headerField('PU', 0.75),
-      headerField('PU', 0.75),
-      headerField('Alt Event', 1.25),
+      headerField('Shave', 0.85),
+      headerField('Run', 0.85),
+      if (fullPage) headerField('Alt Event', 1.25),
+      headerField('MDL', 0.75),
+      headerField('HRP', 0.75),
+      headerField('SDC', 0.75),
+      headerField('PLK', 0.75),
     ]);
   }
 
   List<TableRow> tableChildren(bool fullPage, int startIndex, int endIndex) {
     List<TableRow> children = [];
     for (int i = startIndex; i <= endIndex; i++) {
+      String mdl = 'TRUE', hrp = 'TRUE', sdc = 'TRUE', plk = 'TRUE';
+      try {
+        mdl = documents[i]['mdl'].toString().toUpperCase();
+        hrp = documents[i]['hrp'].toString().toUpperCase();
+        sdc = documents[i]['sdc'].toString().toUpperCase();
+        plk = documents[i]['plk'].toString().toUpperCase();
+      } catch (e) {
+        debugPrint('new events are null');
+      }
       children.add(
         TableRow(
           children: [
             tableField(
                 '${documents[i]['rank']} ${documents[i]['name']}, ${documents[i]['firstName']}',
                 fullPage ? 2.75 : 2.5),
-            if (fullPage) tableField(documents[i]['date'], 1.75),
-            tableField(documents[i]['shaving'].toString().toUpperCase(), 1.0),
-            tableField(documents[i]['pu'].toString().toUpperCase(), 0.75),
-            tableField(documents[i]['su'].toString().toUpperCase(), 0.75),
-            tableField(documents[i]['run'].toString().toUpperCase(), 0.75),
-            tableField(documents[i]['altEvent'], 1.25),
+            tableField(documents[i]['shaving'].toString().toUpperCase(), 0.85),
+            tableField(documents[i]['run'].toString().toUpperCase(), 0.85),
+            if (fullPage) tableField(documents[i]['altEvent'], 1.25),
+            tableField(mdl, 0.75),
+            tableField(hrp, 0.75),
+            tableField(sdc, 0.75),
+            tableField(plk, 0.75),
           ],
         ),
       );

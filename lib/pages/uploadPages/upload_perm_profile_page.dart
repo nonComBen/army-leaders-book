@@ -30,7 +30,17 @@ class UploadPermProfilePage extends ConsumerStatefulWidget {
 class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
   late List<String> columnHeaders;
   late List<List<Data?>> rows;
-  String? soldierId, date, shaving, pu, su, run, altEvent, comments, path;
+  String? soldierId,
+      date,
+      shaving,
+      mdl,
+      hrp,
+      sdc,
+      plk,
+      run,
+      altEvent,
+      comments,
+      path;
 
   void _openFileExplorer() async {
     try {
@@ -59,8 +69,10 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
       soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';
       date = columnHeaders.contains('Date') ? 'Date' : '';
       shaving = columnHeaders.contains('Shaving') ? 'Shaving' : '';
-      pu = columnHeaders.contains('PU') ? 'PU' : '';
-      su = columnHeaders.contains('SU') ? 'SU' : '';
+      mdl = columnHeaders.contains('MDL') ? 'MDL' : '';
+      hrp = columnHeaders.contains('HRP') ? 'HRP' : '';
+      sdc = columnHeaders.contains('SDC') ? 'SDC' : '';
+      plk = columnHeaders.contains('PLK') ? 'PLK' : '';
       run = columnHeaders.contains('Run') ? 'Run' : '';
       altEvent = columnHeaders.contains('Alt Event') ? 'Alt Event' : '';
       comments = columnHeaders.contains('Comments') ? 'Comments' : '';
@@ -81,6 +93,7 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
       List<String> events = [];
       events.add('');
       events.add('Walk');
+      events.add('Row');
       events.add('Bike');
       events.add('Swim');
 
@@ -103,8 +116,10 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
           String saveDate =
               convertDate(getCellValue(rows[i], columnHeaders, date));
           String saveShaving = getCellValue(rows[i], columnHeaders, shaving);
-          String savePu = getCellValue(rows[i], columnHeaders, pu);
-          String saveSu = getCellValue(rows[i], columnHeaders, su);
+          String saveMdl = getCellValue(rows[i], columnHeaders, mdl);
+          String saveHrp = getCellValue(rows[i], columnHeaders, hrp);
+          String saveSdc = getCellValue(rows[i], columnHeaders, sdc);
+          String savePlk = getCellValue(rows[i], columnHeaders, plk);
           String saveRun = getCellValue(rows[i], columnHeaders, run);
           String saveAltEvent = getCellValue(rows[i], columnHeaders, altEvent);
           String saveComments = getCellValue(rows[i], columnHeaders, comments);
@@ -125,8 +140,14 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
             date: saveDate,
             shaving: saveShaving.toLowerCase() == 'true' ||
                 saveShaving.toLowerCase() == 'yes',
-            pu: savePu.toLowerCase() == 'true' || savePu.toLowerCase() == 'yes',
-            su: saveSu.toLowerCase() == 'true' || saveSu.toLowerCase() == 'yes',
+            mdl: saveMdl.toLowerCase() == 'true' ||
+                saveMdl.toLowerCase() == 'yes',
+            hrp: saveHrp.toLowerCase() == 'true' ||
+                saveHrp.toLowerCase() == 'yes',
+            sdc: saveSdc.toLowerCase() == 'true' ||
+                saveSdc.toLowerCase() == 'yes',
+            plk: savePlk.toLowerCase() == 'true' ||
+                savePlk.toLowerCase() == 'yes',
             run: saveRun.toLowerCase() == 'true' ||
                 saveRun.toLowerCase() == 'yes',
             altEvent: saveAltEvent,
@@ -147,8 +168,10 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
     soldierId = '';
     date = '';
     shaving = '';
-    pu = '';
-    su = '';
+    mdl = '';
+    hrp = '';
+    sdc = '';
+    plk = '';
     run = '';
     altEvent = '';
     comments = '';
@@ -244,12 +267,12 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 padding: EdgeInsets.fromLTRB(
                     8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
-                  label: const Text('Push Ups'),
+                  label: const Text('Maximum Deadlift'),
                   items: columnHeaders,
-                  value: pu,
+                  value: mdl,
                   onChanged: (value) {
                     setState(() {
-                      pu = value;
+                      mdl = value;
                     });
                   },
                 ),
@@ -258,12 +281,40 @@ class UploadPermProfilePageState extends ConsumerState<UploadPermProfilePage> {
                 padding: EdgeInsets.fromLTRB(
                     8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
                 child: PlatformItemPicker(
-                  label: const Text('Sit Ups'),
+                  label: const Text('Hand Release Push Ups'),
                   items: columnHeaders,
-                  value: su,
+                  value: hrp,
                   onChanged: (value) {
                     setState(() {
-                      su = value;
+                      hrp = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Sprint-Drag-Carry'),
+                  items: columnHeaders,
+                  value: sdc,
+                  onChanged: (value) {
+                    setState(() {
+                      sdc = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('Plank'),
+                  items: columnHeaders,
+                  value: plk,
+                  onChanged: (value) {
+                    setState(() {
+                      plk = value;
                     });
                   },
                 ),

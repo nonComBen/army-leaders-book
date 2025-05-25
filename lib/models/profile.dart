@@ -94,8 +94,12 @@ class PermProfile {
   String date;
   String type;
   bool shaving;
-  bool pu;
-  bool su;
+  //bool pu;
+  //bool su;
+  bool mdl;
+  bool hrp;
+  bool sdc;
+  bool plk;
   bool run;
   String altEvent;
   String comments;
@@ -113,8 +117,12 @@ class PermProfile {
     this.date = '',
     this.type = 'Permanent',
     this.shaving = false,
-    this.pu = false,
-    this.su = false,
+    // this.pu = false,
+    // this.su = false,
+    this.mdl = false,
+    this.hrp = false,
+    this.sdc = false,
+    this.plk = false,
     this.run = false,
     this.altEvent = '',
     this.comments = '',
@@ -133,8 +141,12 @@ class PermProfile {
     map['date'] = date;
     map['type'] = type;
     map['shaving'] = shaving;
-    map['pu'] = pu;
-    map['su'] = su;
+    // map['pu'] = pu;
+    // map['su'] = su;
+    map['mdl'] = mdl;
+    map['hrp'] = hrp;
+    map['sdc'] = sdc;
+    map['plk'] = plk;
     map['run'] = run;
     map['altEvent'] = altEvent;
     map['comments'] = comments;
@@ -144,10 +156,22 @@ class PermProfile {
 
   factory PermProfile.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
+    bool mdl = true;
+    bool hrp = true;
+    bool sdc = true;
+    bool plk = true;
     try {
       users = doc['users'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
+    }
+    try {
+      mdl = doc['mdl'];
+      hrp = doc['hrp'];
+      sdc = doc['sdc'];
+      plk = doc['plk'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'AFT Events Do Not Exist');
     }
     return PermProfile(
       id: doc.id,
@@ -162,8 +186,12 @@ class PermProfile {
       date: doc['date'],
       type: doc['type'],
       shaving: doc['shaving'],
-      pu: doc['pu'],
-      su: doc['su'],
+      // pu: doc['pu'],
+      // su: doc['su'],
+      mdl: mdl,
+      hrp: hrp,
+      sdc: sdc,
+      plk: plk,
       run: doc['run'],
       altEvent: doc['altEvent'],
       comments: doc['comments'],

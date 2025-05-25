@@ -55,6 +55,7 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
   final List<String> _events = [
     '',
     'Walk',
+    'Row',
     'Bike',
     'Swim',
   ];
@@ -62,8 +63,10 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
   bool removeSoldiers = false,
       updated = false,
       shaving = false,
-      pu = false,
-      su = false,
+      mdl = false,
+      hrp = false,
+      sdc = false,
+      plk = false,
       run = false;
   DateTime? _dateTime;
 
@@ -97,8 +100,10 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
     _commentsController.text = widget.profile.comments;
 
     shaving = widget.profile.shaving;
-    pu = widget.profile.pu;
-    su = widget.profile.su;
+    mdl = widget.profile.mdl;
+    hrp = widget.profile.hrp;
+    sdc = widget.profile.sdc;
+    plk = widget.profile.plk;
     run = widget.profile.run;
 
     _dateTime = DateTime.tryParse(widget.profile.date);
@@ -125,8 +130,10 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
         rankSort: _rankSort!,
         date: _dateController.text,
         shaving: shaving,
-        pu: pu,
-        su: su,
+        mdl: mdl,
+        hrp: hrp,
+        sdc: sdc,
+        plk: plk,
         run: run,
         altEvent: _event!,
         comments: _commentsController.text,
@@ -178,12 +185,12 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
           padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
           child: PlatformCheckboxListTile(
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('Pushup'),
-            value: pu,
+            title: const Text('MDL'),
+            value: mdl,
             onChanged: (value) {
               if (mounted) {
                 setState(() {
-                  pu = value!;
+                  mdl = value!;
                   updated = true;
                 });
               }
@@ -194,12 +201,44 @@ class EditPermProfilePageState extends ConsumerState<EditPermProfilePage> {
           padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
           child: PlatformCheckboxListTile(
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('Situp'),
-            value: su,
+            title: const Text('HRP'),
+            value: hrp,
             onChanged: (value) {
               if (mounted) {
                 setState(() {
-                  su = value!;
+                  hrp = value!;
+                  updated = true;
+                });
+              }
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+          child: PlatformCheckboxListTile(
+            controlAffinity: ListTileControlAffinity.leading,
+            title: const Text('SDC'),
+            value: sdc,
+            onChanged: (value) {
+              if (mounted) {
+                setState(() {
+                  sdc = value!;
+                  updated = true;
+                });
+              }
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+          child: PlatformCheckboxListTile(
+            controlAffinity: ListTileControlAffinity.leading,
+            title: const Text('Plank'),
+            value: plk,
+            onChanged: (value) {
+              if (mounted) {
+                setState(() {
+                  plk = value!;
                   updated = true;
                 });
               }

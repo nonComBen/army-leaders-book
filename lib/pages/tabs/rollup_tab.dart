@@ -208,7 +208,8 @@ class HomePageState extends ConsumerState<RollupTab>
     }
   }
 
-  showByName(String title, List<DocumentSnapshot> list, HomeCard homeCard) {
+  void showByName(
+      String title, List<DocumentSnapshot> list, HomeCard homeCard) {
     Widget content = ShowByNameContent(
       title: title,
       list: list,

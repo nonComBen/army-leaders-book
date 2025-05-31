@@ -106,7 +106,7 @@ class AptsPageState extends ConsumerState<AptsPage> {
     super.dispose();
   }
 
-  _uploadExcel(BuildContext context) {
+  void _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
           context,

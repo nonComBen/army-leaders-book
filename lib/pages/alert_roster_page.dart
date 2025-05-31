@@ -73,7 +73,7 @@ class AlertRosterPageState extends ConsumerState<AlertRosterPage> {
     prefs = ref.read(sharedPreferencesProvider);
   }
 
-  initialize() async {
+  Future<void> initialize() async {
     _supervisors.addAll(_allSoldiers
         .map((e) => {
               'soldier': '${e.rank} ${e.lastName}, ${e.firstName}',

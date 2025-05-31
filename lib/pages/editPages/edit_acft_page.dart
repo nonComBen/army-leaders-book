@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:leaders_book/calculators/aft_hrp_calculator.dart';
+import 'package:leaders_book/calculators/aft_mdl_calculator.dart';
+import 'package:leaders_book/calculators/aft_plk_calculator.dart';
+import 'package:leaders_book/calculators/aft_run_calculator.dart';
+import 'package:leaders_book/calculators/aft_sdc_calculator.dart';
 import 'package:leaders_book/models/setting.dart';
 
 import '../../providers/auth_provider.dart';
@@ -99,7 +104,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       hrpPass = true,
       sdcPass = true,
       plkPass = true,
-      runPass = true;
+      runPass = true,
+      aft = true;
   final List<String> _runTypes = ['Run', 'Walk', 'Row', 'Bike', 'Swim'];
   late DateTime _dateTime;
   FToast toast = FToast();
@@ -148,6 +154,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     }
     _ageGroup = widget.acft.ageGroup;
     _gender = widget.acft.gender;
+    aft = widget.acft.aft;
 
     _soldierId = widget.acft.soldierId;
     _rank = widget.acft.rank;
@@ -270,51 +277,73 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   }
 
   void calcMdl() {
-    _mdlScore = getMdlScore(
-      ageGroup: ageGroups.indexOf(_ageGroup) + 1,
-      male: _gender == 'Male',
-      weight: _mdlRaw!,
-    );
+    _mdlScore = aft
+        ? getAftMdlScore(
+            weight: _mdlRaw!,
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male')
+        : getMdlScore(
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male',
+            weight: _mdlRaw!,
+          );
     mdlPass = _mdlScore! >= 60;
     _deadliftController.text = _mdlScore.toString();
   }
 
   void calcSpt() {
-    _sptScore = getSptScore(
-      ageGroup: ageGroups.indexOf(_ageGroup) + 1,
-      dist: _sptRaw!,
-      male: _gender == 'Male',
-    );
-    sptPass = _sptScore! >= 60;
+    _sptScore = aft
+        ? 0
+        : getSptScore(
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            dist: _sptRaw!,
+            male: _gender == 'Male',
+          );
+    sptPass = _sptScore! >= 60 || aft;
     _powerThrowController.text = _sptScore.toString();
   }
 
   void calcHrp() {
-    _hrpScore = getHrpScore(
-      ageGroup: ageGroups.indexOf(_ageGroup) + 1,
-      male: _gender == 'Male',
-      pushups: _hrpRaw!,
-    );
+    _hrpScore = aft
+        ? getAftHrpScore(
+            pushups: _hrpRaw!,
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male')
+        : getHrpScore(
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male',
+            pushups: _hrpRaw!,
+          );
     hrpPass = _hrpScore! >= 60;
     _puController.text = _hrpScore.toString();
   }
 
   void calcSdc() {
-    _sdcScore = getSdcScore(
-      ageGroup: ageGroups.indexOf(_ageGroup) + 1,
-      male: _gender == 'Male',
-      time: getIntTime(_sdcMins, _sdcSecs),
-    );
+    _sdcScore = aft
+        ? getAftSdcScore(
+            time: getIntTime(_sdcMins, _sdcSecs),
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male')
+        : getSdcScore(
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male',
+            time: getIntTime(_sdcMins, _sdcSecs),
+          );
     sdcPass = _sdcScore! >= 60;
     _dragController.text = _sdcScore.toString();
   }
 
   void calcPlk() {
-    _plkScore = getPlkScore(
-      ageGroup: ageGroups.indexOf(_ageGroup) + 1,
-      male: _gender == 'Male',
-      time: getIntTime(_plkMins, _plkSecs),
-    );
+    _plkScore = aft
+        ? getAftPlkScore(
+            time: getIntTime(_plkMins, _plkSecs),
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male')
+        : getPlkScore(
+            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+            male: _gender == 'Male',
+            time: getIntTime(_plkMins, _plkSecs),
+          );
     plkPass = _plkScore! >= 60;
     _plankController.text = _plkScore.toString();
   }
@@ -322,11 +351,16 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   void calcRunScore() {
     int time = getIntTime(_runMins, _runSecs);
     if (_runType == 'Run') {
-      _runScore = get2mrScore(
-        ageGroup: ageGroups.indexOf(_ageGroup) + 1,
-        male: _gender == 'Male',
-        time: time,
-      );
+      _runScore = aft
+          ? getAft2mrScore(
+              time: time,
+              ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+              male: _gender == 'Male')
+          : get2mrScore(
+              ageGroup: ageGroups.indexOf(_ageGroup) + 1,
+              male: _gender == 'Male',
+              time: time,
+            );
     } else {
       List<String> altMins =
           getAltBenchmarks(ageGroups.indexOf(_ageGroup), _gender == 'Male');
@@ -389,9 +423,9 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
           notificationService.scheduleNotification(
             dateTime: dueDate.subtract(Duration(days: days)),
             id: id,
-            title: '$_rank $_lastName\'s ACFT Due',
+            title: '$_rank $_lastName\'s ACFT/AFT Due',
             body:
-                '$_rank $_lastName\'s ACFT Due in $days on ${formatter.format(dueDate)}',
+                '$_rank $_lastName\'s ACFT/AFT Due in $days on ${formatter.format(dueDate)}',
             payload: 'ACFT',
           );
           id++;
@@ -413,7 +447,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         ageGroup: _ageGroup,
         gender: _gender,
         deadliftRaw: _deadliftRawController.text,
-        powerThrowRaw: _powerThrowRawController.text,
+        powerThrowRaw: aft ? '0' : _powerThrowRawController.text,
         puRaw: _puRawController.text,
         dragRaw: _dragRawController.text,
         plankRaw: _plankRawController.text,
@@ -428,6 +462,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         altEvent: _runType,
         pass: pass,
         notificationIds: notificationIds,
+        aft: aft,
       );
 
       if (widget.acft.id == null) {
@@ -512,6 +547,27 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                 controller: _dateController,
                 label: 'Date',
                 date: _dateTime,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: PlatformSelectionWidget(
+                  titles: const [Text('AFT'), Text('ACFT')],
+                  groupValue: aft ? 'AFT' : 'ACFT',
+                  values: const ['AFT', 'ACFT'],
+                  onChanged: (dynamic value) {
+                    setState(() {
+                      updated = true;
+                      aft = value == 'AFT';
+                      calcMdl();
+                      calcSpt();
+                      calcHrp();
+                      calcSdc();
+                      calcPlk();
+                      calcRunScore();
+                      calcTotal();
+                    });
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -615,36 +671,40 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                   labelText: 'Score',
                 ),
               ),
-              const Padding(
-                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                  child: HeaderText(
-                    'SPT',
-                    textAlign: TextAlign.start,
-                  )),
-              PaddedTextField(
-                controller: _powerThrowRawController,
-                keyboardType: TextInputType.text,
-                label: 'Raw',
-                decoration: const InputDecoration(
-                  labelText: 'Raw',
+              if (!aft)
+                const Padding(
+                    padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                    child: HeaderText(
+                      'SPT',
+                      textAlign: TextAlign.start,
+                    )),
+              if (!aft)
+                PaddedTextField(
+                  controller: _powerThrowRawController,
+                  keyboardType: TextInputType.text,
+                  label: 'Raw',
+                  enabled: !aft,
+                  decoration: const InputDecoration(
+                    labelText: 'Raw',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      updated = true;
+                      _sptRaw = double.tryParse(value) ?? 0;
+                      calcSpt();
+                      calcTotal();
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    updated = true;
-                    _sptRaw = double.tryParse(value) ?? 0;
-                    calcSpt();
-                    calcTotal();
-                  });
-                },
-              ),
-              PaddedTextField(
-                controller: _powerThrowController,
-                enabled: false,
-                label: 'Score',
-                decoration: const InputDecoration(
-                  labelText: 'Score',
+              if (!aft)
+                PaddedTextField(
+                  controller: _powerThrowController,
+                  enabled: false,
+                  label: 'Score',
+                  decoration: const InputDecoration(
+                    labelText: 'Score',
+                  ),
                 ),
-              ),
               const Padding(
                 padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
                 child: HeaderText(

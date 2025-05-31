@@ -34,7 +34,7 @@ class LinkAnonymousPageState extends ConsumerState<LinkAnonymousPage> {
   final _nameController = TextEditingController();
   User? user;
 
-  _launchURL(String url) async {
+  Future<void> _launchURL(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {

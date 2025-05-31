@@ -30,6 +30,7 @@ class Acft {
   String altEvent;
   bool pass;
   List<dynamic>? notificationIds;
+  bool aft;
 
   Acft({
     this.id,
@@ -60,6 +61,7 @@ class Acft {
     this.altEvent = 'Run',
     this.pass = true,
     this.notificationIds,
+    this.aft = true,
   });
 
   static const String collectionName = 'acftStats';
@@ -93,6 +95,7 @@ class Acft {
     map['altEvent'] = altEvent;
     map['pass'] = pass;
     map['notificationIds'] = notificationIds;
+    map['aft'] = aft;
 
     return map;
   }
@@ -101,6 +104,7 @@ class Acft {
     List<dynamic> users = [doc['owner']];
     String ageGroup = '17-21', gender = 'Male';
     List<dynamic>? notificationIds;
+    bool aft = false;
     try {
       users = doc['users'];
     } catch (e) {
@@ -112,6 +116,11 @@ class Acft {
       notificationIds = doc['notificationIds'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'AgeGroup Does Not Exist');
+    }
+    try {
+      aft = doc['aft'];
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Aft Does Not Exist');
     }
     return Acft(
       id: doc.id,
@@ -142,6 +151,7 @@ class Acft {
       altEvent: doc['altEvent'],
       pass: doc['pass'],
       notificationIds: notificationIds,
+      aft: aft,
     );
   }
 }

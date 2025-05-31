@@ -106,7 +106,7 @@ class FlagsPageState extends ConsumerState<FlagsPage> {
     super.dispose();
   }
 
-  _uploadExcel(BuildContext context) {
+  void _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
         context,

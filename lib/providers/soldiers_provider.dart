@@ -13,7 +13,7 @@ final soldiersProvider =
 class SoldiersService extends StateNotifier<List<Soldier>> {
   SoldiersService() : super([]);
 
-  get soldiers {
+  List<Soldier> get soldiers {
     return state;
   }
 

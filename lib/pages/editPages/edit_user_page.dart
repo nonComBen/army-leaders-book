@@ -287,7 +287,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
     return false;
   }
 
-  submit(BuildContext context) {
+  void submit(BuildContext context) {
     if (validateAndSave()) {
       Map<String, dynamic> saveUser = {
         'userId': widget.userId,

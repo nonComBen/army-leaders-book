@@ -11,7 +11,7 @@ class FilteredSoldiers extends StateNotifier<List<Soldier>> {
   FilteredSoldiers(this.allSoldiers) : super(allSoldiers);
   final List<Soldier> allSoldiers;
 
-  get soldiers => state;
+  List<Soldier> get soldiers => state;
 
   void filter(List<String> sections) {
     state = allSoldiers

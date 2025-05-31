@@ -12,7 +12,7 @@ class AppleSignInAvailable {
     _isAvailable = await SignInWithApple.isAvailable();
   }
 
-  get isAvailable {
+  bool get isAvailable {
     return _isAvailable;
   }
 }

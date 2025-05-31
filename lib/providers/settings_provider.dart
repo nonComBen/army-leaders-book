@@ -13,7 +13,7 @@ final settingsProvider =
 class SettingsService extends StateNotifier<Setting?> {
   SettingsService() : super(null);
 
-  get settings {
+  Setting? get settings {
     return state;
   }
 

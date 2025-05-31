@@ -173,7 +173,7 @@ class EditBodyfatPageState extends ConsumerState<EditBodyfatPage> {
     return (number * 2).round() / 2;
   }
 
-  calcBf() {
+  void calcBf() {
     int maxPercent = bfCalculator.percentTable[
         _gender == 'Male' ? ageGroupIndex() : ageGroupIndex() + 4];
     int weight = int.tryParse(_weightController.text) ?? 0;

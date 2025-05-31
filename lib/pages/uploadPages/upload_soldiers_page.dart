@@ -93,7 +93,7 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
     }
   }
 
-  _readExcel(Sheet sheet) {
+  void _readExcel(Sheet sheet) {
     rows = sheet.rows;
     columnHeaders = getColumnHeaders(rows.first);
     soldierId = columnHeaders.contains('Soldier Id') ? 'Soldier Id' : '';

@@ -190,32 +190,34 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                   'TRUE';
 
           Acft acft = Acft(
-              soldierId: saveSoldierId,
-              owner: owner,
-              users: users,
-              rank: rank,
-              name: name,
-              firstName: firstName,
-              section: section,
-              rankSort: rankSort,
-              date: saveDate,
-              ageGroup: saveAge,
-              gender: saveGender,
-              deadliftRaw: saveMdlRaw,
-              powerThrowRaw: saveSptRaw,
-              puRaw: savePuRaw,
-              dragRaw: saveSdcRaw,
-              plankRaw: savePlkRaw,
-              runRaw: saveRunRaw,
-              deadliftScore: mdlInt,
-              powerThrowScore: sptInt,
-              puScore: puInt,
-              dragScore: sdcInt,
-              plankScore: plkInt,
-              runScore: runInt,
-              total: total,
-              altEvent: saveRunEvent,
-              pass: pass);
+            soldierId: saveSoldierId,
+            owner: owner,
+            users: users,
+            rank: rank,
+            name: name,
+            firstName: firstName,
+            section: section,
+            rankSort: rankSort,
+            date: saveDate,
+            ageGroup: saveAge,
+            gender: saveGender,
+            deadliftRaw: saveMdlRaw,
+            powerThrowRaw: saveSptRaw,
+            puRaw: savePuRaw,
+            dragRaw: saveSdcRaw,
+            plankRaw: savePlkRaw,
+            runRaw: saveRunRaw,
+            deadliftScore: mdlInt,
+            powerThrowScore: sptInt,
+            puScore: puInt,
+            dragScore: sdcInt,
+            plankScore: plkInt,
+            runScore: runInt,
+            total: total,
+            altEvent: saveRunEvent,
+            pass: pass,
+            aft: true,
+          );
 
           firestore.collection(Acft.collectionName).add(acft.toMap());
         }
@@ -254,7 +256,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
-      title: 'Upload ACFT Stats',
+      title: 'Upload ACFT/AFT Stats',
       body: UploadFrame(
         children: <Widget>[
           const Padding(
@@ -553,7 +555,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 _saveData(context);
               }
             },
-            child: const Text('Upload ACFT Stats'),
+            child: const Text('Upload ACFT/AFT Stats'),
           )
         ],
       ),

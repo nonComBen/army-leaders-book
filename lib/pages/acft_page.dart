@@ -144,7 +144,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
     super.dispose();
   }
 
-  _uploadExcel(BuildContext context) {
+  void _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
         context,
@@ -167,6 +167,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       TextCellValue('First Name'),
       TextCellValue('Section'),
       TextCellValue('Date'),
+      TextCellValue('AFT'),
       TextCellValue('Age Group'),
       TextCellValue('Gender'),
       TextCellValue('MDL Raw'),
@@ -186,6 +187,12 @@ class AcftPageState extends ConsumerState<AcftPage> {
       TextCellValue('Pass'),
     ]);
     for (DocumentSnapshot doc in documents) {
+      bool downloadAft = false;
+      try {
+        downloadAft = doc['aft'];
+      } catch (e) {
+        debugPrint('AFT doesn\'t exist');
+      }
       List<dynamic> docs = [];
       docs.add(doc['soldierId']);
       docs.add(doc['rank']);
@@ -194,6 +201,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       docs.add(doc['firstName']);
       docs.add(doc['section']);
       docs.add(doc['date']);
+      docs.add(downloadAft);
       docs.add(doc['ageGroup'] ?? '');
       docs.add(doc['gender'] ?? '');
       docs.add(doc['deadliftRaw']);
@@ -243,7 +251,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
             child: MyToast(
               message: 'Data successfully downloaded to $location',
               buttonText: kIsWeb ? null : 'Open',
-              onPressed: kIsWeb ? null : () => openFile('$path/acftStats.xlsx'),
+              onPressed: kIsWeb ? null : () => openFile('$path/aftStats.xlsx'),
             ),
           );
         }
@@ -306,7 +314,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         child: MyToast(
           message: message,
           buttonText: kIsWeb ? null : 'Open',
-          onPressed: kIsWeb ? null : () => openFile('$location/acftStats.pdf'),
+          onPressed: kIsWeb ? null : () => openFile('$location/aftStats.pdf'),
         ),
       );
     }
@@ -330,7 +338,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, _userId, 'ACFT$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'ACFT$s/AFT$s');
   }
 
   void _editRecord() {
@@ -361,6 +369,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
           acft: Acft(
             owner: _userId!,
             users: [_userId],
+            aft: true,
           ),
         ),
       ),
@@ -408,7 +417,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
         run++;
       }
       if (doc['deadliftScore'] != 0 &&
-          doc['powerThrowScore'] != 0 &&
           doc['puScore'] != 0 &&
           doc['dragScore'] != 0 &&
           doc['legTuckScore'] != 0 &&
@@ -791,14 +799,14 @@ class AcftPageState extends ConsumerState<AcftPage> {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
-        title: 'ACFT Stats',
+        title: 'ACFT/AFT Stats',
         actions: createAppBarActions(
           width,
           [
             if (!kIsWeb && Platform.isIOS)
               if (!kIsWeb && Platform.isIOS)
                 AppBarOption(
-                  title: 'New ACFT',
+                  title: 'New ACFT/AFT',
                   icon: Icon(
                     kIsWeb || Platform.isAndroid
                         ? Icons.add
@@ -808,7 +816,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   onPressed: () => _newRecord(context),
                 ),
             AppBarOption(
-              title: 'Edit ACFT',
+              title: 'Edit ACFT/AFT',
               icon: Icon(
                 kIsWeb || Platform.isAndroid
                     ? Icons.edit
@@ -818,7 +826,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
               onPressed: () => _editRecord(),
             ),
             AppBarOption(
-              title: 'Delete ACFT(s)',
+              title: 'Delete ACFT/AFT(s)',
               icon: Icon(
                 kIsWeb || Platform.isAndroid
                     ? Icons.delete
@@ -828,7 +836,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
               onPressed: () => _deleteRecord(),
             ),
             AppBarOption(
-              title: 'Filter ACFTs',
+              title: 'Filter ACFT/AFTs',
               icon: Icon(
                 Icons.filter_alt,
                 color: getPrimaryColor(context),
@@ -991,7 +999,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: Text(
-                              'Zeros are factored out and averages are rounded down.',
+                              'Zeros are factored out and averages are rounded down. Total average will be skewed higher until all ACFTs are replaced with AFTs',
                               style: TextStyle(
                                   fontSize: 14, color: getTextColor(context)),
                               textAlign: TextAlign.center,

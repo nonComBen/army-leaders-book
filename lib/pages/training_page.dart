@@ -105,7 +105,7 @@ class TrainingPageState extends ConsumerState<TrainingPage> {
     super.dispose();
   }
 
-  _uploadExcel(BuildContext context) {
+  void _uploadExcel(BuildContext context) {
     if (isSubscribed) {
       Navigator.push(
         context,

@@ -206,7 +206,7 @@ void downloadExcel(BuildContext context, List<Soldier> soldiers) async {
   }
 }
 
-uploadExcel(BuildContext context, bool isSubscribed) {
+void uploadExcel(BuildContext context, bool isSubscribed) {
   if (isSubscribed) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => const UploadSoldierPage()));

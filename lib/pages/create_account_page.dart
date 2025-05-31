@@ -39,7 +39,7 @@ class CreateAccountPageState extends ConsumerState<CreateAccountPage> {
 
   FToast toast = FToast();
 
-  _launchURL(String url) async {
+  Future<void> _launchURL(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {

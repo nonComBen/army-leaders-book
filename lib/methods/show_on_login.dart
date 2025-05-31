@@ -246,7 +246,8 @@ void showChangeLog(BuildContext context) async {
   );
 }
 
-showNiprWarning(BuildContext context, SharedPreferences? prefs) async {
+Future<void> showNiprWarning(
+    BuildContext context, SharedPreferences? prefs) async {
   bool dontShow = false;
   await showDialog(
     context: context,

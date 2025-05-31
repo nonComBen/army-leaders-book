@@ -30,7 +30,7 @@ class NotificationService {
     _notificationAppLaunchDetails = notificationAppLaunchDetails;
   }
 
-  get isAllowed {
+  bool get isAllowed {
     return _notificationsAllowed;
   }
 

@@ -210,7 +210,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     );
   }
 
-  editRecord(int index, Map<dynamic, dynamic> soldier) {
+  void editRecord(int index, Map<dynamic, dynamic> soldier) {
     int dailyIndex = dailies.indexOf(soldier);
     int filteredIndex = filteredDailies.indexOf(soldier);
     String type = soldier['type'];
@@ -418,7 +418,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     return statuses;
   }
 
-  sortDailies() {
+  void sortDailies() {
     filteredDailies.sort((a, b) {
       int? c = a['typeSort'].compareTo(b['typeSort']);
       if (c == 0) {
@@ -444,7 +444,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     return true;
   }
 
-  buildNewDailies() async {
+  Future<void> buildNewDailies() async {
     soldiers = ref.read(soldiersProvider);
     QuerySnapshot perstatSnapshot = await firestore
         .collection(Perstat.collectionName)
@@ -589,7 +589,7 @@ class DailyPerstatPageState extends ConsumerState<DailyPerstatPage> {
     super.initState();
   }
 
-  initialize() async {
+  Future<void> initialize() async {
     DocumentSnapshot snapshot;
     PerstatByName? byName;
     try {

@@ -29,7 +29,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.example.${project.name}"
+    namespace "com.armynoncomtools.leadersbook"
     compileSdkVersion 35
 
     lintOptions {
@@ -40,7 +40,7 @@ android {
         applicationId "com.armynoncomtools.leadersbook"
         minSdkVersion 23
         targetSdkVersion 35
-        versionCode 201
+        versionCode 202
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -50,8 +50,8 @@ android {
         // Flag to enable support for the new language APIs
         coreLibraryDesugaringEnabled true
         // Sets Java compatibility to Java 8
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     signingConfigs {
@@ -66,8 +66,8 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
 
             // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

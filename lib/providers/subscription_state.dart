@@ -6,7 +6,7 @@ final subscriptionStateProvider =
 });
 
 class SubscriptionState extends StateNotifier<bool> {
-  SubscriptionState() : super(true);
+  SubscriptionState() : super(false);
 
   void subscribe() {
     state = true;

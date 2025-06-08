@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:launch_review/launch_review.dart';
+import 'package:rate_my_app/rate_my_app.dart';
 
 import '../../methods/toast_messages/show_toast.dart';
 import '../../pages/premium_page.dart';
@@ -423,9 +423,8 @@ class OverflowTab extends ConsumerWidget {
           onTap: kIsWeb
               ? null
               : () {
-                  LaunchReview.launch(
-                      androidAppId: 'com.armynoncomtools.leadersbook',
-                      iOSAppId: '1462962891');
+                  RateMyApp rateMyApp = RateMyApp();
+                  rateMyApp.launchStore();
                 },
         ),
         PlatformListTile(

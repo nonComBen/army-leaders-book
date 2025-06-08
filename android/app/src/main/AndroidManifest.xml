@@ -1,7 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:installLocation="preferExternal"
-    package="com.armynoncomtools.leadersbook">
+    android:installLocation="preferExternal">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application

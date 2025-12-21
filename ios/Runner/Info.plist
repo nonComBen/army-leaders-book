@@ -46,6 +46,8 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>itms</string>
+		<string>google</string>  
+  		<string>googlechrome</string> 
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

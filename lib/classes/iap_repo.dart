@@ -74,8 +74,7 @@ class IAPRepo {
     bool isSubscribed = false;
     if (userSnapshot.docs.isNotEmpty) {
       _leader = Leader.fromSnapshot(userSnapshot.docs.first);
-      isSubscribed =
-          userSnapshot.docs.first['adFree'] || premiumIds.contains(user.uid);
+      isSubscribed = _leader!.adFree || premiumIds.contains(user.uid);
     }
 
     purchases = purchaseSnapshot.docs.map((document) {

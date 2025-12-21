@@ -28,7 +28,7 @@ abstract class PlatformApp extends StatelessWidget {
         primaryColor: themeData.colorScheme.onPrimary,
         primaryContrastingColor: themeData.colorScheme.primary,
         scaffoldBackgroundColor: themeData.scaffoldBackgroundColor,
-        barBackgroundColor: themeData.dialogBackgroundColor,
+        barBackgroundColor: themeData.dialogTheme.backgroundColor,
         textTheme: CupertinoTextThemeData(
           textStyle: TextStyle(
             color: themeData.brightness == Brightness.light

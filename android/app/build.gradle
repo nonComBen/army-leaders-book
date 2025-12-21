@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.armynoncomtools.leadersbook"
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     lintOptions {
         disable 'InvalidPackage'
@@ -38,9 +38,9 @@ android {
 
     defaultConfig {
         applicationId "com.armynoncomtools.leadersbook"
-        minSdkVersion 23
-        targetSdkVersion 35
-        versionCode 202
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
+        versionCode 204
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true

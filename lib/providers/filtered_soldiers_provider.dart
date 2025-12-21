@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:leaders_book/providers/soldiers_provider.dart';
 
 import '../models/soldier.dart';

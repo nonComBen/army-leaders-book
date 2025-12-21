@@ -28,8 +28,9 @@ Future<void> _configureLocalTimeZone() async {
     return;
   }
   tz.initializeTimeZones();
-  final String timeZoneName = await FlutterTimezone.getLocalTimezone();
-  tz.setLocalLocation(tz.getLocation(timeZoneName));
+  final TimezoneInfo timeZoneInfo = await FlutterTimezone.getLocalTimezone();
+
+  tz.setLocalLocation(tz.getLocation(timeZoneInfo.identifier));
 }
 
 @pragma('vm:entry-point')

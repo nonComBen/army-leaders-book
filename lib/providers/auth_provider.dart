@@ -26,6 +26,31 @@ abstract class BaseAuth {
 
 class AuthService implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final _googleSignIn = GoogleSignIn.instance;
+  bool _isGoogleSignInInitialized = false;
+
+  AuthService() {
+    _initializeGoogleSignIn();
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      debugPrint('Google Signin is Initializing');
+      await _googleSignIn.initialize(
+          serverClientId:
+              '590952710530-197ccbag50220tf9cs30i3qkqbdlo6b0.apps.googleusercontent.com');
+      _isGoogleSignInInitialized = true;
+    } catch (e) {
+      debugPrint('Failed to initialize Google Sign-In: $e');
+    }
+  }
+
+  /// Always check Google sign in initialization before use
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_isGoogleSignInInitialized) {
+      await _initializeGoogleSignIn();
+    }
+  }
 
   /// Generates a cryptographically secure random nonce, to be included in a
   /// credential request.
@@ -53,13 +78,16 @@ class AuthService implements BaseAuth {
       String email, String password) async {
     AuthCredential credential;
     if (email == 'google') {
-      GoogleSignIn googleSignIn = GoogleSignIn.standard(scopes: [
-        'email',
-      ]);
-      GoogleSignInAccount googleSignInAccount = (await googleSignIn.signIn())!;
-      GoogleSignInAuthentication gsa = await googleSignInAccount.authentication;
+      GoogleSignIn googleSignIn = GoogleSignIn.instance;
+      await googleSignIn.initialize();
+      GoogleSignInAccount googleSignInAccount =
+          (await googleSignIn.authenticate());
+      GoogleSignInAuthentication gsa = googleSignInAccount.authentication;
+      final GoogleSignInClientAuthorization? authorization =
+          await googleSignInAccount.authorizationClient
+              .authorizationForScopes(['email']);
       credential = GoogleAuthProvider.credential(
-        accessToken: gsa.accessToken,
+        accessToken: authorization!.accessToken,
         idToken: gsa.idToken,
       );
     } else if (email == 'apple') {
@@ -122,9 +150,7 @@ class AuthService implements BaseAuth {
   @override
   Future<void> signOut() async {
     var user = _firebaseAuth.currentUser;
-    GoogleSignIn googleSignIn = GoogleSignIn.standard(scopes: [
-      'email',
-    ]);
+    GoogleSignIn googleSignIn = GoogleSignIn.instance;
     await googleSignIn.signOut();
     if (user?.isAnonymous ?? false) {
       user!.delete();
@@ -151,17 +177,36 @@ class AuthService implements BaseAuth {
       // Once signed in, return the UserCredential
       result = await _firebaseAuth.signInWithPopup(googleProvider);
     } else {
-      GoogleSignIn googleSignIn = GoogleSignIn.standard(scopes: [
-        'email',
-      ]);
-      GoogleSignInAccount googleSignInAccount = (await googleSignIn.signIn())!;
-      GoogleSignInAuthentication gsa = await googleSignInAccount.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: gsa.accessToken,
-        idToken: gsa.idToken,
+      await _ensureGoogleSignInInitialized();
+      GoogleSignInAccount account;
+      try {
+        // authenticate() throws exceptions instead of returning null
+        account = await _googleSignIn.authenticate(
+          scopeHint: ['email'], // Specify required scopes
+        );
+        debugPrint('Google Signin is Authenticated: ${account.displayName}');
+      } on GoogleSignInException catch (e) {
+        debugPrint(
+            'Google Sign In error: code: ${e.code.name} description:${e.description} details:${e.details}');
+        rethrow;
+      } catch (error) {
+        debugPrint('Unexpected Google Sign-In error: $error');
+        rethrow;
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = account.authentication;
+
+      // Get authorization for Firebase scopes if needed
+      final authClient = _googleSignIn.authorizationClient;
+      final authorization = await authClient.authorizationForScopes(['email']);
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: authorization?.accessToken,
+        idToken: googleAuth.idToken,
       );
 
-      result = await _firebaseAuth.signInWithCredential(credential);
+      result = await FirebaseAuth.instance.signInWithCredential(credential);
     }
 
     return result.user;

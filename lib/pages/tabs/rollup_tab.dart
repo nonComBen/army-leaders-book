@@ -505,7 +505,7 @@ class HomePageState extends ConsumerState<RollupTab>
                   }
                 }
                 return RollupCard(
-                  title: 'ACFT Stats',
+                  title: 'AFT Stats',
                   infoRow1: [
                     TextButton(
                       child: Text(
@@ -516,7 +516,7 @@ class HomePageState extends ConsumerState<RollupTab>
                             color: Colors.blue),
                       ),
                       onPressed: () {
-                        showByName('Overdue ACFTs', overdue, HomeCard.acft);
+                        showByName('Overdue AFTs', overdue, HomeCard.acft);
                       },
                     ),
                     TextButton(
@@ -526,7 +526,7 @@ class HomePageState extends ConsumerState<RollupTab>
                               decoration: TextDecoration.underline,
                               color: Colors.blue)),
                       onPressed: () {
-                        showByName('Failed ACFTs', fails, HomeCard.acft);
+                        showByName('Failed AFTs', fails, HomeCard.acft);
                       },
                     ),
                   ],
@@ -535,7 +535,7 @@ class HomePageState extends ConsumerState<RollupTab>
                       onPressed: () =>
                           Navigator.of(context, rootNavigator: true)
                               .pushNamed(AcftPage.routeName),
-                      child: const Text('Go to ACFT'),
+                      child: const Text('Go to AFT'),
                     ),
                   ],
                 );

@@ -30,7 +30,7 @@ class LocalAuthLoginPageState extends ConsumerState<LocalAuthLoginPage> {
 
     bool authenticated = await localAuth.authenticate(
         localizedReason: 'Let OS determine authentication method',
-        options: const AuthenticationOptions(stickyAuth: true));
+        persistAcrossBackgrounding: true);
 
     if (authenticated) {
       soldiersService.loadSoldiers(_auth!.currentUser()!.uid);

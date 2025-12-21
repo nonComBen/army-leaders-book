@@ -30,7 +30,7 @@ Color getBackgroundColor(BuildContext context) {
 
 Color getContrastingBackgroundColor(BuildContext context) {
   if (kIsWeb || Platform.isAndroid) {
-    return Theme.of(context).dialogBackgroundColor;
+    return Theme.of(context).dialogTheme.backgroundColor!;
   } else {
     return CupertinoTheme.of(context).barBackgroundColor;
   }

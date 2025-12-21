@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:leaders_book/pages/privacy_policy_page.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -171,6 +172,7 @@ class LoginPageState extends ConsumerState<LoginPage> {
       setState(() {
         isLoggingIn = false;
       });
+      debugPrint(e.toString());
       toast.showToast(
         child: MyToast(
           message: e.toString(),
@@ -346,6 +348,20 @@ class LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ),
                   ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformTextButton(
+                    child: const Text(
+                      'Privacy Policy',
+                      style: TextStyle(fontSize: 18.0, color: Colors.blue),
+                      textAlign: TextAlign.center,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context)
+                          .pushNamed(PrivacyPolicyPage.routeName);
+                    },
+                  ),
+                ),
               ],
             ),
     );

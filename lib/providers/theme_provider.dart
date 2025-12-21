@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:leaders_book/providers/shared_prefs_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,7 +32,7 @@ ThemeData darkThemeData = ThemeData(
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: Colors.black, foregroundColor: Colors.yellow),
   primarySwatch: primaryBlack,
-  dialogBackgroundColor: Colors.grey[900],
+  dialogTheme: DialogThemeData(backgroundColor: Colors.grey[900]),
   colorScheme: const ColorScheme.highContrastDark(
       brightness: Brightness.dark,
       primary: Colors.yellow,
@@ -48,7 +48,7 @@ ThemeData darkThemeData = ThemeData(
 ThemeData lightThemeData = ThemeData(
   primarySwatch: primaryBlack,
   scaffoldBackgroundColor: Colors.grey[300],
-  dialogBackgroundColor: Colors.grey[300],
+  dialogTheme: DialogThemeData(backgroundColor: Colors.grey[300]),
   colorScheme: ColorScheme.highContrastLight(
     brightness: Brightness.light,
     primary: Colors.black87,

@@ -17,7 +17,6 @@ import '../../calculators/hrp_calculator.dart';
 import '../../calculators/mdl_calculator.dart';
 import '../../calculators/plk_calculator.dart';
 import '../../calculators/sdc_calculator.dart';
-import '../../calculators/spt_calculator.dart';
 import '../../calculators/twomr_calculator.dart';
 import '../../methods/create_less_soldiers.dart';
 import '../../methods/local_notification_methods.dart';
@@ -55,14 +54,13 @@ class EditAcftPage extends ConsumerStatefulWidget {
 }
 
 class EditAcftPageState extends ConsumerState<EditAcftPage> {
-  String _title = 'New ACFT';
+  String _title = 'New AFT';
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _deadliftController = TextEditingController();
-  final TextEditingController _powerThrowController = TextEditingController();
   final TextEditingController _puController = TextEditingController();
   final TextEditingController _dragController = TextEditingController();
   final TextEditingController _plankController = TextEditingController();
@@ -80,7 +78,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   List<dynamic>? _users;
   int? _total,
       _mdlScore,
-      _sptScore,
       _hrpScore,
       _sdcScore,
       _plkScore,
@@ -93,14 +90,12 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       _runSecs,
       _mdlRaw,
       _hrpRaw;
-  double? _sptRaw;
   List<Soldier>? lessSoldiers;
   late List<Soldier> allSoldiers;
   bool pass = true,
       removeSoldiers = false,
       updated = false,
       mdlPass = true,
-      sptPass = true,
       hrpPass = true,
       sdcPass = true,
       plkPass = true,
@@ -127,7 +122,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   void dispose() {
     _dateController.dispose();
     _deadliftController.dispose();
-    _powerThrowController.dispose();
     _puController.dispose();
     _dragController.dispose();
     _plankController.dispose();
@@ -167,14 +161,12 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
 
     _total = widget.acft.total;
     _mdlScore = widget.acft.deadliftScore;
-    _sptScore = widget.acft.powerThrowScore;
     _hrpScore = widget.acft.puScore;
     _sdcScore = widget.acft.dragScore;
     _plkScore = widget.acft.plankScore;
     _runScore = widget.acft.runScore;
 
     _mdlRaw = int.tryParse(widget.acft.deadliftRaw) ?? 0;
-    _sptRaw = double.tryParse(widget.acft.powerThrowRaw) ?? 0;
     _hrpRaw = int.tryParse(widget.acft.puRaw) ?? 0;
     if (widget.acft.dragRaw.characters.contains(":")) {
       _sdcMins = int.tryParse(widget.acft.dragRaw
@@ -212,7 +204,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
 
     _dateController.text = widget.acft.date;
     _deadliftController.text = _mdlScore.toString();
-    _powerThrowController.text = _sptScore.toString();
     _puController.text = _hrpScore.toString();
     _dragController.text = _sdcScore.toString();
     _plankController.text = _plkScore.toString();
@@ -227,14 +218,12 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     pass = widget.acft.pass;
     if (pass) {
       mdlPass = true;
-      sptPass = true;
       hrpPass = true;
       sdcPass = true;
       plkPass = true;
       runPass = true;
     } else {
       mdlPass = _mdlScore! >= 60;
-      sptPass = _sptScore! >= 60;
       hrpPass = _hrpScore! >= 60;
       sdcPass = _sdcScore! >= 60;
       plkPass = _plkScore! >= 60;
@@ -289,18 +278,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
           );
     mdlPass = _mdlScore! >= 60;
     _deadliftController.text = _mdlScore.toString();
-  }
-
-  void calcSpt() {
-    _sptScore = aft
-        ? 0
-        : getSptScore(
-            ageGroup: ageGroups.indexOf(_ageGroup) + 1,
-            dist: _sptRaw!,
-            male: _gender == 'Male',
-          );
-    sptPass = _sptScore! >= 60 || aft;
-    _powerThrowController.text = _sptScore.toString();
   }
 
   void calcHrp() {
@@ -382,13 +359,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   }
 
   void calcTotal() {
-    _total = _mdlScore! +
-        _sptScore! +
-        _hrpScore! +
-        _sdcScore! +
-        _plkScore! +
-        _runScore!;
-    pass = mdlPass && sptPass && hrpPass && sdcPass && plkPass && runPass;
+    _total = _mdlScore! + _hrpScore! + _sdcScore! + _plkScore! + _runScore!;
+    pass = mdlPass && hrpPass && sdcPass && plkPass && runPass;
   }
 
   void submit(BuildContext context) async {
@@ -423,10 +395,10 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
           notificationService.scheduleNotification(
             dateTime: dueDate.subtract(Duration(days: days)),
             id: id,
-            title: '$_rank $_lastName\'s ACFT/AFT Due',
+            title: '$_rank $_lastName\'s AFT Due',
             body:
-                '$_rank $_lastName\'s ACFT/AFT Due in $days on ${formatter.format(dueDate)}',
-            payload: 'ACFT',
+                '$_rank $_lastName\'s AFT Due in $days on ${formatter.format(dueDate)}',
+            payload: 'AFT',
           );
           id++;
         }
@@ -447,13 +419,11 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         ageGroup: _ageGroup,
         gender: _gender,
         deadliftRaw: _deadliftRawController.text,
-        powerThrowRaw: aft ? '0' : _powerThrowRawController.text,
         puRaw: _puRawController.text,
         dragRaw: _dragRawController.text,
         plankRaw: _plankRawController.text,
         runRaw: _runRawController.text,
         deadliftScore: _mdlScore!,
-        powerThrowScore: _sptScore!,
         puScore: _hrpScore!,
         dragScore: _sdcScore!,
         plankScore: _plkScore!,
@@ -474,7 +444,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
               .doc(widget.acft.id)
               .set(saveAcft.toMap(), SetOptions(merge: true));
         } on Exception catch (e) {
-          debugPrint('Error updating ACFT: $e');
+          debugPrint('Error updating AFT: $e');
         }
       }
       Navigator.pop(context);
@@ -551,27 +521,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: PlatformSelectionWidget(
-                  titles: const [Text('AFT'), Text('ACFT')],
-                  groupValue: aft ? 'AFT' : 'ACFT',
-                  values: const ['AFT', 'ACFT'],
-                  onChanged: (dynamic value) {
-                    setState(() {
-                      updated = true;
-                      aft = value == 'AFT';
-                      calcMdl();
-                      calcSpt();
-                      calcHrp();
-                      calcSdc();
-                      calcPlk();
-                      calcRunScore();
-                      calcTotal();
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: PlatformSelectionWidget(
                   titles: const [Text('M'), Text('F')],
                   groupValue: _gender,
                   values: const ['Male', 'Female'],
@@ -580,7 +529,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                       updated = true;
                       _gender = value;
                       calcMdl();
-                      calcSpt();
                       calcHrp();
                       calcSdc();
                       calcPlk();
@@ -602,7 +550,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                       updated = true;
                       _ageGroup = value;
                       calcMdl();
-                      calcSpt();
                       calcHrp();
                       calcSdc();
                       calcPlk();
@@ -671,40 +618,6 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
                   labelText: 'Score',
                 ),
               ),
-              if (!aft)
-                const Padding(
-                    padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                    child: HeaderText(
-                      'SPT',
-                      textAlign: TextAlign.start,
-                    )),
-              if (!aft)
-                PaddedTextField(
-                  controller: _powerThrowRawController,
-                  keyboardType: TextInputType.text,
-                  label: 'Raw',
-                  enabled: !aft,
-                  decoration: const InputDecoration(
-                    labelText: 'Raw',
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      updated = true;
-                      _sptRaw = double.tryParse(value) ?? 0;
-                      calcSpt();
-                      calcTotal();
-                    });
-                  },
-                ),
-              if (!aft)
-                PaddedTextField(
-                  controller: _powerThrowController,
-                  enabled: false,
-                  label: 'Score',
-                  decoration: const InputDecoration(
-                    labelText: 'Score',
-                  ),
-                ),
               const Padding(
                 padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
                 child: HeaderText(
@@ -888,7 +801,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
             ],
           ),
           PlatformButton(
-            child: Text(widget.acft.id == null ? 'Add ACFT' : 'Update ACFT'),
+            child: Text(widget.acft.id == null ? 'Add AFT' : 'Update AFT'),
             onPressed: () => submit(context),
           ),
         ],

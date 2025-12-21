@@ -167,13 +167,10 @@ class AcftPageState extends ConsumerState<AcftPage> {
       TextCellValue('First Name'),
       TextCellValue('Section'),
       TextCellValue('Date'),
-      TextCellValue('AFT'),
       TextCellValue('Age Group'),
       TextCellValue('Gender'),
       TextCellValue('MDL Raw'),
       TextCellValue('MDL Score'),
-      TextCellValue('SPT Raw'),
-      TextCellValue('SPT Score'),
       TextCellValue('HRP Raw'),
       TextCellValue('HRP Score'),
       TextCellValue('SDC Raw'),
@@ -187,12 +184,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
       TextCellValue('Pass'),
     ]);
     for (DocumentSnapshot doc in documents) {
-      bool downloadAft = false;
-      try {
-        downloadAft = doc['aft'];
-      } catch (e) {
-        debugPrint('AFT doesn\'t exist');
-      }
       List<dynamic> docs = [];
       docs.add(doc['soldierId']);
       docs.add(doc['rank']);
@@ -201,13 +192,10 @@ class AcftPageState extends ConsumerState<AcftPage> {
       docs.add(doc['firstName']);
       docs.add(doc['section']);
       docs.add(doc['date']);
-      docs.add(downloadAft);
       docs.add(doc['ageGroup'] ?? '');
       docs.add(doc['gender'] ?? '');
       docs.add(doc['deadliftRaw']);
       docs.add(doc['deadliftScore']);
-      docs.add(doc['powerThrowRaw']);
-      docs.add(doc['powerThrowScore']);
       docs.add(doc['puRaw']);
       docs.add(doc['puScore']);
       docs.add(doc['dragRaw']);
@@ -338,7 +326,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       return;
     }
     String s = _selectedDocuments.length > 1 ? 's' : '';
-    deleteRecord(context, _selectedDocuments, _userId, 'ACFT$s/AFT$s');
+    deleteRecord(context, _selectedDocuments, _userId, 'AFT$s');
   }
 
   void _editRecord() {
@@ -378,14 +366,12 @@ class AcftPageState extends ConsumerState<AcftPage> {
 
   void _calcAves() {
     int deadlift = 0;
-    int powerThrow = 0;
     int pu = 0;
     int drag = 0;
     int plank = 0;
     int run = 0;
     int total = 0;
     deadliftAve = 0;
-    powerThrowAve = 0;
     puAve = 0;
     dragAve = 0;
     plkAve = 0;
@@ -395,10 +381,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
       if (doc['deadliftScore'] != 0) {
         deadliftAve += doc['deadliftScore'] as int;
         deadlift++;
-      }
-      if (doc['powerThrowScore'] != 0) {
-        powerThrowAve += doc['powerThrowScore'] as int;
-        powerThrow++;
       }
       if (doc['puScore'] != 0) {
         puAve += doc['puScore'] as int;
@@ -426,7 +408,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
       }
     }
     deadliftAve = deadlift != 0 ? (deadliftAve / deadlift).floor() : 0;
-    powerThrowAve = powerThrow != 0 ? (powerThrowAve / powerThrow).floor() : 0;
     puAve = pu != 0 ? (puAve / pu).floor() : 0;
     dragAve = drag != 0 ? (dragAve / drag).floor() : 0;
     plkAve = plank != 0 ? (plkAve / plank).floor() : 0;
@@ -477,7 +458,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
     if (width > 735) {
       columnList.add(
         DataColumn(
-          label: const Text('SPT'),
+          label: const Text('HRP'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending),
         ),
@@ -486,7 +467,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
     if (width > 830) {
       columnList.add(
         DataColumn(
-          label: const Text('HRP'),
+          label: const Text('SDC'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending),
         ),
@@ -495,22 +476,13 @@ class AcftPageState extends ConsumerState<AcftPage> {
     if (width > 935) {
       columnList.add(
         DataColumn(
-          label: const Text('SDC'),
-          onSort: (int columnIndex, bool ascending) =>
-              onSortColumn(columnIndex, ascending),
-        ),
-      );
-    }
-    if (width > 1030) {
-      columnList.add(
-        DataColumn(
           label: const Text('PLK'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending),
         ),
       );
     }
-    if (width > 1140) {
+    if (width > 1030) {
       columnList.add(
         DataColumn(
           label: const Text('2MR'),
@@ -623,7 +595,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       cellList.add(
         DataCell(
           Text(
-            documentSnapshot['powerThrowScore'].toString(),
+            documentSnapshot['puScore'].toString(),
             style: fail
                 ? failTextStyle
                 : overdue
@@ -639,7 +611,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       cellList.add(
         DataCell(
           Text(
-            documentSnapshot['puScore'].toString(),
+            documentSnapshot['dragScore'].toString(),
             style: fail
                 ? failTextStyle
                 : overdue
@@ -655,22 +627,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
       cellList.add(
         DataCell(
           Text(
-            documentSnapshot['dragScore'].toString(),
-            style: fail
-                ? failTextStyle
-                : overdue
-                    ? overdueTextStyle
-                    : amber
-                        ? amberTextStyle
-                        : const TextStyle(),
-          ),
-        ),
-      );
-    }
-    if (width > 1030) {
-      cellList.add(
-        DataCell(
-          Text(
             documentSnapshot['legTuckScore'].toString(),
             style: fail
                 ? failTextStyle
@@ -683,7 +639,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 1140) {
+    if (width > 1030) {
       cellList.add(
         DataCell(
           Text(
@@ -723,21 +679,17 @@ class AcftPageState extends ConsumerState<AcftPage> {
                 (a, b) => a['deadliftScore'].compareTo(b['deadliftScore']));
             break;
           case 5:
-            filteredDocs.sort(
-                (a, b) => a['powerThrowScore'].compareTo(b['powerThrowScore']));
-            break;
-          case 6:
             filteredDocs.sort((a, b) => a['puScore'].compareTo(b['puScore']));
             break;
-          case 7:
+          case 6:
             filteredDocs
                 .sort((a, b) => a['dragScore'].compareTo(b['dragScore']));
             break;
-          case 8:
+          case 7:
             filteredDocs
                 .sort((a, b) => a['legTuckScore'].compareTo(b['legTuckScore']));
             break;
-          case 9:
+          case 8:
             filteredDocs.sort((a, b) => a['runScore'].compareTo(b['runScore']));
             break;
         }
@@ -760,21 +712,17 @@ class AcftPageState extends ConsumerState<AcftPage> {
                 (a, b) => b['deadliftScore'].compareTo(a['deadliftScore']));
             break;
           case 5:
-            filteredDocs.sort(
-                (a, b) => b['powerThrowScore'].compareTo(a['powerThrowScore']));
-            break;
-          case 6:
             filteredDocs.sort((a, b) => b['puScore'].compareTo(a['puScore']));
             break;
-          case 7:
+          case 6:
             filteredDocs
                 .sort((a, b) => b['dragScore'].compareTo(a['dragScore']));
             break;
-          case 8:
+          case 7:
             filteredDocs
                 .sort((a, b) => b['legTuckScore'].compareTo(a['legTuckScore']));
             break;
-          case 9:
+          case 8:
             filteredDocs.sort((a, b) => b['runScore'].compareTo(a['runScore']));
             break;
         }
@@ -799,14 +747,14 @@ class AcftPageState extends ConsumerState<AcftPage> {
     double width = MediaQuery.of(context).size.width;
     final user = ref.read(authProvider).currentUser()!;
     return PlatformScaffold(
-        title: 'ACFT/AFT Stats',
+        title: 'AFT Stats',
         actions: createAppBarActions(
           width,
           [
             if (!kIsWeb && Platform.isIOS)
               if (!kIsWeb && Platform.isIOS)
                 AppBarOption(
-                  title: 'New ACFT/AFT',
+                  title: 'New AFT',
                   icon: Icon(
                     kIsWeb || Platform.isAndroid
                         ? Icons.add
@@ -816,7 +764,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
                   onPressed: () => _newRecord(context),
                 ),
             AppBarOption(
-              title: 'Edit ACFT/AFT',
+              title: 'Edit AFT',
               icon: Icon(
                 kIsWeb || Platform.isAndroid
                     ? Icons.edit
@@ -826,7 +774,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
               onPressed: () => _editRecord(),
             ),
             AppBarOption(
-              title: 'Delete ACFT/AFT(s)',
+              title: 'Delete AFT(s)',
               icon: Icon(
                 kIsWeb || Platform.isAndroid
                     ? Icons.delete
@@ -836,7 +784,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
               onPressed: () => _deleteRecord(),
             ),
             AppBarOption(
-              title: 'Filter ACFT/AFTs',
+              title: 'Filter AFTs',
               icon: Icon(
                 Icons.filter_alt,
                 color: getPrimaryColor(context),
@@ -924,11 +872,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(4.0),
-                                      child:
-                                          StandardText('SPT: $powerThrowAve'),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(4.0),
                                       child: StandardText('HRP: $puAve'),
                                     ),
                                     Padding(
@@ -959,11 +902,6 @@ class AcftPageState extends ConsumerState<AcftPage> {
                                           padding: const EdgeInsets.all(4.0),
                                           child:
                                               StandardText('MDL: $deadliftAve'),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: StandardText(
-                                              'SPT: $powerThrowAve'),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(4.0),

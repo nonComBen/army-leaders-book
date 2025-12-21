@@ -36,8 +36,6 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
       gender,
       mdlRaw,
       mdlScore,
-      sptRaw,
-      sptScore,
       puRaw,
       puScore,
       sdcRaw,
@@ -81,8 +79,6 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
         gender = columnHeaders.contains('Gender') ? 'Gender' : '';
         mdlRaw = columnHeaders.contains('MDL Raw') ? 'MDL Raw' : '';
         mdlScore = columnHeaders.contains('MDL Score') ? 'MDL Score' : '';
-        sptRaw = columnHeaders.contains('SPT Raw') ? 'SPT Raw' : '';
-        sptScore = columnHeaders.contains('SPT Score') ? 'SPT Score' : '';
         puRaw = columnHeaders.contains('HRP Raw') ? 'HRP Raw' : '';
         puScore = columnHeaders.contains('HRP Score') ? 'HRP Score' : '';
         sdcRaw = columnHeaders.contains('SDC Raw') ? 'SDC Raw' : '';
@@ -126,7 +122,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
         String? rank, name, firstName, section, rankSort, owner;
         List<dynamic>? users;
         bool pass;
-        int? mdlInt, sptInt, puInt, sdcInt, plkInt, runInt, total;
+        int? mdlInt, puInt, sdcInt, plkInt, runInt, total;
         String saveSoldierId = getCellValue(rows[i], columnHeaders, soldierId);
 
         if (soldierIds.contains(saveSoldierId)) {
@@ -146,8 +142,6 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
           String saveGender = getCellValue(rows[i], columnHeaders, gender);
           String saveMdlRaw = getCellValue(rows[i], columnHeaders, mdlRaw);
           String saveMdlScore = getCellValue(rows[i], columnHeaders, mdlScore);
-          String saveSptRaw = getCellValue(rows[i], columnHeaders, sptRaw);
-          String saveSptScore = getCellValue(rows[i], columnHeaders, sptScore);
           String savePuRaw = getCellValue(rows[i], columnHeaders, puRaw);
           String savePuScore = getCellValue(rows[i], columnHeaders, puScore);
           String saveSdcRaw = getCellValue(rows[i], columnHeaders, sdcRaw);
@@ -169,8 +163,6 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
           }
           mdlInt = int.tryParse(saveMdlScore);
           mdlInt ??= 0;
-          sptInt = int.tryParse(saveSptScore);
-          sptInt ??= 0;
           puInt = int.tryParse(savePuScore);
           puInt ??= 0;
           sdcInt = int.tryParse(saveSdcScore);
@@ -179,7 +171,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
           plkInt ??= 0;
           runInt = int.tryParse(saveRunScore);
           runInt ??= 0;
-          total = mdlInt + sptInt + puInt + sdcInt + plkInt + runInt;
+          total = mdlInt + puInt + sdcInt + plkInt + runInt;
 
           pass = passDropdown == ''
               ? true
@@ -202,13 +194,11 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
             ageGroup: saveAge,
             gender: saveGender,
             deadliftRaw: saveMdlRaw,
-            powerThrowRaw: saveSptRaw,
             puRaw: savePuRaw,
             dragRaw: saveSdcRaw,
             plankRaw: savePlkRaw,
             runRaw: saveRunRaw,
             deadliftScore: mdlInt,
-            powerThrowScore: sptInt,
             puScore: puInt,
             dragScore: sdcInt,
             plankScore: plkInt,
@@ -236,8 +226,6 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
     gender = '';
     mdlRaw = '';
     mdlScore = '';
-    sptRaw = '';
-    sptScore = '';
     puRaw = '';
     puScore = '';
     sdcRaw = '';
@@ -256,7 +244,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return PlatformScaffold(
-      title: 'Upload ACFT/AFT Stats',
+      title: 'Upload AFT Stats',
       body: UploadFrame(
         children: <Widget>[
           const Padding(
@@ -373,34 +361,6 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                   onChanged: (value) {
                     setState(() {
                       mdlScore = value;
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
-                child: PlatformItemPicker(
-                  label: const Text('SPT Raw'),
-                  items: columnHeaders,
-                  value: sptRaw,
-                  onChanged: (value) {
-                    setState(() {
-                      sptRaw = value;
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
-                child: PlatformItemPicker(
-                  label: const Text('SPT Score'),
-                  items: columnHeaders,
-                  value: sptScore,
-                  onChanged: (value) {
-                    setState(() {
-                      sptScore = value;
                     });
                   },
                 ),
@@ -555,7 +515,7 @@ class UploadAcftPageState extends ConsumerState<UploadAcftPage> {
                 _saveData(context);
               }
             },
-            child: const Text('Upload ACFT/AFT Stats'),
+            child: const Text('Upload AFT Stats'),
           )
         ],
       ),

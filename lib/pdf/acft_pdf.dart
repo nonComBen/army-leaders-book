@@ -39,7 +39,6 @@ class AcftsPdf {
 
   Map<String, int> getAverages() {
     List<int?> mdl = [];
-    List<int?> spt = [];
     List<int?> hrp = [];
     List<int?> sdc = [];
     List<int?> plk = [];
@@ -49,10 +48,6 @@ class AcftsPdf {
       int events = 0;
       if (doc['deadliftScore'] != 0) {
         mdl.add(doc['deadliftScore']);
-        events++;
-      }
-      if (doc['powerThrowScore'] != 0) {
-        spt.add(doc['powerThrowScore']);
         events++;
       }
       if (doc['puScore'] != 0) {
@@ -71,19 +66,12 @@ class AcftsPdf {
         run.add(doc['runScore']);
         events++;
       }
-      if (events == 6) {
-        total.add(mdl.last! +
-            spt.last! +
-            hrp.last! +
-            sdc.last! +
-            plk.last! +
-            run.last!);
+      if (events == 5) {
+        total.add(mdl.last! + hrp.last! + sdc.last! + plk.last! + run.last!);
       }
     }
     return <String, int>{
       'mdl': (mdl.reduce((value, element) => value! + element!)! / mdl.length)
-          .floor(),
-      'spt': (spt.reduce((value, element) => value! + element!)! / spt.length)
           .floor(),
       'hrp': (hrp.reduce((value, element) => value! + element!)! / hrp.length)
           .floor(),
@@ -104,7 +92,6 @@ class AcftsPdf {
       children: [
         headerField('Name', 2.75),
         headerField('MDL', 0.75),
-        headerField('SPT', 0.75),
         headerField('HRP', 0.75),
         headerField('SDC', 0.75),
         headerField('PLK', 0.75),
@@ -131,8 +118,6 @@ class AcftsPdf {
                 TextAlign.left),
             tableField(
                 documents[i]['deadliftRaw'], 0.75, failed, TextAlign.left),
-            tableField(
-                documents[i]['powerThrowRaw'], 0.75, failed, TextAlign.left),
             tableField(documents[i]['puRaw'], 0.75, failed, TextAlign.left),
             tableField(documents[i]['dragRaw'], 0.75, failed, TextAlign.left),
             tableField(
@@ -147,8 +132,6 @@ class AcftsPdf {
           children: [
             tableField('', 2.75, failed, TextAlign.right),
             tableField(documents[i]['deadliftScore'].toString(), 0.75, failed,
-                TextAlign.left),
-            tableField(documents[i]['powerThrowScore'].toString(), 0.75, failed,
                 TextAlign.left),
             tableField(documents[i]['puScore'].toString(), 0.75, failed,
                 TextAlign.left),
@@ -173,7 +156,6 @@ class AcftsPdf {
       children: [
         headerField('Average', 2.75),
         headerField(getAverages()['mdl'].toString(), 0.75),
-        headerField(getAverages()['spt'].toString(), 0.75),
         headerField(getAverages()['hrp'].toString(), 0.75),
         headerField(getAverages()['sdc'].toString(), 0.75),
         headerField(getAverages()['plk'].toString(), 0.75),
@@ -188,9 +170,9 @@ class AcftsPdf {
       children: [
         headerField('Name', 2.5),
         headerField('MDL/SDC', 0.875),
-        headerField('SPT/LTK', 0.875),
-        headerField('HRP/2MR', 0.875),
-        headerField('Date/Total', 1.375),
+        headerField('LTK/HRP', 0.875),
+        headerField('2MR/Event', 1.0),
+        headerField('Date/Total', 1.25),
       ],
     );
   }
@@ -212,12 +194,12 @@ class AcftsPdf {
                 TextAlign.left),
             tableField(documents[i]['deadliftScore'].toString(), 0.875, failed,
                 TextAlign.left),
-            tableField(documents[i]['powerThrowScore'].toString(), 0.875,
-                failed, TextAlign.left),
-            tableField(documents[i]['puScore'].toString(), 0.875, failed,
+            tableField(documents[i]['legTuckScore'].toString(), 0.875, failed,
+                TextAlign.left),
+            tableField(documents[i]['runScore'].toString(), 1.0, failed,
                 TextAlign.left),
             tableField(
-                documents[i]['date'].toString(), 1.375, failed, TextAlign.left),
+                documents[i]['date'].toString(), 1.25, failed, TextAlign.left),
           ],
         ),
       );
@@ -227,12 +209,12 @@ class AcftsPdf {
             tableField('', 2.5, failed, TextAlign.right),
             tableField(documents[i]['dragScore'].toString(), 0.875, failed,
                 TextAlign.left),
-            tableField(documents[i]['legTuckScore'].toString(), 0.875, failed,
+            tableField(documents[i]['puScore'].toString(), 0.875, failed,
                 TextAlign.left),
-            tableField(documents[i]['runScore'].toString(), 0.875, failed,
+            tableField(documents[i]['altEvent'].toString(), 1.0, failed,
                 TextAlign.left),
-            tableField(documents[i]['total'].toString(), 1.375, failed,
-                TextAlign.left),
+            tableField(
+                documents[i]['total'].toString(), 1.25, failed, TextAlign.left),
           ],
         ),
       );
@@ -249,12 +231,10 @@ class AcftsPdf {
             '${getAverages()['mdl'].toString()}/${getAverages()['sdc'].toString()}',
             0.875),
         headerField(
-            '${getAverages()['spt'].toString()}/${getAverages()['plk'].toString()}',
+            '${getAverages()['plk'].toString()}/${getAverages()['hrp'].toString()}',
             0.875),
-        headerField(
-            '${getAverages()['hrp'].toString()}/${getAverages()['run'].toString()}',
-            0.875),
-        headerField(getAverages()['total'].toString(), 1.375),
+        headerField(getAverages()['run'].toString(), 1.0),
+        headerField(getAverages()['total'].toString(), 1.25),
       ],
     );
   }
@@ -292,7 +272,7 @@ class AcftsPdf {
       );
     }
 
-    return pdfDownload(pdf, 'acftStats');
+    return pdfDownload(pdf, 'aftStats');
   }
 
   Future<String> createHalfPage() async {
@@ -327,6 +307,6 @@ class AcftsPdf {
       );
     }
 
-    return pdfDownload(pdf, 'acftStats');
+    return pdfDownload(pdf, 'aftStats');
   }
 }

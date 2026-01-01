@@ -32,7 +32,8 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
   late SubscriptionPurchases sp;
   late DateTime date;
   late DateFormat dateFormat;
-  late String store;
+  late String store, price;
+  late PurchasableProduct product;
 
   @override
   void initState() {
@@ -46,6 +47,14 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
     date = DateTime.now().add(const Duration(days: 365));
     dateFormat = DateFormat('yyyy-MM-dd');
     store = Platform.isAndroid ? 'Google Play Store' : 'App Store';
+    if (Platform.isAndroid) {
+      product =
+          sp.products.firstWhere((element) => element.id == 'ad_free_two');
+    } else {
+      product =
+          sp.products.firstWhere((element) => element.id == 'premium_sub');
+    }
+    price = product.price;
   }
 
   @override
@@ -85,7 +94,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: StandardText(
-                  'The Premium subscription cost \$1.99 per year and will automatically renew '
+                  'The Premium subscription cost $price per year and will automatically renew '
                   'on ${dateFormat.format(date)} unless canceled through the $store.',
                   textAlign: TextAlign.center,
                 ),
@@ -93,14 +102,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
               PlatformButton(
                 onPressed: () async {
                   if (storeAvailable || sp.products.isNotEmpty) {
-                    PurchasableProduct product;
-                    if (Platform.isAndroid) {
-                      product = sp.products
-                          .firstWhere((element) => element.id == 'ad_free_two');
-                    } else {
-                      product = sp.products
-                          .firstWhere((element) => element.id == 'premium_sub');
-                    }
                     setState(() {
                       isLoading = true;
                     });

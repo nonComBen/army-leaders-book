@@ -19,7 +19,6 @@ import '../../providers/subscription_state.dart';
 import '../../pages/acft_page.dart';
 import '../../pages/actions_tracker_page.dart';
 import '../../pages/alert_roster_page.dart';
-import '../../pages/apft_page.dart';
 import '../../pages/appointments_page.dart';
 import '../../pages/bodyfat_page.dart';
 import '../../pages/creeds_page.dart';
@@ -139,14 +138,14 @@ class OverflowTab extends ConsumerWidget {
           },
         ),
         PlatformListTile(
-          title: const Text('APFT Stats'),
+          title: const Text('AFT Stats'),
           leading: Icon(
             Icons.directions_run,
             color: getTextColor(context),
           ),
           onTap: () {
             Navigator.of(context, rootNavigator: true)
-                .pushNamed(ApftPage.routeName);
+                .pushNamed(AcftPage.routeName);
           },
         ),
         PlatformListTile(

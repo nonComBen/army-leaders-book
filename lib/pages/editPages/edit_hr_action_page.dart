@@ -47,11 +47,12 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
   final TextEditingController _dd93Controller = TextEditingController();
   final TextEditingController _sglvController = TextEditingController();
   final TextEditingController _prrController = TextEditingController();
+  final TextEditingController _da5960Controller = TextEditingController();
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   List<dynamic>? _users;
   List<Soldier>? allSoldiers, lessSoldiers;
   bool removeSoldiers = false, updated = false;
-  DateTime? _dd93Date, _sglvDate, _prrDate;
+  DateTime? _dd93Date, _sglvDate, _prrDate, _da5960Date;
   FToast toast = FToast();
   Setting? setting;
 
@@ -60,6 +61,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
     _dd93Controller.dispose();
     _sglvController.dispose();
     _prrController.dispose();
+    _da5960Controller.dispose();
     super.dispose();
   }
 
@@ -85,13 +87,14 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
     _dd93Controller.text = widget.hrAction.dd93;
     _sglvController.text = widget.hrAction.sglv;
     _prrController.text = widget.hrAction.prr;
-
+    _da5960Controller.text = widget.hrAction.da5960;
     removeSoldiers = false;
     updated = false;
 
     _dd93Date = DateTime.tryParse(widget.hrAction.dd93);
     _sglvDate = DateTime.tryParse(widget.hrAction.sglv);
     _prrDate = DateTime.tryParse(widget.hrAction.prr);
+    _da5960Date = DateTime.tryParse(widget.hrAction.da5960);
   }
 
   void submit(BuildContext context) async {
@@ -101,7 +104,12 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
     }
     if (validateAndSave(
       _formKey,
-      [_dd93Controller.text, _sglvController.text, _prrController.text],
+      [
+        _dd93Controller.text,
+        _sglvController.text,
+        _prrController.text,
+        _da5960Controller.text
+      ],
     )) {
       setting = ref.read(settingsProvider) ?? Setting(owner: _owner);
       List<int> notificationIds = [];
@@ -116,7 +124,7 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
               .cancelPreviousNotifications(widget.hrAction.notificationIds);
         }
 
-        List<String> topics = ['DD93', 'SGLV', 'PRR'];
+        List<String> topics = ['DD93', 'SGLV', 'PRR', 'DA 5960'];
         for (String topic in topics) {
           final date = getDate(topic);
           if (date != '') {
@@ -179,6 +187,8 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
         return _dd93Controller.text;
       case 'SGLV':
         return _sglvController.text;
+      case 'DA 5960':
+        return _da5960Controller.text;
       default:
         return _prrController.text;
     }
@@ -255,6 +265,16 @@ class EditHrActionPageState extends ConsumerState<EditHrActionPage> {
                 controller: _prrController,
                 label: 'Record Review Date',
                 date: _prrDate,
+              ),
+              DateTextField(
+                controller: _prrController,
+                label: 'Record Review Date',
+                date: _prrDate,
+              ),
+              DateTextField(
+                controller: _da5960Controller,
+                label: 'DA 5960 Date',
+                date: _da5960Date,
               ),
             ],
           ),

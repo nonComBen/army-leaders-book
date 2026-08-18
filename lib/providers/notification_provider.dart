@@ -67,12 +67,12 @@ class NotificationService {
 
     try {
       notificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        scheduledDate,
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        const NotificationDetails(
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'androidId',
             'androidName',
@@ -93,7 +93,7 @@ class NotificationService {
 
   void cancelPreviousNotifications(List<dynamic> ids) {
     for (int id in ids) {
-      notificationsPlugin.cancel(id);
+      notificationsPlugin.cancel(id: id);
     }
   }
 }

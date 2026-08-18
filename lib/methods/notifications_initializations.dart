@@ -99,7 +99,7 @@ Future<NotificationAppLaunchDetails?> initializeLocalNotifications() async {
     iOS: initializationSettingsDarwin,
   );
   await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
+    settings: initializationSettings,
     onDidReceiveNotificationResponse:
         (NotificationResponse notificationResponse) {
       switch (notificationResponse.notificationResponseType) {

@@ -33,6 +33,7 @@ import '../../pages/hr_actions_page.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/soldiers_provider.dart';
+import '../../providers/subscription_purchases.dart';
 import '../../providers/tracking_provider.dart';
 import '../../providers/leader_provider.dart';
 import '../../widgets/platform_widgets/platform_button.dart';
@@ -987,6 +988,7 @@ class HomePageState extends ConsumerState<RollupTab>
 
   @override
   Widget build(BuildContext context) {
+    ref.read(subscriptionPurchasesProvider);
     final user = ref.read(authProvider).currentUser();
     setting = ref.watch(settingsProvider) ?? Setting(owner: '');
     isSubscribed = ref.watch(subscriptionStateProvider);

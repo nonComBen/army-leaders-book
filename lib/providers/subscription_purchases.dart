@@ -46,6 +46,7 @@ class SubscriptionPurchases {
   }
 
   Future<void> loadPurchases() async {
+    debugPrint('Loading purchases...');
     final available = await iapConnection!.isAvailable();
     if (!available) {
       storeState = StoreState.notAvailable;

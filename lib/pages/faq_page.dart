@@ -127,7 +127,7 @@ class FaqPageState extends ConsumerState<FaqPage> {
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerLeft,
         child: const Text(
-          'There is a web version at https://www.armyleadersbook.app.',
+          'There is a web version at https://army-leaders-book.web.app/.',
           textAlign: TextAlign.start,
           style: TextStyle(fontSize: 18),
         ),

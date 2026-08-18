@@ -30,15 +30,15 @@ class UploadHrActionsPage extends ConsumerStatefulWidget {
 class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
   late List<String> columnHeaders;
   late List<List<Data?>> rows;
-  String? soldierId, dd93, sglv, prr, path;
+  String? soldierId, dd93, sglv, prr, da5960, path;
 
   void _openFileExplorer() async {
     try {
-      var result = (await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
+      var result = (await FilePicker.pickFiles(
+          type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes!);
+        var excel = Excel.decodeBytes(await result.files.first.readAsBytes());
         _readExcel(excel.sheets.values.first);
       } else {
         var file = File(result.files.first.path!);
@@ -62,6 +62,7 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
       prr = columnHeaders.contains('Record Review Date')
           ? 'Record Review Date'
           : '';
+      da5960 = columnHeaders.contains('DA 5960 Date') ? 'DA 5960 Date' : '';
     });
   }
 
@@ -98,6 +99,8 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
               convertDate(getCellValue(rows[i], columnHeaders, sglv));
           String savePrr =
               convertDate(getCellValue(rows[i], columnHeaders, prr));
+          String saveDa5960 =
+              convertDate(getCellValue(rows[i], columnHeaders, da5960));
 
           HrAction hrAction = HrAction(
             soldierId: saveSoldierId,
@@ -111,6 +114,7 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
             dd93: saveDd93,
             sglv: saveSglv,
             prr: savePrr,
+            da5960: saveDa5960,
           );
 
           firestore.collection(HrAction.collectionName).add(hrAction.toMap());
@@ -128,6 +132,7 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
     dd93 = '';
     sglv = '';
     prr = '';
+    da5960 = '';
     columnHeaders = [];
     columnHeaders.add('');
     rows = [];
@@ -226,6 +231,20 @@ class UploadHrActionsPageState extends ConsumerState<UploadHrActionsPage> {
                   onChanged: (value) {
                     setState(() {
                       prr = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('DA 5960 Date'),
+                  items: columnHeaders,
+                  value: da5960,
+                  onChanged: (value) {
+                    setState(() {
+                      da5960 = value;
                     });
                   },
                 ),

@@ -220,7 +220,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
     String path, location;
     if (kIsWeb) {
       WebDownload webDownload = WebDownload(
-          type: 'xlsx', fileName: 'acftStats.xlsx', data: excel.encode());
+          type: 'xlsx', fileName: 'aftStats.xlsx', data: excel.encode());
       webDownload.download();
     } else {
       List<String> strings = await getPath();
@@ -228,7 +228,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       location = strings[1];
       try {
         var bytes = excel.encode()!;
-        File('$path/acftStats.xlsx')
+        File('$path/aftStats.xlsx')
           ..createSync(recursive: true)
           ..writeAsBytesSync(bytes);
         if (mounted) {

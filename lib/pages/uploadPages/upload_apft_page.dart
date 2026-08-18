@@ -45,11 +45,11 @@ class UploadApftPageState extends ConsumerState<UploadApftPage> {
 
   void _openFileExplorer() async {
     try {
-      var result = (await FilePicker.platform
-          .pickFiles(type: FileType.custom, allowedExtensions: ['xlsx']))!;
+      var result = (await FilePicker.pickFiles(
+          type: FileType.custom, allowedExtensions: ['xlsx']))!;
       path = result.files.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(result.files.first.bytes!);
+        var excel = Excel.decodeBytes(await result.files.first.readAsBytes());
         _readExcel(excel.sheets.values.first);
       } else {
         var file = File(result.files.first.path!);

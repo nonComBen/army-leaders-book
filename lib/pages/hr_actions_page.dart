@@ -129,6 +129,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
       TextCellValue('DD93 Date'),
       TextCellValue('SGLV Date'),
       TextCellValue('Record Review Date'),
+      TextCellValue('DA 5960 Date'),
     ]);
     for (DocumentSnapshot doc in documents) {
       List<dynamic> docs = [];
@@ -141,6 +142,7 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
       docs.add(doc['dd93']);
       docs.add(doc['sglv']);
       docs.add(doc['prr']);
+      docs.add(doc['da5960']);
 
       docsList.add(docs.map((e) => TextCellValue(e.toString())).toList());
     }
@@ -332,6 +334,12 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending)));
     }
+    if (width > 850) {
+      columnList.add(DataColumn(
+          label: const Text('5960'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending)));
+    }
     return columnList;
   }
 
@@ -363,6 +371,9 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
     if (width > 700) {
       cellList.add(DataCell(Text(documentSnapshot['prr'])));
     }
+    if (width > 850) {
+      cellList.add(DataCell(Text(documentSnapshot['da5960'])));
+    }
     return cellList;
   }
 
@@ -385,6 +396,9 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
           case 4:
             filteredDocs.sort((a, b) => a['prr'].compareTo(b['prr']));
             break;
+          case 5:
+            filteredDocs.sort((a, b) => a['da5960'].compareTo(b['da5960']));
+            break;
         }
       } else {
         switch (columnIndex) {
@@ -402,6 +416,9 @@ class HrActionsPageState extends ConsumerState<HrActionsPage> {
             break;
           case 4:
             filteredDocs.sort((a, b) => b['prr'].compareTo(a['prr']));
+            break;
+          case 5:
+            filteredDocs.sort((a, b) => b['da5960'].compareTo(a['da5960']));
             break;
         }
       }

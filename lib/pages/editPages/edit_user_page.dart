@@ -361,7 +361,7 @@ class EditUserPageState extends ConsumerState<EditUserPage> {
             children: <Widget>[
               PaddedTextField(
                 controller: TextEditingController(text: widget.userId),
-                enabled: false,
+                //enabled: false,
                 label: 'User Id',
                 decoration: InputDecoration(
                     labelText: 'User Id',

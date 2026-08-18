@@ -14,6 +14,7 @@ class HrAction {
   String dd93;
   String sglv;
   String prr;
+  String da5960;
   List<dynamic> notificationIds;
 
   HrAction({
@@ -29,6 +30,7 @@ class HrAction {
     this.dd93 = '',
     this.sglv = '',
     this.prr = '',
+    this.da5960 = '',
     this.notificationIds = const [],
   });
 
@@ -47,6 +49,7 @@ class HrAction {
     map['dd93'] = dd93;
     map['sglv'] = sglv;
     map['prr'] = prr;
+    map['da5960'] = da5960;
     map['notificationIds'] = notificationIds;
 
     return map;
@@ -55,9 +58,11 @@ class HrAction {
   factory HrAction.fromSnapshot(DocumentSnapshot doc) {
     List<dynamic> users = [doc['owner']];
     List<dynamic> notificationIds = [];
+    String da5960 = '';
     try {
       users = doc['users'];
       notificationIds = doc['notificationIds'];
+      da5960 = doc['da5960'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Users Does Not Exist');
     }
@@ -74,6 +79,7 @@ class HrAction {
         dd93: doc['dd93'],
         sglv: doc['sglv'],
         prr: doc['prr'],
+        da5960: da5960,
         notificationIds: notificationIds);
   }
 }

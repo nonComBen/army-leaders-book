@@ -53,6 +53,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
   final TextEditingController _sectionController = TextEditingController();
   final TextEditingController _dodIdController = TextEditingController();
   final TextEditingController _cacExpireController = TextEditingController();
+  final TextEditingController _gtccExpireController = TextEditingController();
   final TextEditingController _dorController = TextEditingController();
   final TextEditingController _mosController = TextEditingController();
   final TextEditingController _paraLnController = TextEditingController();
@@ -123,7 +124,8 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
       _basdDate,
       _pebdDate,
       _gainDate,
-      _cacDate;
+      _cacDate,
+      _gtccDate;
   DateFormat formatter = DateFormat('yyyy-MM-dd');
 
   @override
@@ -142,6 +144,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _sectionController.text = widget.soldier.section;
     _dodIdController.text = widget.soldier.dodId;
     _cacExpireController.text = widget.soldier.cacExpiration;
+    _gtccExpireController.text = widget.soldier.gtccExpiration;
     _mosController.text = widget.soldier.mos;
     _dutyController.text = widget.soldier.duty;
     _paraLnController.text = widget.soldier.paraLn;
@@ -202,6 +205,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
     _sectionController.dispose();
     _dodIdController.dispose();
     _cacExpireController.dispose();
+    _gtccExpireController.dispose();
     _mosController.dispose();
     _dorController.dispose();
     _dutyController.dispose();
@@ -483,6 +487,7 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
         section: _sectionController.text,
         dodId: _dodIdController.text,
         cacExpiration: _cacExpireController.text,
+        gtccExpiration: _gtccExpireController.text,
         dor: _dorController.text,
         mos: _mosController.text,
         duty: _dutyController.text,
@@ -661,6 +666,13 @@ class EditSoldierPageState extends ConsumerState<EditSoldierPage> {
                 minYears: 1,
                 maxYears: 5,
                 controller: _cacExpireController,
+              ),
+              DateTextField(
+                label: 'GTCC Expiration Date',
+                date: _gtccDate,
+                minYears: 1,
+                maxYears: 10,
+                controller: _gtccExpireController,
               ),
               DateTextField(
                 label: 'Date of Rank',

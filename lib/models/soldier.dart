@@ -16,6 +16,7 @@ class Soldier {
   String section;
   String dodId;
   String cacExpiration;
+  String gtccExpiration;
   String dor;
   String mos;
   String duty;
@@ -68,6 +69,7 @@ class Soldier {
     this.section = '',
     this.dodId = '',
     this.cacExpiration = '',
+    this.gtccExpiration = '',
     this.dor = '',
     this.mos = '',
     this.duty = '',
@@ -123,6 +125,7 @@ class Soldier {
     map['section'] = section;
     map['dodId'] = dodId;
     map['cacExpiration'] = cacExpiration;
+    map['gtccExpiration'] = gtccExpiration;
     map['dor'] = dor;
     map['mos'] = mos;
     map['duty'] = duty;
@@ -186,7 +189,8 @@ class Soldier {
         maritalStatus = '',
         cacExpiration = '',
         nokRelationship = '',
-        ymav = '';
+        ymav = '',
+        gtccExpiration = '';
     bool assigned = true;
     try {
       users = doc['users'];
@@ -242,6 +246,7 @@ class Soldier {
       cacExpiration = doc['cacExpiration'];
       nokRelationship = doc['nokRelationship'];
       ymav = doc['ymav'];
+      gtccExpiration = doc['gtccExpiration'];
     } catch (e) {
       debugPrint('Error: $e');
     }
@@ -261,6 +266,7 @@ class Soldier {
       section: doc['section'],
       dodId: dodId,
       cacExpiration: cacExpiration,
+      gtccExpiration: gtccExpiration,
       dor: doc['dor'],
       mos: doc['mos'],
       duty: doc['duty'],

@@ -39,6 +39,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
       section,
       supervisor,
       dodId,
+      cacExpiration,
+      gtccExpiration,
       dor,
       mos,
       duty,
@@ -105,6 +107,10 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
     section = columnHeaders.contains('Section') ? 'Section' : '';
     supervisor = columnHeaders.contains('Supervisor') ? 'Supervisor' : '';
     dodId = columnHeaders.contains('DoD ID') ? 'DoD ID' : '';
+    cacExpiration =
+        columnHeaders.contains('CAC Expiration') ? 'CAC Expiration' : '';
+    gtccExpiration =
+        columnHeaders.contains('GTCC Expiration') ? 'GTCC Expiration' : '';
     dor = columnHeaders.contains('Date of Rank') ? 'Date of Rank' : '';
     mos = columnHeaders.contains('MOS') ? 'MOS' : '';
     duty = columnHeaders.contains('Duty Position') ? 'Duty Position' : '';
@@ -207,6 +213,10 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
       String saveSection = getCellValue(rows[i], columnHeaders, section);
       String saveSupervisor = getCellValue(rows[i], columnHeaders, supervisor);
       String saveDodId = getCellValue(rows[i], columnHeaders, dodId);
+      String saveCacExpiration =
+          convertDate(getCellValue(rows[i], columnHeaders, cacExpiration));
+      String saveGtccExpiration =
+          convertDate(getCellValue(rows[i], columnHeaders, gtccExpiration));
       String saveDor = convertDate(getCellValue(rows[i], columnHeaders, dor));
       String saveMos = getCellValue(rows[i], columnHeaders, mos);
       String saveDuty = getCellValue(rows[i], columnHeaders, duty);
@@ -267,6 +277,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
         section: saveSection,
         supervisor: saveSupervisor,
         dodId: saveDodId,
+        cacExpiration: saveCacExpiration,
+        gtccExpiration: saveGtccExpiration,
         dor: saveDor,
         mos: saveMos,
         duty: saveDuty,
@@ -325,6 +337,8 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
     assigned = '';
     section = '';
     dodId = '';
+    cacExpiration = '';
+    gtccExpiration = '';
     dor = '';
     mos = '';
     duty = '';
@@ -524,6 +538,34 @@ class UploadSoldierPageState extends ConsumerState<UploadSoldierPage> {
                   onChanged: (value) {
                     setState(() {
                       dodId = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('CAC Expiration'),
+                  items: columnHeaders,
+                  value: cacExpiration,
+                  onChanged: (value) {
+                    setState(() {
+                      cacExpiration = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                child: PlatformItemPicker(
+                  label: const Text('GTCC Expiration'),
+                  items: columnHeaders,
+                  value: gtccExpiration,
+                  onChanged: (value) {
+                    setState(() {
+                      gtccExpiration = value;
                     });
                   },
                 ),

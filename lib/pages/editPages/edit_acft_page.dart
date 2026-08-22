@@ -72,7 +72,11 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
   final TextEditingController _dragRawController = TextEditingController();
   final TextEditingController _plankRawController = TextEditingController();
   final TextEditingController _runRawController = TextEditingController();
-  String _ageGroup = '17-21', _gender = 'Male', _runType = 'Run';
+  final TextEditingController _cftRawController = TextEditingController();
+  String _ageGroup = '17-21',
+      _gender = 'Male',
+      _testType = 'AFT',
+      _runType = 'Run';
   String? _soldierId, _rank, _lastName, _firstName, _section, _rankSort, _owner;
   late User user;
   List<dynamic>? _users;
@@ -89,7 +93,9 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       _runMins,
       _runSecs,
       _mdlRaw,
-      _hrpRaw;
+      _hrpRaw,
+      _cftMins,
+      _cftSecs;
   List<Soldier>? lessSoldiers;
   late List<Soldier> allSoldiers;
   bool pass = true,
@@ -132,6 +138,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     _dragRawController.dispose();
     _plankRawController.dispose();
     _runRawController.dispose();
+    _cftRawController.dispose();
     super.dispose();
   }
 
@@ -148,6 +155,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     }
     _ageGroup = widget.acft.ageGroup;
     _gender = widget.acft.gender;
+    _testType = widget.acft.cft ? 'CFT' : 'AFT';
     aft = widget.acft.aft;
 
     _soldierId = widget.acft.soldierId;
@@ -190,6 +198,17 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
       _plkMins = 0;
       _plkMins = 0;
     }
+    if (widget.acft.cftTime.characters.contains(":")) {
+      _cftMins = int.tryParse(widget.acft.cftTime
+              .substring(0, widget.acft.cftTime.indexOf(":"))) ??
+          0;
+      _cftSecs = int.tryParse(widget.acft.cftTime
+              .substring(widget.acft.cftTime.indexOf(":") + 1)) ??
+          0;
+    } else {
+      _cftMins = 0;
+      _cftSecs = 0;
+    }
     if (widget.acft.runRaw.characters.contains(":")) {
       _runMins = int.tryParse(widget.acft.runRaw
               .substring(0, widget.acft.runRaw.indexOf(":"))) ??
@@ -214,6 +233,7 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     _dragRawController.text = widget.acft.dragRaw;
     _plankRawController.text = widget.acft.plankRaw;
     _runRawController.text = widget.acft.runRaw;
+    _cftRawController.text = widget.acft.cftTime;
 
     pass = widget.acft.pass;
     if (pass) {
@@ -363,6 +383,14 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
     pass = mdlPass && hrpPass && sdcPass && plkPass && runPass;
   }
 
+  void calcCftPass() {
+    if (_cftMins! < 30 || (_cftMins == 30 && _cftSecs! == 00)) {
+      pass = true;
+    } else {
+      pass = false;
+    }
+  }
+
   void submit(BuildContext context) async {
     if (_soldierId == null) {
       toast.showToast(
@@ -433,6 +461,8 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
         pass: pass,
         notificationIds: notificationIds,
         aft: aft,
+        cft: _testType == 'CFT',
+        cftTime: _cftRawController.text,
       );
 
       if (widget.acft.id == null) {
@@ -521,268 +551,332 @@ class EditAcftPageState extends ConsumerState<EditAcftPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: PlatformSelectionWidget(
-                  titles: const [Text('M'), Text('F')],
-                  groupValue: _gender,
-                  values: const ['Male', 'Female'],
+                  titles: const [Text('AFT'), Text('CFT')],
+                  groupValue: _testType,
+                  values: const ['AFT', 'CFT'],
                   onChanged: (dynamic value) {
                     setState(() {
                       updated = true;
-                      _gender = value;
-                      calcMdl();
-                      calcHrp();
-                      calcSdc();
-                      calcPlk();
-                      calcRunScore();
-                      calcTotal();
+                      _testType = value;
+                      if (value == 'AFT') {
+                        calcMdl();
+                        calcHrp();
+                        calcSdc();
+                        calcPlk();
+                        calcRunScore();
+                        calcTotal();
+                      } else {
+                        calcCftPass();
+                      }
                     });
                   },
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
-                child: PlatformItemPicker(
-                  value: _ageGroup,
-                  label: const Text('Age Group'),
-                  items: ageGroups,
-                  onChanged: (dynamic value) {
-                    setState(() {
-                      updated = true;
-                      _ageGroup = value;
-                      calcMdl();
-                      calcHrp();
-                      calcSdc();
-                      calcPlk();
-                      calcRunScore();
-                      calcTotal();
-                      calcRunScore();
-                      calcTotal();
-                    });
-                  },
+              if (_testType == 'AFT') ...[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: PlatformSelectionWidget(
+                    titles: const [Text('M'), Text('F')],
+                    groupValue: _gender,
+                    values: const ['Male', 'Female'],
+                    onChanged: (dynamic value) {
+                      setState(() {
+                        updated = true;
+                        _gender = value;
+                        calcMdl();
+                        calcHrp();
+                        calcSdc();
+                        calcPlk();
+                        calcRunScore();
+                        calcTotal();
+                      });
+                    },
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
-                child: PlatformItemPicker(
-                  label: const Text('Aerobic Event'),
-                  items: _runTypes,
-                  onChanged: (dynamic value) {
-                    setState(() {
-                      _runType = value;
-                      updated = true;
-                      calcRunScore();
-                      calcTotal();
-                    });
-                  },
-                  value: _runType,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                  child: PlatformItemPicker(
+                    value: _ageGroup,
+                    label: const Text('Age Group'),
+                    items: ageGroups,
+                    onChanged: (dynamic value) {
+                      setState(() {
+                        updated = true;
+                        _ageGroup = value;
+                        calcMdl();
+                        calcHrp();
+                        calcSdc();
+                        calcPlk();
+                        calcRunScore();
+                        calcTotal();
+                        calcRunScore();
+                        calcTotal();
+                      });
+                    },
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      8.0, 8.0, 8.0, width <= 700 ? 0.0 : 8.0),
+                  child: PlatformItemPicker(
+                    label: const Text('Aerobic Event'),
+                    items: _runTypes,
+                    onChanged: (dynamic value) {
+                      setState(() {
+                        _runType = value;
+                        updated = true;
+                        calcRunScore();
+                        calcTotal();
+                      });
+                    },
+                    value: _runType,
+                  ),
+                ),
+              ],
             ],
           ),
-          GridView.count(
-            primary: false,
-            crossAxisCount: 3,
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-            childAspectRatio: width > 900 ? 900 / 325 : width / 325,
-            shrinkWrap: true,
-            children: <Widget>[
-              const Padding(
-                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                  child: Text(
-                    'MDL',
-                    style: TextStyle(fontSize: 18),
-                  )),
-              PaddedTextField(
-                controller: _deadliftRawController,
-                keyboardType: TextInputType.number,
-                label: 'Raw',
-                decoration: const InputDecoration(
-                  labelText: 'Raw',
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    updated = true;
-                    _mdlRaw = int.tryParse(value) ?? 0;
-                    calcMdl();
-                    calcTotal();
-                  });
-                },
-              ),
-              PaddedTextField(
-                controller: _deadliftController,
-                enabled: false,
-                label: 'Score',
-                decoration: const InputDecoration(
-                  labelText: 'Score',
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                child: HeaderText(
-                  'HRP',
-                  textAlign: TextAlign.start,
-                ),
-              ),
-              PaddedTextField(
-                controller: _puRawController,
-                keyboardType: TextInputType.number,
-                label: 'Raw',
-                decoration: const InputDecoration(
-                  labelText: 'Raw',
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    updated = true;
-                    _hrpRaw = int.tryParse(value) ?? 0;
-                    calcHrp();
-                    calcTotal();
-                  });
-                },
-              ),
-              PaddedTextField(
-                controller: _puController,
-                enabled: false,
-                label: 'Score',
-                decoration: const InputDecoration(
-                  labelText: 'Score',
-                ),
-              ),
-              const Padding(
-                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                  child: HeaderText(
-                    'SDC',
-                    textAlign: TextAlign.start,
-                  )),
-              PaddedTextField(
-                controller: _dragRawController,
-                keyboardType: TextInputType.text,
-                label: 'Raw',
-                decoration: const InputDecoration(
-                  labelText: 'Raw',
-                ),
-                onChanged: (value) {
-                  String mins = value.contains(':')
-                      ? value.substring(0, value.indexOf(':'))
-                      : '5';
-                  _sdcMins = int.tryParse(mins) ?? 5;
-                  String secs = value.substring(value.indexOf(':') + 1);
-                  _sdcSecs = int.tryParse(secs) ?? 0;
-                  setState(() {
-                    updated = true;
-                    calcSdc();
-                    calcTotal();
-                  });
-                },
-              ),
-              PaddedTextField(
-                controller: _dragController,
-                enabled: false,
-                label: 'Score',
-                decoration: const InputDecoration(
-                  labelText: 'Score',
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                child: HeaderText(
-                  'PLK',
-                  textAlign: TextAlign.start,
-                ),
-              ),
-              PaddedTextField(
-                controller: _plankRawController,
-                keyboardType: TextInputType.text,
-                label: 'Raw',
-                decoration: const InputDecoration(
-                  labelText: 'Raw',
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    updated = true;
-                    String mins = value.contains(':')
-                        ? value.substring(0, value.indexOf(':'))
-                        : '0';
-                    _plkMins = int.tryParse(mins) ?? 0;
-                    String secs = value.substring(value.indexOf(':') + 1);
-                    _plkSecs = int.tryParse(secs) ?? 0;
-                    calcPlk();
-                    calcTotal();
-                  });
-                },
-              ),
-              PaddedTextField(
-                controller: _plankController,
-                enabled: false,
-                label: 'Score',
-                decoration: const InputDecoration(
-                  labelText: 'Score',
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
-                child: HeaderText(
-                  _runType,
-                  textAlign: TextAlign.start,
-                ),
-              ),
-              PaddedTextField(
-                controller: _runRawController,
-                keyboardType: TextInputType.text,
-                label: 'Raw',
-                decoration: const InputDecoration(
-                  labelText: 'Raw',
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    updated = true;
-                    String mins = value.contains(':')
-                        ? value.substring(0, value.indexOf(':'))
-                        : '30';
-                    _runMins = int.tryParse(mins) ?? 30;
-                    String secs = value.substring(value.indexOf(':') + 1);
-                    _runSecs = int.tryParse(secs) ?? 0;
-                    calcRunScore();
-                    calcTotal();
-                  });
-                },
-              ),
-              PaddedTextField(
-                controller: _runController,
-                enabled: false,
-                label: 'Score',
-                decoration: const InputDecoration(
-                  labelText: 'Score',
-                ),
-              ),
-              const Padding(
-                  padding: EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
-                  child: HeaderText(
-                    'Total',
-                    textAlign: TextAlign.start,
-                  )),
-              const Padding(padding: EdgeInsets.all(8.0), child: SizedBox()),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: getTextColor(context),
-                        width: 2.0,
-                        style: BorderStyle.solid,
-                      ),
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(20.0))),
-                  child: Center(
+          if (_testType == 'CFT')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
                     child: HeaderText(
-                      _total.toString(),
+                      'CFT Time',
+                      textAlign: TextAlign.start,
                     ),
                   ),
                 ),
-              )
-            ],
-          ),
+                Flexible(
+                  child: PaddedTextField(
+                    controller: _cftRawController,
+                    keyboardType: TextInputType.text,
+                    label: 'Raw ',
+                    decoration: const InputDecoration(
+                      labelText: 'Raw',
+                    ),
+                    onChanged: (value) {
+                      String mins = value.contains(':')
+                          ? value.substring(0, value.indexOf(':'))
+                          : '30';
+                      _cftMins = int.tryParse(mins) ?? 30;
+                      String secs = value.substring(value.indexOf(':') + 1);
+                      _cftSecs = int.tryParse(secs) ?? 0;
+                      setState(() {
+                        updated = true;
+                        calcCftPass();
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          if (_testType == 'AFT')
+            GridView.count(
+              primary: false,
+              crossAxisCount: 3,
+              mainAxisSpacing: 1.0,
+              crossAxisSpacing: 1.0,
+              childAspectRatio: width > 900 ? 900 / 325 : width / 325,
+              shrinkWrap: true,
+              children: <Widget>[
+                const Padding(
+                    padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                    child: Text(
+                      'MDL',
+                      style: TextStyle(fontSize: 18),
+                    )),
+                PaddedTextField(
+                  controller: _deadliftRawController,
+                  keyboardType: TextInputType.number,
+                  label: 'Raw',
+                  decoration: const InputDecoration(
+                    labelText: 'Raw',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      updated = true;
+                      _mdlRaw = int.tryParse(value) ?? 0;
+                      calcMdl();
+                      calcTotal();
+                    });
+                  },
+                ),
+                PaddedTextField(
+                  controller: _deadliftController,
+                  enabled: false,
+                  label: 'Score',
+                  decoration: const InputDecoration(
+                    labelText: 'Score',
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                  child: HeaderText(
+                    'HRP',
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                PaddedTextField(
+                  controller: _puRawController,
+                  keyboardType: TextInputType.number,
+                  label: 'Raw',
+                  decoration: const InputDecoration(
+                    labelText: 'Raw',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      updated = true;
+                      _hrpRaw = int.tryParse(value) ?? 0;
+                      calcHrp();
+                      calcTotal();
+                    });
+                  },
+                ),
+                PaddedTextField(
+                  controller: _puController,
+                  enabled: false,
+                  label: 'Score',
+                  decoration: const InputDecoration(
+                    labelText: 'Score',
+                  ),
+                ),
+                const Padding(
+                    padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                    child: HeaderText(
+                      'SDC',
+                      textAlign: TextAlign.start,
+                    )),
+                PaddedTextField(
+                  controller: _dragRawController,
+                  keyboardType: TextInputType.text,
+                  label: 'Raw',
+                  decoration: const InputDecoration(
+                    labelText: 'Raw',
+                  ),
+                  onChanged: (value) {
+                    String mins = value.contains(':')
+                        ? value.substring(0, value.indexOf(':'))
+                        : '5';
+                    _sdcMins = int.tryParse(mins) ?? 5;
+                    String secs = value.substring(value.indexOf(':') + 1);
+                    _sdcSecs = int.tryParse(secs) ?? 0;
+                    setState(() {
+                      updated = true;
+                      calcSdc();
+                      calcTotal();
+                    });
+                  },
+                ),
+                PaddedTextField(
+                  controller: _dragController,
+                  enabled: false,
+                  label: 'Score',
+                  decoration: const InputDecoration(
+                    labelText: 'Score',
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                  child: HeaderText(
+                    'PLK',
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                PaddedTextField(
+                  controller: _plankRawController,
+                  keyboardType: TextInputType.text,
+                  label: 'Raw',
+                  decoration: const InputDecoration(
+                    labelText: 'Raw',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      updated = true;
+                      String mins = value.contains(':')
+                          ? value.substring(0, value.indexOf(':'))
+                          : '0';
+                      _plkMins = int.tryParse(mins) ?? 0;
+                      String secs = value.substring(value.indexOf(':') + 1);
+                      _plkSecs = int.tryParse(secs) ?? 0;
+                      calcPlk();
+                      calcTotal();
+                    });
+                  },
+                ),
+                PaddedTextField(
+                  controller: _plankController,
+                  enabled: false,
+                  label: 'Score',
+                  decoration: const InputDecoration(
+                    labelText: 'Score',
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8.0, 24.0, 8.0, 0.0),
+                  child: HeaderText(
+                    _runType,
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                PaddedTextField(
+                  controller: _runRawController,
+                  keyboardType: TextInputType.text,
+                  label: 'Raw',
+                  decoration: const InputDecoration(
+                    labelText: 'Raw',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      updated = true;
+                      String mins = value.contains(':')
+                          ? value.substring(0, value.indexOf(':'))
+                          : '30';
+                      _runMins = int.tryParse(mins) ?? 30;
+                      String secs = value.substring(value.indexOf(':') + 1);
+                      _runSecs = int.tryParse(secs) ?? 0;
+                      calcRunScore();
+                      calcTotal();
+                    });
+                  },
+                ),
+                PaddedTextField(
+                  controller: _runController,
+                  enabled: false,
+                  label: 'Score',
+                  decoration: const InputDecoration(
+                    labelText: 'Score',
+                  ),
+                ),
+                const Padding(
+                    padding: EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 0.0),
+                    child: HeaderText(
+                      'Total',
+                      textAlign: TextAlign.start,
+                    )),
+                const Padding(padding: EdgeInsets.all(8.0), child: SizedBox()),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: getTextColor(context),
+                          width: 2.0,
+                          style: BorderStyle.solid,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(20.0))),
+                    child: Center(
+                      child: HeaderText(
+                        _total.toString(),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
           FormGridView(
             width: width,
             children: <Widget>[

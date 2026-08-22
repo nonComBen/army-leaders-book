@@ -19,7 +19,6 @@ import '../../methods/show_on_login.dart';
 import '../../methods/theme_methods.dart';
 import '../../methods/update_methods.dart';
 import '../../models/acft.dart';
-import '../../models/apft.dart';
 import '../../models/appointment.dart';
 import '../../models/bodyfat.dart';
 import '../../models/flag.dart';
@@ -42,7 +41,6 @@ import '../../widgets/rollup_card.dart';
 import '../../widgets/show_by_name_content.dart';
 import '../../widgets/standard_text.dart';
 import '../acft_page.dart';
-import '../apft_page.dart';
 import '../appointments_page.dart';
 import '../bodyfat_page.dart';
 import '../daily_perstat_page.dart';
@@ -399,78 +397,6 @@ class HomePageState extends ConsumerState<RollupTab>
         ),
       );
     }
-    if (setting.apft) {
-      list.add(
-        StreamBuilder(
-          stream: _firestore
-              .collection(Apft.collectionName)
-              .where('users', isNotEqualTo: null)
-              .where('users', arrayContains: userId)
-              .snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Card(
-                  color: getContrastingBackgroundColor(context),
-                  child: PlatformLoadingWidget(),
-                );
-              default:
-                int apftOverdue = 0;
-                int apftFail = 0;
-                List<DocumentSnapshot> fails = [];
-                List<DocumentSnapshot> overdue = [];
-                snapshot.data!.docs
-                    .sort((a, b) => a['rankSort'].compareTo(b['rankSort']));
-                for (DocumentSnapshot doc in snapshot.data!.docs) {
-                  if (!doc['pass']) {
-                    apftFail++;
-                    fails.add(doc);
-                  }
-                  if (isOverdue(doc['date'], 30 * setting.acftMonths)) {
-                    apftOverdue++;
-                    overdue.add(doc);
-                  }
-                }
-                return RollupCard(
-                  title: 'APFT Stats',
-                  infoRow1: [
-                    TextButton(
-                      child: Text('Overdue: $apftOverdue',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName('Overdue APFTs', overdue, HomeCard.apft);
-                      },
-                    ),
-                    TextButton(
-                      child: Text('Failed: $apftFail',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              decoration: TextDecoration.underline,
-                              color: Colors.blue)),
-                      onPressed: () {
-                        showByName('Failed APFTs', fails, HomeCard.apft);
-                      },
-                    ),
-                  ],
-                  buttons: [
-                    PlatformButton(
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true)
-                              .pushNamed(ApftPage.routeName),
-                      child: const Text('Go to APFT'),
-                    ),
-                  ],
-                );
-            }
-          },
-        ),
-      );
-    }
     if (setting.acft) {
       list.add(
         StreamBuilder(
@@ -501,8 +427,17 @@ class HomePageState extends ConsumerState<RollupTab>
                     fails.add(doc);
                   }
                   if (isOverdue(doc['date'], 30 * setting.acftMonths)) {
-                    acftOverdue++;
-                    overdue.add(doc);
+                    List<DocumentSnapshot> tests = snapshot.data!.docs
+                        .where((d) => d['soldierId'] == doc['soldierId'])
+                        .toList();
+                    if (tests.length > 1) {
+                      tests.sort((a, b) => b['date'].compareTo(a['date']));
+                      final latestTest = tests.first;
+                      if (latestTest.id == doc.id) {}
+                    } else {
+                      acftOverdue++;
+                      overdue.add(doc);
+                    }
                   }
                 }
                 return RollupCard(

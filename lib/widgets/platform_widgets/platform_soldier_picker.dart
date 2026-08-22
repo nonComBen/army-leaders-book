@@ -24,7 +24,7 @@ abstract class PlatformSoldierPicker extends Widget {
             child: Text(label),
           ),
         ),
-        value: value,
+        initialValue: value,
         items: soldiers
             .map(
               (soldier) => DropdownMenuItem<String>(
@@ -101,7 +101,7 @@ class AndroidItemPicker extends DropdownButtonFormField
   AndroidItemPicker(
       {super.key,
       super.items,
-      super.value,
+      super.initialValue,
       super.onChanged,
       super.decoration,
       super.isExpanded});

@@ -36,13 +36,13 @@ class UploadWorkingAwardsPageState
   void _openFileExplorer() async {
     try {
       var result = (await FilePicker.pickFiles(
-          type: FileType.custom, allowedExtensions: ['xlsx']))!;
-      path = result.files.first.name;
+          type: FileType.custom, allowedExtensions: ['xlsx']));
+      path = result.first.name;
       if (kIsWeb) {
-        var excel = Excel.decodeBytes(await result.files.first.readAsBytes());
+        var excel = Excel.decodeBytes(await result.first.readAsBytes());
         _readExcel(excel.sheets.values.first);
       } else {
-        var file = File(result.files.first.path!);
+        var file = File(result.first.path!);
         var bytes = file.readAsBytesSync();
         var excel = Excel.decodeBytes(bytes);
         _readExcel(excel.sheets.values.first);

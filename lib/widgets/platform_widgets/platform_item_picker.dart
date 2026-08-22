@@ -23,7 +23,7 @@ abstract class PlatformItemPicker extends Widget {
             child: label,
           ),
         ),
-        value: value,
+        initialValue: value,
         items: items
             .map(
               (event) => DropdownMenuItem<String>(
@@ -95,7 +95,7 @@ class AndroidItemPicker extends DropdownButtonFormField
   AndroidItemPicker(
       {super.key,
       super.items,
-      super.value,
+      super.initialValue,
       super.onChanged,
       super.decoration,
       super.isExpanded});

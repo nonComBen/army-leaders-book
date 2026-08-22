@@ -111,6 +111,8 @@ Future<NotificationAppLaunchDetails?> initializeLocalNotifications() async {
             selectNotificationStream.add(notificationResponse.payload);
           }
           break;
+        case NotificationResponseType.notificationDismissed:
+          break;
       }
     },
     onDidReceiveBackgroundNotificationResponse: notificationTapBackground,

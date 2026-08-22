@@ -28,6 +28,8 @@ class Acft {
   int runScore;
   int total;
   String altEvent;
+  bool cft;
+  String cftTime;
   bool pass;
   List<dynamic>? notificationIds;
   bool aft;
@@ -62,6 +64,8 @@ class Acft {
     this.pass = true,
     this.notificationIds,
     this.aft = true,
+    this.cft = false,
+    this.cftTime = '',
   });
 
   static const String collectionName = 'acftStats';
@@ -96,7 +100,8 @@ class Acft {
     map['pass'] = pass;
     map['notificationIds'] = notificationIds;
     map['aft'] = aft;
-
+    map['cft'] = cft;
+    map['cftTime'] = cftTime;
     return map;
   }
 
@@ -104,7 +109,8 @@ class Acft {
     List<dynamic> users = [doc['owner']];
     String ageGroup = '17-21', gender = 'Male';
     List<dynamic>? notificationIds;
-    bool aft = false;
+    bool aft = false, cft = false;
+    String cftTime = '';
     try {
       users = doc['users'];
     } catch (e) {
@@ -119,6 +125,8 @@ class Acft {
     }
     try {
       aft = doc['aft'];
+      cft = doc['cft'];
+      cftTime = doc['cftTime'];
     } catch (e) {
       FirebaseAnalytics.instance.logEvent(name: 'Aft Does Not Exist');
     }
@@ -152,6 +160,8 @@ class Acft {
       pass: doc['pass'],
       notificationIds: notificationIds,
       aft: aft,
+      cft: cft,
+      cftTime: cftTime,
     );
   }
 }

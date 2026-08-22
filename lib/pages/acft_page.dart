@@ -169,6 +169,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       TextCellValue('Date'),
       TextCellValue('Age Group'),
       TextCellValue('Gender'),
+      TextCellValue('AFT/CFT'),
       TextCellValue('MDL Raw'),
       TextCellValue('MDL Score'),
       TextCellValue('HRP Raw'),
@@ -184,6 +185,12 @@ class AcftPageState extends ConsumerState<AcftPage> {
       TextCellValue('Pass'),
     ]);
     for (DocumentSnapshot doc in documents) {
+      String testType = 'AFT';
+      try {
+        testType = doc['cft'] ? 'CFT' : 'AFT';
+      } catch (e) {
+        FirebaseAnalytics.instance.logEvent(name: 'Age Group Does Not Exist');
+      }
       List<dynamic> docs = [];
       docs.add(doc['soldierId']);
       docs.add(doc['rank']);
@@ -194,6 +201,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
       docs.add(doc['date']);
       docs.add(doc['ageGroup'] ?? '');
       docs.add(doc['gender'] ?? '');
+      docs.add(testType);
       docs.add(doc['deadliftRaw']);
       docs.add(doc['deadliftScore']);
       docs.add(doc['puRaw']);
@@ -440,13 +448,22 @@ class AcftPageState extends ConsumerState<AcftPage> {
     if (width > 500) {
       columnList.add(
         DataColumn(
+          label: const Text('AFT/CFT'),
+          onSort: (int columnIndex, bool ascending) =>
+              onSortColumn(columnIndex, ascending),
+        ),
+      );
+    }
+    if (width > 600) {
+      columnList.add(
+        DataColumn(
           label: const Text('Total'),
           onSort: (int columnIndex, bool ascending) =>
               onSortColumn(columnIndex, ascending),
         ),
       );
     }
-    if (width > 650) {
+    if (width > 750) {
       columnList.add(
         DataColumn(
           label: const Text('MDL'),
@@ -455,7 +472,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 735) {
+    if (width > 835) {
       columnList.add(
         DataColumn(
           label: const Text('HRP'),
@@ -464,7 +481,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 830) {
+    if (width > 930) {
       columnList.add(
         DataColumn(
           label: const Text('SDC'),
@@ -473,7 +490,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 935) {
+    if (width > 1035) {
       columnList.add(
         DataColumn(
           label: const Text('PLK'),
@@ -482,7 +499,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 1030) {
+    if (width > 1130) {
       columnList.add(
         DataColumn(
           label: const Text('2MR'),
@@ -517,6 +534,12 @@ class AcftPageState extends ConsumerState<AcftPage> {
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber);
     TextStyle failTextStyle =
         const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue);
+    String testType = 'AFT';
+    try {
+      testType = documentSnapshot['cft'] ? 'CFT' : 'AFT';
+    } catch (e) {
+      FirebaseAnalytics.instance.logEvent(name: 'Age Group Does Not Exist');
+    }
     List<DataCell> cellList = [
       DataCell(
         Text(
@@ -563,6 +586,22 @@ class AcftPageState extends ConsumerState<AcftPage> {
       cellList.add(
         DataCell(
           Text(
+            testType,
+            style: fail
+                ? failTextStyle
+                : overdue
+                    ? overdueTextStyle
+                    : amber
+                        ? amberTextStyle
+                        : const TextStyle(),
+          ),
+        ),
+      );
+    }
+    if (width > 600) {
+      cellList.add(
+        DataCell(
+          Text(
             documentSnapshot['total'].toString(),
             style: fail
                 ? failTextStyle
@@ -575,7 +614,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 650) {
+    if (width > 750) {
       cellList.add(
         DataCell(
           Text(
@@ -591,7 +630,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 735) {
+    if (width > 835) {
       cellList.add(
         DataCell(
           Text(
@@ -607,7 +646,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 830) {
+    if (width > 930) {
       cellList.add(
         DataCell(
           Text(
@@ -623,7 +662,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 935) {
+    if (width > 1035) {
       cellList.add(
         DataCell(
           Text(
@@ -639,7 +678,7 @@ class AcftPageState extends ConsumerState<AcftPage> {
         ),
       );
     }
-    if (width > 1030) {
+    if (width > 1130) {
       cellList.add(
         DataCell(
           Text(
@@ -672,24 +711,26 @@ class AcftPageState extends ConsumerState<AcftPage> {
             filteredDocs.sort((a, b) => a['date'].compareTo(b['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => a['total'].compareTo(b['total']));
             break;
           case 4:
+            filteredDocs.sort((a, b) => a['total'].compareTo(b['total']));
+            break;
+          case 5:
             filteredDocs.sort(
                 (a, b) => a['deadliftScore'].compareTo(b['deadliftScore']));
             break;
-          case 5:
-            filteredDocs.sort((a, b) => a['puScore'].compareTo(b['puScore']));
-            break;
           case 6:
-            filteredDocs
-                .sort((a, b) => a['dragScore'].compareTo(b['dragScore']));
+            filteredDocs.sort((a, b) => a['puScore'].compareTo(b['puScore']));
             break;
           case 7:
             filteredDocs
-                .sort((a, b) => a['legTuckScore'].compareTo(b['legTuckScore']));
+                .sort((a, b) => a['dragScore'].compareTo(b['dragScore']));
             break;
           case 8:
+            filteredDocs
+                .sort((a, b) => a['legTuckScore'].compareTo(b['legTuckScore']));
+            break;
+          case 9:
             filteredDocs.sort((a, b) => a['runScore'].compareTo(b['runScore']));
             break;
         }
@@ -705,24 +746,26 @@ class AcftPageState extends ConsumerState<AcftPage> {
             filteredDocs.sort((a, b) => b['date'].compareTo(a['date']));
             break;
           case 3:
-            filteredDocs.sort((a, b) => b['total'].compareTo(a['total']));
             break;
           case 4:
+            filteredDocs.sort((a, b) => b['total'].compareTo(a['total']));
+            break;
+          case 5:
             filteredDocs.sort(
                 (a, b) => b['deadliftScore'].compareTo(a['deadliftScore']));
             break;
-          case 5:
-            filteredDocs.sort((a, b) => b['puScore'].compareTo(a['puScore']));
-            break;
           case 6:
-            filteredDocs
-                .sort((a, b) => b['dragScore'].compareTo(a['dragScore']));
+            filteredDocs.sort((a, b) => b['puScore'].compareTo(a['puScore']));
             break;
           case 7:
             filteredDocs
-                .sort((a, b) => b['legTuckScore'].compareTo(a['legTuckScore']));
+                .sort((a, b) => b['dragScore'].compareTo(a['dragScore']));
             break;
           case 8:
+            filteredDocs
+                .sort((a, b) => b['legTuckScore'].compareTo(a['legTuckScore']));
+            break;
+          case 9:
             filteredDocs.sort((a, b) => b['runScore'].compareTo(a['runScore']));
             break;
         }
